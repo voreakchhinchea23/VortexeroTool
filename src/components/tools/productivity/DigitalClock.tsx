@@ -9,18 +9,14 @@ import {
   Sparkles,
   Volume2,
   VolumeX,
-  Globe,
-  Bell,
-  CheckCircle2,
   Flag,
-  Layers,
-  Type,
-  Flame,
+  Edit2,
+  Check,
 } from 'lucide-react';
 
 export type ClockTheme =
-  | 'cyberpunk'
   | 'night_city'
+  | 'cyberpunk'
   | 'synthwave'
   | 'tokyo_night'
   | 'tokyo_rain'
@@ -48,15 +44,15 @@ interface LapItem {
 }
 
 const TIMEZONES = [
-  { id: 'local', label: 'Local Device Time', offset: null },
-  { id: 'UTC', label: 'UTC / GMT', timeZone: 'UTC' },
-  { id: 'Asia/Phnom_Penh', label: 'Phnom Penh / BKK (ICT +7)', timeZone: 'Asia/Phnom_Penh' },
-  { id: 'Asia/Tokyo', label: 'Tokyo (JST +9)', timeZone: 'Asia/Tokyo' },
-  { id: 'Europe/London', label: 'London (GMT/BST)', timeZone: 'Europe/London' },
-  { id: 'America/New_York', label: 'New York (EST/EDT)', timeZone: 'America/New_York' },
-  { id: 'America/Los_Angeles', label: 'San Francisco (PST/PDT)', timeZone: 'America/Los_Angeles' },
-  { id: 'Europe/Paris', label: 'Paris / Berlin (CET)', timeZone: 'Europe/Paris' },
-  { id: 'Australia/Sydney', label: 'Sydney (AEST)', timeZone: 'Australia/Sydney' },
+  { id: 'local', label: 'Local Device Time' },
+  { id: 'UTC', label: 'UTC / GMT' },
+  { id: 'Asia/Phnom_Penh', label: 'Phnom Penh / BKK (ICT +7)' },
+  { id: 'Asia/Tokyo', label: 'Tokyo (JST +9)' },
+  { id: 'Europe/London', label: 'London (GMT/BST)' },
+  { id: 'America/New_York', label: 'New York (EST/EDT)' },
+  { id: 'America/Los_Angeles', label: 'San Francisco (PST/PDT)' },
+  { id: 'Europe/Paris', label: 'Paris / Berlin (CET)' },
+  { id: 'Australia/Sydney', label: 'Sydney (AEST)' },
 ];
 
 export const DigitalClock: React.FC = () => {
@@ -69,7 +65,7 @@ export const DigitalClock: React.FC = () => {
   const [is24Hour, setIs24Hour] = useState(false);
   const [showSeconds, setShowSeconds] = useState(true);
   const [showDate, setShowDate] = useState(true);
-  const [customTag, setCustomTag] = useState<string>('💻 Deep Work Focus');
+  const [customTag, setCustomTag] = useState<string>('Deep Work Focus');
   const [isEditingTag, setIsEditingTag] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -96,7 +92,7 @@ export const DigitalClock: React.FC = () => {
     localStorage.setItem('vortexero_clock_theme', theme);
   }, [theme]);
 
-  // Audio Context for Chimes & Ticks (Client-side Web Audio API)
+  // Audio Context for Chimes & Ticks
   const getAudioContext = () => {
     if (!audioCtxRef.current) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -258,14 +254,14 @@ export const DigitalClock: React.FC = () => {
   const swSeconds = Math.floor((swTime % 60000) / 1000).toString().padStart(2, '0');
   const swMs = Math.floor((swTime % 1000) / 10).toString().padStart(2, '0');
 
-  // Analog Hand Angles
-  const sec = displayTime.getSeconds();
-  const min = displayTime.getMinutes();
-  const hr = displayTime.getHours() % 12;
+  // Exact Analog Angles
+  const secValue = displayTime.getSeconds();
+  const minValue = displayTime.getMinutes();
+  const hrValue = displayTime.getHours() % 12;
 
-  const secAngle = sec * 6;
-  const minAngle = min * 6 + sec * 0.1;
-  const hrAngle = hr * 30 + min * 0.5;
+  const secAngle = secValue * 6;
+  const minAngle = minValue * 6 + secValue * 0.1;
+  const hrAngle = hrValue * 30 + minValue * 0.5;
 
   // Font styling class helper
   const getFontFamilyClass = () => {
@@ -282,7 +278,7 @@ export const DigitalClock: React.FC = () => {
     }
   };
 
-  // Comprehensive Aesthetic Theme Styles (18 Curated Styles)
+  // Comprehensive Aesthetic Theme Styles
   const getThemeStyles = () => {
     switch (theme) {
       case 'night_city':
@@ -296,7 +292,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#00f0ff',
           handMin: '#fcee0a',
           handHr: '#ff003c',
-          dialBg: 'bg-[#0e0e17]',
+          dialBg: '#0e0e17',
+          dialBorder: '#fcee0a',
           flipCard: 'bg-[#151522] text-[#fcee0a] border-[#fcee0a]/30 shadow-[#fcee0a]/20',
         };
       case 'cyberpunk':
@@ -310,7 +307,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#22d3ee',
           handMin: '#e879f9',
           handHr: '#38bdf8',
-          dialBg: 'bg-[#090e24]',
+          dialBg: '#090e24',
+          dialBorder: '#22d3ee',
           flipCard: 'bg-[#0c1430] text-cyan-300 border-cyan-500/30 shadow-cyan-500/20',
         };
       case 'synthwave':
@@ -324,7 +322,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#22d3ee',
           handMin: '#f472b6',
           handHr: '#c084fc',
-          dialBg: 'bg-[#1a0c3a]',
+          dialBg: '#1a0c3a',
+          dialBorder: '#f472b6',
           flipCard: 'bg-[#1c0e3d] text-fuchsia-300 border-fuchsia-500/30 shadow-fuchsia-500/20',
         };
       case 'tokyo_night':
@@ -338,7 +337,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#f7768e',
           handMin: '#7aa2f7',
           handHr: '#bb9af7',
-          dialBg: 'bg-[#24283b]',
+          dialBg: '#24283b',
+          dialBorder: '#7aa2f7',
           flipCard: 'bg-[#24283b] text-[#7aa2f7] border-[#7aa2f7]/30 shadow-[#7aa2f7]/20',
         };
       case 'tokyo_rain':
@@ -352,7 +352,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#f472b6',
           handMin: '#c084fc',
           handHr: '#818cf8',
-          dialBg: 'bg-[#15152e]',
+          dialBg: '#15152e',
+          dialBorder: '#c084fc',
           flipCard: 'bg-[#181838] text-purple-300 border-purple-500/30 shadow-purple-500/20',
         };
       case 'nord_aurora':
@@ -366,7 +367,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#bf616a',
           handMin: '#88c0d0',
           handHr: '#81a1c1',
-          dialBg: 'bg-[#3b4252]',
+          dialBg: '#3b4252',
+          dialBorder: '#88c0d0',
           flipCard: 'bg-[#3b4252] text-[#88c0d0] border-[#88c0d0]/30 shadow-[#88c0d0]/20',
         };
       case 'matrix':
@@ -380,7 +382,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#34d399',
           handMin: '#10b981',
           handHr: '#059669',
-          dialBg: 'bg-[#051c0d]',
+          dialBg: '#051c0d',
+          dialBorder: '#10b981',
           flipCard: 'bg-[#062411] text-emerald-400 border-emerald-500/30 shadow-emerald-500/20',
         };
       case 'amber_crt':
@@ -394,7 +397,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#ffb000',
           handMin: '#e69d00',
           handHr: '#cc8b00',
-          dialBg: 'bg-[#1a1200]',
+          dialBg: '#1a1200',
+          dialBorder: '#ffb000',
           flipCard: 'bg-[#1f1500] text-[#ffb000] border-[#ffb000]/30 shadow-[#ffb000]/20',
         };
       case 'dracula':
@@ -408,7 +412,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#50fa7b',
           handMin: '#ff79c6',
           handHr: '#bd93f9',
-          dialBg: 'bg-[#383a59]',
+          dialBg: '#383a59',
+          dialBorder: '#ff79c6',
           flipCard: 'bg-[#383a59] text-[#ff79c6] border-[#bd93f9]/30 shadow-[#ff79c6]/20',
         };
       case 'catppuccin':
@@ -422,7 +427,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#f5c2e7',
           handMin: '#cba6f7',
           handHr: '#89b4fa',
-          dialBg: 'bg-[#313244]',
+          dialBg: '#313244',
+          dialBorder: '#cba6f7',
           flipCard: 'bg-[#313244] text-[#cba6f7] border-[#cba6f7]/30 shadow-[#cba6f7]/20',
         };
       case 'luxury_gold':
@@ -436,7 +442,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#fbbf24',
           handMin: '#fef08a',
           handHr: '#f59e0b',
-          dialBg: 'bg-[#14141c]',
+          dialBg: '#14141c',
+          dialBorder: '#fbbf24',
           flipCard: 'bg-[#171722] text-amber-300 border-amber-500/30 shadow-amber-500/20',
         };
       case 'cosmic_nebula':
@@ -450,7 +457,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#ec4899',
           handMin: '#818cf8',
           handHr: '#38bdf8',
-          dialBg: 'bg-[#0d0d26]',
+          dialBg: '#0d0d26',
+          dialBorder: '#818cf8',
           flipCard: 'bg-[#111133] text-pink-300 border-indigo-500/30 shadow-pink-500/20',
         };
       case 'solar_flare':
@@ -464,7 +472,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#fbbf24',
           handMin: '#f59e0b',
           handHr: '#d97706',
-          dialBg: 'bg-[#221307]',
+          dialBg: '#221307',
+          dialBorder: '#f59e0b',
           flipCard: 'bg-[#261509] text-amber-400 border-amber-500/30 shadow-amber-500/20',
         };
       case 'rose_quartz':
@@ -478,7 +487,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#f472b6',
           handMin: '#fbcfe8',
           handHr: '#f9a8d4',
-          dialBg: 'bg-[#291723]',
+          dialBg: '#291723',
+          dialBorder: '#f472b6',
           flipCard: 'bg-[#291723] text-pink-300 border-pink-500/30 shadow-pink-500/20',
         };
       case 'swiss_bauhaus':
@@ -492,7 +502,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#f43f5e',
           handMin: '#ffffff',
           handHr: '#94a3b8',
-          dialBg: 'bg-slate-800',
+          dialBg: '#1e293b',
+          dialBorder: '#f43f5e',
           flipCard: 'bg-slate-800 text-white border-slate-700 shadow-slate-950/40',
         };
       case 'oled':
@@ -506,7 +517,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#ffffff',
           handMin: '#a3a3a3',
           handHr: '#e5e5e5',
-          dialBg: 'bg-[#0a0a0a]',
+          dialBg: '#0a0a0a',
+          dialBorder: '#404040',
           flipCard: 'bg-[#121212] text-white border-neutral-800 shadow-black',
         };
       case 'emerald':
@@ -520,7 +532,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#2dd4bf',
           handMin: '#14b8a6',
           handHr: '#0f766e',
-          dialBg: 'bg-[#082418]',
+          dialBg: '#082418',
+          dialBorder: '#14b8a6',
           flipCard: 'bg-[#082418] text-teal-300 border-teal-500/30 shadow-teal-500/20',
         };
       case 'slate':
@@ -535,7 +548,8 @@ export const DigitalClock: React.FC = () => {
           handSec: '#3b82f6',
           handMin: '#94a3b8',
           handHr: '#cbd5e1',
-          dialBg: 'bg-[#1e293b]',
+          dialBg: '#1e293b',
+          dialBorder: '#3b82f6',
           flipCard: 'bg-[#1e293b] text-slate-100 border-slate-700 shadow-slate-950/40',
         };
     }
@@ -736,25 +750,33 @@ export const DigitalClock: React.FC = () => {
             </button>
           </div>
 
-          {/* Editable Work Tag Badge */}
+          {/* Editable Work Tag Badge without laptop emoji */}
           <div className="flex items-center gap-1.5">
             {isEditingTag ? (
-              <input
-                type="text"
-                value={customTag}
-                onChange={(e) => setCustomTag(e.target.value)}
-                onBlur={() => setIsEditingTag(false)}
-                onKeyDown={(e) => e.key === 'Enter' && setIsEditingTag(false)}
-                autoFocus
-                className="px-3 py-1 text-xs rounded-xl bg-white dark:bg-slate-900 border border-brand-500 text-slate-900 dark:text-white focus:outline-none"
-              />
+              <div className="flex items-center gap-1">
+                <input
+                  type="text"
+                  value={customTag}
+                  onChange={(e) => setCustomTag(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingTag(false)}
+                  autoFocus
+                  className="px-3 py-1 text-xs rounded-xl bg-white dark:bg-slate-900 border border-brand-500 text-slate-900 dark:text-white focus:outline-none"
+                />
+                <button
+                  onClick={() => setIsEditingTag(false)}
+                  className="p-1 rounded-lg bg-brand-600 text-white hover:bg-brand-700 cursor-pointer"
+                >
+                  <Check size={14} />
+                </button>
+              </div>
             ) : (
               <button
                 onClick={() => setIsEditingTag(true)}
-                className="px-3 py-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:border-brand-500/50 transition-colors cursor-pointer"
-                title="Click to change your work status label"
+                className="px-3 py-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:border-brand-500/50 transition-colors cursor-pointer flex items-center gap-1.5"
+                title="Click to edit focus status label"
               >
-                {customTag} ✏️
+                <span>{customTag}</span>
+                <Edit2 size={11} className="text-slate-400" />
               </button>
             )}
           </div>
@@ -869,7 +891,7 @@ export const DigitalClock: React.FC = () => {
             <button
               onClick={toggleFullscreen}
               className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors cursor-pointer"
-              title="Exit Fullscreen (ESC or F11)"
+              title="Exit Fullscreen"
             >
               <Minimize size={18} />
             </button>
@@ -976,57 +998,132 @@ export const DigitalClock: React.FC = () => {
           </div>
         )}
 
-        {/* Mode 3: Analog Chronometer Mode */}
+        {/* Mode 3: Razor-Sharp SVG Analog Chronometer */}
         {mode === 'analog' && (
           <div className="relative z-10 flex flex-col items-center space-y-5 my-auto">
-            <div
-              className={`relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-slate-700/50 p-4 flex items-center justify-center shadow-2xl ${themeConfig.dialBg}`}
-            >
-              {/* Dial Hour Markers */}
-              {[...Array(12)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`absolute rounded-full ${i % 3 === 0 ? 'w-1.5 h-4 bg-white/80' : 'w-1 h-2.5 bg-slate-500/60'}`}
-                  style={{
-                    transform: `rotate(${i * 30}deg) translateY(-120px)`,
-                  }}
+            <div className="relative w-72 h-72 sm:w-84 sm:h-84 flex items-center justify-center">
+              <svg
+                viewBox="0 0 300 300"
+                className="w-full h-full drop-shadow-2xl select-none"
+              >
+                {/* Watch Outer Ring & Dial Face */}
+                <circle
+                  cx="150"
+                  cy="150"
+                  r="142"
+                  fill={themeConfig.dialBg}
+                  stroke={themeConfig.dialBorder}
+                  strokeWidth="3.5"
+                  strokeOpacity="0.4"
                 />
-              ))}
-
-              {/* Hour Hand */}
-              <div
-                className="absolute w-2 h-18 rounded-full origin-bottom shadow-md"
-                style={{
-                  backgroundColor: themeConfig.handHr,
-                  transform: `translateY(-36px) rotate(${hrAngle}deg)`,
-                }}
-              />
-
-              {/* Minute Hand */}
-              <div
-                className="absolute w-1.5 h-26 rounded-full origin-bottom shadow-md"
-                style={{
-                  backgroundColor: themeConfig.handMin,
-                  transform: `translateY(-52px) rotate(${minAngle}deg)`,
-                }}
-              />
-
-              {/* Second Hand */}
-              {showSeconds && (
-                <div
-                  className="absolute w-0.5 h-30 rounded-full origin-bottom transition-transform duration-150 shadow-sm"
-                  style={{
-                    backgroundColor: themeConfig.handSec,
-                    transform: `translateY(-60px) rotate(${secAngle}deg)`,
-                  }}
+                <circle
+                  cx="150"
+                  cy="150"
+                  r="134"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth="1.5"
                 />
-              )}
 
-              {/* Center Pin */}
-              <div
-                className="w-4 h-4 rounded-full z-20 shadow-lg ring-2 ring-white/20"
-                style={{ backgroundColor: themeConfig.handSec }}
-              />
+                {/* 60 Minute / Second Tick Marks */}
+                {[...Array(60)].map((_, i) => {
+                  const isHourTick = i % 5 === 0;
+                  const isMajorTick = i % 15 === 0;
+                  return (
+                    <line
+                      key={i}
+                      x1="150"
+                      y1={isMajorTick ? '18' : isHourTick ? '22' : '26'}
+                      x2="150"
+                      y2={isMajorTick ? '36' : isHourTick ? '32' : '29'}
+                      stroke={isMajorTick ? '#ffffff' : isHourTick ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)'}
+                      strokeWidth={isMajorTick ? '3.5' : isHourTick ? '2' : '1'}
+                      strokeLinecap="round"
+                      transform={`rotate(${i * 6} 150 150)`}
+                    />
+                  );
+                })}
+
+                {/* 12 Hour Numbers */}
+                {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, idx) => {
+                  const angleRad = ((idx * 30 - 90) * Math.PI) / 180;
+                  const radius = 104;
+                  const x = 150 + radius * Math.cos(angleRad);
+                  const y = 150 + radius * Math.sin(angleRad) + 5;
+                  return (
+                    <text
+                      key={num}
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="rgba(255,255,255,0.85)"
+                      fontSize="14"
+                      fontWeight="bold"
+                      fontFamily="sans-serif"
+                    >
+                      {num}
+                    </text>
+                  );
+                })}
+
+                {/* Hour Hand */}
+                <line
+                  x1="150"
+                  y1="150"
+                  x2="150"
+                  y2="76"
+                  stroke={themeConfig.handHr}
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  transform={`rotate(${hrAngle} 150 150)`}
+                  style={{ filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.5))' }}
+                />
+
+                {/* Minute Hand */}
+                <line
+                  x1="150"
+                  y1="150"
+                  x2="150"
+                  y2="46"
+                  stroke={themeConfig.handMin}
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  transform={`rotate(${minAngle} 150 150)`}
+                  style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}
+                />
+
+                {/* Second Hand with Counterweight */}
+                {showSeconds && (
+                  <g transform={`rotate(${secAngle} 150 150)`}>
+                    {/* Tail counterweight */}
+                    <line
+                      x1="150"
+                      y1="150"
+                      x2="150"
+                      y2="175"
+                      stroke={themeConfig.handSec}
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    {/* Main needle */}
+                    <line
+                      x1="150"
+                      y1="150"
+                      x2="150"
+                      y2="34"
+                      stroke={themeConfig.handSec}
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      style={{ filter: `drop-shadow(0 0 6px ${themeConfig.handSec})` }}
+                    />
+                  </g>
+                )}
+
+                {/* Center Pivot Pin */}
+                <circle cx="150" cy="150" r="7" fill={themeConfig.handSec} stroke="#000" strokeWidth="2" />
+                <circle cx="150" cy="150" r="2.5" fill="#ffffff" />
+              </svg>
             </div>
 
             {/* Sub Digital Readout */}
@@ -1043,7 +1140,7 @@ export const DigitalClock: React.FC = () => {
         {mode === 'pomodoro' && (
           <div className="relative z-10 space-y-6 my-auto">
             <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border backdrop-blur-md ${themeConfig.badgeBg}`}>
-              {pomoMode === 'work' ? '🎯 Deep Work Session' : '☕ Rest & Rejuvenate'}
+              {pomoMode === 'work' ? 'Focus Session' : 'Short Break'}
             </span>
 
             <div className={`text-7xl sm:text-9xl tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText}`}>
@@ -1141,7 +1238,7 @@ export const DigitalClock: React.FC = () => {
 
         {/* Bottom Presentation Hint */}
         <p className="absolute bottom-4 text-[11px] text-slate-500 opacity-60 font-mono">
-          Press Fullscreen for dedicated second-monitor desk display • Audio chimes supported
+          Press Fullscreen for second-monitor display • Audio chimes supported
         </p>
       </div>
     </div>
