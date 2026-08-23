@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Volume2, Play, Pause, Square, Copy, Sparkles, Check, RotateCcw, AlertCircle, Globe } from 'lucide-react';
+import { Mic, MicOff, Volume2, Play, Pause, Square, Copy, Sparkles, Check, RotateCcw, AlertCircle, Globe, Info } from 'lucide-react';
 import { useClipboard } from '../../../hooks/useClipboard';
 import { useToast } from '../../../context/ToastContext';
 
@@ -25,9 +25,13 @@ export const VoiceAudioStudio: React.FC = () => {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [selectedLang, setSelectedLang] = useState('en-US');
   const [micError, setMicError] = useState<string | null>(null);
+  const [audioLevel, setAudioLevel] = useState<number>(0);
 
   const recognitionRef = useRef<any>(null);
-  const isListeningRef = useRef<boolean>(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
 
   // Text to Speech States
   const [ttsText, setTtsText] = useState('Welcome to VortexeroTool! Supercharge your productivity with modern client-side utilities.');
@@ -55,48 +59,95 @@ export const VoiceAudioStudio: React.FC = () => {
     }
   }, []);
 
-  // Stop recognition on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      isListeningRef.current = false;
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {
-          // ignore
-        }
-      }
+      stopAllAudio();
     };
   }, []);
 
-  // Initialize Speech Recognition with explicit permission handling
+  const stopAllAudio = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.abort();
+      } catch {
+        // ignore
+      }
+      recognitionRef.current = null;
+    }
+
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(t => t.stop());
+      micStreamRef.current = null;
+    }
+
+    if (audioContextRef.current) {
+      try {
+        audioContextRef.current.close();
+      } catch {
+        // ignore
+      }
+      audioContextRef.current = null;
+    }
+
+    setIsListening(false);
+    setAudioLevel(0);
+  };
+
+  // Start Voice Dictation
   const startSpeechRecognition = async () => {
     setMicError(null);
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setMicError('Speech recognition is not supported in this browser. Please use Google Chrome, Microsoft Edge, or Safari.');
+      setMicError('Speech recognition is not supported in this browser. Please try Chrome, Edge, or Safari.');
       addToast('Speech recognition not supported in this browser', 'error');
       return;
     }
 
     try {
-      // Explicitly request microphone stream to trigger permission prompt if not yet granted
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Stop stream track once permission verified
-        stream.getTracks().forEach(t => t.stop());
-      }
-    } catch (err: any) {
-      console.warn('Microphone permission request:', err);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setMicError('Microphone permission was denied. Please click the lock or settings icon in your browser URL bar and allow Microphone access.');
-        addToast('Microphone permission denied', 'error');
-        return;
-      }
-    }
+      // 1. Request microphone stream
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStreamRef.current = stream;
 
-    try {
+      // 2. Setup Audio Visualizer
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const audioCtx = new AudioContextClass();
+        audioContextRef.current = audioCtx;
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 64;
+        source.connect(analyser);
+        analyserRef.current = analyser;
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const checkLevel = () => {
+          if (!analyserRef.current) return;
+          analyserRef.current.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < bufferLength; i++) {
+            sum += dataArray[i];
+          }
+          const avg = sum / bufferLength;
+          setAudioLevel(Math.min(100, Math.round((avg / 128) * 100)));
+          animFrameRef.current = requestAnimationFrame(checkLevel);
+        };
+        checkLevel();
+      } catch (err) {
+        console.warn('Audio visualizer init:', err);
+      }
+
+      // 3. Initialize SpeechRecognition cleanly
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
@@ -104,9 +155,7 @@ export const VoiceAudioStudio: React.FC = () => {
 
       recognition.onstart = () => {
         setIsListening(true);
-        isListeningRef.current = true;
         setMicError(null);
-        addToast('Microphone active — Start speaking!', 'success');
       };
 
       recognition.onresult = (event: any) => {
@@ -123,53 +172,41 @@ export const VoiceAudioStudio: React.FC = () => {
       };
 
       recognition.onerror = (event: any) => {
-        console.error('Speech Recognition Error:', event.error);
+        console.warn('Speech Recognition Event Error:', event.error);
         if (event.error === 'not-allowed') {
           setMicError('Microphone permission was denied. Please allow microphone access in browser settings.');
-          setIsListening(false);
-          isListeningRef.current = false;
         } else if (event.error === 'network') {
-          setMicError('Network error: Browser speech recognition requires an internet connection.');
+          setMicError('Brave / Network Note: Brave Browser blocks Google Speech services by default. Enable "Use Google services for speech recognition" in brave://settings/system or use Chrome / Edge.');
+        } else if (event.error !== 'no-speech') {
+          setMicError(`Speech service notice: ${event.error}`);
         }
       };
 
       recognition.onend = () => {
+        // Clean single stop without infinite recursive restart loops
         setInterimTranscript('');
-        // If the user hasn't explicitly stopped it, auto-restart continuous listening
-        if (isListeningRef.current) {
-          try {
-            recognition.start();
-          } catch {
-            setIsListening(false);
-            isListeningRef.current = false;
-          }
-        } else {
-          setIsListening(false);
-        }
+        stopAllAudio();
       };
 
       recognitionRef.current = recognition;
       recognition.start();
+      addToast('Microphone active — Start speaking!', 'success');
     } catch (err: any) {
-      console.error('Failed to start speech recognition:', err);
-      setMicError(err.message || 'Could not start microphone dictation.');
-      setIsListening(false);
-      isListeningRef.current = false;
+      console.error('Failed to start dictation:', err);
+      stopAllAudio();
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMicError('Microphone permission was denied. Please click the lock or settings icon in your browser URL bar and allow Microphone access.');
+      } else {
+        setMicError(err.message || 'Could not access microphone.');
+      }
+      addToast('Microphone error', 'error');
     }
   };
 
   const stopSpeechRecognition = () => {
-    isListeningRef.current = false;
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch {
-        // ignore
-      }
-    }
-    setIsListening(false);
+    stopAllAudio();
     setInterimTranscript('');
-    addToast('Dictation paused', 'info');
+    addToast('Dictation stopped', 'info');
   };
 
   const toggleListening = () => {
@@ -269,13 +306,13 @@ export const VoiceAudioStudio: React.FC = () => {
             </div>
           </div>
 
-          {/* Error Banner */}
+          {/* Error / Browser Diagnostics Banner */}
           {micError && (
             <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 flex items-start gap-3 text-xs text-rose-700 dark:text-rose-300">
               <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-500" />
               <div>
-                <p className="font-bold">Microphone Note</p>
-                <p className="mt-0.5">{micError}</p>
+                <p className="font-bold">Microphone / Browser Diagnostics</p>
+                <p className="mt-0.5 leading-relaxed">{micError}</p>
               </div>
             </div>
           )}
@@ -286,11 +323,11 @@ export const VoiceAudioStudio: React.FC = () => {
               onClick={toggleListening}
               className={`w-20 h-20 rounded-3xl mx-auto flex items-center justify-center text-white transition-all shadow-xl cursor-pointer ${
                 isListening
-                  ? 'bg-rose-600 shadow-rose-500/30 scale-110 animate-pulse'
+                  ? 'bg-rose-600 shadow-rose-500/30 scale-110'
                   : 'bg-brand-600 hover:bg-brand-700 shadow-brand-500/25'
               }`}
             >
-              {isListening ? <Mic size={32} /> : <MicOff size={32} />}
+              {isListening ? <Mic size={32} className="animate-pulse" /> : <MicOff size={32} />}
             </button>
 
             <div>
@@ -298,9 +335,25 @@ export const VoiceAudioStudio: React.FC = () => {
                 {isListening ? '🎙️ Listening... Speak into your microphone' : 'Click the microphone to start dictating'}
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                {isListening ? 'Live speech will appear below automatically.' : 'Works in Google Chrome, Microsoft Edge, and Safari with microphone access.'}
+                {isListening ? 'Click the button again when you want to pause.' : 'Supports continuous dictation in Chrome, Edge, and Safari.'}
               </p>
             </div>
+
+            {/* Live Audio Level Meter */}
+            {isListening && (
+              <div className="max-w-xs mx-auto space-y-1 pt-2">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                  <span>Mic Input Signal</span>
+                  <span className="font-mono">{audioLevel}%</span>
+                </div>
+                <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-rose-500 transition-all duration-75"
+                    style={{ width: `${Math.max(5, audioLevel)}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Actions & Transcript Box */}
