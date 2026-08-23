@@ -26,6 +26,7 @@ import { HashGenerator } from './security/HashGenerator';
 import { JwtDecoder } from './security/JwtDecoder';
 
 // Web Tools
+import { MultiWatchesStudio } from './web/MultiWatchesStudio';
 import { QrCodeGenerator } from './web/QrCodeGenerator';
 import { UrlShortener } from './web/UrlShortener';
 import { UtmBuilder } from './web/UtmBuilder';
@@ -105,7 +106,9 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
       case 'jwt-decoder':
         return <JwtDecoder />;
 
-      // Web
+      // Web & Streaming
+      case 'multistream-hub':
+        return <MultiWatchesStudio />;
       case 'qr-generator':
         return <QrCodeGenerator />;
       case 'url-shortener':

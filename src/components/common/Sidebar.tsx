@@ -3,7 +3,7 @@ import { CATEGORIES, TOOLS } from '../../data/toolsData';
 import { ToolCategory } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
 import { useFavorites } from '../../context/FavoritesContext';
-import { Star, Flame, Sparkles, Coffee } from 'lucide-react';
+import { Star, Flame, Sparkles, Coffee, Tv, ExternalLink } from 'lucide-react';
 
 interface SidebarProps {
   selectedCategory: ToolCategory;
@@ -104,6 +104,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
       )}
+
+      {/* MultiWatches Stream Hub Card */}
+      <a
+        href="https://multi-watches.vercel.app/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full p-4 rounded-2xl bg-gradient-to-br from-purple-600/15 via-indigo-600/10 to-pink-600/15 border border-purple-500/30 block hover:border-purple-500/60 transition-all cursor-pointer group shadow-sm"
+      >
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-purple-600 to-pink-600 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <Tv size={14} />
+            </div>
+            <span className="font-bold text-xs text-slate-900 dark:text-white">MultiWatches</span>
+          </div>
+          <ExternalLink size={12} className="text-purple-400 opacity-70 group-hover:opacity-100" />
+        </div>
+        <p className="text-[11px] text-purple-600 dark:text-purple-300/80 leading-tight">
+          Watch multiple live streams together in split grids 🔴
+        </p>
+      </a>
 
       {/* Buy Me a Coffee Support Card */}
       {onOpenDonate && (

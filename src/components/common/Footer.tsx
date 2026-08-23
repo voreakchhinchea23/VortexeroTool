@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Shield, Heart, Github, Coffee } from 'lucide-react';
+import { Sparkles, Shield, Heart, Github, Coffee, Tv, ExternalLink } from 'lucide-react';
 
 interface FooterProps {
   onSelectCategory: (cat: any) => void;
@@ -25,10 +25,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool, 
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
               An all-in-one developer and productivity utility platform built with modern web technologies. Fast, accessible, client-side, and privacy-first.
             </p>
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 <Shield size={14} />
-                <span>Zero server logging • 100% Client-side execution</span>
+                <span>Zero server logging • 100% Client-side</span>
               </div>
               {onOpenDonate && (
                 <button
@@ -42,10 +42,27 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool, 
             </div>
           </div>
 
-          {/* Quick Tools */}
+          {/* Quick Tools & Ecosystem */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Popular Utilities</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Featured & Apps</h4>
             <ul className="space-y-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+              <li>
+                <a
+                  href="https://multi-watches.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1.5"
+                >
+                  <Tv size={13} />
+                  <span>MultiWatches App 🔴</span>
+                  <ExternalLink size={11} />
+                </a>
+              </li>
+              <li>
+                <button onClick={() => onSelectTool('ambient-sounds')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                  Ambient Chill Sounds
+                </button>
+              </li>
               <li>
                 <button onClick={() => onSelectTool('digital-clock')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
                   Digital Clock Studio
@@ -59,16 +76,6 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool, 
               <li>
                 <button onClick={() => onSelectTool('typing-test')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
                   Typing Speed Practice
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectTool('pdf-tools')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  PDF Multi-Tool
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectTool('signature-pad')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Digital Signature Pad
                 </button>
               </li>
             </ul>
@@ -90,7 +97,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool, 
               </li>
               <li>
                 <button onClick={() => onSelectCategory('web')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Web & Sharing
+                  Web & Streaming
                 </button>
               </li>
               <li>

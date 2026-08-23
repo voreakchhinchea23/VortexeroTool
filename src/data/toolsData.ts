@@ -4,7 +4,7 @@ export const CATEGORIES: CategoryInfo[] = [
   { id: 'all', name: 'All Tools', description: 'Browse all available utilities', iconName: 'LayoutGrid' },
   { id: 'productivity', name: 'Productivity & Focus', description: 'CV builder, PDF, invoice, audio, clock & counters', iconName: 'Zap' },
   { id: 'security', name: 'Security & Auth', description: 'Passwords, usernames, hashes & tokens', iconName: 'ShieldCheck' },
-  { id: 'web', name: 'Web & Sharing', description: 'QR codes, link tools, meta tags', iconName: 'Globe' },
+  { id: 'web', name: 'Web & Streaming', description: 'Multi-stream viewer, QR codes, links, meta tags', iconName: 'Globe' },
   { id: 'text', name: 'Text & Content', description: 'Case convert, word counter, markdown & Base64', iconName: 'FileText' },
   { id: 'design', name: 'Design & Graphics', description: 'Image studio, charts, gradients & clamp', iconName: 'Palette' },
   { id: 'developer', name: 'Developer & Data', description: 'CSV/Excel, JSON, SQL, currency, diff, units & regex', iconName: 'Code2' },
@@ -60,10 +60,11 @@ export const TOOLS: Tool[] = [
   {
     id: 'ambient-sounds',
     name: 'Ambient Focus Sounds & White Noise',
-    description: 'Multi-channel ambient background mixer (Rain, Waves, Fireplace, Forest, Cafe, White Noise) for deep focus.',
+    description: '16-channel synthesized ambient focus mixer (Rain, Waves, Fireplace, Forest, Cafe, White Noise, 432Hz Drone).',
     category: 'productivity',
     iconName: 'Volume2',
-    tags: ['ambient', 'sounds', 'rain', 'focus', 'study', 'whitenoise', 'relax']
+    badge: 'Popular',
+    tags: ['ambient', 'sounds', 'rain', 'focus', 'study', 'whitenoise', 'relax', 'sleep']
   },
   {
     id: 'digital-clock',
@@ -126,6 +127,59 @@ export const TOOLS: Tool[] = [
     tags: ['calendar', 'date', 'working days', 'planner', 'calculator']
   },
 
+  // Web & Streaming
+  {
+    id: 'multistream-hub',
+    name: 'MultiWatches Stream Viewer Hub',
+    description: 'Watch multiple Twitch, YouTube & Kick live streams together at the same time in customized split-screen grids.',
+    category: 'web',
+    iconName: 'Tv',
+    badge: 'Featured',
+    tags: ['stream', 'watch', 'twitch', 'youtube', 'kick', 'streamer', 'multiwatch', 'live', 'video']
+  },
+  {
+    id: 'qr-generator',
+    name: 'Advanced QR Code Generator',
+    description: 'Create high-resolution custom QR codes for URLs, WiFi networks, vCards, text, and email.',
+    category: 'web',
+    iconName: 'QrCode',
+    badge: 'Popular',
+    tags: ['qr', 'qrcode', 'wifi', 'vcard', 'barcode', 'share']
+  },
+  {
+    id: 'url-shortener',
+    name: 'URL Shortener & Link Hub',
+    description: 'Shorten long links, create clean branded URLs, and track recent redirection history.',
+    category: 'web',
+    iconName: 'Link2',
+    badge: 'Hot',
+    tags: ['url', 'shorten', 'link', 'redirect', 'tinyurl', 'web']
+  },
+  {
+    id: 'utm-builder',
+    name: 'UTM Campaign Builder',
+    description: 'Build trackable marketing campaign URLs with UTM parameters and preset templates.',
+    category: 'web',
+    iconName: 'Target',
+    tags: ['utm', 'marketing', 'campaign', 'analytics', 'google', 'tracking']
+  },
+  {
+    id: 'og-meta-generator',
+    name: 'Open Graph & Social Meta Generator',
+    description: 'Generate social share meta tags with live previews for Google Search, Twitter, and Facebook cards.',
+    category: 'web',
+    iconName: 'Share2',
+    tags: ['seo', 'opengraph', 'meta', 'social', 'twitter', 'preview']
+  },
+  {
+    id: 'url-encoder-decoder',
+    name: 'URL Encoder / Query Parser',
+    description: 'Encode, decode URL components, and visually inspect and edit query string parameters.',
+    category: 'web',
+    iconName: 'Split',
+    tags: ['url', 'encode', 'decode', 'query', 'params', 'uri']
+  },
+
   // Security
   {
     id: 'password-generator',
@@ -168,50 +222,6 @@ export const TOOLS: Tool[] = [
     category: 'security',
     iconName: 'ShieldAlert',
     tags: ['jwt', 'token', 'auth', 'decode', 'json', 'expiration']
-  },
-
-  // Web & Sharing
-  {
-    id: 'qr-generator',
-    name: 'Advanced QR Code Generator',
-    description: 'Create high-resolution custom QR codes for URLs, WiFi networks, vCards, text, and email.',
-    category: 'web',
-    iconName: 'QrCode',
-    badge: 'Popular',
-    tags: ['qr', 'qrcode', 'wifi', 'vcard', 'barcode', 'share']
-  },
-  {
-    id: 'url-shortener',
-    name: 'URL Shortener & Link Hub',
-    description: 'Shorten long links, create clean branded URLs, and track recent redirection history.',
-    category: 'web',
-    iconName: 'Link2',
-    badge: 'Hot',
-    tags: ['url', 'shorten', 'link', 'redirect', 'tinyurl', 'web']
-  },
-  {
-    id: 'utm-builder',
-    name: 'UTM Campaign Builder',
-    description: 'Build trackable marketing campaign URLs with UTM parameters and preset templates.',
-    category: 'web',
-    iconName: 'Target',
-    tags: ['utm', 'marketing', 'campaign', 'analytics', 'google', 'tracking']
-  },
-  {
-    id: 'og-meta-generator',
-    name: 'Open Graph & Social Meta Generator',
-    description: 'Generate social share meta tags with live previews for Google Search, Twitter, and Facebook cards.',
-    category: 'web',
-    iconName: 'Share2',
-    tags: ['seo', 'opengraph', 'meta', 'social', 'twitter', 'preview']
-  },
-  {
-    id: 'url-encoder-decoder',
-    name: 'URL Encoder / Query Parser',
-    description: 'Encode, decode URL components, and visually inspect and edit query string parameters.',
-    category: 'web',
-    iconName: 'Split',
-    tags: ['url', 'encode', 'decode', 'query', 'params', 'uri']
   },
 
   // Text & Content
@@ -366,7 +376,7 @@ export const TOOLS: Tool[] = [
   {
     id: 'timestamp-converter',
     name: 'Unix Timestamp Converter',
-    description: 'Convert Epoch timestamps to human dates, UTC, ISO 8601, and calculate relative time intervals.',
+    description: 'Convert Epoch timestamps to human dates, UTC, ISO 8601, and relative time intervals.',
     category: 'developer',
     iconName: 'Clock',
     tags: ['timestamp', 'epoch', 'time', 'date', 'unix', 'timezone']
