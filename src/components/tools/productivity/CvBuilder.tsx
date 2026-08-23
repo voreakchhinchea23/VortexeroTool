@@ -306,7 +306,7 @@ const PRESET_ELENA_VANCE: CvData = {
 
 export const CvBuilder: React.FC = () => {
   const [data, setData] = useState<CvData>(PRESET_JOHN_DOE);
-  const [template, setTemplate] = useState<TemplateType>('modern_tech');
+  const [template, setTemplate] = useState<TemplateType>('modern_sidebar_obsidian');
   const [accentColor, setAccentColor] = useState<ColorAccent>('#2563eb');
   const [newSkill, setNewSkill] = useState<string>('');
   const [viewTab, setViewTab] = useState<'split' | 'edit_only' | 'preview_only'>('split');
@@ -342,7 +342,7 @@ export const CvBuilder: React.FC = () => {
           <style>
             @page {
               size: A4 portrait;
-              margin: 10mm 12mm;
+              margin: 0;
             }
             * {
               -webkit-print-color-adjust: exact !important;
@@ -357,10 +357,14 @@ export const CvBuilder: React.FC = () => {
               padding: 0 !important;
               font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
               width: 100%;
+              min-height: 100%;
             }
             .cv-container {
               width: 100% !important;
+              min-height: 100vh !important;
               background: #ffffff !important;
+              margin: 0 !important;
+              padding: 0 !important;
             }
           </style>
         </head>
@@ -455,12 +459,12 @@ export const CvBuilder: React.FC = () => {
   ];
 
   const templatesList: { id: TemplateType; label: string; badge?: string }[] = [
-    { id: 'modern_tech', label: 'Modern Tech (2-Col)', badge: 'Popular' },
+    { id: 'modern_sidebar_obsidian', label: 'Zurich Slate Grid', badge: 'Popular' },
     { id: 'faang_ats_perfect', label: 'FAANG Standard (ATS)', badge: 'Recommended' },
-    { id: 'executive_clean', label: 'Executive Clean' },
+    { id: 'modern_tech', label: 'Modern Tech (2-Col)' },
     { id: 'ivy_league_serif', label: 'Ivy League Serif', badge: 'Classic' },
-    { id: 'modern_sidebar_obsidian', label: 'Zurich Slate Grid' },
     { id: 'berlin_creative_studio', label: 'Berlin Portfolio UI' },
+    { id: 'executive_clean', label: 'Executive Clean' },
     { id: 'creative_indigo', label: 'Creative Banner' },
     { id: 'deloitte_corporate', label: 'Corporate Consulting' },
     { id: 'tokyo_metro_minimal', label: 'Tokyo Minimalist' },
@@ -831,11 +835,152 @@ export const CvBuilder: React.FC = () => {
         <div className={`cv-a4-preview ${viewTab === 'split' ? 'lg:col-span-7' : 'col-span-12'}`}>
           <div
             id="cv-print-document"
-            className="bg-white text-slate-900 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-200 font-sans w-full"
+            className="bg-white text-slate-900 rounded-3xl shadow-2xl border border-slate-200 font-sans w-full overflow-hidden"
           >
-            {/* TEMPLATE 1: Modern Tech Two-Column */}
+            {/* TEMPLATE 1: Zurich Slate Sidebar Grid (Fixed Seamless Edge-to-Edge) */}
+            {template === 'modern_sidebar_obsidian' && (
+              <div className="grid grid-cols-12 min-h-[960px] bg-white text-slate-900">
+                {/* Left Dark Sidebar with 100% Height */}
+                <div className="col-span-4 bg-[#0f172a] text-white p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+                  <div className="space-y-5">
+                    {data.showPhoto && data.photoUrl && (
+                      <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-slate-600 mx-auto shadow-lg ring-4 ring-white/10">
+                        <img src={data.photoUrl} alt={data.name} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+
+                    <div className="text-center space-y-1">
+                      <h1 className="text-xl font-black tracking-tight text-white leading-tight">{data.name}</h1>
+                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: accentColor }}>
+                        {data.title}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2.5 text-[11px] text-slate-300 pt-3 border-t border-slate-800/80">
+                      {data.email && (
+                        <div className="flex items-center gap-2 truncate">
+                          <Mail size={13} className="text-slate-400 shrink-0" />
+                          <span className="truncate">{data.email}</span>
+                        </div>
+                      )}
+                      {data.phone && (
+                        <div className="flex items-center gap-2 truncate">
+                          <Phone size={13} className="text-slate-400 shrink-0" />
+                          <span>{data.phone}</span>
+                        </div>
+                      )}
+                      {data.location && (
+                        <div className="flex items-center gap-2 truncate">
+                          <MapPin size={13} className="text-slate-400 shrink-0" />
+                          <span>{data.location}</span>
+                        </div>
+                      )}
+                      {data.website && (
+                        <div className="flex items-center gap-2 truncate">
+                          <Globe size={13} className="text-slate-400 shrink-0" />
+                          <span className="truncate">{data.website}</span>
+                        </div>
+                      )}
+                      {data.linkedin && (
+                        <div className="flex items-center gap-2 truncate">
+                          <Linkedin size={13} className="text-slate-400 shrink-0" />
+                          <span className="truncate">{data.linkedin}</span>
+                        </div>
+                      )}
+                      {data.github && (
+                        <div className="flex items-center gap-2 truncate">
+                          <Github size={13} className="text-slate-400 shrink-0" />
+                          <span className="truncate">{data.github}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800/80 space-y-2">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">Core Skills</h3>
+                      <div className="flex flex-wrap gap-1.5">
+                        {data.skills.map((s) => (
+                          <span
+                            key={s}
+                            className="px-2 py-0.5 rounded-md bg-slate-800/90 text-slate-200 text-[10px] font-medium border border-slate-700/60"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Education at bottom of sidebar */}
+                  <div className="pt-4 border-t border-slate-800/80 space-y-2">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">Education</h3>
+                    {data.education.map((edu) => (
+                      <div key={edu.id} className="text-[11px] space-y-0.5">
+                        <p className="font-bold text-white leading-snug">{edu.degree}</p>
+                        <p className="text-slate-400 text-[10px]">{edu.school}</p>
+                        <p className="text-slate-500 text-[9px] font-mono">{edu.year}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Clean Right Body */}
+                <div className="col-span-8 p-6 sm:p-8 space-y-5 bg-white text-slate-900">
+                  {data.summary && (
+                    <div className="space-y-1.5">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b-2 pb-1" style={{ borderColor: accentColor }}>
+                        Professional Summary
+                      </h3>
+                      <p className="text-xs text-slate-600 leading-relaxed">{data.summary}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b-2 pb-1" style={{ borderColor: accentColor }}>
+                      Work Experience
+                    </h3>
+                    <div className="space-y-3.5">
+                      {data.experiences.map((exp) => (
+                        <div key={exp.id} className="space-y-1">
+                          <div className="flex justify-between items-baseline">
+                            <span className="font-bold text-xs text-slate-900">{exp.role}</span>
+                            <span className="text-[10px] font-mono text-slate-500 font-semibold">{exp.period}</span>
+                          </div>
+                          <p className="text-[11px] font-semibold text-slate-600">
+                            {exp.company} • {exp.location}
+                          </p>
+                          <ul className="list-disc ml-3.5 space-y-0.5 text-xs text-slate-600 leading-relaxed">
+                            {exp.bullets.filter(Boolean).map((b, i) => (
+                              <li key={i}>{b}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {data.projects.length > 0 && (
+                    <div className="space-y-2.5 pt-1">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b-2 pb-1" style={{ borderColor: accentColor }}>
+                        Key Projects
+                      </h3>
+                      {data.projects.map((p) => (
+                        <div key={p.id} className="text-xs space-y-0.5">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-bold text-slate-900">{p.title}</span>
+                            <span className="text-slate-500 text-[10px] font-mono">({p.tech})</span>
+                          </div>
+                          <p className="text-slate-600 text-[11px] leading-relaxed">{p.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TEMPLATE 2: Modern Tech Two-Column */}
             {template === 'modern_tech' && (
-              <div className="grid grid-cols-12 gap-6">
+              <div className="grid grid-cols-12 p-6 sm:p-10 gap-6 min-h-[960px]">
                 {/* Left Sidebar */}
                 <div className="col-span-4 border-r border-slate-200 pr-5 space-y-4">
                   {data.showPhoto && data.photoUrl && (
@@ -960,9 +1105,9 @@ export const CvBuilder: React.FC = () => {
               </div>
             )}
 
-            {/* TEMPLATE 2: FAANG Standard (ATS Perfect) */}
+            {/* TEMPLATE 3: FAANG Standard (ATS Perfect) */}
             {template === 'faang_ats_perfect' && (
-              <div className="space-y-3.5 text-slate-900 text-xs">
+              <div className="p-6 sm:p-10 space-y-3.5 text-slate-900 text-xs min-h-[960px]">
                 {/* Header */}
                 <div className="text-center space-y-1 border-b border-slate-300 pb-2.5">
                   <h1 className="text-2xl font-black uppercase tracking-tight">{data.name}</h1>
@@ -1063,9 +1208,9 @@ export const CvBuilder: React.FC = () => {
               </div>
             )}
 
-            {/* TEMPLATE 3: Ivy League Classical Serif */}
+            {/* TEMPLATE 4: Ivy League Classical Serif */}
             {template === 'ivy_league_serif' && (
-              <div className="space-y-4 font-serif text-slate-900">
+              <div className="p-6 sm:p-10 space-y-4 font-serif text-slate-900 min-h-[960px]">
                 <div className="text-center space-y-1 border-b-2 border-slate-900 pb-3">
                   <h1 className="text-2xl font-bold tracking-tight">{data.name}</h1>
                   <p className="text-xs italic text-slate-600">{data.title}</p>
@@ -1130,104 +1275,9 @@ export const CvBuilder: React.FC = () => {
               </div>
             )}
 
-            {/* TEMPLATE 4: Zurich Slate Sidebar Grid */}
-            {template === 'modern_sidebar_obsidian' && (
-              <div className="grid grid-cols-12 rounded-2xl overflow-hidden shadow-lg border border-slate-200">
-                {/* Dark Left Sidebar */}
-                <div className="col-span-4 bg-slate-900 text-white p-5 space-y-4">
-                  {data.showPhoto && data.photoUrl && (
-                    <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-slate-700 mx-auto shadow-md">
-                      <img src={data.photoUrl} alt={data.name} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-
-                  <div className="text-center">
-                    <h1 className="text-lg font-black tracking-tight">{data.name}</h1>
-                    <p className="text-xs font-semibold text-slate-400 mt-0.5">{data.title}</p>
-                  </div>
-
-                  <div className="space-y-1.5 text-[11px] text-slate-300 pt-2 border-t border-slate-800">
-                    <div className="truncate">{data.email}</div>
-                    <div>{data.phone}</div>
-                    <div>{data.location}</div>
-                    {data.website && <div className="truncate">{data.website}</div>}
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-800 space-y-2">
-                    <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-400">Skills</h3>
-                    <div className="flex flex-wrap gap-1">
-                      {data.skills.map((s) => (
-                        <span key={s} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 text-[10px] font-mono">
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-800 space-y-1.5">
-                    <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-400">Education</h3>
-                    {data.education.map((edu) => (
-                      <div key={edu.id} className="text-[11px]">
-                        <p className="font-bold text-white">{edu.degree}</p>
-                        <p className="text-slate-400 text-[10px]">{edu.school}</p>
-                        <p className="text-slate-500 text-[9px] font-mono">{edu.year}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Clean Right Body */}
-                <div className="col-span-8 p-6 space-y-4 bg-white">
-                  {data.summary && (
-                    <div className="space-y-1">
-                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b pb-1" style={{ borderColor: accentColor }}>
-                        Professional Summary
-                      </h3>
-                      <p className="text-xs text-slate-600 leading-relaxed">{data.summary}</p>
-                    </div>
-                  )}
-
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b pb-1" style={{ borderColor: accentColor }}>
-                      Work Experience
-                    </h3>
-                    {data.experiences.map((exp) => (
-                      <div key={exp.id} className="space-y-0.5">
-                        <div className="flex justify-between items-baseline font-bold text-xs text-slate-900">
-                          <span>{exp.role}</span>
-                          <span className="text-[10px] font-mono text-slate-500">{exp.period}</span>
-                        </div>
-                        <p className="text-[11px] font-semibold text-slate-600">{exp.company} • {exp.location}</p>
-                        <ul className="list-disc ml-3.5 space-y-0.5 text-xs text-slate-600 mt-1 leading-relaxed">
-                          {exp.bullets.filter(Boolean).map((b, i) => (
-                            <li key={i}>{b}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-
-                  {data.projects.length > 0 && (
-                    <div className="space-y-2 pt-1">
-                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b pb-1" style={{ borderColor: accentColor }}>
-                        Projects
-                      </h3>
-                      {data.projects.map((p) => (
-                        <div key={p.id} className="text-xs space-y-0.5">
-                          <span className="font-bold text-slate-900">{p.title}</span>
-                          <span className="text-slate-500 text-[10px]"> ({p.tech})</span>
-                          <p className="text-slate-600 text-[11px]">{p.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* TEMPLATE 5: Berlin Creative Portfolio UI */}
             {template === 'berlin_creative_studio' && (
-              <div className="space-y-4">
+              <div className="p-6 sm:p-10 space-y-4 min-h-[960px]">
                 <div className="flex items-start justify-between gap-4 border-b-4 pb-4" style={{ borderColor: accentColor }}>
                   <div className="space-y-1">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white" style={{ backgroundColor: accentColor }}>
@@ -1300,9 +1350,9 @@ export const CvBuilder: React.FC = () => {
               </div>
             )}
 
-            {/* TEMPLATE 6: Executive Clean Single Column */}
+            {/* TEMPLATE 6: Executive Clean */}
             {template === 'executive_clean' && (
-              <div className="space-y-4">
+              <div className="p-6 sm:p-10 space-y-4 min-h-[960px]">
                 <div className="border-b-2 pb-3 text-center space-y-1" style={{ borderColor: accentColor }}>
                   <h1 className="text-xl font-black text-slate-900 tracking-tight">{data.name}</h1>
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-600">{data.title}</p>
@@ -1367,7 +1417,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 7: Creative Banner */}
             {template === 'creative_indigo' && (
-              <div className="space-y-4">
+              <div className="p-6 sm:p-10 space-y-4 min-h-[960px]">
                 <div className="p-4 rounded-xl text-white flex items-center justify-between gap-4" style={{ backgroundColor: accentColor }}>
                   <div className="space-y-0.5">
                     <h1 className="text-xl font-black">{data.name}</h1>
@@ -1431,9 +1481,9 @@ export const CvBuilder: React.FC = () => {
               </div>
             )}
 
-            {/* TEMPLATE 8: Corporate Consulting (Deloitte / Big 4) */}
+            {/* TEMPLATE 8: Corporate Consulting */}
             {template === 'deloitte_corporate' && (
-              <div className="space-y-3.5 text-xs">
+              <div className="p-6 sm:p-10 space-y-3.5 text-xs min-h-[960px]">
                 <div className="border-b-2 pb-3 flex justify-between items-end" style={{ borderColor: accentColor }}>
                   <div>
                     <h1 className="text-2xl font-black tracking-tight text-slate-900">{data.name}</h1>
@@ -1494,7 +1544,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 9: Tokyo Minimalist */}
             {template === 'tokyo_metro_minimal' && (
-              <div className="space-y-3.5 font-sans text-xs">
+              <div className="p-6 sm:p-10 space-y-3.5 font-sans text-xs min-h-[960px]">
                 <div className="flex justify-between items-baseline border-b border-slate-300 pb-2">
                   <div>
                     <h1 className="text-xl font-bold tracking-widest uppercase text-slate-900">{data.name}</h1>
@@ -1544,7 +1594,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 10: NYC High-Impact Monochrome */}
             {template === 'monochrome_bold' && (
-              <div className="space-y-4 text-slate-950 text-xs">
+              <div className="p-6 sm:p-10 space-y-4 text-slate-950 text-xs min-h-[960px]">
                 <div className="bg-black text-white p-6 rounded-2xl flex items-center justify-between">
                   <div>
                     <h1 className="text-2xl font-black uppercase tracking-tight">{data.name}</h1>
@@ -1613,7 +1663,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 11: Nordic Elegance */}
             {template === 'nordic_minimal' && (
-              <div className="space-y-4 font-serif">
+              <div className="p-6 sm:p-10 space-y-4 font-serif min-h-[960px]">
                 <div className="flex justify-between items-center border-b border-slate-300 pb-3">
                   <div>
                     <h1 className="text-2xl font-normal tracking-wide text-slate-900">{data.name}</h1>
@@ -1669,7 +1719,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 12: Compact 1-Page */}
             {template === 'compact_onepage' && (
-              <div className="space-y-3 text-xs leading-snug">
+              <div className="p-6 sm:p-10 space-y-3 text-xs leading-snug min-h-[960px]">
                 <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: accentColor }}>
                   <div>
                     <h1 className="text-lg font-black text-slate-900">{data.name}</h1>
@@ -1719,7 +1769,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 13: Left Accent Bar */}
             {template === 'left_accent_bar' && (
-              <div className="border-l-4 pl-5 space-y-4" style={{ borderColor: accentColor }}>
+              <div className="p-6 sm:p-10 border-l-4 pl-5 space-y-4 min-h-[960px]" style={{ borderColor: accentColor }}>
                 <div className="space-y-1">
                   <h1 className="text-2xl font-black tracking-tight text-slate-900">{data.name}</h1>
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: accentColor }}>{data.title}</p>
@@ -1765,7 +1815,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 14: Minimal Plaintext ATS */}
             {template === 'minimal_ats' && (
-              <div className="space-y-4 font-mono text-xs leading-relaxed">
+              <div className="p-6 sm:p-10 space-y-4 font-mono text-xs leading-relaxed min-h-[960px]">
                 <div className="border-b border-slate-300 pb-2">
                   <h1 className="text-xl font-bold uppercase tracking-tight text-slate-900">{data.name}</h1>
                   <p className="text-xs font-semibold text-slate-700">{data.title}</p>
