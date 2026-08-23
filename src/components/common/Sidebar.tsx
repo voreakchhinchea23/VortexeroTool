@@ -3,13 +3,14 @@ import { CATEGORIES, TOOLS } from '../../data/toolsData';
 import { ToolCategory } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
 import { useFavorites } from '../../context/FavoritesContext';
-import { Star, Flame, Sparkles } from 'lucide-react';
+import { Star, Flame, Sparkles, Coffee } from 'lucide-react';
 
 interface SidebarProps {
   selectedCategory: ToolCategory;
   onSelectCategory: (cat: ToolCategory) => void;
   activeToolId: string | null;
   onSelectTool: (id: string) => void;
+  onOpenDonate?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -17,6 +18,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectCategory,
   activeToolId,
   onSelectTool,
+  onOpenDonate,
 }) => {
   const { favorites } = useFavorites();
   const favoriteTools = TOOLS.filter(t => favorites.includes(t.id));
@@ -101,6 +103,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             })}
           </div>
         </div>
+      )}
+
+      {/* Buy Me a Coffee Support Card */}
+      {onOpenDonate && (
+        <button
+          onClick={onOpenDonate}
+          className="w-full p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-500/5 border border-amber-500/30 text-left hover:border-amber-500/60 transition-all cursor-pointer group shadow-sm"
+        >
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <Coffee size={15} />
+            </div>
+            <span className="font-bold text-xs text-slate-900 dark:text-white">Buy Me a Coffee</span>
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+            Support VortexeroTool with ABA Pay ☕
+          </p>
+        </button>
       )}
 
       {/* Pro Badge Card */}

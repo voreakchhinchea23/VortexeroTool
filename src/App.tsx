@@ -11,6 +11,7 @@ import { MobileNav } from './components/common/MobileNav';
 import { CommandPalette } from './components/common/CommandPalette';
 import { ToastContainer } from './components/common/ToastContainer';
 import { Footer } from './components/common/Footer';
+import { DonateModal } from './components/common/DonateModal';
 
 // Dashboard Views
 import { HeroSection } from './components/dashboard/HeroSection';
@@ -30,6 +31,7 @@ export function App() {
     return TOOLS.some(t => t.id === hash) ? hash : null;
   });
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
 
   const { addRecent } = useFavorites();
 
@@ -107,6 +109,7 @@ export function App() {
       <Navbar
         onOpenSearch={() => setIsCommandPaletteOpen(true)}
         onHomeClick={() => setActiveToolId(null)}
+        onOpenDonate={() => setIsDonateOpen(true)}
       />
 
       {/* Main Layout Body */}
@@ -120,6 +123,7 @@ export function App() {
           }}
           activeToolId={activeToolId}
           onSelectTool={handleSelectTool}
+          onOpenDonate={() => setIsDonateOpen(true)}
         />
 
         {/* Center Main Content */}
@@ -197,6 +201,12 @@ export function App() {
         onSelectTool={handleSelectTool}
       />
 
+      {/* Buy Me a Coffee Support Modal */}
+      <DonateModal
+        isOpen={isDonateOpen}
+        onClose={() => setIsDonateOpen(false)}
+      />
+
       {/* Global Toast Notification System */}
       <ToastContainer />
 
@@ -207,6 +217,7 @@ export function App() {
           setActiveToolId(null);
         }}
         onSelectTool={handleSelectTool}
+        onOpenDonate={() => setIsDonateOpen(true)}
       />
     </div>
   );

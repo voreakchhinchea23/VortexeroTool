@@ -1,13 +1,14 @@
 import React from 'react';
-import { Sparkles, Search, Moon, Sun, Github, Command } from 'lucide-react';
+import { Sparkles, Search, Moon, Sun, Github, Command, Coffee } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 interface NavbarProps {
   onOpenSearch: () => void;
   onHomeClick: () => void;
+  onOpenDonate: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, onHomeClick }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, onHomeClick, onOpenDonate }) => {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -56,13 +57,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, onHomeClick }) => 
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
+          {/* Buy Me a Coffee Button */}
+          <button
+            onClick={onOpenDonate}
+            className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm"
+            title="Buy me a coffee / Support project"
+          >
+            <Coffee size={15} className="animate-pulse" />
+            <span className="hidden sm:inline">Coffee</span>
+          </button>
+
           {/* Mobile Search Button */}
           <button
             onClick={onOpenSearch}
             className="p-2.5 rounded-xl md:hidden text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             title="Search tools (Ctrl+K)"
           >
-            <Search size={20} />
+            <Search size={18} />
           </button>
 
           {/* Theme Toggle */}

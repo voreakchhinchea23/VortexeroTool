@@ -1,12 +1,13 @@
 import React from 'react';
-import { Sparkles, Shield, Heart, Github } from 'lucide-react';
+import { Sparkles, Shield, Heart, Github, Coffee } from 'lucide-react';
 
 interface FooterProps {
   onSelectCategory: (cat: any) => void;
   onSelectTool: (id: string) => void;
+  onOpenDonate?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool }) => {
+export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool, onOpenDonate }) => {
   return (
     <footer className="mt-20 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-[#090d16]/60 backdrop-blur-xl transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -24,9 +25,20 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool }
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
               An all-in-one developer and productivity utility platform built with modern web technologies. Fast, accessible, client-side, and privacy-first.
             </p>
-            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-              <Shield size={14} />
-              <span>Zero server logging • 100% Client-side execution</span>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                <Shield size={14} />
+                <span>Zero server logging • 100% Client-side execution</span>
+              </div>
+              {onOpenDonate && (
+                <button
+                  onClick={onOpenDonate}
+                  className="px-3 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <Coffee size={13} />
+                  <span>Buy Me a Coffee</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -40,23 +52,23 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool }
                 </button>
               </li>
               <li>
+                <button onClick={() => onSelectTool('cv-builder')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                  CV & Resume Builder
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onSelectTool('typing-test')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
                   Typing Speed Practice
                 </button>
               </li>
               <li>
-                <button onClick={() => onSelectTool('password-generator')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Password Generator
+                <button onClick={() => onSelectTool('pdf-tools')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                  PDF Multi-Tool
                 </button>
               </li>
               <li>
-                <button onClick={() => onSelectTool('chart-generator')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Graphic & Chart Studio
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectTool('spinning-wheel')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Decision Wheel
+                <button onClick={() => onSelectTool('signature-pad')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                  Digital Signature Pad
                 </button>
               </li>
             </ul>
