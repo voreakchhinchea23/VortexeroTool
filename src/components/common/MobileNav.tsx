@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { CATEGORIES } from '../../data/toolsData';
 import { ToolCategory } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
-import { Home, Layers, Search, Star, X } from 'lucide-react';
-import { useFavorites } from '../../context/FavoritesContext';
+import { Home, Layers, Search, X } from 'lucide-react';
+import { getCategoryColor } from '../../data/toolColors';
 
 interface MobileNavProps {
   selectedCategory: ToolCategory;
@@ -19,7 +19,6 @@ export const MobileNav: React.FC<MobileNavProps> = ({
   onGoHome,
 }) => {
   const [showCategoryDrawer, setShowCategoryDrawer] = useState(false);
-  const { favorites } = useFavorites();
 
   return (
     <>
@@ -40,6 +39,8 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             <div className="grid grid-cols-2 gap-2.5">
               {CATEGORIES.map(cat => {
                 const isActive = selectedCategory === cat.id;
+                const catColor = getCategoryColor(cat.id);
+
                 return (
                   <button
                     key={cat.id}
@@ -48,13 +49,17 @@ export const MobileNav: React.FC<MobileNavProps> = ({
                       setShowCategoryDrawer(false);
                       onGoHome();
                     }}
-                    className={`flex items-center gap-3 p-3 rounded-2xl text-left font-semibold text-xs transition-all ${
+                    className={`flex items-center gap-3 p-3 rounded-2xl text-left font-semibold text-xs transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
+                        ? `${catColor.pillActive}`
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
-                    <DynamicIcon name={cat.iconName} size={18} />
+                    <DynamicIcon
+                      name={cat.iconName}
+                      size={18}
+                      className={isActive ? 'text-white' : catColor.iconColor}
+                    />
                     <span>{cat.name}</span>
                   </button>
                 );
@@ -68,7 +73,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-6 py-2.5 flex items-center justify-around shadow-lg">
         <button
           onClick={onGoHome}
-          className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400"
+          className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 cursor-pointer"
         >
           <Home size={20} />
           <span className="text-[10px] font-semibold">Home</span>
@@ -76,7 +81,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
 
         <button
           onClick={() => setShowCategoryDrawer(true)}
-          className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400"
+          className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 cursor-pointer"
         >
           <Layers size={20} />
           <span className="text-[10px] font-semibold">Categories</span>
@@ -84,7 +89,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
 
         <button
           onClick={onOpenSearch}
-          className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400"
+          className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 cursor-pointer"
         >
           <Search size={20} />
           <span className="text-[10px] font-semibold">Search</span>

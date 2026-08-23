@@ -4,6 +4,7 @@ import { Search, X, Command, ArrowRight } from 'lucide-react';
 import { TOOLS } from '../../data/toolsData';
 import { DynamicIcon } from './DynamicIcon';
 import { Tool } from '../../types/tool';
+import { getToolColor } from '../../data/toolColors';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -121,6 +122,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               ) : (
                 filteredTools.map((tool, idx) => {
                   const isSelected = idx === selectedIndex;
+                  const toolColor = getToolColor(tool.id, tool.category);
                   return (
                     <div
                       key={tool.id}
@@ -137,10 +139,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
                             isSelected
-                              ? 'bg-white/20 text-white'
-                              : 'bg-slate-100 dark:bg-slate-800 text-brand-600 dark:text-brand-400'
+                              ? 'bg-white/20 text-white border-white/30'
+                              : `${toolColor.iconBg} ${toolColor.iconBorder} ${toolColor.iconColor}`
                           }`}
                         >
                           <DynamicIcon name={tool.iconName} size={18} />

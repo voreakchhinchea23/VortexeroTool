@@ -15,11 +15,20 @@
     --color-border: 31 41 55;
   }
 
+  .vibrant {
+    --color-bg: 7 10 19;
+    --color-surface: 15 23 42;
+    --color-border: 30 41 59;
+  }
+
   * {
     border-color: theme('colors.slate.200');
   }
   .dark * {
     border-color: theme('colors.slate.800');
+  }
+  .vibrant * {
+    border-color: theme('colors.slate.800/80');
   }
 
   /* Custom Scrollbar */
@@ -43,6 +52,12 @@
   .dark ::-webkit-scrollbar-thumb:hover {
     background: rgba(100, 116, 139, 0.8);
   }
+  .vibrant ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(99, 102, 241, 0.4), rgba(236, 72, 153, 0.4));
+  }
+  .vibrant ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(99, 102, 241, 0.8), rgba(236, 72, 153, 0.8));
+  }
 }
 
 @layer utilities {
@@ -57,6 +72,13 @@
     background: rgba(17, 24 39, 0.75);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .vibrant .glass {
+    background: rgba(11, 16, 28, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
@@ -76,6 +98,14 @@
     box-shadow: 0 4px 25px -2px rgba(0, 0, 0, 0.3);
   }
 
+  .vibrant .glass-card {
+    background: rgba(13, 18, 30, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.4);
+  }
+
   .bg-grid-pattern {
     background-size: 32px 32px;
     background-image: 
@@ -90,8 +120,20 @@
       linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
 
+  .vibrant .bg-grid-pattern {
+    background-size: 32px 32px;
+    background-image: 
+      radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.09) 0%, transparent 65%),
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  }
+
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 dark:from-blue-400 dark:via-indigo-300 dark:to-purple-400;
+  }
+
+  .vibrant .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-violet-300 to-fuchsia-400;
   }
 }
 

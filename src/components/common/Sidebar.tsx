@@ -3,7 +3,9 @@ import { CATEGORIES, TOOLS } from '../../data/toolsData';
 import { ToolCategory } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
 import { useFavorites } from '../../context/FavoritesContext';
-import { Star, Flame, Sparkles, Coffee, Tv, ExternalLink } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { getCategoryColor, getToolColor } from '../../data/toolColors';
+import { Star, Sparkles, Coffee, Tv, ExternalLink } from 'lucide-react';
 
 interface SidebarProps {
   selectedCategory: ToolCategory;
@@ -21,6 +23,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenDonate,
 }) => {
   const { favorites } = useFavorites();
+  const { isVibrant } = useTheme();
   const favoriteTools = TOOLS.filter(t => favorites.includes(t.id));
 
   return (
@@ -34,6 +37,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {CATEGORIES.map(cat => {
             const isActive = selectedCategory === cat.id && activeToolId === null;
             const count = cat.id === 'all' ? TOOLS.length : TOOLS.filter(t => t.category === cat.id).length;
+            const catColor = getCategoryColor(cat.id);
 
             return (
               <button
@@ -46,7 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-brand-600 text-white shadow-md shadow-brand-500/25'
+                    ? `${catColor.pillActive}`
                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -54,7 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <DynamicIcon
                     name={cat.iconName}
                     size={18}
-                    className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-brand-500'}
+                    className={isActive ? 'text-white' : catColor.iconColor}
                   />
                   <span>{cat.name}</span>
                 </div>
@@ -86,6 +90,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-1">
             {favoriteTools.map(tool => {
               const isActive = activeToolId === tool.id;
+              const toolColor = getToolColor(tool.id, tool.category);
+
               return (
                 <button
                   key={tool.id}
@@ -96,7 +102,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <DynamicIcon name={tool.iconName} size={15} className="shrink-0 text-slate-400" />
+                  <DynamicIcon
+                    name={tool.iconName}
+                    size={15}
+                    className={`shrink-0 ${toolColor.iconColor}`}
+                  />
                   <span className="truncate">{tool.name}</span>
                 </button>
               );
@@ -145,8 +155,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       {/* Pro Badge Card */}
-      <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-500/10 via-indigo-500/10 to-violet-500/10 border border-brand-500/20 text-center">
-        <div className="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center mx-auto mb-2 shadow-sm">
+      <div className={`p-4 rounded-2xl border text-center ${
+        isVibrant 
+          ? 'bg-gradient-to-br from-indigo-500/15 via-purple-500/10 to-pink-500/15 border-indigo-500/30' 
+          : 'bg-gradient-to-br from-brand-500/10 via-indigo-500/10 to-violet-500/10 border-brand-500/20'
+      }`}>
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-violet-600 text-white flex items-center justify-center mx-auto mb-2 shadow-sm">
           <Sparkles size={16} />
         </div>
         <h5 className="text-xs font-bold text-slate-900 dark:text-white">100% Client-Side</h5>

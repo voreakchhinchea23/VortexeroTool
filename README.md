@@ -90,7 +90,7 @@ All tools execute **100% locally in the browser**, ensuring maximum speed, zero 
 - **🔒 Privacy First**: 100% client-side computation. No data is ever transmitted or stored on external servers.
 - **⚡ Blazing Fast**: Built with Vite and React 18 for instantaneous tool switching and zero bundle bloat.
 - **🎨 Modern UX / UI**: Glassmorphism aesthetic, smooth Framer Motion transitions, responsive mobile navbar, and custom command palette (`Ctrl + K` / `Cmd + K`).
-- **🌓 Dark & Light Modes**: Seamless system theme detection with manual persistence in `localStorage`.
+- **✨ 3 Aesthetic Themes**: Switch between **Vivid Chroma** (luminous neon studio with per-tool color signatures & ambient halos), **Obsidian Dark**, and **Clean Light** with manual persistence in `localStorage`.
 - **⭐ Pins & Recents**: Pin your favorite tools and quickly resume where you left off.
 - **📄 Clean PDF & Vector Exports**: Isolated print stream guaranteeing clean single-page A4 documents for CVs and Invoices.
 
