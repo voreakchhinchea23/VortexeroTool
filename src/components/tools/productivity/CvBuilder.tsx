@@ -341,30 +341,31 @@ export const CvBuilder: React.FC = () => {
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
             @page {
-              size: A4 portrait;
-              margin: 0;
+              size: 210mm 297mm;
+              margin: 0mm;
             }
             * {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
-              box-sizing: border-box;
+              box-sizing: border-box !important;
             }
             html, body {
-              background: #ffffff !important;
-              background-color: #ffffff !important;
-              color: #0f172a !important;
               margin: 0 !important;
               padding: 0 !important;
+              width: 210mm !important;
+              min-height: 297mm !important;
+              background: #ffffff !important;
               font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              width: 100%;
-              min-height: 100%;
             }
             .cv-container {
-              width: 100% !important;
-              min-height: 100vh !important;
-              background: #ffffff !important;
+              width: 210mm !important;
+              min-height: 297mm !important;
               margin: 0 !important;
               padding: 0 !important;
+              background: #ffffff !important;
+            }
+            .cv-container > div {
+              min-height: 297mm !important;
             }
           </style>
         </head>
@@ -835,13 +836,13 @@ export const CvBuilder: React.FC = () => {
         <div className={`cv-a4-preview ${viewTab === 'split' ? 'lg:col-span-7' : 'col-span-12'}`}>
           <div
             id="cv-print-document"
-            className="bg-white text-slate-900 rounded-3xl shadow-2xl border border-slate-200 font-sans w-full overflow-hidden"
+            className="bg-white text-slate-900 rounded-3xl shadow-2xl border border-slate-200 font-sans w-full max-w-[210mm] mx-auto min-h-[297mm] overflow-hidden"
           >
-            {/* TEMPLATE 1: Zurich Slate Sidebar Grid (Fixed Seamless Edge-to-Edge) */}
+            {/* TEMPLATE 1: Zurich Slate Sidebar Grid (Fixed Seamless Edge-to-Edge A4) */}
             {template === 'modern_sidebar_obsidian' && (
-              <div className="grid grid-cols-12 min-h-[960px] bg-white text-slate-900">
+              <div className="grid grid-cols-12 min-h-[297mm] h-full bg-white text-slate-900">
                 {/* Left Dark Sidebar with 100% Height */}
-                <div className="col-span-4 bg-[#0f172a] text-white p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+                <div className="col-span-4 bg-[#0f172a] text-white p-6 sm:p-8 space-y-6 flex flex-col justify-between min-h-[297mm]">
                   <div className="space-y-5">
                     {data.showPhoto && data.photoUrl && (
                       <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-slate-600 mx-auto shadow-lg ring-4 ring-white/10">
@@ -924,7 +925,7 @@ export const CvBuilder: React.FC = () => {
                 </div>
 
                 {/* Clean Right Body */}
-                <div className="col-span-8 p-6 sm:p-8 space-y-5 bg-white text-slate-900">
+                <div className="col-span-8 p-6 sm:p-8 space-y-5 bg-white text-slate-900 min-h-[297mm]">
                   {data.summary && (
                     <div className="space-y-1.5">
                       <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b-2 pb-1" style={{ borderColor: accentColor }}>
@@ -980,7 +981,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 2: Modern Tech Two-Column */}
             {template === 'modern_tech' && (
-              <div className="grid grid-cols-12 p-6 sm:p-10 gap-6 min-h-[960px]">
+              <div className="grid grid-cols-12 p-6 sm:p-10 gap-6 min-h-[297mm]">
                 {/* Left Sidebar */}
                 <div className="col-span-4 border-r border-slate-200 pr-5 space-y-4">
                   {data.showPhoto && data.photoUrl && (
@@ -1107,7 +1108,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 3: FAANG Standard (ATS Perfect) */}
             {template === 'faang_ats_perfect' && (
-              <div className="p-6 sm:p-10 space-y-3.5 text-slate-900 text-xs min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-3.5 text-slate-900 text-xs min-h-[297mm]">
                 {/* Header */}
                 <div className="text-center space-y-1 border-b border-slate-300 pb-2.5">
                   <h1 className="text-2xl font-black uppercase tracking-tight">{data.name}</h1>
@@ -1210,7 +1211,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 4: Ivy League Classical Serif */}
             {template === 'ivy_league_serif' && (
-              <div className="p-6 sm:p-10 space-y-4 font-serif text-slate-900 min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-4 font-serif text-slate-900 min-h-[297mm]">
                 <div className="text-center space-y-1 border-b-2 border-slate-900 pb-3">
                   <h1 className="text-2xl font-bold tracking-tight">{data.name}</h1>
                   <p className="text-xs italic text-slate-600">{data.title}</p>
@@ -1277,7 +1278,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 5: Berlin Creative Portfolio UI */}
             {template === 'berlin_creative_studio' && (
-              <div className="p-6 sm:p-10 space-y-4 min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-4 min-h-[297mm]">
                 <div className="flex items-start justify-between gap-4 border-b-4 pb-4" style={{ borderColor: accentColor }}>
                   <div className="space-y-1">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white" style={{ backgroundColor: accentColor }}>
@@ -1352,7 +1353,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 6: Executive Clean */}
             {template === 'executive_clean' && (
-              <div className="p-6 sm:p-10 space-y-4 min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-4 min-h-[297mm]">
                 <div className="border-b-2 pb-3 text-center space-y-1" style={{ borderColor: accentColor }}>
                   <h1 className="text-xl font-black text-slate-900 tracking-tight">{data.name}</h1>
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-600">{data.title}</p>
@@ -1417,7 +1418,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 7: Creative Banner */}
             {template === 'creative_indigo' && (
-              <div className="p-6 sm:p-10 space-y-4 min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-4 min-h-[297mm]">
                 <div className="p-4 rounded-xl text-white flex items-center justify-between gap-4" style={{ backgroundColor: accentColor }}>
                   <div className="space-y-0.5">
                     <h1 className="text-xl font-black">{data.name}</h1>
@@ -1483,7 +1484,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 8: Corporate Consulting */}
             {template === 'deloitte_corporate' && (
-              <div className="p-6 sm:p-10 space-y-3.5 text-xs min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-3.5 text-xs min-h-[297mm]">
                 <div className="border-b-2 pb-3 flex justify-between items-end" style={{ borderColor: accentColor }}>
                   <div>
                     <h1 className="text-2xl font-black tracking-tight text-slate-900">{data.name}</h1>
@@ -1544,7 +1545,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 9: Tokyo Minimalist */}
             {template === 'tokyo_metro_minimal' && (
-              <div className="p-6 sm:p-10 space-y-3.5 font-sans text-xs min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-3.5 font-sans text-xs min-h-[297mm]">
                 <div className="flex justify-between items-baseline border-b border-slate-300 pb-2">
                   <div>
                     <h1 className="text-xl font-bold tracking-widest uppercase text-slate-900">{data.name}</h1>
@@ -1594,7 +1595,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 10: NYC High-Impact Monochrome */}
             {template === 'monochrome_bold' && (
-              <div className="p-6 sm:p-10 space-y-4 text-slate-950 text-xs min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-4 text-slate-950 text-xs min-h-[297mm]">
                 <div className="bg-black text-white p-6 rounded-2xl flex items-center justify-between">
                   <div>
                     <h1 className="text-2xl font-black uppercase tracking-tight">{data.name}</h1>
@@ -1663,7 +1664,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 11: Nordic Elegance */}
             {template === 'nordic_minimal' && (
-              <div className="p-6 sm:p-10 space-y-4 font-serif min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-4 font-serif min-h-[297mm]">
                 <div className="flex justify-between items-center border-b border-slate-300 pb-3">
                   <div>
                     <h1 className="text-2xl font-normal tracking-wide text-slate-900">{data.name}</h1>
@@ -1719,7 +1720,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 12: Compact 1-Page */}
             {template === 'compact_onepage' && (
-              <div className="p-6 sm:p-10 space-y-3 text-xs leading-snug min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-3 text-xs leading-snug min-h-[297mm]">
                 <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: accentColor }}>
                   <div>
                     <h1 className="text-lg font-black text-slate-900">{data.name}</h1>
@@ -1769,7 +1770,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 13: Left Accent Bar */}
             {template === 'left_accent_bar' && (
-              <div className="p-6 sm:p-10 border-l-4 pl-5 space-y-4 min-h-[960px]" style={{ borderColor: accentColor }}>
+              <div className="p-6 sm:p-10 border-l-4 pl-5 space-y-4 min-h-[297mm]" style={{ borderColor: accentColor }}>
                 <div className="space-y-1">
                   <h1 className="text-2xl font-black tracking-tight text-slate-900">{data.name}</h1>
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: accentColor }}>{data.title}</p>
@@ -1815,7 +1816,7 @@ export const CvBuilder: React.FC = () => {
 
             {/* TEMPLATE 14: Minimal Plaintext ATS */}
             {template === 'minimal_ats' && (
-              <div className="p-6 sm:p-10 space-y-4 font-mono text-xs leading-relaxed min-h-[960px]">
+              <div className="p-6 sm:p-10 space-y-4 font-mono text-xs leading-relaxed min-h-[297mm]">
                 <div className="border-b border-slate-300 pb-2">
                   <h1 className="text-xl font-bold uppercase tracking-tight text-slate-900">{data.name}</h1>
                   <p className="text-xs font-semibold text-slate-700">{data.title}</p>
