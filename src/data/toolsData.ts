@@ -2,16 +2,52 @@ import { Tool, CategoryInfo } from '../types/tool';
 
 export const CATEGORIES: CategoryInfo[] = [
   { id: 'all', name: 'All Tools', description: 'Browse all available utilities', iconName: 'LayoutGrid' },
-  { id: 'productivity', name: 'Productivity & Focus', description: 'CV builder, PDF, invoice, audio, clock & counters', iconName: 'Zap' },
+  { id: 'productivity', name: 'Productivity & Focus', description: 'Finance, health, countdown, CV builder, invoice & clock', iconName: 'Zap' },
   { id: 'security', name: 'Security & Auth', description: 'Passwords, usernames, hashes & tokens', iconName: 'ShieldCheck' },
-  { id: 'web', name: 'Web & Streaming', description: 'Multi-stream viewer, QR codes, links, meta tags', iconName: 'Globe' },
+  { id: 'web', name: 'Web & Streaming', description: 'Responsive tester, multi-stream viewer, QR codes, links, meta tags', iconName: 'Globe' },
   { id: 'text', name: 'Text & Content', description: 'Case convert, word counter, markdown & Base64', iconName: 'FileText' },
-  { id: 'design', name: 'Design & Graphics', description: 'Image studio, charts, gradients & clamp', iconName: 'Palette' },
-  { id: 'developer', name: 'Developer & Data', description: 'CSV/Excel, JSON, SQL, currency, diff, units & regex', iconName: 'Code2' },
+  { id: 'design', name: 'Design & Graphics', description: 'Whiteboard, color palette, image studio, charts & clamp', iconName: 'Palette' },
+  { id: 'developer', name: 'Developer & Data', description: 'Code to image, SQL formatter, cron generator, CSV/Excel, JSON & regex', iconName: 'Code2' },
 ];
 
 export const TOOLS: Tool[] = [
   // Productivity & Real Life Tools
+  {
+    id: 'loan-calculator',
+    name: 'Loan & Mortgage Amortization Studio',
+    description: 'Calculate monthly loan/mortgage payments, extra payoff savings, and interactive yearly/monthly amortization tables.',
+    category: 'productivity',
+    iconName: 'Calculator',
+    badge: 'New',
+    tags: ['loan', 'mortgage', 'emi', 'finance', 'interest', 'amortization', 'bank', 'money']
+  },
+  {
+    id: 'bmi-calorie-calculator',
+    name: 'BMI, BMR & Daily Calorie Calculator',
+    description: 'Calculate Body Mass Index (BMI), Basal Metabolic Rate (BMR), TDEE burn, and optimal daily protein/carb/fat macros.',
+    category: 'productivity',
+    iconName: 'Activity',
+    badge: 'Hot',
+    tags: ['bmi', 'bmr', 'tdee', 'calories', 'health', 'fitness', 'weight', 'nutrition', 'macro']
+  },
+  {
+    id: 'tip-calculator',
+    name: 'Tip & Restaurant Bill Splitter',
+    description: 'Calculate tips, split restaurant bills evenly or itemized among friends, and round up totals with 1-click summary copy.',
+    category: 'productivity',
+    iconName: 'DollarSign',
+    badge: 'New',
+    tags: ['tip', 'bill', 'split', 'restaurant', 'gratuity', 'calculator', 'food', 'money']
+  },
+  {
+    id: 'event-countdown',
+    name: 'Event Countdown & Milestone Studio',
+    description: 'Create live ticking countdown cards for product launches, deadlines, vacations, holidays, and milestones.',
+    category: 'productivity',
+    iconName: 'Calendar',
+    badge: 'Popular',
+    tags: ['countdown', 'timer', 'event', 'deadline', 'date', 'holiday', 'milestone']
+  },
   {
     id: 'cv-builder',
     name: 'Modern CV & Resume Builder Studio',
@@ -69,7 +105,7 @@ export const TOOLS: Tool[] = [
   {
     id: 'digital-clock',
     name: 'Modern Digital Clock Studio',
-    description: 'Fullscreen aesthetic digital & analog clock designed for second monitors with 10 themes and Pomodoro.',
+    description: 'Fullscreen aesthetic digital & analog clock designed for second monitors with 18 themes, Flip Clock & Pomodoro.',
     category: 'productivity',
     iconName: 'Clock',
     badge: 'Hot',
@@ -99,202 +135,223 @@ export const TOOLS: Tool[] = [
     description: 'Track days together since relationships, anniversaries, or countdowns with live seconds and milestones.',
     category: 'productivity',
     iconName: 'Heart',
-    badge: 'Popular',
-    tags: ['love', 'anniversary', 'day counter', 'countdown', 'date', 'relationship']
+    tags: ['love', 'd-day', 'counter', 'anniversary', 'relationship', 'days']
   },
   {
     id: 'voting-system',
-    name: 'Interactive Voting & Poll Studio',
-    description: 'Create custom polls, cast votes, and visualize live graphical percentage fill bars and winner stats.',
+    name: 'Anonymous Quick Poll & Voting',
+    description: 'Create fast voting polls, add multiple choices, and view real-time percentage bar charts locally.',
     category: 'productivity',
     iconName: 'Vote',
-    tags: ['vote', 'poll', 'survey', 'graphics', 'results', 'choice']
+    tags: ['poll', 'vote', 'survey', 'decision', 'team', 'questions']
   },
   {
     id: 'name-generator',
-    name: 'Real & Startup Name Generator',
-    description: 'Generate real first/last names, startup brands, baby names, and fantasy characters with origin filters.',
+    name: 'Brand & Startup Name Generator',
+    description: 'Generate catchy tech startups, modern SaaS apps, creative branding, and fantasy character names.',
     category: 'productivity',
-    iconName: 'UserCheck',
-    tags: ['name', 'generator', 'baby', 'startup', 'character', 'random']
+    iconName: 'Sparkle',
+    tags: ['name', 'brand', 'startup', 'saas', 'generator', 'domain']
   },
   {
     id: 'calendar-planner',
-    name: 'Interactive Calendar & Date Math',
-    description: 'Monthly interactive calendar with working business days counter and date duration calculator.',
+    name: 'Interactive Calendar & Schedule Planner',
+    description: 'Monthly schedule planner with day-by-day event notes, recurring reminders, and iCal / ICS calendar export.',
     category: 'productivity',
-    iconName: 'Calendar',
-    tags: ['calendar', 'date', 'working days', 'planner', 'calculator']
+    iconName: 'CalendarDays',
+    tags: ['calendar', 'planner', 'schedule', 'events', 'ics', 'reminders']
+  },
+
+  // Security & Auth
+  {
+    id: 'password-generator',
+    name: 'Ultra-Secure Password Generator',
+    description: 'Generate entropy-rated cryptographic passwords with customizable symbols, numbers, and memorable passphrases.',
+    category: 'security',
+    iconName: 'KeyRound',
+    badge: 'Popular',
+    tags: ['password', 'security', 'generator', 'crypto', 'passphrase', 'entropy']
+  },
+  {
+    id: 'username-generator',
+    name: 'Gaming & Social Username Studio',
+    description: 'Generate aesthetic, gamer-tag, tech, and aesthetic social usernames across multiple styles.',
+    category: 'security',
+    iconName: 'UserCheck',
+    tags: ['username', 'gamertag', 'handle', 'generator', 'social']
+  },
+  {
+    id: 'uuid-generator',
+    name: 'UUID / GUID Generator (v4 & v7)',
+    description: 'Generate cryptographically random RFC-compliant UUID v4 and timestamp-ordered UUID v7 strings in bulk.',
+    category: 'security',
+    iconName: 'Fingerprint',
+    tags: ['uuid', 'guid', 'v4', 'v7', 'identifier', 'developer']
+  },
+  {
+    id: 'hash-generator',
+    name: 'Cryptographic Hash Studio',
+    description: 'Generate cryptographic digests using SHA-256, SHA-512, SHA-3, SHA-1, and MD5 with instant comparison.',
+    category: 'security',
+    iconName: 'Hash',
+    tags: ['hash', 'sha256', 'sha512', 'md5', 'crypto', 'checksum']
+  },
+  {
+    id: 'jwt-decoder',
+    name: 'JWT Debugger & Claims Inspector',
+    description: 'Decode and inspect JSON Web Tokens (Header, Payload, Claims) with automatic expiration and time validity checks.',
+    category: 'security',
+    iconName: 'ShieldAlert',
+    tags: ['jwt', 'token', 'auth', 'decode', 'json', 'security']
   },
 
   // Web & Streaming
   {
+    id: 'responsive-tester',
+    name: 'Responsive Device Viewport Simulator',
+    description: 'Test websites in realistic iPhone, iPad, MacBook, and Desktop screen frames with rotation and custom viewport controls.',
+    category: 'web',
+    iconName: 'Smartphone',
+    badge: 'New',
+    tags: ['responsive', 'mobile', 'device', 'viewport', 'tester', 'web', 'preview']
+  },
+  {
     id: 'multistream-hub',
-    name: 'MultiWatches Stream Viewer Hub',
-    description: 'Watch multiple Twitch, YouTube & Kick live streams together at the same time in customized split-screen grids.',
+    name: 'Multi-Stream Command Center',
+    description: 'Watch up to 9 live Twitch, YouTube, and Kick video streams simultaneously in custom responsive grid layouts.',
     category: 'web',
     iconName: 'Tv',
-    badge: 'Featured',
-    tags: ['stream', 'watch', 'twitch', 'youtube', 'kick', 'streamer', 'multiwatch', 'live', 'video']
+    badge: 'Hot',
+    tags: ['multistream', 'twitch', 'youtube', 'kick', 'streaming', 'viewer', 'grid']
   },
   {
     id: 'qr-generator',
-    name: 'Advanced QR Code Generator',
-    description: 'Create high-resolution custom QR codes for URLs, WiFi networks, vCards, text, and email.',
+    name: 'Custom QR Code & Barcode Studio',
+    description: 'Create branded QR codes with custom foreground/background colors, embedded logo upload, and SVG/PNG download.',
     category: 'web',
     iconName: 'QrCode',
     badge: 'Popular',
-    tags: ['qr', 'qrcode', 'wifi', 'vcard', 'barcode', 'share']
+    tags: ['qr', 'qrcode', 'barcode', 'logo', 'generator', 'download']
   },
   {
     id: 'url-shortener',
-    name: 'URL Shortener & Link Hub',
-    description: 'Shorten long links, create clean branded URLs, and track recent redirection history.',
+    name: 'Free URL Shortener & Link Hub',
+    description: 'Create fast short links using is.gd & tinyurl APIs with built-in instant QR code generation.',
     category: 'web',
     iconName: 'Link2',
-    badge: 'Hot',
-    tags: ['url', 'shorten', 'link', 'redirect', 'tinyurl', 'web']
+    tags: ['url', 'shortener', 'link', 'tinyurl', 'isgd', 'share']
   },
   {
     id: 'utm-builder',
-    name: 'UTM Campaign Builder',
-    description: 'Build trackable marketing campaign URLs with UTM parameters and preset templates.',
+    name: 'Google Analytics UTM Campaign Builder',
+    description: 'Build trackable marketing campaign URLs with Source, Medium, Campaign, Term, and Content parameters.',
     category: 'web',
-    iconName: 'Target',
-    tags: ['utm', 'marketing', 'campaign', 'analytics', 'google', 'tracking']
+    iconName: 'Compass',
+    tags: ['utm', 'analytics', 'marketing', 'campaign', 'tracking', 'url']
   },
   {
     id: 'og-meta-generator',
-    name: 'Open Graph & Social Meta Generator',
-    description: 'Generate social share meta tags with live previews for Google Search, Twitter, and Facebook cards.',
+    name: 'Open Graph & Social Card Previewer',
+    description: 'Generate HTML meta tags and preview live social share cards for Facebook, X (Twitter), LinkedIn, and Discord.',
     category: 'web',
     iconName: 'Share2',
-    tags: ['seo', 'opengraph', 'meta', 'social', 'twitter', 'preview']
+    tags: ['og', 'opengraph', 'meta', 'social', 'twitter', 'discord', 'seo']
   },
   {
     id: 'url-encoder-decoder',
-    name: 'URL Encoder / Query Parser',
-    description: 'Encode, decode URL components, and visually inspect and edit query string parameters.',
+    name: 'URL Percent Encoder & Decoder',
+    description: 'Safely encode and decode special characters in URLs, query strings, and URI components.',
     category: 'web',
-    iconName: 'Split',
-    tags: ['url', 'encode', 'decode', 'query', 'params', 'uri']
-  },
-
-  // Security
-  {
-    id: 'password-generator',
-    name: 'Password Generator',
-    description: 'Generate ultra-secure passwords with custom length, entropy analysis, and crack-time estimation.',
-    category: 'security',
-    iconName: 'KeyRound',
-    badge: 'Popular',
-    tags: ['password', 'security', 'generator', 'random', 'strength', 'crypto']
-  },
-  {
-    id: 'username-generator',
-    name: 'Username & Gamertag Generator',
-    description: 'Create unique, stylish usernames for gaming, social media, tech handles, and fantasy themes.',
-    category: 'security',
-    iconName: 'UserCheck',
-    badge: 'Hot',
-    tags: ['username', 'gamertag', 'handle', 'generator', 'name', 'avatar']
-  },
-  {
-    id: 'uuid-generator',
-    name: 'UUID & NanoID Generator',
-    description: 'Generate bulk cryptographically random UUIDs (v4/v1) and compact NanoIDs.',
-    category: 'security',
-    iconName: 'Fingerprint',
-    tags: ['uuid', 'guid', 'nanoid', 'identifier', 'unique', 'random']
-  },
-  {
-    id: 'hash-generator',
-    name: 'Hash Generator & Checker',
-    description: 'Calculate and verify SHA-256, SHA-512, SHA-1, and MD5 cryptographic hashes.',
-    category: 'security',
-    iconName: 'Hash',
-    tags: ['hash', 'sha256', 'md5', 'checksum', 'crypto', 'digest']
-  },
-  {
-    id: 'jwt-decoder',
-    name: 'JWT Decoder & Inspector',
-    description: 'Decode, inspect, and analyze JSON Web Tokens with expiration timers and payload viewer.',
-    category: 'security',
-    iconName: 'ShieldAlert',
-    tags: ['jwt', 'token', 'auth', 'decode', 'json', 'expiration']
+    iconName: 'Binary',
+    tags: ['url', 'encode', 'decode', 'uri', 'percent-encoding']
   },
 
   // Text & Content
   {
     id: 'case-converter',
-    name: 'Text Case Converter',
-    description: 'Transform text into UPPERCASE, lowercase, Title Case, camelCase, snake_case, kebab-case, and more.',
+    name: 'Smart Text Case Converter',
+    description: 'Convert text between UPPERCASE, lowercase, Title Case, camelCase, snake_case, kebab-case, and PascalCase.',
     category: 'text',
-    iconName: 'Type',
-    badge: 'Popular',
+    iconName: 'CaseSensitive',
     tags: ['case', 'text', 'camelcase', 'snakecase', 'kebab', 'convert']
   },
   {
     id: 'word-counter',
-    name: 'Word & Character Counter',
-    description: 'Live statistics on words, characters, sentences, reading time, speaking time, and keyword density.',
+    name: 'Live Word Counter & Reading Time',
+    description: 'Analyze word count, character count, sentence structure, reading time, speaking duration, and keyword density.',
     category: 'text',
-    iconName: 'TextQuote',
-    tags: ['word', 'character', 'counter', 'reading time', 'stats', 'density']
+    iconName: 'AlignLeft',
+    tags: ['word', 'counter', 'characters', 'reading-time', 'statistics', 'text']
   },
   {
     id: 'lorem-generator',
-    name: 'Lorem Ipsum & Mock Data',
-    description: 'Generate placeholder dummy text, paragraphs, sentences, HTML elements, and JSON records.',
+    name: 'Lorem Ipsum Dummy Text Generator',
+    description: 'Generate placeholder paragraphs, sentences, words, and list items for web design mockups and prototypes.',
     category: 'text',
-    iconName: 'Pilcrow',
-    tags: ['lorem', 'ipsum', 'dummy', 'placeholder', 'mock', 'text']
+    iconName: 'Type',
+    tags: ['lorem', 'ipsum', 'placeholder', 'dummy', 'text', 'generator']
   },
   {
     id: 'markdown-previewer',
-    name: 'Markdown Live Editor',
-    description: 'Live split-pane Markdown editor with synchronized preview, GFM tables, and HTML export.',
+    name: 'Live Markdown Editor & Cheat Sheet',
+    description: 'Split-screen GitHub-flavored Markdown editor with instant live HTML preview and syntax cheat sheet.',
     category: 'text',
-    iconName: 'FileCode2',
-    badge: 'Featured',
-    tags: ['markdown', 'editor', 'preview', 'gfm', 'html', 'writer']
+    iconName: 'Code',
+    tags: ['markdown', 'editor', 'preview', 'gfm', 'html', 'write']
   },
   {
     id: 'base64-tool',
-    name: 'Base64 String & Image Tool',
-    description: 'Encode and decode Base64 text, or convert images and files into inline Base64 Data URIs.',
+    name: 'Base64 Text & File Encoder/Decoder',
+    description: 'Encode and decode UTF-8 text strings and binary image files to Base64 data URIs with 1-click preview.',
     category: 'text',
-    iconName: 'Binary',
-    tags: ['base64', 'encode', 'decode', 'image', 'datauri', 'binary']
+    iconName: 'FileCode2',
+    tags: ['base64', 'encode', 'decode', 'binary', 'string', 'data-uri']
   },
 
   // Design & Graphics
   {
-    id: 'image-studio',
-    name: 'Advanced Image Studio & Filter Suite',
-    description: 'Adjust visual filters (Brightness, Contrast, Sepia, Blur), convert formats, and extract dominant 6-color palettes.',
+    id: 'whiteboard-sketch',
+    name: 'Quick Whiteboard & Sketch Canvas',
+    description: 'Smooth digital whiteboard canvas for brainstorming, wireframes, pen drawings, shapes, and PNG export.',
     category: 'design',
-    iconName: 'Sliders',
+    iconName: 'PenTool',
+    badge: 'New',
+    tags: ['whiteboard', 'sketch', 'draw', 'canvas', 'paint', 'wireframe', 'diagram']
+  },
+  {
+    id: 'color-palette-generator',
+    name: 'Color Palette & Harmony Studio',
+    description: 'Generate harmonious color palettes with Spacebar, lock favorite colors, view contrast, and export CSS variables.',
+    category: 'design',
+    iconName: 'Palette',
+    badge: 'Popular',
+    tags: ['color', 'palette', 'harmony', 'coolors', 'css', 'design', 'hex']
+  },
+  {
+    id: 'image-studio',
+    name: 'Photo Studio & Color Picker EyeDropper',
+    description: 'Extract dominant color palettes, inspect pixel HEX/RGB with an interactive loupe, crop, rotate, and filter images.',
+    category: 'design',
+    iconName: 'Image',
     badge: 'Hot',
-    tags: ['image', 'filter', 'palette', 'color', 'convert', 'png', 'jpg']
+    tags: ['image', 'photo', 'crop', 'eyedropper', 'palette', 'filter', 'rotate']
   },
   {
     id: 'chart-generator',
-    name: 'Dynamic Graphic & Chart Studio',
-    description: 'Input numerical values and labels to generate interactive Bar, Line, Donut, and Progress charts with SVG export.',
+    name: 'Interactive Chart & Graph Studio',
+    description: 'Create beautiful Bar, Line, Pie, and Doughnut charts with custom color schemes and PNG/SVG export.',
     category: 'design',
     iconName: 'BarChart3',
-    badge: 'Hot',
-    tags: ['chart', 'graph', 'data', 'visualization', 'svg', 'analytics']
+    badge: 'New',
+    tags: ['chart', 'graph', 'data', 'visualization', 'bar', 'pie', 'line', 'svg']
   },
   {
     id: 'gradient-generator',
-    name: 'CSS Gradient Generator',
-    description: 'Design beautiful linear and radial gradients with customizable color stops, angle, and CSS export.',
+    name: 'CSS Mesh & Linear Gradient Studio',
+    description: 'Design multi-stop linear, radial, and mesh gradients with angle controls and ready-to-use CSS output.',
     category: 'design',
     iconName: 'Sparkles',
-    badge: 'Hot',
-    tags: ['gradient', 'css', 'color', 'background', 'design', 'palette']
+    tags: ['gradient', 'css', 'linear', 'radial', 'mesh', 'color', 'background']
   },
   {
     id: 'glassmorphism-generator',
@@ -330,6 +387,33 @@ export const TOOLS: Tool[] = [
   },
 
   // Developer & Data
+  {
+    id: 'code-to-image',
+    name: 'Code Snippet to Beautiful Image Studio',
+    description: 'Turn source code snippets into gorgeous social cards with macOS/Windows frames, gradients, and PNG export.',
+    category: 'developer',
+    iconName: 'Code2',
+    badge: 'Popular',
+    tags: ['code', 'carbon', 'rayso', 'snippet', 'image', 'share', 'syntax', 'card']
+  },
+  {
+    id: 'sql-formatter',
+    name: 'SQL Query Formatter & Minifier',
+    description: 'Format, beautify, indent, and uppercase SQL queries (PostgreSQL, MySQL, SQLite, T-SQL) with 1-click copy.',
+    category: 'developer',
+    iconName: 'Database',
+    badge: 'New',
+    tags: ['sql', 'database', 'formatter', 'beautify', 'query', 'mysql', 'postgres']
+  },
+  {
+    id: 'cron-generator',
+    name: 'Crontab Expression Generator & Explainer',
+    description: 'Visually build 5-field cron schedules, read plain English explanations, and calculate upcoming execution dates.',
+    category: 'developer',
+    iconName: 'Clock',
+    badge: 'Hot',
+    tags: ['cron', 'crontab', 'schedule', 'scheduler', 'linux', 'backend', 'developer']
+  },
   {
     id: 'csv-excel-studio',
     name: 'CSV & Excel Spreadsheet Studio',

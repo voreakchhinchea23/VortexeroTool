@@ -2,7 +2,7 @@
 
 # ⚡ VortexeroTool
 
-### *The All-In-One Developer, Document & Productivity Utilities Suite*
+### *The All-In-One Everyday, Document & Developer Utilities Suite*
 
 [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -21,67 +21,78 @@
 
 ## 📖 Overview
 
-**VortexeroTool** is a modern, responsive, all-in-one web platform featuring **35 powerhouse online tools** for software engineers, designers, content creators, students, and everyday digital workflows.
+**VortexeroTool** is a modern, responsive, all-in-one web platform featuring **53 powerhouse online tools** for everyday users, software engineers, designers, content creators, students, and digital workflows.
 
 All tools execute **100% locally in the browser**, ensuring maximum speed, zero latency, and absolute user privacy with no backend logging.
 
 ---
 
-## 🛠️ Complete Suite of 35 Tools
+## 🛠️ Complete Suite of 53 Tools
 
-### ⚡ Productivity & Documents
-1. **Modern CV & Resume Builder**: Build modern, clean, ATS-friendly CVs with 8 templates, photo upload, and clean single-page vector A4 PDF export.
-2. **PDF Multi-Tool & Image Converter**: Convert JPG, PNG, and WebP images into standard A4 PDF documents and convert Markdown notes into formatted PDFs.
-3. **Professional Invoice & Receipt Studio**: Create branded client invoices with line items, tax/discount calculation, and 1-click clean PDF print.
-4. **Digital Signature & E-Sign Pad**: Draw digital signatures on smooth canvas or generate calligraphic cursive signatures with transparent PNG download.
-5. **Voice Dictation & Text-to-Speech**: Speech-to-text voice recognition supporting 10+ languages (English, Khmer, French, Spanish, Japanese, etc.) and natural TTS voice playback.
-6. **Ambient Focus Sounds Mixer**: Multi-channel synthesized ambient sound generator (Rain, Waves, Fireplace, Forest, Cafe, White Noise) for deep focus.
-7. **Modern Digital Clock Studio**: Fullscreen second-monitor clock with 10 aesthetic themes (Tokyo Rain, Solar Flare, Cyber Neon, OLED, Matrix, etc.), analog watch mode, and Pomodoro timer.
-8. **Keyboard Typing Speed Test**: Monkeytype-style keyboard typing practice with live WPM, accuracy, time/word modes, and coding keywords.
-9. **Decision Wheel (Choice Picker)**: Interactive physics spinning wheel of fortune to pick random choices, food, or team picks with celebratory confetti.
-10. **Love & Anniversary Day Counter**: Real-time live seconds breakdown (years, months, days, hours, mins, secs) for relationships, anniversaries, and custom goals.
-11. **Interactive Voting & Poll Studio**: Create custom polls, cast votes, and visualize live graphical percentage fill bars and winner stats.
-12. **Real & Startup Name Generator**: Generates real first/last names, startup brands, baby names with meanings, and fantasy characters with origin filters.
-13. **Interactive Calendar & Date Math**: Monthly interactive grid with working business days calculator and duration between dates.
+### ⚡ Productivity, Finance & Health
+1. **Loan & Mortgage Amortization Studio**: Monthly payment (EMI) calculator, interest payoff simulator, and full yearly/monthly amortization schedule.
+2. **BMI, BMR & Daily Calorie Calculator**: Body Mass Index, BMR, TDEE maintenance calories, and target macronutrient split (Protein, Carbs, Fats).
+3. **Tip & Restaurant Bill Splitter**: Calculate tips, split dining bills evenly or itemized among friends, and round up totals with quick copy.
+4. **Event Countdown & Milestone Studio**: Live ticking countdown cards for deadlines, holidays, vacations, birthdays, and product launches.
+5. **Modern CV & Resume Builder**: Build modern ATS-ready CVs with 8 templates, photo upload, and clean single-page vector A4 PDF export.
+6. **PDF Multi-Tool & Image Converter**: Convert JPG, PNG, and WebP images into standard A4 PDF documents and convert Markdown notes into PDFs.
+7. **Professional Invoice & Receipt Studio**: Create branded client invoices with line items, tax/discount calculation, and 1-click clean PDF print.
+8. **Digital Signature & E-Sign Pad**: Draw digital signatures on smooth canvas or generate calligraphic cursive signatures with transparent PNG download.
+9. **Voice Dictation & Text-to-Speech**: Speech-to-text voice recognition supporting 10+ languages and natural TTS voice playback.
+10. **Ambient Focus Sounds Mixer**: Multi-channel synthesized ambient sound generator (Rain, Waves, Fireplace, Forest, Cafe, White Noise) for deep focus.
+11. **Modern Digital Clock Studio**: Fullscreen second-monitor clock with 18 aesthetic themes, Flip Clock, precision SVG analog chronometer, and Pomodoro timer.
+12. **Keyboard Typing Speed Test**: Monkeytype-style keyboard typing practice with live WPM, accuracy, time/word modes, and coding keywords.
+13. **Decision Wheel (Choice Picker)**: Interactive physics spinning wheel of fortune to pick random choices, food, or team picks with celebratory confetti.
+14. **Love & Anniversary Day Counter**: Real-time live seconds breakdown for relationships, anniversaries, and custom goals.
+15. **Interactive Voting & Poll Studio**: Create custom polls, cast votes, and visualize live graphical percentage fill bars.
+16. **Real & Startup Name Generator**: Generates real first/last names, startup brands, baby names with meanings, and fantasy characters.
+17. **Interactive Calendar & Planner**: Monthly interactive grid with working business days calculator and iCal / ICS event export.
 
 ### 🔐 Security & Cryptography
-14. **Password Generator**: Custom length, entropy analysis, crack-time estimation, and bulk generation.
-15. **Username & Gamertag Generator**: Create stylish handles for gaming, esports, tech, and social media.
-16. **UUID & NanoID Generator**: Cryptographically random UUID v4 and NanoID batch generator.
-17. **Hash Generator & Checker**: Calculate and verify SHA-256, SHA-512, SHA-1, and MD5 hashes.
-18. **JWT Decoder & Inspector**: Inspect JSON Web Tokens with expiration timers and payload viewer.
+18. **Password Generator**: Custom length, entropy analysis, crack-time estimation, and bulk generation.
+19. **Username & Gamertag Generator**: Create stylish handles for gaming, esports, tech, and social media.
+20. **UUID & NanoID Generator**: Cryptographically random UUID v4, timestamp-ordered UUID v7, and NanoID batch generator.
+21. **Hash Generator & Checker**: Calculate and verify SHA-256, SHA-512, SHA-3, SHA-1, and MD5 hashes.
+22. **JWT Decoder & Inspector**: Inspect JSON Web Tokens with expiration timers and payload viewer.
 
-### 📱 Web & Sharing Utilities
-19. **Advanced QR Code Generator**: High-resolution QR codes for URLs, WiFi networks, vCards, emails, and SMS with PNG/SVG export.
-20. **URL Shortener & Link Hub**: Shorten links, create branded URLs, and track recent history.
-21. **UTM Campaign Builder**: Build trackable marketing URLs with Google, Meta, and Twitter presets.
-22. **Open Graph & Social Meta Generator**: Social share meta tags with live Google, Twitter, and Facebook card previews.
-23. **URL Encoder / Query Parser**: URL component encoder/decoder and query parameter key-value editor.
+### 📱 Web & Streaming Utilities
+23. **Responsive Device Viewport Simulator**: Test websites in realistic iPhone, iPad, MacBook, and Desktop screen frames with rotation.
+24. **Multi-Stream Command Center**: Watch up to 9 live Twitch, YouTube, and Kick video streams simultaneously in custom responsive grid layouts.
+25. **Advanced QR Code Generator**: High-resolution QR codes for URLs, WiFi networks, vCards, emails, and SMS with PNG/SVG export.
+26. **URL Shortener & Link Hub**: Shorten links, create branded URLs, and track recent history.
+27. **UTM Campaign Builder**: Build trackable marketing URLs with Google, Meta, and Twitter presets.
+28. **Open Graph & Social Meta Generator**: Social share meta tags with live Google, Twitter, and Facebook card previews.
+29. **URL Encoder / Decoder**: URL component encoder/decoder and query parameter key-value editor.
 
 ### ✍️ Text & Content Tools
-24. **Text Case Converter**: 11 text styles (Title Case, UPPERCASE, camelCase, snake_case, kebab-case, etc.).
-25. **Word & Character Counter**: Words, characters, reading time, speaking time, and keyword density stats.
-26. **Lorem Ipsum & Mock Data**: Dummy text, paragraphs, HTML tags, and mock JSON user data generator.
-27. **Markdown Live Editor**: Split-pane live Markdown editor with GFM tables and HTML export.
-28. **Base64 String & Image Tool**: Text Base64 encode/decode and Image Data URI converter.
+30. **Text Case Converter**: 11 text styles (Title Case, UPPERCASE, camelCase, snake_case, kebab-case, etc.).
+31. **Word & Character Counter**: Words, characters, reading time, speaking time, and keyword density stats.
+32. **Lorem Ipsum & Mock Data**: Dummy text, paragraphs, HTML tags, and mock JSON user data generator.
+33. **Markdown Live Editor**: Split-pane live Markdown editor with GFM tables and HTML export.
+34. **Base64 String & Image Tool**: Text Base64 encode/decode and Image Data URI converter.
 
 ### 🎨 Design & Visual Tools
-29. **Advanced Image Studio & Filter Suite**: Brightness, Contrast, Saturation, Blur, Sepia, Grayscale, and automatic 6-color HEX palette extraction.
-30. **Dynamic Graphic & Chart Studio**: Input numerical values and generate interactive Bar, Line, Donut, and Progress charts with SVG export.
-31. **CSS Gradient Generator**: Linear and radial gradient builder with color stops and CSS export.
-32. **Glassmorphism & Shadow Builder**: Visual UI builder for frosted-glass cards, blur, border opacity, and box-shadows.
-33. **CSS Clamp() Fluid Type Calculator**: Responsive fluid typography clamp() formulas with live viewport simulation slider.
-34. **Color Contrast Checker (WCAG)**: Contrast ratio calculator for WCAG 2.1 AA/AAA accessibility compliance.
-35. **Image Compressor & Converter**: Browser canvas image compression with format conversion (WebP/PNG/JPG).
+35. **Quick Whiteboard & Sketch Canvas**: Smooth digital whiteboard canvas for brainstorming, wireframes, pen drawings, shapes, and PNG export.
+36. **Color Palette & Harmony Studio**: Generate harmonious palettes with Spacebar, lock colors, view contrast, and export CSS variables.
+37. **Advanced Image Studio & Filter Suite**: Dominant color palette extraction, pixel eyedropper loupe, crop, rotate, and filter images.
+38. **Dynamic Graphic & Chart Studio**: Input numerical values and generate interactive Bar, Line, Donut, and Progress charts with SVG export.
+39. **CSS Gradient Generator**: Linear, radial, and mesh gradient builder with color stops and CSS export.
+40. **Glassmorphism & Shadow Builder**: Visual UI builder for frosted-glass cards, blur, border opacity, and box-shadows.
+41. **CSS Clamp() Fluid Type Calculator**: Responsive fluid typography clamp() formulas with live viewport simulation slider.
+42. **Color Contrast Checker (WCAG)**: Contrast ratio calculator for WCAG 2.1 AA/AAA accessibility compliance.
+43. **Image Compressor & Converter**: Browser canvas image compression with format conversion (WebP/PNG/JPG).
 
 ### 💻 Developer & Data Utilities
-36. **CSV & Excel Spreadsheet Studio**: Interactive spreadsheet grid with two-way conversion (CSV ⇄ JSON ⇄ SQL INSERT queries ⇄ Markdown ⇄ HTML).
-37. **Live Currency Exchange Converter**: Real-time exchange rate calculator (USD, EUR, GBP, KHR, JPY, SGD, THB, CNY, CAD, AUD) with conversion matrix.
-38. **JSON Formatter & Validator**: Format, validate, prettify, and minify JSON with syntax error indicators.
-39. **Text & Code Diff Checker**: Side-by-side and unified diff comparison with line addition/deletion highlighting.
-40. **Universal Data & Unit Converter**: Digital storage (Bytes to TB), length, weight, temperature, and time.
-41. **Unix Timestamp Converter**: Epoch timestamps to human dates, UTC, ISO 8601, and relative intervals.
-42. **Live Regex Matcher & Tester**: Regular expressions in real-time with flags and pattern cheatsheets.
+44. **Code Snippet to Beautiful Image Studio**: Turn source code into social cards with macOS/Windows frames, gradients, and PNG export.
+45. **SQL Query Formatter & Minifier**: Format, beautify, indent, and uppercase SQL queries (PostgreSQL, MySQL, SQLite, T-SQL) with 1-click copy.
+46. **Crontab Expression Generator & Explainer**: Visually build 5-field cron schedules, read plain English explanations, and calculate upcoming runs.
+47. **CSV & Excel Spreadsheet Studio**: Interactive table grid editor with two-way conversion (CSV ⇄ JSON ⇄ SQL INSERT queries ⇄ Markdown).
+48. **Live Currency Exchange Converter**: Real-time multi-currency exchange converter supporting USD, EUR, GBP, KHR, JPY, SGD, THB, CNY, CAD, AUD.
+49. **JSON Formatter & Validator**: Format, validate, prettify, and minify JSON with syntax error indicators.
+50. **Text & Code Diff Checker**: Side-by-side and unified diff comparison with line addition/deletion highlighting.
+51. **Universal Data & Unit Converter**: Digital storage (Bytes to TB), length, weight, temperature, and time.
+52. **Unix Timestamp Converter**: Epoch timestamps to human dates, UTC, ISO 8601, and relative intervals.
+53. **Live Regex Matcher & Tester**: Regular expressions in real-time with flags and pattern cheatsheets.
 
 ---
 
@@ -98,58 +109,21 @@ All tools execute **100% locally in the browser**, ensuring maximum speed, zero 
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (version 18+ recommended)
-- `npm` or `yarn` or `pnpm`
+```bash
+# Clone the repository
+git clone https://github.com/voreakchhinchea23/VortexeroTool.git
 
-### Local Installation
+# Navigate into project directory
+cd VortexeroTool
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/voreakchhinchea23/VortexeroTool.git
-   cd VortexeroTool
-   ```
+# Install dependencies
+npm install
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
-   Open your browser at `http://localhost:5173`.
-
-4. **Build for production**:
-   ```bash
-   npm run build
-   ```
-
----
-
-## ☁️ Deployment on Vercel
-
-This repository is pre-configured with [`vercel.json`](vercel.json) for instant Single Page Application (SPA) deployment on **Vercel**:
-
-1. Push your repository to GitHub:
-   ```bash
-   git push origin main
-   ```
-2. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **"Add New Project"**.
-3. Import your `VortexeroTool` repository.
-4. Framework Preset will automatically detect **Vite**.
-5. Click **Deploy**! 🚀
-
----
-
-## 👤 Author
-
-**Voreak Chhinchea**
-- GitHub: [@voreakchhinchea23](https://github.com/voreakchhinchea23)
+# Run Vite development server
+npm run dev
+```
 
 ---
 
 ## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
+MIT License © 2026 VortexeroTool

@@ -4,6 +4,10 @@ import { Tool } from '../../types/tool';
 import { ToolHeader } from '../common/ToolHeader';
 
 // Productivity Tools
+import { LoanCalculator } from './productivity/LoanCalculator';
+import { BmiCalorieCalculator } from './productivity/BmiCalorieCalculator';
+import { TipCalculator } from './productivity/TipCalculator';
+import { EventCountdown } from './productivity/EventCountdown';
 import { CvBuilder } from './productivity/CvBuilder';
 import { PdfTools } from './productivity/PdfTools';
 import { InvoiceGenerator } from './productivity/InvoiceGenerator';
@@ -26,6 +30,7 @@ import { HashGenerator } from './security/HashGenerator';
 import { JwtDecoder } from './security/JwtDecoder';
 
 // Web Tools
+import { ResponsiveTester } from './web/ResponsiveTester';
 import { MultiWatchesStudio } from './web/MultiWatchesStudio';
 import { QrCodeGenerator } from './web/QrCodeGenerator';
 import { UrlShortener } from './web/UrlShortener';
@@ -41,6 +46,8 @@ import { MarkdownPreviewer } from './text/MarkdownPreviewer';
 import { Base64Tool } from './text/Base64Tool';
 
 // Design & Graphics Tools
+import { WhiteboardSketch } from './design/WhiteboardSketch';
+import { ColorPaletteGenerator } from './design/ColorPaletteGenerator';
 import { ImageStudio } from './design/ImageStudio';
 import { ChartGenerator } from './design/ChartGenerator';
 import { GradientGenerator } from './design/GradientGenerator';
@@ -50,6 +57,9 @@ import { ColorContrastChecker } from './design/ColorContrastChecker';
 import { ImageCompressor } from './design/ImageCompressor';
 
 // Developer & Data Tools
+import { CodeToImage } from './developer/CodeToImage';
+import { SqlFormatter } from './developer/SqlFormatter';
+import { CronGenerator } from './developer/CronGenerator';
 import { CsvExcelStudio } from './developer/CsvExcelStudio';
 import { CurrencyConverter } from './developer/CurrencyConverter';
 import { JsonFormatter } from './developer/JsonFormatter';
@@ -67,6 +77,14 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
   const renderToolComponent = () => {
     switch (tool.id) {
       // Productivity & Document
+      case 'loan-calculator':
+        return <LoanCalculator />;
+      case 'bmi-calorie-calculator':
+        return <BmiCalorieCalculator />;
+      case 'tip-calculator':
+        return <TipCalculator />;
+      case 'event-countdown':
+        return <EventCountdown />;
       case 'cv-builder':
         return <CvBuilder />;
       case 'pdf-tools':
@@ -107,6 +125,8 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <JwtDecoder />;
 
       // Web & Streaming
+      case 'responsive-tester':
+        return <ResponsiveTester />;
       case 'multistream-hub':
         return <MultiWatchesStudio />;
       case 'qr-generator':
@@ -133,6 +153,10 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <Base64Tool />;
 
       // Design & Graphics
+      case 'whiteboard-sketch':
+        return <WhiteboardSketch />;
+      case 'color-palette-generator':
+        return <ColorPaletteGenerator />;
       case 'image-studio':
         return <ImageStudio />;
       case 'chart-generator':
@@ -149,6 +173,12 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <ImageCompressor />;
 
       // Developer & Data
+      case 'code-to-image':
+        return <CodeToImage />;
+      case 'sql-formatter':
+        return <SqlFormatter />;
+      case 'cron-generator':
+        return <CronGenerator />;
       case 'csv-excel-studio':
         return <CsvExcelStudio />;
       case 'currency-converter':
