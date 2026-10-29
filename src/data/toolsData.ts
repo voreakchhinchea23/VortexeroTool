@@ -114,7 +114,7 @@ const RAW_TOOLS: Tool[] = [
   {
     id: 'digital-clock',
     name: 'Modern Digital Clock Studio',
-    description: 'Fullscreen aesthetic digital & analog clock designed for second monitors with 18 themes, Flip Clock & Pomodoro.',
+    description: 'Fullscreen aesthetic digital & analog clock designed for second monitors with 28 themes, StandBy stacked mode, Flip Clock & Pomodoro.',
     category: 'productivity',
     iconName: 'Clock',
     badge: 'Hot',

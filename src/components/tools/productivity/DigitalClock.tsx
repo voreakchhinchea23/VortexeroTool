@@ -32,15 +32,47 @@ export type ClockTheme =
   | 'swiss_bauhaus'
   | 'oled'
   | 'emerald'
-  | 'slate';
+  | 'slate'
+  | 'kyoto_twilight'
+  | 'abyss_ocean'
+  | 'paper_studio'
+  | 'warm_espresso'
+  | 'toxic_lime'
+  | 'frost_aurora'
+  | 'midnight_velocity'
+  | 'dreamy_lilac'
+  | 'sahara_dune'
+  | 'electric_violet';
 
-type Mode = 'digital' | 'analog' | 'flip' | 'pomodoro' | 'stopwatch';
-type FontStyle = 'mono' | 'sans' | 'serif' | 'digital';
+type Mode = 'digital' | 'stacked' | 'flip' | 'analog' | 'pomodoro' | 'stopwatch';
+type FontStyle = 'mono' | 'sans' | 'serif' | 'digital' | 'condensed' | 'minimal';
+type ThemeCategory = 'all' | 'cyber' | 'space' | 'warm' | 'minimal';
 
 interface LapItem {
   id: number;
   time: number;
   lapDuration: number;
+}
+
+interface ThemeStyles {
+  bg: string;
+  clockText: string;
+  glow: string;
+  accent: string;
+  border: string;
+  badgeBg: string;
+  handSec: string;
+  handMin: string;
+  handHr: string;
+  dialBg: string;
+  dialBorder: string;
+  flipCard: string;
+  progressBar: string;
+  subText?: string;
+  dialTickMajor?: string;
+  dialTickMinor?: string;
+  dialNumColor?: string;
+  isLight?: boolean;
 }
 
 const TIMEZONES = [
@@ -56,15 +88,26 @@ const TIMEZONES = [
 ];
 
 export const DigitalClock: React.FC = () => {
-  const [mode, setMode] = useState<Mode>('digital');
+  const [mode, setMode] = useState<Mode>(() => {
+    return (localStorage.getItem('vortexero_clock_mode') as Mode) || 'digital';
+  });
   const [theme, setTheme] = useState<ClockTheme>(() => {
     return (localStorage.getItem('vortexero_clock_theme') as ClockTheme) || 'night_city';
   });
-  const [fontStyle, setFontStyle] = useState<FontStyle>('mono');
+  const [fontStyle, setFontStyle] = useState<FontStyle>(() => {
+    return (localStorage.getItem('vortexero_clock_font') as FontStyle) || 'mono';
+  });
+  const [themeCategory, setThemeCategory] = useState<ThemeCategory>('all');
   const [selectedTimezone, setSelectedTimezone] = useState<string>('local');
   const [is24Hour, setIs24Hour] = useState(false);
   const [showSeconds, setShowSeconds] = useState(true);
   const [showDate, setShowDate] = useState(true);
+  const [showProgressBar, setShowProgressBar] = useState<boolean>(() => {
+    return localStorage.getItem('vortexero_clock_progressbar') !== 'false';
+  });
+  const [ambientGlow, setAmbientGlow] = useState<boolean>(() => {
+    return localStorage.getItem('vortexero_clock_glow') !== 'false';
+  });
   const [customTag, setCustomTag] = useState<string>('Deep Work Focus');
   const [isEditingTag, setIsEditingTag] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -87,10 +130,26 @@ export const DigitalClock: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Save theme choice
+  // Save preferences
   useEffect(() => {
     localStorage.setItem('vortexero_clock_theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_font', fontStyle);
+  }, [fontStyle]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_progressbar', String(showProgressBar));
+  }, [showProgressBar]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_glow', String(ambientGlow));
+  }, [ambientGlow]);
 
   // Audio Context for Chimes & Ticks
   const getAudioContext = () => {
@@ -268,6 +327,10 @@ export const DigitalClock: React.FC = () => {
     switch (fontStyle) {
       case 'sans':
         return 'font-sans font-black tracking-tight';
+      case 'condensed':
+        return 'font-sans font-black tracking-tighter uppercase scale-y-105';
+      case 'minimal':
+        return 'font-sans font-light tracking-[0.16em] uppercase';
       case 'serif':
         return 'font-serif font-bold tracking-normal';
       case 'digital':
@@ -278,8 +341,8 @@ export const DigitalClock: React.FC = () => {
     }
   };
 
-  // Comprehensive Aesthetic Theme Styles
-  const getThemeStyles = () => {
+  // Comprehensive Aesthetic Theme Styles (28 Curated Styles)
+  const getThemeStyles = (): ThemeStyles => {
     switch (theme) {
       case 'night_city':
         return {
@@ -295,6 +358,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#0e0e17',
           dialBorder: '#fcee0a',
           flipCard: 'bg-[#151522] text-[#fcee0a] border-[#fcee0a]/30 shadow-[#fcee0a]/20',
+          progressBar: 'bg-[#fcee0a]',
         };
       case 'cyberpunk':
         return {
@@ -310,6 +374,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#090e24',
           dialBorder: '#22d3ee',
           flipCard: 'bg-[#0c1430] text-cyan-300 border-cyan-500/30 shadow-cyan-500/20',
+          progressBar: 'bg-gradient-to-r from-cyan-400 to-fuchsia-500',
         };
       case 'synthwave':
         return {
@@ -325,6 +390,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#1a0c3a',
           dialBorder: '#f472b6',
           flipCard: 'bg-[#1c0e3d] text-fuchsia-300 border-fuchsia-500/30 shadow-fuchsia-500/20',
+          progressBar: 'bg-gradient-to-r from-fuchsia-500 via-pink-500 to-cyan-400',
         };
       case 'tokyo_night':
         return {
@@ -340,6 +406,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#24283b',
           dialBorder: '#7aa2f7',
           flipCard: 'bg-[#24283b] text-[#7aa2f7] border-[#7aa2f7]/30 shadow-[#7aa2f7]/20',
+          progressBar: 'bg-gradient-to-r from-[#7aa2f7] to-[#bb9af7]',
         };
       case 'tokyo_rain':
         return {
@@ -355,6 +422,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#15152e',
           dialBorder: '#c084fc',
           flipCard: 'bg-[#181838] text-purple-300 border-purple-500/30 shadow-purple-500/20',
+          progressBar: 'bg-gradient-to-r from-purple-500 via-pink-400 to-indigo-400',
         };
       case 'nord_aurora':
         return {
@@ -370,6 +438,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#3b4252',
           dialBorder: '#88c0d0',
           flipCard: 'bg-[#3b4252] text-[#88c0d0] border-[#88c0d0]/30 shadow-[#88c0d0]/20',
+          progressBar: 'bg-gradient-to-r from-[#88c0d0] to-[#a3be8c]',
         };
       case 'matrix':
         return {
@@ -385,6 +454,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#051c0d',
           dialBorder: '#10b981',
           flipCard: 'bg-[#062411] text-emerald-400 border-emerald-500/30 shadow-emerald-500/20',
+          progressBar: 'bg-emerald-400',
         };
       case 'amber_crt':
         return {
@@ -400,6 +470,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#1a1200',
           dialBorder: '#ffb000',
           flipCard: 'bg-[#1f1500] text-[#ffb000] border-[#ffb000]/30 shadow-[#ffb000]/20',
+          progressBar: 'bg-[#ffb000]',
         };
       case 'dracula':
         return {
@@ -415,6 +486,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#383a59',
           dialBorder: '#ff79c6',
           flipCard: 'bg-[#383a59] text-[#ff79c6] border-[#bd93f9]/30 shadow-[#ff79c6]/20',
+          progressBar: 'bg-gradient-to-r from-[#ff79c6] to-[#50fa7b]',
         };
       case 'catppuccin':
         return {
@@ -430,6 +502,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#313244',
           dialBorder: '#cba6f7',
           flipCard: 'bg-[#313244] text-[#cba6f7] border-[#cba6f7]/30 shadow-[#cba6f7]/20',
+          progressBar: 'bg-gradient-to-r from-[#cba6f7] to-[#f5c2e7]',
         };
       case 'luxury_gold':
         return {
@@ -445,6 +518,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#14141c',
           dialBorder: '#fbbf24',
           flipCard: 'bg-[#171722] text-amber-300 border-amber-500/30 shadow-amber-500/20',
+          progressBar: 'bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500',
         };
       case 'cosmic_nebula':
         return {
@@ -460,6 +534,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#0d0d26',
           dialBorder: '#818cf8',
           flipCard: 'bg-[#111133] text-pink-300 border-indigo-500/30 shadow-pink-500/20',
+          progressBar: 'bg-gradient-to-r from-cyan-400 via-indigo-400 to-pink-500',
         };
       case 'solar_flare':
         return {
@@ -475,6 +550,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#221307',
           dialBorder: '#f59e0b',
           flipCard: 'bg-[#261509] text-amber-400 border-amber-500/30 shadow-amber-500/20',
+          progressBar: 'bg-gradient-to-r from-amber-400 to-orange-500',
         };
       case 'rose_quartz':
         return {
@@ -490,6 +566,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#291723',
           dialBorder: '#f472b6',
           flipCard: 'bg-[#291723] text-pink-300 border-pink-500/30 shadow-pink-500/20',
+          progressBar: 'bg-gradient-to-r from-pink-400 to-rose-300',
         };
       case 'swiss_bauhaus':
         return {
@@ -505,6 +582,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#1e293b',
           dialBorder: '#f43f5e',
           flipCard: 'bg-slate-800 text-white border-slate-700 shadow-slate-950/40',
+          progressBar: 'bg-rose-500',
         };
       case 'oled':
         return {
@@ -520,6 +598,7 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#0a0a0a',
           dialBorder: '#404040',
           flipCard: 'bg-[#121212] text-white border-neutral-800 shadow-black',
+          progressBar: 'bg-white',
         };
       case 'emerald':
         return {
@@ -535,9 +614,9 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#082418',
           dialBorder: '#14b8a6',
           flipCard: 'bg-[#082418] text-teal-300 border-teal-500/30 shadow-teal-500/20',
+          progressBar: 'bg-teal-400',
         };
       case 'slate':
-      default:
         return {
           bg: 'bg-[#0f172a]',
           clockText: 'text-slate-100',
@@ -551,32 +630,235 @@ export const DigitalClock: React.FC = () => {
           dialBg: '#1e293b',
           dialBorder: '#3b82f6',
           flipCard: 'bg-[#1e293b] text-slate-100 border-slate-700 shadow-slate-950/40',
+          progressBar: 'bg-blue-500',
+        };
+      case 'kyoto_twilight':
+        return {
+          bg: 'bg-[#140a10]',
+          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-500 to-red-600 drop-shadow-[0_0_35px_rgba(244,63,94,0.8)]',
+          glow: 'bg-gradient-to-tr from-rose-500/15 via-amber-500/10 to-red-600/15',
+          accent: 'text-[#ff4757]',
+          border: 'border-rose-500/30',
+          badgeBg: 'bg-rose-500/15 text-rose-300 border-rose-500/40',
+          handSec: '#ff4757',
+          handMin: '#fb7185',
+          handHr: '#f43f5e',
+          dialBg: '#1f0d18',
+          dialBorder: '#ff4757',
+          flipCard: 'bg-[#220e1a] text-rose-300 border-rose-500/30 shadow-rose-500/20',
+          progressBar: 'bg-gradient-to-r from-amber-400 via-rose-500 to-red-500',
+        };
+      case 'abyss_ocean':
+        return {
+          bg: 'bg-[#020b14]',
+          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-teal-200 via-cyan-400 to-blue-500 drop-shadow-[0_0_35px_rgba(6,182,212,0.85)]',
+          glow: 'bg-gradient-to-tr from-cyan-500/15 via-teal-500/10 to-blue-600/15',
+          accent: 'text-[#00f2fe]',
+          border: 'border-cyan-500/30',
+          badgeBg: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40',
+          handSec: '#00f2fe',
+          handMin: '#38bdf8',
+          handHr: '#0284c7',
+          dialBg: '#051829',
+          dialBorder: '#00f2fe',
+          flipCard: 'bg-[#061d33] text-cyan-300 border-cyan-500/30 shadow-cyan-500/20',
+          progressBar: 'bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-500',
+        };
+      case 'paper_studio':
+        return {
+          bg: 'bg-[#f8f9fa]',
+          clockText: 'text-slate-900 drop-shadow-[0_2px_12px_rgba(0,0,0,0.06)]',
+          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.04),transparent_70%)]',
+          accent: 'text-rose-600',
+          border: 'border-slate-300/80',
+          badgeBg: 'bg-slate-200/90 text-slate-800 border-slate-300',
+          handSec: '#ef4444',
+          handMin: '#1e293b',
+          handHr: '#0f172a',
+          dialBg: '#ffffff',
+          dialBorder: '#cbd5e1',
+          flipCard: 'bg-white text-slate-900 border-slate-300 shadow-xl shadow-slate-300/50',
+          subText: 'text-slate-600',
+          dialTickMajor: '#0f172a',
+          dialTickMinor: 'rgba(15,23,42,0.3)',
+          dialNumColor: '#0f172a',
+          progressBar: 'bg-rose-500',
+          isLight: true,
+        };
+      case 'warm_espresso':
+        return {
+          bg: 'bg-[#160f0a]',
+          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-amber-300 to-amber-600 drop-shadow-[0_0_25px_rgba(217,119,6,0.65)]',
+          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(217,119,6,0.12),transparent_70%)]',
+          accent: 'text-[#fde68a]',
+          border: 'border-amber-600/30',
+          badgeBg: 'bg-amber-600/15 text-amber-200 border-amber-600/40',
+          handSec: '#d97706',
+          handMin: '#fde68a',
+          handHr: '#b45309',
+          dialBg: '#231710',
+          dialBorder: '#d97706',
+          flipCard: 'bg-[#271a12] text-amber-200 border-amber-600/30 shadow-amber-900/30',
+          progressBar: 'bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600',
+        };
+      case 'toxic_lime':
+        return {
+          bg: 'bg-[#050a03]',
+          clockText: 'text-[#ccff00] drop-shadow-[0_0_35px_rgba(204,255,0,0.85)]',
+          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(204,255,0,0.14),transparent_70%)]',
+          accent: 'text-[#a3e635]',
+          border: 'border-[#ccff00]/30',
+          badgeBg: 'bg-[#ccff00]/15 text-[#ccff00] border-[#ccff00]/40',
+          handSec: '#ccff00',
+          handMin: '#bef264',
+          handHr: '#84cc16',
+          dialBg: '#0b1606',
+          dialBorder: '#ccff00',
+          flipCard: 'bg-[#0d1a08] text-[#ccff00] border-[#ccff00]/30 shadow-[#ccff00]/20',
+          progressBar: 'bg-[#ccff00]',
+        };
+      case 'frost_aurora':
+        return {
+          bg: 'bg-[#06111e]',
+          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-white via-sky-200 to-teal-200 drop-shadow-[0_0_30px_rgba(186,230,253,0.85)]',
+          glow: 'bg-gradient-to-tr from-sky-500/15 via-teal-500/10 to-transparent',
+          accent: 'text-[#7dd3fc]',
+          border: 'border-sky-400/30',
+          badgeBg: 'bg-sky-500/15 text-sky-200 border-sky-400/40',
+          handSec: '#38bdf8',
+          handMin: '#bae6fd',
+          handHr: '#7dd3fc',
+          dialBg: '#0b2038',
+          dialBorder: '#38bdf8',
+          flipCard: 'bg-[#0e2744] text-sky-200 border-sky-400/30 shadow-sky-500/20',
+          progressBar: 'bg-gradient-to-r from-sky-300 via-teal-200 to-blue-400',
+        };
+      case 'midnight_velocity':
+        return {
+          bg: 'bg-[#0b0c10]',
+          clockText: 'text-[#ff2b44] drop-shadow-[0_0_35px_rgba(255,43,68,0.9)]',
+          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,43,68,0.14),transparent_70%)]',
+          accent: 'text-[#facc15]',
+          border: 'border-red-500/30',
+          badgeBg: 'bg-red-500/15 text-red-300 border-red-500/40',
+          handSec: '#facc15',
+          handMin: '#ff2b44',
+          handHr: '#b91c1c',
+          dialBg: '#161820',
+          dialBorder: '#ff2b44',
+          flipCard: 'bg-[#181924] text-[#ff2b44] border-red-500/30 shadow-red-500/20',
+          progressBar: 'bg-gradient-to-r from-red-600 via-rose-500 to-amber-400',
+        };
+      case 'dreamy_lilac':
+        return {
+          bg: 'bg-[#120e22]',
+          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-300 drop-shadow-[0_0_30px_rgba(216,180,254,0.7)]',
+          glow: 'bg-gradient-to-tr from-purple-500/15 via-pink-500/10 to-indigo-500/15',
+          accent: 'text-[#f472b6]',
+          border: 'border-purple-400/30',
+          badgeBg: 'bg-purple-500/15 text-purple-200 border-purple-400/40',
+          handSec: '#c084fc',
+          handMin: '#f472b6',
+          handHr: '#a855f7',
+          dialBg: '#1f183b',
+          dialBorder: '#c084fc',
+          flipCard: 'bg-[#231b42] text-purple-200 border-purple-400/30 shadow-purple-500/20',
+          progressBar: 'bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-400',
+        };
+      case 'sahara_dune':
+        return {
+          bg: 'bg-[#170e08]',
+          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-400 to-rose-400 drop-shadow-[0_0_25px_rgba(251,146,60,0.7)]',
+          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(251,146,60,0.12),transparent_70%)]',
+          accent: 'text-[#fb923c]',
+          border: 'border-orange-500/30',
+          badgeBg: 'bg-orange-500/15 text-orange-200 border-orange-500/40',
+          handSec: '#f59e0b',
+          handMin: '#fb923c',
+          handHr: '#c2410c',
+          dialBg: '#26160c',
+          dialBorder: '#fb923c',
+          flipCard: 'bg-[#2a180e] text-orange-200 border-orange-500/30 shadow-orange-950/40',
+          progressBar: 'bg-gradient-to-r from-amber-300 via-orange-400 to-rose-400',
+        };
+      case 'electric_violet':
+        return {
+          bg: 'bg-[#0c0317]',
+          clockText: 'text-[#d946ef] drop-shadow-[0_0_35px_rgba(217,70,239,0.85)]',
+          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(217,70,239,0.14),transparent_70%)]',
+          accent: 'text-[#f0abfc]',
+          border: 'border-fuchsia-500/30',
+          badgeBg: 'bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-500/40',
+          handSec: '#c084fc',
+          handMin: '#e879f9',
+          handHr: '#a21caf',
+          dialBg: '#1b0733',
+          dialBorder: '#d946ef',
+          flipCard: 'bg-[#20093d] text-fuchsia-200 border-fuchsia-500/30 shadow-fuchsia-500/20',
+          progressBar: 'bg-gradient-to-r from-fuchsia-400 via-purple-500 to-pink-500',
+        };
+      default:
+        return {
+          bg: 'bg-[#08080d]',
+          clockText: 'text-[#fcee0a] drop-shadow-[0_0_35px_rgba(252,238,10,0.85)]',
+          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(252,238,10,0.12),transparent_70%)]',
+          accent: 'text-[#00f0ff]',
+          border: 'border-[#fcee0a]/30',
+          badgeBg: 'bg-[#fcee0a]/15 text-[#fcee0a] border-[#fcee0a]/40',
+          handSec: '#00f0ff',
+          handMin: '#fcee0a',
+          handHr: '#ff003c',
+          dialBg: '#0e0e17',
+          dialBorder: '#fcee0a',
+          flipCard: 'bg-[#151522] text-[#fcee0a] border-[#fcee0a]/30 shadow-[#fcee0a]/20',
+          progressBar: 'bg-[#fcee0a]',
         };
     }
   };
 
   const themeConfig = getThemeStyles();
 
-  const themes: { id: ClockTheme; label: string; color: string }[] = [
-    { id: 'night_city', label: 'Night City 2077', color: 'bg-[#fcee0a]' },
-    { id: 'cyberpunk', label: 'Cyber Neon', color: 'bg-cyan-400' },
-    { id: 'synthwave', label: 'Synthwave 80s', color: 'bg-fuchsia-500' },
-    { id: 'tokyo_night', label: 'Tokyo Night', color: 'bg-[#7aa2f7]' },
-    { id: 'tokyo_rain', label: 'Tokyo Rain', color: 'bg-purple-400' },
-    { id: 'nord_aurora', label: 'Nordic Aurora', color: 'bg-[#88c0d0]' },
-    { id: 'matrix', label: 'Matrix Terminal', color: 'bg-emerald-400' },
-    { id: 'amber_crt', label: 'Vintage Amber CRT', color: 'bg-[#ffb000]' },
-    { id: 'dracula', label: 'Dracula Gothic', color: 'bg-[#ff79c6]' },
-    { id: 'catppuccin', label: 'Catppuccin Mocha', color: 'bg-[#cba6f7]' },
-    { id: 'luxury_gold', label: 'Royal Obsidian Gold', color: 'bg-amber-400' },
-    { id: 'cosmic_nebula', label: 'Cosmic Nebula', color: 'bg-pink-500' },
-    { id: 'solar_flare', label: 'Solar Flare', color: 'bg-orange-500' },
-    { id: 'rose_quartz', label: 'Rose Quartz', color: 'bg-pink-300' },
-    { id: 'swiss_bauhaus', label: 'Swiss Bauhaus', color: 'bg-rose-500' },
-    { id: 'oled', label: 'OLED Pure Black', color: 'bg-neutral-950 border border-neutral-600' },
-    { id: 'emerald', label: 'Emerald Forest', color: 'bg-teal-400' },
-    { id: 'slate', label: 'Deep Slate', color: 'bg-slate-600' },
+  const themes: { id: ClockTheme; label: string; color: string; category: ThemeCategory }[] = [
+    // Neon & Cyber
+    { id: 'night_city', label: 'Night City 2077', color: 'bg-[#fcee0a]', category: 'cyber' },
+    { id: 'cyberpunk', label: 'Cyber Neon', color: 'bg-cyan-400', category: 'cyber' },
+    { id: 'synthwave', label: 'Synthwave 80s', color: 'bg-fuchsia-500', category: 'cyber' },
+    { id: 'matrix', label: 'Matrix Terminal', color: 'bg-emerald-400', category: 'cyber' },
+    { id: 'toxic_lime', label: 'Acid Cyber Lime', color: 'bg-[#ccff00]', category: 'cyber' },
+    { id: 'electric_violet', label: 'Electric Ultraviolet', color: 'bg-[#d946ef]', category: 'cyber' },
+    { id: 'midnight_velocity', label: 'Midnight Velocity', color: 'bg-[#ff2b44]', category: 'cyber' },
+
+    // Space & Aurora
+    { id: 'tokyo_night', label: 'Tokyo Night', color: 'bg-[#7aa2f7]', category: 'space' },
+    { id: 'tokyo_rain', label: 'Tokyo Rain', color: 'bg-purple-400', category: 'space' },
+    { id: 'nord_aurora', label: 'Nordic Aurora', color: 'bg-[#88c0d0]', category: 'space' },
+    { id: 'cosmic_nebula', label: 'Cosmic Nebula', color: 'bg-pink-500', category: 'space' },
+    { id: 'frost_aurora', label: 'Glacial Frost', color: 'bg-sky-300', category: 'space' },
+    { id: 'abyss_ocean', label: 'Deep Abyss', color: 'bg-cyan-500', category: 'space' },
+
+    // Warm & Sunset
+    { id: 'amber_crt', label: 'Vintage Amber CRT', color: 'bg-[#ffb000]', category: 'warm' },
+    { id: 'luxury_gold', label: 'Royal Obsidian Gold', color: 'bg-amber-400', category: 'warm' },
+    { id: 'solar_flare', label: 'Solar Flare', color: 'bg-orange-500', category: 'warm' },
+    { id: 'warm_espresso', label: 'Warm Espresso', color: 'bg-amber-700', category: 'warm' },
+    { id: 'sahara_dune', label: 'Sahara Dune', color: 'bg-orange-400', category: 'warm' },
+    { id: 'kyoto_twilight', label: 'Kyoto Twilight', color: 'bg-rose-500', category: 'warm' },
+    { id: 'emerald', label: 'Emerald Forest', color: 'bg-teal-400', category: 'warm' },
+
+    // Minimal & Studio
+    { id: 'paper_studio', label: 'Studio Paper (Light)', color: 'bg-slate-100 border border-slate-400', category: 'minimal' },
+    { id: 'oled', label: 'OLED Pure Black', color: 'bg-neutral-950 border border-neutral-600', category: 'minimal' },
+    { id: 'swiss_bauhaus', label: 'Swiss Bauhaus', color: 'bg-rose-500', category: 'minimal' },
+    { id: 'slate', label: 'Deep Slate', color: 'bg-slate-600', category: 'minimal' },
+    { id: 'dracula', label: 'Dracula Gothic', color: 'bg-[#ff79c6]', category: 'minimal' },
+    { id: 'catppuccin', label: 'Catppuccin Mocha', color: 'bg-[#cba6f7]', category: 'minimal' },
+    { id: 'rose_quartz', label: 'Rose Quartz', color: 'bg-pink-300', category: 'minimal' },
+    { id: 'dreamy_lilac', label: 'Dreamy Lilac', color: 'bg-purple-300', category: 'minimal' },
   ];
+
+  const filteredThemes = themeCategory === 'all'
+    ? themes
+    : themes.filter(t => t.category === themeCategory);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -591,6 +873,15 @@ export const DigitalClock: React.FC = () => {
             }`}
           >
             Digital
+          </button>
+          <button
+            onClick={() => setMode('stacked')}
+            className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+              mode === 'stacked' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'
+            }`}
+            title="Vertical StandBy Stacked layout inspired by smart displays"
+          >
+            StandBy Stacked
           </button>
           <button
             onClick={() => setMode('flip')}
@@ -682,6 +973,24 @@ export const DigitalClock: React.FC = () => {
               Sans
             </button>
             <button
+              onClick={() => setFontStyle('condensed')}
+              className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
+                fontStyle === 'condensed' ? 'bg-white dark:bg-slate-700 shadow-xs text-brand-600 dark:text-brand-300' : 'text-slate-500'
+              }`}
+              title="Architectural Bold Font"
+            >
+              Bold
+            </button>
+            <button
+              onClick={() => setFontStyle('minimal')}
+              className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
+                fontStyle === 'minimal' ? 'bg-white dark:bg-slate-700 shadow-xs text-brand-600 dark:text-brand-300' : 'text-slate-500'
+              }`}
+              title="Clean Minimalist Light Font"
+            >
+              Thin
+            </button>
+            <button
               onClick={() => setFontStyle('digital')}
               className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
                 fontStyle === 'digital' ? 'bg-white dark:bg-slate-700 shadow-xs text-brand-600 dark:text-brand-300' : 'text-slate-500'
@@ -713,9 +1022,9 @@ export const DigitalClock: React.FC = () => {
       </div>
 
       {/* Mode Specific Options Bar */}
-      {mode === 'digital' || mode === 'flip' || mode === 'analog' ? (
+      {mode === 'digital' || mode === 'stacked' || mode === 'flip' || mode === 'analog' ? (
         <div className="flex flex-wrap items-center justify-between gap-3 px-2">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
             <button
               onClick={() => setIs24Hour(!is24Hour)}
               className={`px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
@@ -748,9 +1057,33 @@ export const DigitalClock: React.FC = () => {
             >
               Date
             </button>
+
+            <button
+              onClick={() => setShowProgressBar(!showProgressBar)}
+              className={`px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
+                showProgressBar
+                  ? 'bg-brand-50 dark:bg-brand-950/60 border-brand-500 text-brand-600 dark:text-brand-300'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+              }`}
+              title="Toggle animated 60-second progress line"
+            >
+              60s Bar
+            </button>
+
+            <button
+              onClick={() => setAmbientGlow(!ambientGlow)}
+              className={`px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
+                ambientGlow
+                  ? 'bg-brand-50 dark:bg-brand-950/60 border-brand-500 text-brand-600 dark:text-brand-300'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+              }`}
+              title="Toggle ambient breathing aura glow"
+            >
+              Aura Glow
+            </button>
           </div>
 
-          {/* Editable Work Tag Badge without laptop emoji */}
+          {/* Editable Work Tag Badge */}
           <div className="flex items-center gap-1.5">
             {isEditingTag ? (
               <div className="flex items-center gap-1">
@@ -844,23 +1177,53 @@ export const DigitalClock: React.FC = () => {
         </div>
       ) : null}
 
-      {/* Aesthetic Theme Swatches */}
-      <div className="p-4 rounded-3xl bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between mb-2.5">
-          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Sparkles size={13} className="text-amber-400" />
-            Style Themes ({themes.length} Aesthetics)
+      {/* Aesthetic Theme Swatches (28 Aesthetics with Category Filter) */}
+      <div className="p-4 rounded-3xl bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <Sparkles size={13} className="text-amber-400" />
+              Style Themes ({themes.length} Aesthetics)
+            </span>
+          </div>
+
+          {/* Category Filter Tabs */}
+          <div className="flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold overflow-x-auto no-scrollbar">
+            {[
+              { id: 'all' as ThemeCategory, label: 'All', count: 28 },
+              { id: 'cyber' as ThemeCategory, label: 'Neon & Cyber', count: 7 },
+              { id: 'space' as ThemeCategory, label: 'Aurora & Space', count: 6 },
+              { id: 'warm' as ThemeCategory, label: 'Warm & Sunset', count: 7 },
+              { id: 'minimal' as ThemeCategory, label: 'Minimal & Studio', count: 8 },
+            ].map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setThemeCategory(cat.id)}
+                className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer whitespace-nowrap text-xs ${
+                  themeCategory === cat.id
+                    ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-300 shadow-xs font-bold'
+                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                }`}
+              >
+                {cat.label} ({cat.count})
+              </button>
+            ))}
+          </div>
+
+          <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
+            Active: {themes.find(t => t.id === theme)?.label}
           </span>
-          <span className="text-[11px] font-mono text-slate-500">Selected: {themes.find(t => t.id === theme)?.label}</span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-          {themes.map(t => (
+
+        {/* Swatches Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
+          {filteredThemes.map(t => (
             <button
               key={t.id}
               onClick={() => setTheme(t.id)}
               className={`px-3 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer truncate ${
                 theme === t.id
-                  ? 'bg-brand-600 text-white shadow-md shadow-brand-500/25 scale-[1.03] ring-2 ring-brand-400/40'
+                  ? 'bg-brand-600 text-white shadow-md shadow-brand-500/25 scale-[1.02] ring-2 ring-brand-400/40'
                   : 'bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-750'
               }`}
             >
@@ -878,11 +1241,23 @@ export const DigitalClock: React.FC = () => {
           isFullscreen ? 'fixed inset-0 z-50 rounded-none h-screen w-screen border-none' : ''
         }`}
       >
-        {/* Glow backdrop layer */}
-        <div className={`absolute inset-0 ${themeConfig.glow} pointer-events-none`} />
+        {/* Glow backdrop layer with ambient breathing option */}
+        <div
+          className={`absolute inset-0 ${themeConfig.glow} ${ambientGlow ? 'animate-pulse-slow' : ''} pointer-events-none transition-all duration-700`}
+        />
+
+        {/* Live 60-Second Animated Progress Bar */}
+        {showProgressBar && (
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-black/15 dark:bg-white/5 overflow-hidden z-20">
+            <div
+              className={`h-full transition-all duration-300 ${themeConfig.progressBar}`}
+              style={{ width: `${((displayTime.getSeconds() + 1) / 60) * 100}%` }}
+            />
+          </div>
+        )}
 
         {/* Top Floating Info in Fullscreen & Normal */}
-        <div className="absolute top-6 left-6 right-6 flex items-center justify-between pointer-events-auto">
+        <div className="absolute top-6 left-6 right-6 flex items-center justify-between pointer-events-auto z-20">
           <span className={`px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border backdrop-blur-md ${themeConfig.badgeBg}`}>
             {customTag}
           </span>
@@ -890,7 +1265,11 @@ export const DigitalClock: React.FC = () => {
           {isFullscreen && (
             <button
               onClick={toggleFullscreen}
-              className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors cursor-pointer"
+              className={`p-2.5 rounded-2xl ${
+                themeConfig.isLight
+                  ? 'bg-black/10 hover:bg-black/20 text-slate-800'
+                  : 'bg-white/10 hover:bg-white/20 text-white'
+              } backdrop-blur-md transition-colors cursor-pointer`}
               title="Exit Fullscreen"
             >
               <Minimize size={18} />
@@ -898,7 +1277,7 @@ export const DigitalClock: React.FC = () => {
           )}
         </div>
 
-        {/* Mode 1: Digital Display Mode */}
+        {/* Mode 1: Digital Display Mode (Horizontal) */}
         {mode === 'digital' && (
           <div className="relative z-10 space-y-4 my-auto">
             <div className="flex items-baseline justify-center gap-1 sm:gap-3">
@@ -924,14 +1303,52 @@ export const DigitalClock: React.FC = () => {
             </div>
 
             {showDate && (
-              <p className="text-base sm:text-xl font-medium tracking-wide text-slate-400">
+              <p className={`text-base sm:text-xl font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'}`}>
                 {dateStr}
               </p>
             )}
           </div>
         )}
 
-        {/* Mode 2: Flip Card Clock Mode */}
+        {/* Mode 2: Modern StandBy Stacked Mode (Vertical Large Digits) */}
+        {mode === 'stacked' && (
+          <div className="relative z-10 flex flex-col items-center justify-center my-auto space-y-2 py-4">
+            <div className="flex flex-col items-center leading-[0.88] select-none">
+              <span
+                className={`text-7xl sm:text-9xl md:text-[11rem] tracking-tight font-black ${getFontFamilyClass()} ${themeConfig.clockText}`}
+              >
+                {hoursStr}
+              </span>
+              <span
+                className={`text-7xl sm:text-9xl md:text-[11rem] tracking-tight font-black ${getFontFamilyClass()} ${themeConfig.clockText}`}
+              >
+                {minutesStr}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+              {!is24Hour && (
+                <span className={`px-2.5 py-0.5 rounded-lg text-xs sm:text-sm font-black uppercase tracking-wider border ${themeConfig.badgeBg}`}>
+                  {ampm}
+                </span>
+              )}
+
+              {showSeconds && (
+                <span className={`text-base sm:text-xl font-mono font-bold tracking-wider ${themeConfig.accent}`}>
+                  :{secondsStr}
+                </span>
+              )}
+
+              {showDate && (
+                <span className={`text-sm sm:text-base font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'}`}>
+                  • {dateStr}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Mode 3: Flip Card Clock Mode */}
         {mode === 'flip' && (
           <div className="relative z-10 space-y-6 my-auto">
             <div className="flex items-center justify-center gap-3 sm:gap-6">
@@ -945,7 +1362,9 @@ export const DigitalClock: React.FC = () => {
                     {hoursStr}
                   </span>
                 </div>
-                <span className="text-xs uppercase font-extrabold text-slate-500 mt-2">Hours</span>
+                <span className={`text-xs uppercase font-extrabold ${themeConfig.subText || 'text-slate-500'} mt-2`}>
+                  Hours
+                </span>
               </div>
 
               <div className={`text-4xl sm:text-6xl font-black animate-pulse ${themeConfig.accent}`}>:</div>
@@ -960,7 +1379,9 @@ export const DigitalClock: React.FC = () => {
                     {minutesStr}
                   </span>
                 </div>
-                <span className="text-xs uppercase font-extrabold text-slate-500 mt-2">Minutes</span>
+                <span className={`text-xs uppercase font-extrabold ${themeConfig.subText || 'text-slate-500'} mt-2`}>
+                  Minutes
+                </span>
               </div>
 
               {showSeconds && (
@@ -976,7 +1397,9 @@ export const DigitalClock: React.FC = () => {
                         {secondsStr}
                       </span>
                     </div>
-                    <span className="text-xs uppercase font-extrabold text-slate-500 mt-2">Seconds</span>
+                    <span className={`text-xs uppercase font-extrabold ${themeConfig.subText || 'text-slate-500'} mt-2`}>
+                      Seconds
+                    </span>
                   </div>
                 </>
               )}
@@ -991,14 +1414,14 @@ export const DigitalClock: React.FC = () => {
             </div>
 
             {showDate && (
-              <p className="text-sm sm:text-lg font-medium tracking-wide text-slate-400">
+              <p className={`text-sm sm:text-lg font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'}`}>
                 {dateStr}
               </p>
             )}
           </div>
         )}
 
-        {/* Mode 3: Razor-Sharp SVG Analog Chronometer */}
+        {/* Mode 4: Razor-Sharp SVG Analog Chronometer */}
         {mode === 'analog' && (
           <div className="relative z-10 flex flex-col items-center space-y-5 my-auto">
             <div className="relative w-72 h-72 sm:w-84 sm:h-84 flex items-center justify-center">
@@ -1021,7 +1444,7 @@ export const DigitalClock: React.FC = () => {
                   cy="150"
                   r="134"
                   fill="none"
-                  stroke="rgba(255,255,255,0.06)"
+                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'}
                   strokeWidth="1.5"
                 />
 
@@ -1036,7 +1459,13 @@ export const DigitalClock: React.FC = () => {
                       y1={isMajorTick ? '18' : isHourTick ? '22' : '26'}
                       x2="150"
                       y2={isMajorTick ? '36' : isHourTick ? '32' : '29'}
-                      stroke={isMajorTick ? '#ffffff' : isHourTick ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)'}
+                      stroke={
+                        isMajorTick
+                          ? (themeConfig.dialTickMajor || '#ffffff')
+                          : isHourTick
+                            ? (themeConfig.dialTickMinor || 'rgba(255,255,255,0.7)')
+                            : (themeConfig.dialTickMinor ? themeConfig.dialTickMinor : 'rgba(255,255,255,0.2)')
+                      }
                       strokeWidth={isMajorTick ? '3.5' : isHourTick ? '2' : '1'}
                       strokeLinecap="round"
                       transform={`rotate(${i * 6} 150 150)`}
@@ -1057,7 +1486,7 @@ export const DigitalClock: React.FC = () => {
                       y={y}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      fill="rgba(255,255,255,0.85)"
+                      fill={themeConfig.dialNumColor || (themeConfig.isLight ? '#0f172a' : 'rgba(255,255,255,0.85)')}
                       fontSize="14"
                       fontWeight="bold"
                       fontFamily="sans-serif"
@@ -1121,22 +1550,22 @@ export const DigitalClock: React.FC = () => {
                 )}
 
                 {/* Center Pivot Pin */}
-                <circle cx="150" cy="150" r="7" fill={themeConfig.handSec} stroke="#000" strokeWidth="2" />
-                <circle cx="150" cy="150" r="2.5" fill="#ffffff" />
+                <circle cx="150" cy="150" r="7" fill={themeConfig.handSec} stroke={themeConfig.isLight ? '#fff' : '#000'} strokeWidth="2" />
+                <circle cx="150" cy="150" r="2.5" fill={themeConfig.isLight ? '#0f172a' : '#ffffff'} />
               </svg>
             </div>
 
             {/* Sub Digital Readout */}
-            <div className={`flex items-center gap-2 text-xl font-bold ${getFontFamilyClass()} text-slate-200`}>
+            <div className={`flex items-center gap-2 text-xl font-bold ${getFontFamilyClass()} ${themeConfig.isLight ? 'text-slate-800' : 'text-slate-200'}`}>
               <span>{hoursStr}:{minutesStr}{showSeconds ? `:${secondsStr}` : ''}</span>
               {!is24Hour && <span className={`text-xs uppercase ${themeConfig.accent}`}>{ampm}</span>}
             </div>
 
-            {showDate && <p className="text-xs text-slate-400">{dateStr}</p>}
+            {showDate && <p className={`text-xs ${themeConfig.subText || 'text-slate-400'}`}>{dateStr}</p>}
           </div>
         )}
 
-        {/* Mode 4: Pomodoro Focus Timer Mode */}
+        {/* Mode 5: Pomodoro Focus Timer Mode */}
         {mode === 'pomodoro' && (
           <div className="relative z-10 space-y-6 my-auto">
             <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border backdrop-blur-md ${themeConfig.badgeBg}`}>
@@ -1150,7 +1579,11 @@ export const DigitalClock: React.FC = () => {
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setPomoIsRunning(!pomoIsRunning)}
-                className="px-7 py-3.5 rounded-2xl bg-white/20 hover:bg-white/30 text-white font-extrabold text-sm flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg"
+                className={`px-7 py-3.5 rounded-2xl ${
+                  themeConfig.isLight
+                    ? 'bg-slate-900 text-white hover:bg-slate-800'
+                    : 'bg-white/20 hover:bg-white/30 text-white'
+                } font-extrabold text-sm flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg`}
               >
                 {pomoIsRunning ? <Pause size={18} /> : <Play size={18} />}
                 <span>{pomoIsRunning ? 'Pause Session' : 'Start Focus'}</span>
@@ -1161,7 +1594,11 @@ export const DigitalClock: React.FC = () => {
                   setPomoIsRunning(false);
                   setPomoTimeLeft(pomoMode === 'work' ? pomoDuration : 5 * 60);
                 }}
-                className="p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                className={`p-3.5 rounded-2xl ${
+                  themeConfig.isLight
+                    ? 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+                    : 'bg-white/10 hover:bg-white/20 text-white'
+                } transition-colors cursor-pointer`}
                 title="Reset timer"
               >
                 <RotateCcw size={18} />
@@ -1170,7 +1607,7 @@ export const DigitalClock: React.FC = () => {
           </div>
         )}
 
-        {/* Mode 5: Stopwatch & Lap Counter Mode */}
+        {/* Mode 6: Stopwatch & Lap Counter Mode */}
         {mode === 'stopwatch' && (
           <div className="relative z-10 space-y-6 my-auto w-full max-w-md">
             <div className={`text-6xl sm:text-8xl tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText}`}>
@@ -1181,7 +1618,11 @@ export const DigitalClock: React.FC = () => {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => setSwIsRunning(!swIsRunning)}
-                className="px-6 py-3 rounded-2xl bg-white/20 hover:bg-white/30 text-white font-extrabold text-sm flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg"
+                className={`px-6 py-3 rounded-2xl ${
+                  themeConfig.isLight
+                    ? 'bg-slate-900 text-white hover:bg-slate-800'
+                    : 'bg-white/20 hover:bg-white/30 text-white'
+                } font-extrabold text-sm flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg`}
               >
                 {swIsRunning ? <Pause size={16} /> : <Play size={16} />}
                 <span>{swIsRunning ? 'Stop' : 'Start'}</span>
@@ -1204,7 +1645,11 @@ export const DigitalClock: React.FC = () => {
                     setSwLaps([]);
                   }
                 }}
-                className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors cursor-pointer flex items-center gap-1.5"
+                className={`px-5 py-3 rounded-2xl ${
+                  themeConfig.isLight
+                    ? 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+                    : 'bg-white/10 hover:bg-white/20 text-white'
+                } text-sm font-semibold transition-colors cursor-pointer flex items-center gap-1.5`}
               >
                 {swIsRunning ? (
                   <>
@@ -1222,9 +1667,15 @@ export const DigitalClock: React.FC = () => {
 
             {/* Lap list */}
             {swLaps.length > 0 && (
-              <div className="max-h-36 overflow-y-auto space-y-1 p-2 rounded-2xl bg-black/30 border border-white/10 text-xs">
+              <div
+                className={`max-h-36 overflow-y-auto space-y-1 p-2 rounded-2xl ${
+                  themeConfig.isLight
+                    ? 'bg-slate-100 border border-slate-300 text-slate-800'
+                    : 'bg-black/30 border border-white/10 text-slate-300'
+                } text-xs`}
+              >
                 {swLaps.map(lap => (
-                  <div key={lap.id} className="flex items-center justify-between px-3 py-1.5 text-slate-300">
+                  <div key={lap.id} className="flex items-center justify-between px-3 py-1.5">
                     <span className="font-bold">Lap {lap.id}</span>
                     <span className="font-mono">
                       +{(lap.lapDuration / 1000).toFixed(2)}s ({Math.floor(lap.time / 1000)}s)
@@ -1237,8 +1688,8 @@ export const DigitalClock: React.FC = () => {
         )}
 
         {/* Bottom Presentation Hint */}
-        <p className="absolute bottom-4 text-[11px] text-slate-500 opacity-60 font-mono">
-          Press Fullscreen for second-monitor display • Audio chimes supported
+        <p className={`absolute bottom-3 text-[11px] ${themeConfig.subText || 'text-slate-500'} opacity-60 font-mono select-none pointer-events-none`}>
+          Press Fullscreen for second-monitor desk display • Audio chimes supported
         </p>
       </div>
     </div>
