@@ -73,6 +73,7 @@ import { JsonToTypeScript } from './developer/JsonToTypeScript';
 import { SvgStudio } from './developer/SvgStudio';
 import { KeycodeInfo } from './developer/KeycodeInfo';
 import { HttpStatusCodes } from './developer/HttpStatusCodes';
+import { ChmodCalculator } from './developer/ChmodCalculator';
 
 interface ToolRendererProps {
   tool: Tool;
@@ -211,6 +212,8 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <KeycodeInfo />;
       case 'http-status-codes':
         return <HttpStatusCodes />;
+      case 'chmod-calculator':
+        return <ChmodCalculator />;
 
       default:
         return (

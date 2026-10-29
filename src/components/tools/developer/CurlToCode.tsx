@@ -59,8 +59,7 @@ export const CurlToCode: React.FC = () => {
   // Parse cURL command
   const parsed = useMemo<ParsedCurl>(() => {
     const raw = curlInput
-      .replace(/\\\n/g, ' ')
-      .replace(/\\\r\n/g, ' ')
+      .replace(/\\\s*[\r\n]+/g, ' ')
       .trim();
 
     let method = '';
@@ -80,7 +79,7 @@ export const CurlToCode: React.FC = () => {
     for (let i = 0; i < tokens.length; i++) {
       const token = tokens[i];
 
-      if (token === 'curl') continue;
+      if (token === 'curl' || token === '\\') continue;
 
       if (token === '-X' || token === '--request') {
         method = (tokens[i + 1] || '').toUpperCase();
@@ -99,6 +98,8 @@ export const CurlToCode: React.FC = () => {
         token === '--data' || 
         token === '--data-raw' || 
         token === '--data-binary' || 
+        token === '--data-ascii' ||
+        token === '--data-urlencode' ||
         token === '--json'
       ) {
         data = tokens[i + 1] || '';
@@ -109,13 +110,25 @@ export const CurlToCode: React.FC = () => {
       } else if (token === '-u' || token === '--user') {
         const userPass = tokens[i + 1] || '';
         const parts = userPass.split(':');
-        auth = { user: parts[0] || '', pass: parts[1] || '' };
+        auth = { user: parts[0] || '', pass: parts.slice(1).join(':') || '' };
         i++;
-      } else if (token.startsWith('http://') || token.startsWith('https://')) {
-        url = token;
+      } else if (token === '-A' || token === '--user-agent') {
+        headers['User-Agent'] = tokens[i + 1] || '';
+        i++;
+      } else if (token === '-b' || token === '--cookie') {
+        headers['Cookie'] = tokens[i + 1] || '';
+        i++;
       } else if (token === '--url') {
         url = tokens[i + 1] || '';
         i++;
+      } else if (token.startsWith('http://') || token.startsWith('https://')) {
+        url = token;
+      } else if (
+        !url &&
+        !token.startsWith('-') &&
+        (token.includes('localhost') || token.includes('127.0.0.1') || token.includes('.') || token.includes('/'))
+      ) {
+        url = token.startsWith('http://') || token.startsWith('https://') ? token : `http://${token}`;
       }
     }
 
@@ -124,8 +137,12 @@ export const CurlToCode: React.FC = () => {
     }
 
     if (auth && !headers['Authorization']) {
-      const encoded = btoa(`${auth.user}:${auth.pass}`);
-      headers['Authorization'] = `Basic ${encoded}`;
+      try {
+        const encoded = btoa(unescape(encodeURIComponent(`${auth.user}:${auth.pass}`)));
+        headers['Authorization'] = `Basic ${encoded}`;
+      } catch {
+        headers['Authorization'] = `Basic ${auth.user}:${auth.pass}`;
+      }
     }
 
     return {
@@ -241,7 +258,8 @@ export const CurlToCode: React.FC = () => {
         code += `)\n\nfunc main() {\n`;
         code += `\turl := "${url}"\n`;
         if (data) {
-          code += `\tpayload := strings.NewReader(\`${data.replace(/`/g, '')}\`)\n`;
+          const goPayload = data.includes('`') ? JSON.stringify(data) : `\`${data}\``;
+          code += `\tpayload := strings.NewReader(${goPayload})\n`;
           code += `\treq, err := http.NewRequest("${method}", url, payload)\n`;
         } else {
           code += `\treq, err := http.NewRequest("${method}", url, nil)\n`;

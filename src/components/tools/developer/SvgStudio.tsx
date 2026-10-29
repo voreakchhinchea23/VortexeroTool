@@ -77,14 +77,26 @@ export const SvgStudio: React.FC = () => {
       .replace(/class=/g, 'className=')
       .replace(/clip-path=/g, 'clipPath=')
       .replace(/fill-rule=/g, 'fillRule=')
+      .replace(/fill-opacity=/g, 'fillOpacity=')
       .replace(/clip-rule=/g, 'clipRule=')
       .replace(/stroke-width=/g, 'strokeWidth=')
       .replace(/stroke-linecap=/g, 'strokeLinecap=')
       .replace(/stroke-linejoin=/g, 'strokeLinejoin=')
       .replace(/stroke-miterlimit=/g, 'strokeMiterlimit=')
+      .replace(/stroke-dasharray=/g, 'strokeDasharray=')
+      .replace(/stroke-dashoffset=/g, 'strokeDashoffset=')
+      .replace(/stroke-opacity=/g, 'strokeOpacity=')
       .replace(/stop-color=/g, 'stopColor=')
       .replace(/stop-opacity=/g, 'stopOpacity=')
-      .replace(/xlink:href=/g, 'xlinkHref=');
+      .replace(/font-family=/g, 'fontFamily=')
+      .replace(/font-size=/g, 'fontSize=')
+      .replace(/font-weight=/g, 'fontWeight=')
+      .replace(/text-anchor=/g, 'textAnchor=')
+      .replace(/dominant-baseline=/g, 'dominantBaseline=')
+      .replace(/alignment-baseline=/g, 'alignmentBaseline=')
+      .replace(/xlink:href=/g, 'xlinkHref=')
+      .replace(/xmlns:xlink=/g, 'xmlnsXlink=')
+      .replace(/xml:space=/g, 'xmlSpace=');
 
     // Add {...props} to opening svg tag
     jsx = jsx.replace(/<svg\b([^>]*)>/, '<svg$1 {...props}>');
@@ -164,12 +176,26 @@ background-size: contain;`;
   const handleDownloadPng = (scale = 2) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = dataUri;
 
     img.onload = () => {
+      // Determine canvas dimensions from image or viewBox
+      let targetWidth = img.width;
+      let targetHeight = img.height;
+
+      if (!targetWidth || !targetHeight) {
+        if (svgMetrics.viewBox && svgMetrics.viewBox !== 'none') {
+          const parts = svgMetrics.viewBox.trim().split(/[\s,]+/).map(Number);
+          if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+            targetWidth = parts[2];
+            targetHeight = parts[3];
+          }
+        }
+      }
+
+      const width = targetWidth || 512;
+      const height = targetHeight || 512;
+
       const canvas = document.createElement('canvas');
-      const width = img.width || 512;
-      const height = img.height || 512;
       canvas.width = width * scale;
       canvas.height = height * scale;
 
@@ -188,6 +214,12 @@ background-size: contain;`;
       document.body.removeChild(link);
       addToast(`PNG (${canvas.width}x${canvas.height}) downloaded!`, 'success');
     };
+
+    img.onerror = () => {
+      addToast('Failed to render PNG from SVG. Please check SVG markup.', 'error');
+    };
+
+    img.src = dataUri;
   };
 
   return (

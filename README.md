@@ -21,13 +21,13 @@
 
 ## 📖 Overview
 
-**VortexeroTool** is a modern, responsive, all-in-one web platform featuring **59 powerhouse online tools** for everyday users, software engineers, designers, content creators, students, and digital workflows.
+**VortexeroTool** is a modern, responsive, all-in-one web platform featuring **60 powerhouse online tools** for everyday users, software engineers, designers, content creators, students, and digital workflows.
 
 All tools execute **100% locally in the browser**, ensuring maximum speed, zero latency, and absolute user privacy with no backend logging.
 
 ---
 
-## 🛠️ Complete Suite of 59 Tools (Sorted A-Z by Default)
+## 🛠️ Complete Suite of 60 Tools (Sorted A-Z by Default)
 
 All tools in VortexeroTool are sorted alphabetically from **A to Z by default**, with one-click toggles for Z-A, popular badges, and category groups.
 
@@ -91,16 +91,17 @@ All tools in VortexeroTool are sorted alphabetically from **A to Z by default**,
 47. **SVG Studio, Optimizer & JSX Converter**: Preview, clean, and convert SVG graphics into React JSX components, Data URIs, and export high-resolution PNGs with zoom and background inspection.
 48. **Keyboard Event & KeyCode Inspector**: Real-time interactive keystroke debugger inspecting event.key, code, which, modifiers, and generating JavaScript event listener code.
 49. **HTTP Status Codes & Headers Reference**: Comprehensive encyclopedia of HTTP status codes (1xx - 5xx) with RFC documentation, standard response headers, and code snippets.
-50. **Code Snippet to Beautiful Image Studio**: Turn source code into social cards with macOS/Windows frames, gradients, and PNG export.
-51. **SQL Query Formatter & Minifier**: Format, beautify, indent, and uppercase SQL queries (PostgreSQL, MySQL, SQLite, T-SQL) with 1-click copy.
-52. **Crontab Expression Generator & Explainer**: Visually build 5-field cron schedules, read plain English explanations, and calculate upcoming runs.
-53. **CSV & Excel Spreadsheet Studio**: Interactive table grid editor with two-way conversion (CSV ⇄ JSON ⇄ SQL INSERT queries ⇄ Markdown).
-54. **Live Currency Exchange Converter**: Real-time multi-currency exchange converter supporting USD, EUR, GBP, KHR, JPY, SGD, THB, CNY, CAD, AUD.
-55. **JSON Formatter & Validator**: Format, validate, prettify, and minify JSON with syntax error indicators.
-56. **Text & Code Diff Checker**: Side-by-side and unified diff comparison with line addition/deletion highlighting.
-57. **Universal Data & Unit Converter**: Digital storage (Bytes to TB), length, weight, temperature, and time.
-58. **Unix Timestamp Converter**: Epoch timestamps to human dates, UTC, ISO 8601, and relative intervals.
-59. **Live Regex Matcher & Tester**: Regular expressions in real-time with flags and pattern cheatsheets.
+50. **Chmod & Linux Permissions Calculator**: Calculate Linux octal file modes, symbolic notations (rwx), SetUID/SetGID/Sticky bits, and generate production chmod commands.
+51. **Code Snippet to Beautiful Image Studio**: Turn source code into social cards with macOS/Windows frames, gradients, and PNG export.
+52. **SQL Query Formatter & Minifier**: Format, beautify, indent, and uppercase SQL queries (PostgreSQL, MySQL, SQLite, T-SQL) with 1-click copy.
+53. **Crontab Expression Generator & Explainer**: Visually build 5-field cron schedules, read plain English explanations, and calculate upcoming runs.
+54. **CSV & Excel Spreadsheet Studio**: Interactive table grid editor with two-way conversion (CSV ⇄ JSON ⇄ SQL INSERT queries ⇄ Markdown).
+55. **Live Currency Exchange Converter**: Real-time multi-currency exchange converter supporting USD, EUR, GBP, KHR, JPY, SGD, THB, CNY, CAD, AUD.
+56. **JSON Formatter & Validator**: Format, validate, prettify, and minify JSON with syntax error indicators.
+57. **Text & Code Diff Checker**: Side-by-side and unified diff comparison with line addition/deletion highlighting.
+58. **Universal Data & Unit Converter**: Digital storage (Bytes to TB), length, weight, temperature, and time.
+59. **Unix Timestamp Converter**: Epoch timestamps to human dates, UTC, ISO 8601, and relative intervals.
+60. **Live Regex Matcher & Tester**: Regular expressions in real-time with flags and pattern cheatsheets.
 
 ---
 

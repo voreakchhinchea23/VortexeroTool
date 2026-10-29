@@ -526,6 +526,15 @@ const RAW_TOOLS: Tool[] = [
     iconName: 'Globe',
     badge: 'Popular',
     tags: ['http', 'status', 'codes', 'rest', 'api', 'headers', 'rfc', 'web', 'developer']
+  },
+  {
+    id: 'chmod-calculator',
+    name: 'Chmod & Linux Permissions Calculator',
+    description: 'Calculate Linux octal file modes, symbolic notations (rwx), SetUID/SetGID/Sticky bits, and generate production chmod commands.',
+    category: 'developer',
+    iconName: 'Shield',
+    badge: 'New',
+    tags: ['chmod', 'linux', 'permissions', 'octal', 'rwx', 'bash', 'terminal', 'devops', 'developer']
   }
 ];
 

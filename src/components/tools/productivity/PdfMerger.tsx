@@ -34,7 +34,16 @@ export const PdfMerger: React.FC = () => {
   const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const { addToast } = useToast();
+
+  React.useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B';
@@ -125,10 +134,11 @@ export const PdfMerger: React.FC = () => {
   };
 
   const handleClearAll = () => {
-    if (previewPdfUrl) {
-      URL.revokeObjectURL(previewPdfUrl);
-      setPreviewPdfUrl(null);
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
     }
+    setPreviewPdfUrl(null);
     setFiles([]);
     addToast('Cleared all files', 'info');
   };
@@ -149,7 +159,7 @@ export const PdfMerger: React.FC = () => {
 
       for (let i = 0; i < files.length; i++) {
         const item = files[i];
-        const srcDoc = await PDFDocument.load(item.buffer, { ignoreEncryption: true });
+        const srcDoc = await PDFDocument.load(item.buffer.slice(0), { ignoreEncryption: true });
         const indices = srcDoc.getPageIndices();
         const copiedPages = await mergedPdf.copyPages(srcDoc, indices);
         
@@ -162,7 +172,11 @@ export const PdfMerger: React.FC = () => {
       setMergeProgress(100);
 
       const blob = new Blob([mergedPdfBytes as unknown as BlobPart], { type: 'application/pdf' });
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
       const downloadUrl = URL.createObjectURL(blob);
+      previewUrlRef.current = downloadUrl;
       setPreviewPdfUrl(downloadUrl);
 
       // Trigger automatic download

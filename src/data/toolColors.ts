@@ -1322,6 +1322,26 @@ const TOOL_COLOR_DEFINITIONS: Record<string, ToolColorScheme> = {
     badgeText: 'text-cyan-600 dark:text-cyan-300',
     badgeBorder: 'border-cyan-500/30',
   },
+  'chmod-calculator': {
+    id: 'chmod-calculator',
+    name: 'Emerald Shield',
+    accentHex: '#10b981',
+    gradient: 'from-emerald-500 to-teal-600',
+    iconColor: 'text-emerald-500 dark:text-emerald-400',
+    iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+    iconBorder: 'border-emerald-500/25 dark:border-emerald-500/30',
+    iconHoverGradient: 'group-hover:bg-gradient-to-tr group-hover:from-emerald-500 group-hover:to-teal-600 group-hover:text-white',
+    cardBorderHover: 'hover:border-emerald-500/50 dark:hover:border-emerald-500/50',
+    cardGlowHover: 'hover:shadow-emerald-500/15',
+    vibrantCardBg: 'bg-gradient-to-br from-emerald-950/30 via-slate-900/90 to-slate-900/95',
+    vibrantBorder: 'border-emerald-500/30 dark:border-emerald-500/30',
+    vibrantGlow: 'shadow-[0_4px_25px_-5px_rgba(16,185,129,0.2)]',
+    tagBgHover: 'group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/40',
+    tagTextHover: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-300',
+    badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+    badgeText: 'text-emerald-600 dark:text-emerald-300',
+    badgeBorder: 'border-emerald-500/30',
+  },
 };
 
 /**

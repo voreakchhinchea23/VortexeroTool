@@ -73,6 +73,10 @@ export const KeycodeInfo: React.FC = () => {
       // Don't intercept if user is typing in the search input
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
 
+      if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+        e.preventDefault();
+      }
+
       const newEvent: KeyEventData = {
         key: e.key,
         code: e.code,
@@ -111,9 +115,18 @@ export const KeycodeInfo: React.FC = () => {
     }
   };
 
+  const modifierConditions = [
+    currentEvent.ctrlKey ? 'event.ctrlKey' : null,
+    currentEvent.metaKey ? 'event.metaKey' : null,
+    currentEvent.shiftKey ? 'event.shiftKey' : null,
+    currentEvent.altKey ? 'event.altKey' : null,
+  ].filter(Boolean);
+
+  const modString = modifierConditions.length > 0 ? ` && ${modifierConditions.join(' && ')}` : '';
+
   const generatedJsCode = `window.addEventListener('keydown', (event) => {
-  if (event.key === '${currentEvent.key}'${currentEvent.ctrlKey ? ' && event.ctrlKey' : ''}${currentEvent.metaKey ? ' && event.metaKey' : ''}) {
-    // Action when ${currentEvent.key} is pressed
+  if (event.key === ${JSON.stringify(currentEvent.key)}${modString}) {
+    // Action when ${currentEvent.key === ' ' ? 'Space' : currentEvent.key} is pressed
     console.log('Key captured:', event.key);
   }
 });`;

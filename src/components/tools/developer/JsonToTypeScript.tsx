@@ -95,6 +95,15 @@ export const JsonToTypeScript: React.FC = () => {
 
     const rootTypeName = toPascalCase(rootName) || 'Root';
     const subTypes: { name: string; content: string }[] = [];
+    const definedTypeNames = new Set<string>();
+
+    const isValidJsIdentifier = (str: string): boolean => {
+      return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(str);
+    };
+
+    const quoteProp = (key: string): string => {
+      return isValidJsIdentifier(key) ? key : JSON.stringify(key);
+    };
 
     const getType = (val: any, propName: string): string => {
       if (val === null) return 'any';
@@ -104,13 +113,25 @@ export const JsonToTypeScript: React.FC = () => {
 
       if (Array.isArray(val)) {
         if (val.length === 0) return 'any[]';
-        const first = val[0];
-        if (typeof first === 'object' && first !== null) {
+        // Check types in array
+        const elementTypes = Array.from(new Set(val.map(item => {
+          if (item === null) return 'null';
+          if (typeof item === 'object') return 'object';
+          return typeof item;
+        })));
+
+        if (elementTypes.length === 1 && elementTypes[0] === 'object') {
           const subTypeName = `${toPascalCase(propName)}Item`;
-          buildType(first, subTypeName);
+          buildType(val[0], subTypeName);
           return `${subTypeName}[]`;
         }
-        return `${getType(first, propName)}[]`;
+
+        if (elementTypes.length === 1) {
+          return `${getType(val[0], propName)}[]`;
+        }
+
+        const unionTypes = Array.from(new Set(val.map(item => getType(item, propName)))).join(' | ');
+        return `(${unionTypes})[]`;
       }
 
       if (typeof val === 'object') {
@@ -123,6 +144,9 @@ export const JsonToTypeScript: React.FC = () => {
     };
 
     const buildType = (obj: Record<string, any>, typeName: string) => {
+      if (definedTypeNames.has(typeName)) return;
+      definedTypeNames.add(typeName);
+
       if (format === 'ts-interface') {
         const exp = useExport ? 'export ' : '';
         let str = `${exp}interface ${typeName} {\n`;
@@ -131,7 +155,8 @@ export const JsonToTypeScript: React.FC = () => {
           const ro = makeReadonly ? 'readonly ' : '';
           const opt = makeOptional ? '?' : '';
           const propType = getType(val, key);
-          str += `  ${ro}${key}${opt}: ${propType};\n`;
+          const propKey = quoteProp(key);
+          str += `  ${ro}${propKey}${opt}: ${propType};\n`;
         }
         str += `}\n`;
         subTypes.push({ name: typeName, content: str });
@@ -143,7 +168,8 @@ export const JsonToTypeScript: React.FC = () => {
           const ro = makeReadonly ? 'readonly ' : '';
           const opt = makeOptional ? '?' : '';
           const propType = getType(val, key);
-          str += `  ${ro}${key}${opt}: ${propType};\n`;
+          const propKey = quoteProp(key);
+          str += `  ${ro}${propKey}${opt}: ${propType};\n`;
         }
         str += `};\n`;
         subTypes.push({ name: typeName, content: str });
@@ -177,7 +203,8 @@ export const JsonToTypeScript: React.FC = () => {
           for (const key of Object.keys(o)) {
             let zType = getZodType(o[key], key);
             if (makeOptional) zType += '.optional()';
-            str += `  ${key}: ${zType},\n`;
+            const propKey = quoteProp(key);
+            str += `  ${propKey}: ${zType},\n`;
           }
           str += `});\n\n`;
           str += `${exp}type ${toPascalCase(schemaName.replace('Schema', ''))} = z.infer<typeof ${schemaName}>;\n`;
@@ -212,7 +239,9 @@ export const JsonToTypeScript: React.FC = () => {
         const buildGo = (o: Record<string, any>, structName: string) => {
           let str = `type ${structName} struct {\n`;
           for (const key of Object.keys(o)) {
-            const fieldName = toPascalCase(key);
+            let fieldName = toPascalCase(key);
+            if (!fieldName) fieldName = 'Field';
+            if (/^[0-9]/.test(fieldName)) fieldName = `Field${fieldName}`;
             const goType = getGoType(o[key], key);
             const omitempty = makeOptional ? ',omitempty' : '';
             str += `\t${fieldName} ${goType} \`json:"${key}${omitempty}"\`\n`;
@@ -226,8 +255,34 @@ export const JsonToTypeScript: React.FC = () => {
     };
 
     if (Array.isArray(parsedJson.data)) {
-      if (parsedJson.data.length > 0 && typeof parsedJson.data[0] === 'object') {
+      if (parsedJson.data.length > 0 && typeof parsedJson.data[0] === 'object' && parsedJson.data[0] !== null) {
         buildType(parsedJson.data[0], `${rootTypeName}Item`);
+        const exp = useExport ? 'export ' : '';
+        if (format === 'ts-interface' || format === 'ts-type') {
+          subTypes.push({
+            name: rootTypeName,
+            content: `${exp}type ${rootTypeName} = ${rootTypeName}Item[];\n`
+          });
+        } else if (format === 'zod') {
+          subTypes.push({
+            name: rootTypeName,
+            content: `${exp}const ${rootTypeName}Schema = z.array(${rootTypeName}ItemSchema);\n${exp}type ${rootTypeName} = z.infer<typeof ${rootTypeName}Schema>;\n`
+          });
+        } else if (format === 'go-struct') {
+          subTypes.push({
+            name: rootTypeName,
+            content: `type ${rootTypeName} []${rootTypeName}Item\n`
+          });
+        }
+      } else {
+        const itemType = parsedJson.data.length > 0 ? getType(parsedJson.data[0], 'item') : 'any';
+        const exp = useExport ? 'export ' : '';
+        if (format === 'ts-interface' || format === 'ts-type') {
+          subTypes.push({
+            name: rootTypeName,
+            content: `${exp}type ${rootTypeName} = ${itemType}[];\n`
+          });
+        }
       }
     } else if (typeof parsedJson.data === 'object' && parsedJson.data !== null) {
       buildType(parsedJson.data, rootTypeName);

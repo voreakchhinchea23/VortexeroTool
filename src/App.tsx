@@ -194,7 +194,10 @@ export function App() {
                         : CATEGORIES.find(c => c.id === selectedCategory)?.name}
                     </h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {sortBy === 'name-asc' ? 'Sorted alphabetically from A to Z' : `Sorted by ${sortBy}`}
+                      {sortBy === 'name-asc' && 'Sorted alphabetically from A to Z (Default)'}
+                      {sortBy === 'name-desc' && 'Sorted alphabetically from Z to A'}
+                      {sortBy === 'popular' && 'Sorted by popularity and hot badges'}
+                      {sortBy === 'category' && 'Grouped by tool category'}
                     </p>
                   </div>
 
