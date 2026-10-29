@@ -10,6 +10,7 @@ import { TipCalculator } from './productivity/TipCalculator';
 import { EventCountdown } from './productivity/EventCountdown';
 import { CvBuilder } from './productivity/CvBuilder';
 import { PdfTools } from './productivity/PdfTools';
+import { PdfMerger } from './productivity/PdfMerger';
 import { InvoiceGenerator } from './productivity/InvoiceGenerator';
 import { SignaturePad } from './productivity/SignaturePad';
 import { VoiceAudioStudio } from './productivity/VoiceAudioStudio';
@@ -67,6 +68,11 @@ import { DiffChecker } from './developer/DiffChecker';
 import { UnitConverter } from './developer/UnitConverter';
 import { TimestampConverter } from './developer/TimestampConverter';
 import { RegexTester } from './developer/RegexTester';
+import { CurlToCode } from './developer/CurlToCode';
+import { JsonToTypeScript } from './developer/JsonToTypeScript';
+import { SvgStudio } from './developer/SvgStudio';
+import { KeycodeInfo } from './developer/KeycodeInfo';
+import { HttpStatusCodes } from './developer/HttpStatusCodes';
 
 interface ToolRendererProps {
   tool: Tool;
@@ -89,6 +95,8 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <CvBuilder />;
       case 'pdf-tools':
         return <PdfTools />;
+      case 'pdf-merger':
+        return <PdfMerger />;
       case 'invoice-generator':
         return <InvoiceGenerator />;
       case 'signature-pad':
@@ -193,6 +201,16 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <TimestampConverter />;
       case 'regex-tester':
         return <RegexTester />;
+      case 'curl-to-code':
+        return <CurlToCode />;
+      case 'json-to-typescript':
+        return <JsonToTypeScript />;
+      case 'svg-studio':
+        return <SvgStudio />;
+      case 'keycode-info':
+        return <KeycodeInfo />;
+      case 'http-status-codes':
+        return <HttpStatusCodes />;
 
       default:
         return (

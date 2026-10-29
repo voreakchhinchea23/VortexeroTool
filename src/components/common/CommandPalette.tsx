@@ -30,7 +30,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       tool.category.toLowerCase().includes(q) ||
       tool.tags.some(tag => tag.toLowerCase().includes(q))
     );
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
 
   useEffect(() => {
     if (isOpen) {

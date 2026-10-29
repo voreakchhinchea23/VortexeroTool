@@ -10,7 +10,7 @@ export const CATEGORIES: CategoryInfo[] = [
   { id: 'developer', name: 'Developer & Data', description: 'Code to image, SQL formatter, cron generator, CSV/Excel, JSON & regex', iconName: 'Code2' },
 ];
 
-export const TOOLS: Tool[] = [
+const RAW_TOOLS: Tool[] = [
   // Productivity & Real Life Tools
   {
     id: 'loan-calculator',
@@ -65,6 +65,15 @@ export const TOOLS: Tool[] = [
     iconName: 'FileUp',
     badge: 'Hot',
     tags: ['pdf', 'convert', 'images', 'documents', 'merge', 'print']
+  },
+  {
+    id: 'pdf-merger',
+    name: 'PDF Merger & Combiner Studio',
+    description: 'Merge multiple PDF documents into a single unified file. Rearrange order, inspect page counts, and combine instantly in browser.',
+    category: 'productivity',
+    iconName: 'Layers',
+    badge: 'New',
+    tags: ['pdf', 'merge', 'combiner', 'pages', 'documents', 'convert', 'productivity']
   },
   {
     id: 'invoice-generator',
@@ -472,5 +481,56 @@ export const TOOLS: Tool[] = [
     category: 'developer',
     iconName: 'SearchCode',
     tags: ['regex', 'pattern', 'test', 'matcher', 'regexp', 'developer']
+  },
+  {
+    id: 'curl-to-code',
+    name: 'cURL to Code Multi-Language Converter',
+    description: 'Transform terminal or DevTools cURL commands into clean client code for JavaScript (Fetch & Axios), Python, Go, Node.js, Rust, and PHP.',
+    category: 'developer',
+    iconName: 'Terminal',
+    badge: 'New',
+    tags: ['curl', 'fetch', 'axios', 'python', 'api', 'code', 'converter', 'http', 'developer']
+  },
+  {
+    id: 'json-to-typescript',
+    name: 'JSON to TypeScript & Schema Studio',
+    description: 'Generate strong TypeScript interfaces, type aliases, runtime Zod validation schemas, and Go structs from raw JSON.',
+    category: 'developer',
+    iconName: 'FileCode2',
+    badge: 'Hot',
+    tags: ['json', 'typescript', 'types', 'zod', 'go', 'struct', 'interface', 'schema', 'developer']
+  },
+  {
+    id: 'svg-studio',
+    name: 'SVG Studio, Optimizer & JSX Converter',
+    description: 'Preview, clean, and convert SVG graphics into React JSX components, Data URIs, and export high-resolution PNGs.',
+    category: 'developer',
+    iconName: 'FileCode',
+    badge: 'New',
+    tags: ['svg', 'vector', 'jsx', 'react', 'optimizer', 'icons', 'png', 'developer']
+  },
+  {
+    id: 'keycode-info',
+    name: 'Keyboard Event & KeyCode Inspector',
+    description: 'Press any key to inspect JavaScript KeyboardEvent parameters, event.key, code, which, modifiers, and generated event listener code.',
+    category: 'developer',
+    iconName: 'Keyboard',
+    badge: 'New',
+    tags: ['keycode', 'keyboard', 'events', 'listener', 'keys', 'developer']
+  },
+  {
+    id: 'http-status-codes',
+    name: 'HTTP Status Codes & Headers Reference',
+    description: 'Comprehensive encyclopedia of HTTP status codes (1xx - 5xx) with RFC documentation, standard response headers, and code snippets.',
+    category: 'developer',
+    iconName: 'Globe',
+    badge: 'Popular',
+    tags: ['http', 'status', 'codes', 'rest', 'api', 'headers', 'rfc', 'web', 'developer']
   }
 ];
+
+// Sort tools alphabetically A-Z by default across the entire application
+export const TOOLS: Tool[] = [...RAW_TOOLS].sort((a, b) => 
+  a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+);
+

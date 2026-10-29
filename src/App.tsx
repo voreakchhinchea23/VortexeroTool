@@ -25,6 +25,7 @@ import { ToolRenderer } from './components/tools/ToolRenderer';
 export function App() {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'popular' | 'category'>('name-asc');
   const [activeToolId, setActiveToolId] = useState<string | null>(() => {
     // Check URL hash on initial load (e.g. #password-generator)
     const hash = window.location.hash.replace('#', '');
@@ -87,9 +88,9 @@ export function App() {
     return counts;
   }, []);
 
-  // Filtered tools for dashboard grid
+  // Filtered & sorted tools for dashboard grid (A-Z by default)
   const filteredTools = useMemo(() => {
-    return TOOLS.filter(tool => {
+    const list = TOOLS.filter(tool => {
       const matchCat = selectedCategory === 'all' || tool.category === selectedCategory;
       const q = searchQuery.toLowerCase().trim();
       const matchSearch =
@@ -101,7 +102,29 @@ export function App() {
 
       return matchCat && matchSearch;
     });
-  }, [selectedCategory, searchQuery]);
+
+    return [...list].sort((a, b) => {
+      if (sortBy === 'name-asc') {
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      }
+      if (sortBy === 'name-desc') {
+        return b.name.localeCompare(a.name, undefined, { sensitivity: 'base' });
+      }
+      if (sortBy === 'popular') {
+        const badgePriority: Record<string, number> = { Hot: 4, Popular: 3, Featured: 2, New: 1 };
+        const aVal = a.badge ? badgePriority[a.badge] || 0 : 0;
+        const bVal = b.badge ? badgePriority[b.badge] || 0 : 0;
+        if (bVal !== aVal) return bVal - aVal;
+        return a.name.localeCompare(b.name);
+      }
+      if (sortBy === 'category') {
+        const catCompare = a.category.localeCompare(b.category);
+        if (catCompare !== 0) return catCompare;
+        return a.name.localeCompare(b.name);
+      }
+      return a.name.localeCompare(b.name);
+    });
+  }, [selectedCategory, searchQuery, sortBy]);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#090d16] bg-grid-pattern text-slate-900 dark:text-slate-100 transition-colors duration-200">
@@ -162,16 +185,38 @@ export function App() {
                   toolCounts={toolCounts}
                 />
 
-                {/* Tools Grid */}
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                    {selectedCategory === 'all'
-                      ? 'All Utilities'
-                      : CATEGORIES.find(c => c.id === selectedCategory)?.name}
-                  </h2>
-                  <span className="text-xs font-mono text-slate-400">
-                    Showing {filteredTools.length} tools
-                  </span>
+                {/* Tools Grid Header with Sort & Count */}
+                <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                      {selectedCategory === 'all'
+                        ? 'All Utilities'
+                        : CATEGORIES.find(c => c.id === selectedCategory)?.name}
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {sortBy === 'name-asc' ? 'Sorted alphabetically from A to Z' : `Sorted by ${sortBy}`}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl px-3 py-1.5 shadow-sm">
+                      <span className="text-[11px] font-semibold text-slate-400">Sort:</span>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as any)}
+                        className="bg-transparent text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+                      >
+                        <option value="name-asc" className="bg-white dark:bg-slate-900">Name (A → Z) [Default]</option>
+                        <option value="name-desc" className="bg-white dark:bg-slate-900">Name (Z → A)</option>
+                        <option value="popular" className="bg-white dark:bg-slate-900">Popular & Hot</option>
+                        <option value="category" className="bg-white dark:bg-slate-900">Category</option>
+                      </select>
+                    </div>
+
+                    <span className="text-xs font-mono text-slate-400 px-3 py-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
+                      {filteredTools.length} {filteredTools.length === 1 ? 'tool' : 'tools'}
+                    </span>
+                  </div>
                 </div>
 
                 <ToolsGrid
