@@ -21,13 +21,13 @@
 
 ## 📖 Overview
 
-**VortexeroTool** is a modern, responsive, all-in-one web platform featuring **60 powerhouse online tools** for everyday users, software engineers, designers, content creators, students, and digital workflows.
+**VortexeroTool** is a modern, responsive, all-in-one web platform featuring **61 powerhouse online tools** for everyday users, software engineers, designers, content creators, students, and digital workflows.
 
 All tools execute **100% locally in the browser**, ensuring maximum speed, zero latency, and absolute user privacy with no backend logging.
 
 ---
 
-## 🛠️ Complete Suite of 60 Tools (Sorted A-Z by Default)
+## 🛠️ Complete Suite of 61 Tools (Sorted A-Z by Default)
 
 All tools in VortexeroTool are sorted alphabetically from **A to Z by default**, with one-click toggles for Z-A, popular badges, and category groups.
 
@@ -50,6 +50,7 @@ All tools in VortexeroTool are sorted alphabetically from **A to Z by default**,
 16. **Interactive Voting & Poll Studio**: Create custom polls, cast votes, and visualize live graphical percentage fill bars.
 17. **Real & Startup Name Generator**: Generates real first/last names, startup brands, baby names with meanings, and fantasy characters.
 18. **Interactive Calendar & Planner**: Monthly interactive grid with working business days calculator and iCal / ICS event export.
+19. **Khmer Lunar Calendar & Holiday Studio (ចន្ទគតិ)**: Interactive Cambodian lunar calendar with Buddhist Era (ព.ស.), animal zodiac (ឆ្នាំសត្វទាំង១២), 10 Saks (ស័កទាំង១០), holy Sil observance days (ថ្ងៃសីល), Cambodian public and religious holidays, and bidirectional date converter.
 
 ### 🔐 Security & Cryptography
 19. **Password Generator**: Custom length, entropy analysis, crack-time estimation, and bulk generation.

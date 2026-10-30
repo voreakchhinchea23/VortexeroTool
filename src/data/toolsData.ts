@@ -170,6 +170,15 @@ const RAW_TOOLS: Tool[] = [
     iconName: 'CalendarDays',
     tags: ['calendar', 'planner', 'schedule', 'events', 'ics', 'reminders']
   },
+  {
+    id: 'khmer-lunar-calendar',
+    name: 'Khmer Lunar Calendar & Holiday Studio (ចន្ទគតិ)',
+    description: 'Explore Cambodian lunar calendar dates (ចន្ទគតិ), Buddhist Era, animal zodiac, holy Sil days (ថ្ងៃសីល), public holidays, and date converter.',
+    category: 'productivity',
+    iconName: 'Moon',
+    badge: 'New',
+    tags: ['khmer', 'calendar', 'chhankitek', 'lunar', 'cambodia', 'holiday', 'buddhist', 'zodiac', 'sil', 'date']
+  },
 
   // Security & Auth
   {

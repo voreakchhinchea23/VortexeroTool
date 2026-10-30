@@ -132,6 +132,26 @@ export const CATEGORY_COLORS: Record<ToolCategory, CategoryColorScheme> = {
 // Curated Tool Color Maps
 const TOOL_COLOR_DEFINITIONS: Record<string, ToolColorScheme> = {
   // Productivity & Focus
+  'khmer-lunar-calendar': {
+    id: 'khmer-lunar-calendar',
+    name: 'Khmer Amber Gold',
+    accentHex: '#f59e0b',
+    gradient: 'from-amber-500 via-orange-500 to-amber-600',
+    iconColor: 'text-amber-500 dark:text-amber-400',
+    iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
+    iconBorder: 'border-amber-500/25 dark:border-amber-500/30',
+    iconHoverGradient: 'group-hover:bg-gradient-to-tr group-hover:from-amber-500 group-hover:to-orange-600 group-hover:text-white',
+    cardBorderHover: 'hover:border-amber-500/50 dark:hover:border-amber-500/50',
+    cardGlowHover: 'hover:shadow-amber-500/15',
+    vibrantCardBg: 'bg-gradient-to-br from-amber-950/30 via-slate-900/90 to-slate-900/95',
+    vibrantBorder: 'border-amber-500/30 dark:border-amber-500/30',
+    vibrantGlow: 'shadow-[0_4px_25px_-5px_rgba(245,158,11,0.2)]',
+    tagBgHover: 'group-hover:bg-amber-50 dark:group-hover:bg-amber-950/40',
+    tagTextHover: 'group-hover:text-amber-600 dark:group-hover:text-amber-300',
+    badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
+    badgeText: 'text-amber-600 dark:text-amber-300',
+    badgeBorder: 'border-amber-500/30',
+  },
   'cv-builder': {
     id: 'cv-builder',
     name: 'Indigo Royal',

@@ -22,6 +22,7 @@ import { DayCounter } from './productivity/DayCounter';
 import { VotingSystem } from './productivity/VotingSystem';
 import { NameGenerator } from './productivity/NameGenerator';
 import { CalendarPlanner } from './productivity/CalendarPlanner';
+import { KhmerLunarCalendar } from './productivity/KhmerLunarCalendar';
 
 // Security Tools
 import { PasswordGenerator } from './security/PasswordGenerator';
@@ -120,6 +121,8 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <NameGenerator />;
       case 'calendar-planner':
         return <CalendarPlanner />;
+      case 'khmer-lunar-calendar':
+        return <KhmerLunarCalendar />;
 
       // Security
       case 'password-generator':
