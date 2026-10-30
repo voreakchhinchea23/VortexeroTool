@@ -1,4 +1,5 @@
 import { TOOLS } from '../data/toolsData';
+import { toKhmerLunarDate, formatKhmerDate, getKhmerHolidays, toKhmerNumber } from 'khmer-chhankitek-calendar';
 
 console.log(`Verifying ${TOOLS.length} tools...`);
 
@@ -59,23 +60,76 @@ const sortedNames = TOOLS.map(t => t.name);
 console.log(`First 3 tools: ${sortedNames.slice(0, 3).join(', ')}`);
 console.log(`Last 3 tools: ${sortedNames.slice(-3).join(', ')}`);
 
-// Test 5: Khmer Lunar Calendar functionality test
-import { toKhmerLunarDate, formatKhmerDate, getKhmerHolidays } from 'khmer-chhankitek-calendar';
+// Test 5: Khmer Lunar Calendar functionality tests
+// 5a: Basic conversion and formatting
 const testDate = toKhmerLunarDate('2026-05-01');
 if (!testDate.lunarDateText || !testDate.buddhistEraYear || !testDate.khmerMonth || !testDate.animalYear) {
   console.error('Khmer Lunar Date conversion failed for 2026-05-01');
   process.exit(1);
 }
-const testHolidays = getKhmerHolidays(2026);
-if (!Array.isArray(testHolidays) || testHolidays.length === 0) {
-  console.error('Khmer Holidays retrieval failed for 2026');
+if (!testDate.isSilDay || !testDate.observanceText) {
+  console.error('Sil day or observance text detection failed for Visak Bochea 2026-05-01');
   process.exit(1);
 }
+
+// 5b: Holidays retrieval for multiple years
+for (const year of [2025, 2026, 2027]) {
+  const testHolidays = getKhmerHolidays(year);
+  if (!Array.isArray(testHolidays) || testHolidays.length === 0) {
+    console.error(`Khmer Holidays retrieval failed for ${year}`);
+    process.exit(1);
+  }
+  const hasKhmerNewYear = testHolidays.some(h => h.nameKm.includes('ចូលឆ្នាំ') || (h.nameEn && h.nameEn.includes('New Year')));
+  if (!hasKhmerNewYear) {
+    console.error(`Missing Khmer New Year in holidays for ${year}`);
+    process.exit(1);
+  }
+}
+
+// 5c: English and Khmer formats
 const enFormatted = formatKhmerDate('2026-05-01', { locale: 'en' });
 if (!enFormatted.includes('BE')) {
   console.error('Khmer Date English formatting failed');
   process.exit(1);
 }
-console.log('✓ Test 5: Khmer lunar calendar conversions, holidays, and formatting verified.');
+
+const kmNumberStr = toKhmerNumber(2026);
+if (kmNumberStr !== '២០២៦') {
+  console.error(`toKhmerNumber failed: expected ២០២៦, got ${kmNumberStr}`);
+  process.exit(1);
+}
+
+// 5d: Year boundaries test (1900-01-01 and 2099-12-31)
+const minDate = toKhmerLunarDate('1900-01-01');
+if (!minDate.lunarDateText || minDate.gregorianDate !== '1900-01-01') {
+  console.error('Boundary test failed for 1900-01-01');
+  process.exit(1);
+}
+const maxDate = toKhmerLunarDate('2099-12-31');
+if (!maxDate.lunarDateText || maxDate.gregorianDate !== '2099-12-31') {
+  console.error('Boundary test failed for 2099-12-31');
+  process.exit(1);
+}
+
+// 5e: Reverse Lunar Date scan (find 15កើត ខែពិសាខ in 2026)
+let foundVisakIso: string | null = null;
+const start2026 = new Date(2026, 0, 1);
+const end2026 = new Date(2026, 11, 31);
+for (let cur = new Date(start2026); cur <= end2026; cur.setDate(cur.getDate() + 1)) {
+  const m = String(cur.getMonth() + 1).padStart(2, '0');
+  const d = String(cur.getDate()).padStart(2, '0');
+  const iso = `2026-${m}-${d}`;
+  const lunar = toKhmerLunarDate(iso);
+  if (lunar.khmerMonth === 'ពិសាខ' && lunar.moonStatus === 'កើត' && lunar.moonDay === 15) {
+    foundVisakIso = iso;
+    break;
+  }
+}
+if (foundVisakIso !== '2026-05-01') {
+  console.error(`Reverse lunar search failed: expected 2026-05-01, got ${foundVisakIso}`);
+  process.exit(1);
+}
+
+console.log('✓ Test 5: Comprehensive Khmer lunar calendar conversions, reverse search, boundaries, and holidays verified.');
 
 console.log('All automated verification checks PASSED successfully!');
