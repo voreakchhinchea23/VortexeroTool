@@ -1362,6 +1362,26 @@ const TOOL_COLOR_DEFINITIONS: Record<string, ToolColorScheme> = {
     badgeText: 'text-emerald-600 dark:text-emerald-300',
     badgeBorder: 'border-emerald-500/30',
   },
+  'periodic-table': {
+    id: 'periodic-table',
+    name: 'Teal Atom',
+    accentHex: '#0d9488',
+    gradient: 'from-teal-500 via-cyan-500 to-emerald-600',
+    iconColor: 'text-teal-500 dark:text-teal-400',
+    iconBg: 'bg-teal-500/10 dark:bg-teal-500/15',
+    iconBorder: 'border-teal-500/25 dark:border-teal-500/30',
+    iconHoverGradient: 'group-hover:bg-gradient-to-tr group-hover:from-teal-500 group-hover:to-cyan-600 group-hover:text-white',
+    cardBorderHover: 'hover:border-teal-500/50 dark:hover:border-teal-500/50',
+    cardGlowHover: 'hover:shadow-teal-500/15',
+    vibrantCardBg: 'bg-gradient-to-br from-teal-950/30 via-slate-900/90 to-slate-900/95',
+    vibrantBorder: 'border-teal-500/30 dark:border-teal-500/30',
+    vibrantGlow: 'shadow-[0_4px_25px_-5px_rgba(13,148,136,0.2)]',
+    tagBgHover: 'group-hover:bg-teal-50 dark:group-hover:bg-teal-950/40',
+    tagTextHover: 'group-hover:text-teal-600 dark:group-hover:text-teal-300',
+    badgeBg: 'bg-teal-500/10 dark:bg-teal-500/20',
+    badgeText: 'text-teal-600 dark:text-teal-300',
+    badgeBorder: 'border-teal-500/30',
+  },
 };
 
 /**

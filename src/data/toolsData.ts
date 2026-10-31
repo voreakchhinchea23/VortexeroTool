@@ -544,6 +544,15 @@ const RAW_TOOLS: Tool[] = [
     iconName: 'Shield',
     badge: 'New',
     tags: ['chmod', 'linux', 'permissions', 'octal', 'rwx', 'bash', 'terminal', 'devops', 'developer']
+  },
+  {
+    id: 'periodic-table',
+    name: 'Periodic Table of Chemical Elements',
+    description: 'Interactive periodic table of chemical elements (តារាងខួបនៃធាតុគីមី) with bilingual Khmer and English data, Bohr shell models, trends, and rich element details.',
+    category: 'developer',
+    iconName: 'Atom',
+    badge: 'New',
+    tags: ['chemistry', 'periodic-table', 'elements', 'science', 'khmer', 'atom', 'molecules', 'physics', 'developer']
   }
 ];
 

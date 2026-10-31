@@ -75,6 +75,7 @@ import { SvgStudio } from './developer/SvgStudio';
 import { KeycodeInfo } from './developer/KeycodeInfo';
 import { HttpStatusCodes } from './developer/HttpStatusCodes';
 import { ChmodCalculator } from './developer/ChmodCalculator';
+import { PeriodicTable } from './developer/PeriodicTable';
 
 interface ToolRendererProps {
   tool: Tool;
@@ -217,6 +218,8 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <HttpStatusCodes />;
       case 'chmod-calculator':
         return <ChmodCalculator />;
+      case 'periodic-table':
+        return <PeriodicTable />;
 
       default:
         return (
