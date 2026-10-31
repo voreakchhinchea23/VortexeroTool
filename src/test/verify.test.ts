@@ -292,6 +292,27 @@ if (!periodicTableColor || periodicTableColor.id !== 'periodic-table') {
   process.exit(1);
 }
 
-console.log('✓ Test 6: Complete 118 elements dataset, Bohr shell sums, bilingual Khmer/English, phase simulations, and layout verified.');
+// Test 7: CodeToImage and language highlighter verification
+import { SUPPORTED_LANGUAGES, detectLanguage, highlightCodeToLines } from '../utils/codeHighlight';
+
+if (SUPPORTED_LANGUAGES.length < 25) {
+  console.error('Supported languages catalog is too small');
+  process.exit(1);
+}
+if (detectLanguage('def fn():\n    return 1') !== 'python') {
+  console.error('Python auto-detection failed');
+  process.exit(1);
+}
+if (detectLanguage('SELECT * FROM table;') !== 'sql') {
+  console.error('SQL auto-detection failed');
+  process.exit(1);
+}
+const testTokens = highlightCodeToLines('const msg: string = "ok";', 'typescript');
+if (!testTokens[0].includes('hljs-keyword')) {
+  console.error('TypeScript token highlighting failed');
+  process.exit(1);
+}
+console.log('✓ Test 7: CodeToImage 27 programming languages, auto-detection engine, and syntax highlighting verified.');
 
 console.log('All automated verification checks PASSED successfully!');
+
