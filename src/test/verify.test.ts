@@ -303,8 +303,16 @@ if (detectLanguage('def fn():\n    return 1') !== 'python') {
   console.error('Python auto-detection failed');
   process.exit(1);
 }
-if (detectLanguage('SELECT * FROM table;') !== 'sql') {
-  console.error('SQL auto-detection failed');
+if (detectLanguage('SELECT id,\n  name\nFROM users\nWHERE id = 1;') !== 'sql') {
+  console.error('Multiline SQL auto-detection failed');
+  process.exit(1);
+}
+if (detectLanguage('local x = 10\nfunction add(a, b)\n  return a + b\nend') !== 'lua') {
+  console.error('Lua auto-detection failed');
+  process.exit(1);
+}
+if (detectLanguage('void main() {\n  var name = "Dart";\n}') !== 'dart') {
+  console.error('Dart auto-detection failed');
   process.exit(1);
 }
 const testTokens = highlightCodeToLines('const msg: string = "ok";', 'typescript');

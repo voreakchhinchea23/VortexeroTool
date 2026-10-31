@@ -9,7 +9,7 @@ import {
   FileCode,
   Image as ImageIcon,
 } from 'lucide-react';
-import { toPng, toJpeg, toSvg, toBlob } from 'html-to-image';
+import { toSvg, toBlob, toCanvas } from 'html-to-image';
 import { useClipboard } from '../../../hooks/useClipboard';
 import { useToast } from '../../../context/ToastContext';
 import {
@@ -78,14 +78,92 @@ export const CodeToImage: React.FC = () => {
 
   const selectedTheme = THEMES.find((t) => t.id === theme) || THEMES[0];
 
-  // Helper to trigger browser file download
-  const triggerDownload = (dataUrl: string, filename: string) => {
+  // Convert Data URL to standard Blob
+  const dataUrlToBlob = (dataUrl: string): Blob => {
+    const parts = dataUrl.split(',');
+    const mime = parts[0].match(/:(.*?);/)?.[1] || 'image/png';
+    const isBase64 = parts[0].includes(';base64');
+    if (isBase64) {
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
+    }
+    return new Blob([decodeURIComponent(parts[1])], { type: mime });
+  };
+
+  // Helper to trigger browser file download via Blob Object URL (bypasses URL character limit)
+  const triggerDownload = (blobOrUrl: Blob | string, filename: string) => {
+    let url = '';
+    let needRevoke = false;
+
+    if (typeof blobOrUrl === 'string') {
+      if (blobOrUrl.startsWith('data:')) {
+        const blob = dataUrlToBlob(blobOrUrl);
+        url = URL.createObjectURL(blob);
+        needRevoke = true;
+      } else {
+        url = blobOrUrl;
+      }
+    } else {
+      url = URL.createObjectURL(blobOrUrl);
+      needRevoke = true;
+    }
+
     const link = document.createElement('a');
-    link.href = dataUrl;
+    link.href = url;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    if (needRevoke) {
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+  };
+
+  // Helper to render preview container to PNG blob with 3-tier fallback (toBlob -> toCanvas -> skipFonts)
+  const renderPreviewToBlob = async (node: HTMLElement, scale: number): Promise<Blob> => {
+    const tableNode = node.querySelector('table');
+    const codeScrollWidth = tableNode ? tableNode.scrollWidth + padding * 2 + 48 : node.scrollWidth;
+    const targetWidth = Math.max(node.clientWidth, codeScrollWidth);
+
+    const baseOptions = {
+      pixelRatio: scale,
+      cacheBust: true,
+      width: targetWidth,
+    };
+
+    // Tier 1: Direct toBlob
+    try {
+      const blob = await toBlob(node, baseOptions);
+      if (blob) return blob;
+    } catch (err) {
+      console.warn('toBlob failed, attempting canvas fallback:', err);
+    }
+
+    // Tier 2: Canvas fallback (toCanvas -> canvas.toBlob)
+    try {
+      const canvas = await toCanvas(node, baseOptions);
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+      if (blob) return blob;
+    } catch (err) {
+      console.warn('Canvas fallback failed, attempting font-safe canvas render:', err);
+    }
+
+    // Tier 3: Font-safe canvas fallback (avoids external font/CORS failure)
+    const canvasSafe = await toCanvas(node, { ...baseOptions, skipFonts: true });
+    return new Promise<Blob>((resolve, reject) => {
+      canvasSafe.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Canvas rendering produced empty image'));
+      }, 'image/png');
+    });
   };
 
   // Export as Image (PNG, JPEG, SVG)
@@ -96,28 +174,44 @@ export const CodeToImage: React.FC = () => {
       setIsExporting(format);
       const node = previewCardRef.current;
       const baseName = currentFilename.replace(/\.[^/.]+$/, '') || 'code-snippet';
+      const tableNode = node.querySelector('table');
+      const codeScrollWidth = tableNode ? tableNode.scrollWidth + padding * 2 + 48 : node.scrollWidth;
+      const targetWidth = Math.max(node.clientWidth, codeScrollWidth);
 
       if (format === 'png') {
-        const dataUrl = await toPng(node, {
-          pixelRatio: exportScale,
-          cacheBust: true,
-          quality: 1,
-        });
-        triggerDownload(dataUrl, `${baseName}.png`);
+        const blob = await renderPreviewToBlob(node, exportScale);
+        triggerDownload(blob, `${baseName}.png`);
         addToast('PNG image downloaded', `Exported at ${exportScale}x resolution.`, 'success');
       } else if (format === 'jpeg') {
-        const dataUrl = await toJpeg(node, {
+        let canvas: HTMLCanvasElement;
+        const opts = {
           pixelRatio: exportScale,
           cacheBust: true,
-          quality: 0.95,
+          width: targetWidth,
+          backgroundColor: '#0d1117',
+        };
+        try {
+          canvas = await toCanvas(node, opts);
+        } catch {
+          canvas = await toCanvas(node, { ...opts, skipFonts: true });
+        }
+        const blob = await new Promise<Blob | null>((resolve) => {
+          canvas.toBlob(resolve, 'image/jpeg', 0.95);
         });
-        triggerDownload(dataUrl, `${baseName}.jpg`);
+        if (!blob) throw new Error('Failed to generate JPEG blob');
+        triggerDownload(blob, `${baseName}.jpg`);
         addToast('JPEG image downloaded', `Exported at ${exportScale}x resolution.`, 'success');
       } else if (format === 'svg') {
-        const dataUrl = await toSvg(node, {
-          cacheBust: true,
-        });
-        triggerDownload(dataUrl, `${baseName}.svg`);
+        let dataUrl: string;
+        const opts = { cacheBust: true, width: targetWidth };
+        try {
+          dataUrl = await toSvg(node, opts);
+        } catch {
+          dataUrl = await toSvg(node, { ...opts, skipFonts: true });
+        }
+        const svgContent = decodeURIComponent(dataUrl.replace('data:image/svg+xml;charset=utf-8,', ''));
+        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        triggerDownload(blob, `${baseName}.svg`);
         addToast('SVG image downloaded', 'Exported as scalable vector image.', 'success');
       }
     } catch (err) {
@@ -135,38 +229,50 @@ export const CodeToImage: React.FC = () => {
     try {
       setIsExporting('copy-image');
       const node = previewCardRef.current;
+      const baseName = currentFilename.replace(/\.[^/.]+$/, '') || 'code-snippet';
 
-      const blob = await toBlob(node, {
-        pixelRatio: exportScale,
-        cacheBust: true,
-      });
-
+      const blob = await renderPreviewToBlob(node, exportScale);
       if (!blob) {
         throw new Error('Failed to generate image blob');
       }
 
       if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            'image/png': blob,
-          }),
-        ]);
-        setCopiedImage(true);
-        setTimeout(() => setCopiedImage(false), 2500);
-        addToast('Image copied to clipboard', 'You can now paste it directly into chats or documents.', 'success');
-      } else {
-        // Fallback: download PNG if clipboard write is unsupported in current browser context
-        const dataUrl = URL.createObjectURL(blob);
-        triggerDownload(dataUrl, 'code-snippet.png');
-        URL.revokeObjectURL(dataUrl);
-        addToast('Clipboard write unsupported', 'PNG downloaded to your device instead.', 'info');
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/png': blob,
+            }),
+          ]);
+          setCopiedImage(true);
+          setTimeout(() => setCopiedImage(false), 2500);
+          addToast('Image copied to clipboard', `High-resolution (${exportScale}x) image ready to paste.`, 'success');
+          return;
+        } catch (clipErr) {
+          console.warn('Direct ClipboardItem write failed, trying promise wrap:', clipErr);
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'image/png': Promise.resolve(blob),
+              }),
+            ]);
+            setCopiedImage(true);
+            setTimeout(() => setCopiedImage(false), 2500);
+            addToast('Image copied to clipboard', `High-resolution (${exportScale}x) image ready to paste.`, 'success');
+            return;
+          } catch {
+            // Browser restricted clipboard write
+          }
+        }
       }
+
+      // Fallback: download PNG if clipboard write is forbidden or unsupported
+      triggerDownload(blob, `${baseName}.png`);
+      addToast('Clipboard write restricted', 'High-resolution PNG saved to your downloads instead.', 'info');
     } catch (err) {
       console.error('Copy image failed: ', err);
-      // Attempt fallback download on error
       try {
-        const fallbackUrl = await toPng(previewCardRef.current, { pixelRatio: exportScale });
-        triggerDownload(fallbackUrl, 'code-snippet.png');
+        const fallbackBlob = await renderPreviewToBlob(previewCardRef.current, 1);
+        triggerDownload(fallbackBlob, 'code-snippet.png');
         addToast('Clipboard permission denied', 'PNG downloaded directly to your device instead.', 'info');
       } catch {
         addToast('Copy image failed', 'Could not access clipboard or render canvas.', 'error');
@@ -191,23 +297,32 @@ export const CodeToImage: React.FC = () => {
             onChange={(e) => setSelectedLanguage(e.target.value)}
             className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
-            <option value="auto">
+            <option value="auto" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
               Auto Detect ({getLanguageMetadata(detectedLanguage).name})
             </option>
-            <optgroup label="Supported Languages">
+            <optgroup label="Supported Languages" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
               {SUPPORTED_LANGUAGES.map((lang) => (
-                <option key={lang.id} value={lang.id}>
+                <option key={lang.id} value={lang.id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
                   {lang.name}
                 </option>
               ))}
             </optgroup>
           </select>
 
-          {selectedLanguage === 'auto' && (
+          {selectedLanguage === 'auto' ? (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60">
               <Sparkles size={11} />
               <span>{langMeta.name}</span>
             </span>
+          ) : (
+            <button
+              onClick={() => setSelectedLanguage('auto')}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700 cursor-pointer transition-colors"
+              title="Switch back to Auto Detect"
+            >
+              <Sparkles size={11} />
+              <span>Reset to Auto</span>
+            </button>
           )}
         </div>
 
@@ -218,7 +333,7 @@ export const CodeToImage: React.FC = () => {
               key={t.id}
               onClick={() => setTheme(t.id)}
               className={`w-6 h-6 rounded-full bg-gradient-to-tr ${t.bg} border-2 transition-transform cursor-pointer shrink-0 ${
-                theme === t.id ? 'scale-125 border-white shadow-md' : 'border-transparent hover:scale-110'
+                theme === t.id ? 'scale-125 border-white ring-2 ring-indigo-500 shadow-md' : 'border-transparent hover:scale-110'
               }`}
               title={t.label}
               aria-label={t.label}
@@ -309,7 +424,7 @@ export const CodeToImage: React.FC = () => {
                 value={customFilename}
                 onChange={(e) => setCustomFilename(e.target.value)}
                 placeholder={langMeta.defaultFilename}
-                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
@@ -356,7 +471,7 @@ export const CodeToImage: React.FC = () => {
           {/* Card Container for Export */}
           <div
             ref={previewCardRef}
-            className={`rounded-3xl bg-gradient-to-tr ${selectedTheme.bg} shadow-2xl transition-all duration-300 overflow-hidden flex items-center justify-center`}
+            className={`rounded-3xl bg-gradient-to-tr ${selectedTheme.bg} shadow-2xl overflow-hidden flex items-center justify-center`}
             style={{ padding: `${padding}px` }}
           >
             {/* Embedded styles ensure syntax highlighting works flawlessly in exported PNG, SVG, JPEG */}
@@ -389,7 +504,7 @@ export const CodeToImage: React.FC = () => {
             `}</style>
 
             {/* Terminal Window Box */}
-            <div className="w-full rounded-2xl bg-[#0d1117]/95 backdrop-blur-2xl border border-white/10 shadow-2xl overflow-hidden text-left">
+            <div className="w-full rounded-2xl bg-[#0d1117] border border-white/10 shadow-2xl overflow-hidden text-left">
               {/* Window Title Bar */}
               {windowStyle !== 'none' && (
                 <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-black/25">
@@ -417,7 +532,7 @@ export const CodeToImage: React.FC = () => {
 
               {/* Code Lines with Syntax Highlighting */}
               <div
-                className="p-4 sm:p-6 font-mono overflow-x-auto leading-relaxed vortex-code-highlight"
+                className="p-4 sm:p-6 font-mono overflow-x-auto no-scrollbar leading-relaxed vortex-code-highlight"
                 style={{ fontSize: `${fontSize}px` }}
               >
                 <table className="w-full border-collapse">

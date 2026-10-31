@@ -43,7 +43,7 @@ export const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
  * 1. Shebangs on first line
  * 2. Distinctive syntax signatures & keywords
  * 3. Fast JSON/YAML parser validation
- * 4. Highlight.js statistical analysis fallback
+ * 4. Highlight.js statistical analysis fallback covering all 26 languages
  */
 export function detectLanguage(code: string): string {
   const trimmed = code.trim();
@@ -59,19 +59,23 @@ export function detectLanguage(code: string): string {
     const shebang = firstLine.toLowerCase();
     if (shebang.includes('python')) return 'python';
     if (shebang.includes('node') || shebang.includes('deno') || shebang.includes('bun')) return 'javascript';
-    if (shebang.includes('bash') || shebang.includes('sh') || shebang.includes('zsh')) return 'bash';
+    if (shebang.includes('bash') || shebang.includes('/sh') || shebang.includes('zsh')) return 'bash';
     if (shebang.includes('ruby')) return 'ruby';
     if (shebang.includes('php')) return 'php';
     if (shebang.includes('perl')) return 'bash';
+    if (shebang.includes('lua')) return 'lua';
+    if (shebang.includes('rscript')) return 'r';
   }
 
-  // 2. Dockerfile signatures
-  const hasDockerfileInstruction = lines.some((line) => {
-    const l = line.trim();
-    return /^(FROM|RUN|CMD|LABEL|EXPOSE|ENV|ADD|COPY|ENTRYPOINT|VOLUME|USER|WORKDIR|ARG|STOPSIGNAL|HEALTHCHECK|SHELL)\s+/i.test(l);
-  });
-  if (hasDockerfileInstruction && (lines[0].toUpperCase().startsWith('FROM ') || /FROM\s+[a-z0-9_.:/-]+/i.test(trimmed))) {
-    return 'dockerfile';
+  // 2. HTML / XML detection
+  if (
+    /^<!DOCTYPE\s+html/i.test(trimmed) ||
+    /^<html[\s>]/i.test(trimmed) ||
+    /^<\?xml\b/i.test(trimmed) ||
+    (/<\/?(div|span|button|input|head|body|table|tr|td|section|header|footer|nav|a|p|h1|h2|h3|ul|ol|li)[>\s]/i.test(trimmed) &&
+      /<\/[a-z0-9]+>/i.test(trimmed))
+  ) {
+    return 'html';
   }
 
   // 3. JSON format validation
@@ -80,32 +84,35 @@ export function detectLanguage(code: string): string {
       JSON.parse(trimmed);
       return 'json';
     } catch {
-      // Not strictly valid JSON, but could still be JSON-like structure
       if (/^\s*"\w+"\s*:\s*/m.test(trimmed)) {
         return 'json';
       }
     }
   }
 
-  // 4. HTML / XML detection
-  if (
-    /^<!DOCTYPE\s+html/i.test(trimmed) ||
-    /^<html[\s>]/i.test(trimmed) ||
-    /^<\?xml\b/i.test(trimmed) ||
-    (/<\/?(div|span|button|input|head|body|table|tr|td|section|header|footer|nav|a|p|h1|h2|h3)[>\s]/i.test(trimmed) &&
-      /<\/[a-z0-9]+>/i.test(trimmed))
-  ) {
-    return 'html';
+  // 4. GraphQL signatures
+  if (/^\s*(type\s+[A-Z][a-zA-Z0-9_]*\s*\{|query\s+[A-Za-z0-9_]*|mutation\s+[A-Za-z0-9_]*|schema\s*\{)/m.test(trimmed)) {
+    return 'graphql';
   }
 
-  // 5. SQL signatures
-  const sqlKeywords =
-    /\b(SELECT\s+.+\s+FROM|INSERT\s+INTO\s+|UPDATE\s+.+\s+SET|DELETE\s+FROM|CREATE\s+TABLE|ALTER\s+TABLE|DROP\s+TABLE|GROUP\s+BY|ORDER\s+BY)\b/i;
-  if (sqlKeywords.test(trimmed) && !trimmed.includes('import ') && !trimmed.includes('def ')) {
+  // 5. SQL signatures (checked before Dockerfile to prevent FROM <table_name> collisions)
+  const sqlPattern =
+    /\b(SELECT\s+[\s\S]+?\s+FROM|INSERT\s+INTO\s+|UPDATE\s+[\s\S]+?\s+SET|DELETE\s+FROM|CREATE\s+TABLE|ALTER\s+TABLE|DROP\s+TABLE|TRUNCATE\s+TABLE|GROUP\s+BY|ORDER\s+BY)\b/i;
+  if (sqlPattern.test(trimmed) && !trimmed.includes('import ') && !trimmed.includes('def ')) {
     return 'sql';
   }
 
-  // 6. Rust signatures
+  // 6. Dockerfile signatures (must start with FROM or have multiple distinct Docker commands)
+  const nonCommentLines = lines.map((l) => l.trim()).filter((l) => l.length > 0 && !l.startsWith('#'));
+  const dockerKeywords = ['FROM', 'RUN', 'CMD', 'LABEL', 'EXPOSE', 'ENV', 'ADD', 'COPY', 'ENTRYPOINT', 'VOLUME', 'USER', 'WORKDIR', 'ARG'];
+  const dockerMatchCount = dockerKeywords.filter((kw) =>
+    nonCommentLines.some((l) => new RegExp(`^${kw}\\s+`, 'i').test(l))
+  ).length;
+  if ((nonCommentLines.length > 0 && /^FROM\s+[a-z0-9_.:/-]+/i.test(nonCommentLines[0])) || dockerMatchCount >= 2) {
+    return 'dockerfile';
+  }
+
+  // 7. Rust signatures
   if (
     /\b(fn\s+main\s*\(|impl\s+[A-Z]|let\s+mut\s+|pub\s+fn\s+|use\s+std::|match\s+.+\s+\{|println!|eprintln!|vec!|#\[derive\()/m.test(
       trimmed
@@ -114,7 +121,7 @@ export function detectLanguage(code: string): string {
     return 'rust';
   }
 
-  // 7. Go signatures
+  // 8. Go signatures
   if (
     /^\s*package\s+[a-z0-9_]+/m.test(trimmed) ||
     /\bfunc\s+(\([^)]+\)\s*)?[A-Z][a-zA-Z0-9_]*\s*\(|fmt\.(Println|Printf|Sprintf)|make\(chan\b/m.test(trimmed)
@@ -122,20 +129,20 @@ export function detectLanguage(code: string): string {
     return 'go';
   }
 
-  // 8. C / C++ signatures
-  if (/#include\s*<iostream>|#include\s*<vector>|std::cout|std::endl|std::cin|namespace\s+[a-z0-9_]+\s*\{/m.test(trimmed)) {
+  // 9. C / C++ signatures
+  if (/#include\s*<(iostream|vector|string|map|algorithm)>|std::(cout|endl|cin|vector|string)|namespace\s+[a-z0-9_]+\s*\{/m.test(trimmed)) {
     return 'cpp';
   }
-  if (/#include\s*<stdio\.h>|#include\s*<stdlib\.h>|int\s+main\s*\(\s*(void|int\s+argc)/m.test(trimmed)) {
+  if (/#include\s*<(stdio|stdlib|string|math)\.h>|int\s+main\s*\(\s*(void|int\s+argc)/m.test(trimmed)) {
     return 'c';
   }
 
-  // 9. C# signatures
+  // 10. C# signatures
   if (/using\s+System(\.[A-Za-z0-9_]+)*;|namespace\s+[A-Za-z0-9_.]+\s*\{|Console\.WriteLine/m.test(trimmed)) {
     return 'csharp';
   }
 
-  // 10. Java signatures
+  // 11. Java signatures
   if (
     /public\s+class\s+[A-Za-z0-9_]+|public\s+static\s+void\s+main\s*\(|System\.out\.println|import\s+java\.[a-z0-9_.]+;/m.test(
       trimmed
@@ -144,36 +151,67 @@ export function detectLanguage(code: string): string {
     return 'java';
   }
 
-  // 11. PHP signatures
+  // 12. PHP signatures
   if (/<\?php|\$[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*\s*=|echo\s+['"]|function\s+[a-zA-Z0-9_]+\s*\(.*?\)\s*\{/m.test(trimmed)) {
     return 'php';
   }
 
-  // 12. Python signatures
+  // 13. Swift signatures
+  if (/import\s+(SwiftUI|UIKit|Foundation|Combine)|guard\s+let\b|@State|@Binding|@Published\b/m.test(trimmed)) {
+    return 'swift';
+  }
+
+  // 14. Kotlin signatures
+  if (/fun\s+main\s*\(|val\s+[a-zA-Z0-9_]+\s*:\s*[A-Z]|suspend\s+fun|companion\s+object\b/m.test(trimmed)) {
+    return 'kotlin';
+  }
+
+  // 15. Dart signatures
+  if (/void\s+main\s*\(\s*\)|import\s+['"]package:|Widget\s+build\s*\(|StatelessWidget|StatefulWidget|setState\s*\(/m.test(trimmed)) {
+    return 'dart';
+  }
+
+  // 16. Scala signatures
+  if (/object\s+[A-Z][a-zA-Z0-9_]*\s+extends\s+(App|Application)|def\s+main\s*\(args:\s*Array\[String\]\)|case\s+class\s+[A-Z]/m.test(trimmed)) {
+    return 'scala';
+  }
+
+  // 17. Lua signatures
+  if (/local\s+[a-zA-Z0-9_]+\s*=|io\.(write|read)\b|table\.(insert|remove)\b|function\s+[a-zA-Z0-9_.:]+\s*\(.*?\)\s*[\s\S]*?\bend\b/m.test(trimmed)) {
+    return 'lua';
+  }
+
+  // 18. R signatures
+  if (/<-|read\.csv\s*\(|summary\s*\(|ggplot\s*\(|data\.frame\s*\(|library\s*\([a-zA-Z0-9_.]+\)/m.test(trimmed)) {
+    return 'r';
+  }
+
+  // 19. Ruby signatures
+  if (/puts\s+['"]|\.times\s+do\b|attr_accessor\b|^\s*def\s+[a-zA-Z0-9_]+(\s*\(.*?\))?\s*$/m.test(trimmed) && /^\s*end\s*$/m.test(trimmed)) {
+    return 'ruby';
+  }
+
+  // 20. Python signatures
   if (
-    /^\s*def\s+[a-zA-Z0-9_]+\s*\(.*?\)\s*:|^\s*class\s+[A-Z][a-zA-Z0-9_]*(\(.*?\))?\s*:|^\s*elif\s+|if\s+__name__\s*==\s*['"]__main__['"]:/m.test(
+    /^\s*def\s+[a-zA-Z0-9_]+\s*\(.*?\)\s*:|^\s*class\s+[A-Z][a-zA-Z0-9_]*(\(.*?\))?\s*:|^\s*elif\s+|if\s+__name__\s*==\s*['"]__main__['"]:|import\s+(os|sys|math|json|re|numpy|pandas|requests)\b|from\s+[a-zA-Z0-9_.]+\s+import\b|print\s*\(.*?\)/m.test(
       trimmed
     )
   ) {
     return 'python';
   }
 
-  // 13. Ruby signatures
-  if (/^\s*def\s+[a-zA-Z0-9_]+(\s*\(.*?\))?\s*$/m.test(trimmed) && /^\s*end\s*$/m.test(trimmed)) {
-    return 'ruby';
+  // 21. Shell / Bash commands (standalone command keywords or lines)
+  if (
+    /\b(sudo|curl|wget|chmod|chown|npm\s+(run|install|i|test|start)|yarn\s+(add|install)|pnpm\s+(add|install)|pip\s+install|git\s+(commit|push|pull|clone|checkout|add|branch|status)|systemctl|docker\s+run|apt-get|apt\s+install|brew\s+install)\b/m.test(
+      trimmed
+    ) ||
+    /\b(echo\s+['"]|export\s+[A-Z_]+=)/m.test(trimmed) ||
+    /^\s*(\$|#)\s+(curl|npm|sudo|git|chmod|cat|ls|cd|rm|mkdir)\b/m.test(trimmed)
+  ) {
+    return 'bash';
   }
 
-  // 14. Swift signatures
-  if (/import\s+(SwiftUI|UIKit|Foundation)|guard\s+let\b|@State|@Binding/m.test(trimmed)) {
-    return 'swift';
-  }
-
-  // 15. Kotlin signatures
-  if (/fun\s+main\s*\(|val\s+[a-zA-Z0-9_]+\s*:\s*[A-Z]|suspend\s+fun/m.test(trimmed)) {
-    return 'kotlin';
-  }
-
-  // 16. CSS signatures
+  // 22. CSS signatures
   if (
     !trimmed.includes('import ') &&
     !trimmed.includes('const ') &&
@@ -185,22 +223,31 @@ export function detectLanguage(code: string): string {
     return 'css';
   }
 
-  // 17. YAML signatures
+  // 23. YAML signatures
   if (/^---/m.test(trimmed) || (/^[a-zA-Z0-9_-]+\s*:\s*(["'\d\w\s-]|$)/m.test(trimmed) && !trimmed.includes('{') && !trimmed.includes(';'))) {
     return 'yaml';
   }
 
-  // 18. GraphQL signatures
-  if (/^\s*(type\s+[A-Z][a-zA-Z0-9_]*\s*\{|query\s+[A-Za-z0-9_]*|mutation\s+[A-Za-z0-9_]*|schema\s*\{)/m.test(trimmed)) {
-    return 'graphql';
-  }
-
-  // 19. Markdown signatures
-  if (/^#{1,6}\s+.+$/m.test(trimmed) && !trimmed.includes(';') && !trimmed.includes('{')) {
+  // 24. Markdown signatures (strictly non-code documentation patterns)
+  const isLikelyCode =
+    trimmed.includes('import ') ||
+    trimmed.includes('const ') ||
+    trimmed.includes('function ') ||
+    trimmed.includes('sudo ') ||
+    trimmed.includes('npm ') ||
+    trimmed.includes('def ') ||
+    trimmed.includes('val ') ||
+    trimmed.includes('class ');
+  if (
+    !isLikelyCode &&
+    (/^#{1,6}\s+.+$/m.test(trimmed) ||
+      /\[.+?\]\(https?:\/\/[^\)]+\)/.test(trimmed) ||
+      /^\|[\s-:]+\|/m.test(trimmed))
+  ) {
     return 'markdown';
   }
 
-  // 20. TypeScript signatures
+  // 25. TypeScript signatures
   if (
     /\b(interface\s+[A-Z][A-Za-z0-9_]*\s*\{|type\s+[A-Z][A-Za-z0-9_]*\s*=|:\s*(string|number|boolean|any|unknown|never|void)\b|as\s+const\b|<[A-Z][A-Za-z0-9_]*>\s*\()/m.test(
       trimmed
@@ -209,7 +256,7 @@ export function detectLanguage(code: string): string {
     return 'typescript';
   }
 
-  // 21. JavaScript signatures
+  // 26. JavaScript signatures
   if (
     /\b(const\s+[a-zA-Z0-9_]+\s*=|let\s+[a-zA-Z0-9_]+\s*=|function\s+[a-zA-Z0-9_]*\s*\(|console\.(log|warn|error)|export\s+default)\b/m.test(
       trimmed
@@ -218,12 +265,7 @@ export function detectLanguage(code: string): string {
     return 'javascript';
   }
 
-  // 22. Bash / Shell signatures
-  if (/\b(echo\s+['"]|chmod\s+[0-9]+|npm\s+(run|install)|sudo\s+|export\s+[A-Z_]+=)/m.test(trimmed)) {
-    return 'bash';
-  }
-
-  // 23. Fallback to highlight.js statistical detection
+  // 27. Fallback to highlight.js statistical detection across all 26 supported languages
   try {
     const hljsCandidates = [
       'typescript',
@@ -233,6 +275,7 @@ export function detectLanguage(code: string): string {
       'go',
       'java',
       'cpp',
+      'c',
       'csharp',
       'php',
       'ruby',
@@ -246,6 +289,11 @@ export function detectLanguage(code: string): string {
       'yaml',
       'markdown',
       'dockerfile',
+      'graphql',
+      'dart',
+      'scala',
+      'r',
+      'lua',
     ];
     const auto = hljs.highlightAuto(trimmed, hljsCandidates);
     if (auto.language) {
@@ -303,8 +351,10 @@ export function highlightCodeToLines(code: string, languageId: string): string[]
     return [''];
   }
 
+  const normalized = code.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
   if (languageId === 'plaintext') {
-    return code.split('\n').map((l) => escapeHtml(l));
+    return normalized.split('\n').map((l) => escapeHtml(l));
   }
 
   const hljsLang = languageId === 'html' ? 'xml' : languageId;
@@ -313,13 +363,13 @@ export function highlightCodeToLines(code: string, languageId: string): string[]
   try {
     let highlightedHtml: string;
     if (isSupported) {
-      highlightedHtml = hljs.highlight(code, { language: hljsLang, ignoreIllegals: true }).value;
+      highlightedHtml = hljs.highlight(normalized, { language: hljsLang, ignoreIllegals: true }).value;
     } else {
-      highlightedHtml = hljs.highlightAuto(code).value;
+      highlightedHtml = hljs.highlightAuto(normalized).value;
     }
     return splitHighlightedHtmlIntoLines(highlightedHtml);
   } catch {
-    return code.split('\n').map((l) => escapeHtml(l));
+    return normalized.split('\n').map((l) => escapeHtml(l));
   }
 }
 

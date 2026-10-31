@@ -34,6 +34,7 @@ const testCases = [
   { code: 'FROM node:18-alpine\nWORKDIR /app\nCOPY . .\nCMD ["node", "index.js"]', expected: 'dockerfile' },
   { code: '{\n  "name": "vortexero",\n  "version": "1.0.0"\n}', expected: 'json' },
   { code: 'SELECT id, username, email FROM users WHERE active = 1 GROUP BY id;', expected: 'sql' },
+  { code: 'SELECT id,\n  username,\n  email\nFROM users\nWHERE active = 1;', expected: 'sql' },
   { code: '<!DOCTYPE html>\n<html>\n<body>\n  <h1>Title</h1>\n</body>\n</html>', expected: 'html' },
   { code: 'fn main() {\n    let mut numbers = vec![1, 2, 3];\n    println!("{:?}", numbers);\n}', expected: 'rust' },
   { code: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello")\n}', expected: 'go' },
@@ -43,10 +44,22 @@ const testCases = [
   { code: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello");\n    }\n}', expected: 'java' },
   { code: '<?php\n$message = "Hello World";\necho $message;\n?>', expected: 'php' },
   { code: 'def calculate_total(items):\n    total = 0\n    for item in items:\n        total += item.price\n    return total', expected: 'python' },
+  { code: '# Python script with comments\nimport os\nimport sys\nprint("Python run")', expected: 'python' },
   { code: 'import SwiftUI\nstruct ContentView: View {\n    @State private var count = 0\n}', expected: 'swift' },
   { code: 'fun main() {\n    val greeting = "Hello Kotlin"\n    println(greeting)\n}', expected: 'kotlin' },
   { code: '.card {\n  display: flex;\n  padding: 16px;\n  background: #fff;\n}', expected: 'css' },
   { code: 'interface UserConfig {\n  id: string;\n  isActive: boolean;\n}\nconst config: UserConfig = { id: "1", isActive: true };', expected: 'typescript' },
+  { code: 'const total = 42;\nconsole.log(total);\nexport default total;', expected: 'javascript' },
+  { code: 'puts "Hello Ruby"\n5.times do |i|\n  puts i\nend', expected: 'ruby' },
+  { code: 'local x = 10\nfunction add(a, b)\n  return a + b\nend\nprint(add(x, 20))', expected: 'lua' },
+  { code: 'data <- read.csv("data.csv")\nsummary(data)\nplot(data$x, data$y)', expected: 'r' },
+  { code: 'void main() {\n  var name = "Dart";\n  print("Hello, $name!");\n}', expected: 'dart' },
+  { code: 'object HelloWorld extends App {\n  println("Hello Scala")\n}', expected: 'scala' },
+  { code: 'type User {\n  id: ID!\n  name: String!\n}\ntype Query {\n  users: [User!]!\n}', expected: 'graphql' },
+  { code: '---\nversion: "3.8"\nservices:\n  web:\n    image: nginx', expected: 'yaml' },
+  { code: '# Project Documentation\n\nThis is a [Markdown link](https://vortexero.com) guide.\n\n| Feature | Status |\n|---|---|\n| Highlights | Active |', expected: 'markdown' },
+  { code: '# Setup server\nsudo apt update && npm install', expected: 'bash' },
+  { code: 'curl -s https://example.com | grep status', expected: 'bash' },
 ];
 
 for (const tc of testCases) {
@@ -116,7 +129,21 @@ if (metaTs.name !== 'TypeScript' || metaTs.extension !== '.ts') {
   process.exit(1);
 }
 const metaDocker = getLanguageMetadata('dockerfile');
-// Test 7: Zero emojis verification in CodeToImage and utils
+if (metaDocker.name !== 'Dockerfile' || metaDocker.defaultFilename !== 'Dockerfile') {
+  console.error('Failed to resolve Dockerfile metadata');
+  process.exit(1);
+}
+
+// Test 7: CRLF normalization
+const crlfCode = "const a = 1;\r\nconst b = 2;\r\n";
+const crlfLines = highlightCodeToLines(crlfCode, 'javascript');
+if (crlfLines.some(l => l.includes('\r'))) {
+  console.error('CRLF carriage return leaked into highlighted lines');
+  process.exit(1);
+}
+console.log('Passed: CRLF line endings normalized cleanly.');
+
+// Test 8: Zero emojis verification in CodeToImage and utils
 import fs from 'fs';
 const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/u;
 const filesToCheck = [
