@@ -322,5 +322,116 @@ if (!testTokens[0].includes('hljs-keyword')) {
 }
 console.log('✓ Test 7: CodeToImage 27 programming languages, auto-detection engine, and syntax highlighting verified.');
 
+// Test 8: CodeToImage authentic Carbon syntax themes, backgrounds, shadows, and fonts verification
+import {
+  CODE_THEMES,
+  BACKGROUND_PRESETS,
+  DROP_SHADOWS,
+  FONT_FAMILIES,
+  generateCodeThemeCss,
+} from '../utils/codeThemes';
+
+const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
+
+// Verify at least 12 authentic code syntax themes exist
+if (CODE_THEMES.length < 12) {
+  console.error(`Expected at least 12 code themes, found ${CODE_THEMES.length}`);
+  process.exit(1);
+}
+
+const requiredThemeIds = [
+  'dracula',
+  'one_dark',
+  'monokai_pro',
+  'night_owl',
+  'nord',
+  'synthwave_84',
+  'github_dark',
+  'github_light',
+  'solarized_dark',
+  'material_ocean',
+  'cobalt_2',
+  'shades_of_purple',
+];
+
+for (const reqId of requiredThemeIds) {
+  const found = CODE_THEMES.find((t) => t.id === reqId);
+  if (!found) {
+    console.error(`Missing required Carbon syntax theme: ${reqId}`);
+    process.exit(1);
+  }
+}
+
+for (const t of CODE_THEMES) {
+  if (!t.id || !t.name || !t.editorBg || !t.titleBarBg || !t.textColor || !t.lineNumColor) {
+    console.error(`Theme ${t.id} has missing required styling properties`);
+    process.exit(1);
+  }
+
+  // Token completeness check
+  const tokens = t.tokens;
+  if (
+    !tokens.keyword ||
+    !tokens.built_in ||
+    !tokens.type ||
+    !tokens.literal ||
+    !tokens.number ||
+    !tokens.string ||
+    !tokens.comment ||
+    !tokens.function ||
+    !tokens.title ||
+    !tokens.params ||
+    !tokens.operator
+  ) {
+    console.error(`Theme ${t.id} has incomplete syntax token colors`);
+    process.exit(1);
+  }
+
+  // Strict check: DO NOT use any emojis
+  if (emojiRegex.test(t.name) || emojiRegex.test(t.id)) {
+    console.error(`Theme ${t.id} contains prohibited emoji characters`);
+    process.exit(1);
+  }
+
+  // Verify CSS generator output
+  const css = generateCodeThemeCss(t);
+  if (!css.includes('.vortex-code-highlight') || !css.includes('.hljs-keyword') || !css.includes(t.editorBg)) {
+    console.error(`Theme ${t.id} CSS generation verification failed`);
+    process.exit(1);
+  }
+}
+
+// Verify background presets
+const hasGradient = BACKGROUND_PRESETS.some((b) => b.type === 'gradient');
+const hasSolid = BACKGROUND_PRESETS.some((b) => b.type === 'solid');
+const hasTransparent = BACKGROUND_PRESETS.some((b) => b.type === 'transparent' && b.value === 'transparent');
+
+if (!hasGradient || !hasSolid || !hasTransparent) {
+  console.error('Missing background preset categories (gradient, solid, transparent)');
+  process.exit(1);
+}
+
+for (const b of BACKGROUND_PRESETS) {
+  if (emojiRegex.test(b.name) || emojiRegex.test(b.id)) {
+    console.error(`Background ${b.id} contains prohibited emoji characters`);
+    process.exit(1);
+  }
+}
+
+// Verify drop shadows
+if (!DROP_SHADOWS.some((s) => s.id === 'carbon_signature') || !DROP_SHADOWS.some((s) => s.id === 'none')) {
+  console.error('Missing required Carbon signature drop shadow preset');
+  process.exit(1);
+}
+
+// Verify font families
+if (!FONT_FAMILIES.some((f) => f.id === 'jetbrains_mono') || !FONT_FAMILIES.some((f) => f.id === 'fira_code')) {
+  console.error('Missing required JetBrains Mono or Fira Code font presets');
+  process.exit(1);
+}
+
+console.log('✓ Test 8: Authentic Carbon syntax themes, backgrounds, shadows, and font presets verified.');
+
 console.log('All automated verification checks PASSED successfully!');
+
 

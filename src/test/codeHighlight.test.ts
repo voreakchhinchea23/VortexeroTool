@@ -145,10 +145,19 @@ console.log('Passed: CRLF line endings normalized cleanly.');
 
 // Test 8: Zero emojis verification in CodeToImage and utils
 import fs from 'fs';
+import {
+  CODE_THEMES,
+  BACKGROUND_PRESETS,
+  DROP_SHADOWS,
+  FONT_FAMILIES,
+  generateCodeThemeCss,
+} from '../utils/codeThemes';
+
 const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/u;
 const filesToCheck = [
   'src/components/tools/developer/CodeToImage.tsx',
   'src/utils/codeHighlight.ts',
+  'src/utils/codeThemes.ts',
 ];
 for (const file of filesToCheck) {
   const content = fs.readFileSync(file, 'utf8');
@@ -160,5 +169,41 @@ for (const file of filesToCheck) {
 }
 console.log('Passed: Zero emojis strictly verified in modified source files.');
 
+// Test 9: Complete Theme & Carbon presets verification
+if (CODE_THEMES.length < 12) {
+  console.error(`Expected at least 12 code themes, found ${CODE_THEMES.length}`);
+  process.exit(1);
+}
+
+for (const t of CODE_THEMES) {
+  const css = generateCodeThemeCss(t);
+  if (!css.includes(t.editorBg) || !css.includes(t.tokens.keyword) || !css.includes(t.tokens.string)) {
+    console.error(`Theme ${t.id} CSS did not inject tokens correctly`);
+    process.exit(1);
+  }
+}
+
+// Ensure transparent background option is present
+const transparentPreset = BACKGROUND_PRESETS.find((b) => b.type === 'transparent');
+if (!transparentPreset || transparentPreset.value !== 'transparent') {
+  console.error('Transparent background preset is missing or invalid');
+  process.exit(1);
+}
+
+// Ensure Carbon signature drop shadow is present
+const carbonShadow = DROP_SHADOWS.find((s) => s.id === 'carbon_signature');
+if (!carbonShadow || !carbonShadow.value.includes('rgba(0, 0, 0, 0.55)')) {
+  console.error('Carbon signature drop shadow preset is missing or invalid');
+  process.exit(1);
+}
+
+// Ensure font presets are present
+if (!FONT_FAMILIES.some((f) => f.id === 'jetbrains_mono') || !FONT_FAMILIES.some((f) => f.id === 'fira_code')) {
+  console.error('Essential monospace font presets missing');
+  process.exit(1);
+}
+console.log('Passed: Carbon syntax themes, backgrounds, shadows, and fonts fully verified.');
+
 console.log('All codeHighlight tests completed successfully!');
+
 

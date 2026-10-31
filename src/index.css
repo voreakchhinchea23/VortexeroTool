@@ -61,6 +61,16 @@
 }
 
 @layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+
   .glass {
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(12px);

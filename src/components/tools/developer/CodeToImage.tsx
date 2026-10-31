@@ -8,6 +8,13 @@ import {
   Sliders,
   FileCode,
   Image as ImageIcon,
+  Palette,
+  Minus,
+  Square,
+  X,
+  Type,
+  Layers,
+  WrapText,
 } from 'lucide-react';
 import { toSvg, toBlob, toCanvas } from 'html-to-image';
 import { useClipboard } from '../../../hooks/useClipboard';
@@ -18,17 +25,13 @@ import {
   highlightCodeToLines,
   getLanguageMetadata,
 } from '../../../utils/codeHighlight';
-
-const THEMES = [
-  { id: 'vivid_chroma', label: 'Vivid Chroma', bg: 'from-purple-600 via-indigo-600 to-pink-500' },
-  { id: 'midnight_neon', label: 'Midnight Neon', bg: 'from-cyan-500 via-blue-600 to-indigo-900' },
-  { id: 'sunset_blaze', label: 'Sunset Blaze', bg: 'from-amber-500 via-rose-500 to-purple-600' },
-  { id: 'emerald_matrix', label: 'Emerald Matrix', bg: 'from-emerald-500 via-teal-600 to-slate-900' },
-  { id: 'obsidian_dark', label: 'Obsidian Pure', bg: 'from-slate-900 via-slate-950 to-black' },
-  { id: 'tokyo_lavender', label: 'Tokyo Lavender', bg: 'from-fuchsia-400 via-purple-500 to-indigo-500' },
-  { id: 'cyberpunk_amber', label: 'Cyberpunk Amber', bg: 'from-amber-400 via-orange-500 to-rose-600' },
-  { id: 'deep_ocean', label: 'Deep Ocean', bg: 'from-blue-600 via-cyan-600 to-teal-500' },
-];
+import {
+  CODE_THEMES,
+  BACKGROUND_PRESETS,
+  DROP_SHADOWS,
+  FONT_FAMILIES,
+  generateCodeThemeCss,
+} from '../../../utils/codeThemes';
 
 const INITIAL_CODE = `// Supercharge your workflow with VortexeroTool
 import { createServer } from 'http';
@@ -49,11 +52,17 @@ export default handleAuth;`;
 export const CodeToImage: React.FC = () => {
   const [code, setCode] = useState<string>(INITIAL_CODE);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('auto');
-  const [theme, setTheme] = useState<string>('vivid_chroma');
+  const [codeThemeId, setCodeThemeId] = useState<string>('dracula');
+  const [backgroundId, setBackgroundId] = useState<string>('vivid_chroma');
+  const [bgCategory, setBgCategory] = useState<'gradient' | 'solid' | 'transparent'>('gradient');
+  const [shadowId, setShadowId] = useState<string>('carbon_signature');
+  const [fontId, setFontId] = useState<string>('jetbrains_mono');
   const [windowStyle, setWindowStyle] = useState<'mac' | 'windows' | 'none'>('mac');
+  const [showTitle, setShowTitle] = useState<boolean>(true);
   const [padding, setPadding] = useState<number>(32);
-  const [fontSize, setFontSize] = useState<number>(13);
+  const [fontSize, setFontSize] = useState<number>(14);
   const [showLineNumbers, setShowLineNumbers] = useState<boolean>(true);
+  const [wrapLines, setWrapLines] = useState<boolean>(false);
   const [exportScale, setExportScale] = useState<number>(2);
   const [customFilename, setCustomFilename] = useState<string>('');
   const [isExporting, setIsExporting] = useState<string | null>(null);
@@ -71,12 +80,33 @@ export const CodeToImage: React.FC = () => {
   // Update default filename placeholder when language changes unless user entered a custom name
   const currentFilename = customFilename.trim() || langMeta.defaultFilename;
 
+  // Selected Theme, Background, Shadow, Font
+  const selectedCodeTheme = useMemo(
+    () => CODE_THEMES.find((t) => t.id === codeThemeId) || CODE_THEMES[0],
+    [codeThemeId]
+  );
+  const selectedBg = useMemo(
+    () => BACKGROUND_PRESETS.find((b) => b.id === backgroundId) || BACKGROUND_PRESETS[0],
+    [backgroundId]
+  );
+  const selectedShadow = useMemo(
+    () => DROP_SHADOWS.find((s) => s.id === shadowId) || DROP_SHADOWS[0],
+    [shadowId]
+  );
+  const selectedFont = useMemo(
+    () => FONT_FAMILIES.find((f) => f.id === fontId) || FONT_FAMILIES[0],
+    [fontId]
+  );
+
   // Generate highlighted lines with preserved HTML spans
   const highlightedLines = useMemo(() => {
     return highlightCodeToLines(code, effectiveLanguage);
   }, [code, effectiveLanguage]);
 
-  const selectedTheme = THEMES.find((t) => t.id === theme) || THEMES[0];
+  // Dynamic CSS for syntax highlighting
+  const themeCss = useMemo(() => {
+    return generateCodeThemeCss(selectedCodeTheme);
+  }, [selectedCodeTheme]);
 
   // Convert Data URL to standard Blob
   const dataUrlToBlob = (dataUrl: string): Blob => {
@@ -95,7 +125,7 @@ export const CodeToImage: React.FC = () => {
     return new Blob([decodeURIComponent(parts[1])], { type: mime });
   };
 
-  // Helper to trigger browser file download via Blob Object URL (bypasses URL character limit)
+  // Helper to trigger browser file download via Blob Object URL
   const triggerDownload = (blobOrUrl: Blob | string, filename: string) => {
     let url = '';
     let needRevoke = false;
@@ -125,16 +155,22 @@ export const CodeToImage: React.FC = () => {
     }
   };
 
-  // Helper to render preview container to PNG blob with 3-tier fallback (toBlob -> toCanvas -> skipFonts)
+  // Helper to render preview container to PNG blob with 3-tier fallback
   const renderPreviewToBlob = async (node: HTMLElement, scale: number): Promise<Blob> => {
-    const tableNode = node.querySelector('table');
-    const codeScrollWidth = tableNode ? tableNode.scrollWidth + padding * 2 + 48 : node.scrollWidth;
-    const targetWidth = Math.max(node.clientWidth, codeScrollWidth);
+    const rect = node.getBoundingClientRect();
+    const targetWidth = Math.max(Math.ceil(rect.width), node.scrollWidth, node.offsetWidth);
+    const targetHeight = Math.max(Math.ceil(rect.height), node.scrollHeight, node.offsetHeight);
 
     const baseOptions = {
       pixelRatio: scale,
       cacheBust: true,
       width: targetWidth,
+      height: targetHeight,
+      style: {
+        transform: 'none',
+        margin: '0',
+        overflow: 'hidden',
+      },
     };
 
     // Tier 1: Direct toBlob
@@ -145,7 +181,7 @@ export const CodeToImage: React.FC = () => {
       console.warn('toBlob failed, attempting canvas fallback:', err);
     }
 
-    // Tier 2: Canvas fallback (toCanvas -> canvas.toBlob)
+    // Tier 2: Canvas fallback
     try {
       const canvas = await toCanvas(node, baseOptions);
       const blob = await new Promise<Blob | null>((resolve) => {
@@ -156,7 +192,7 @@ export const CodeToImage: React.FC = () => {
       console.warn('Canvas fallback failed, attempting font-safe canvas render:', err);
     }
 
-    // Tier 3: Font-safe canvas fallback (avoids external font/CORS failure)
+    // Tier 3: Font-safe canvas fallback
     const canvasSafe = await toCanvas(node, { ...baseOptions, skipFonts: true });
     return new Promise<Blob>((resolve, reject) => {
       canvasSafe.toBlob((blob) => {
@@ -174,22 +210,28 @@ export const CodeToImage: React.FC = () => {
       setIsExporting(format);
       const node = previewCardRef.current;
       const baseName = currentFilename.replace(/\.[^/.]+$/, '') || 'code-snippet';
-      const tableNode = node.querySelector('table');
-      const codeScrollWidth = tableNode ? tableNode.scrollWidth + padding * 2 + 48 : node.scrollWidth;
-      const targetWidth = Math.max(node.clientWidth, codeScrollWidth);
+      const rect = node.getBoundingClientRect();
+      const targetWidth = Math.max(Math.ceil(rect.width), node.scrollWidth, node.offsetWidth);
+      const targetHeight = Math.max(Math.ceil(rect.height), node.scrollHeight, node.offsetHeight);
 
       if (format === 'png') {
         const blob = await renderPreviewToBlob(node, exportScale);
         triggerDownload(blob, `${baseName}.png`);
         addToast('PNG image downloaded', `Exported at ${exportScale}x resolution.`, 'success');
       } else if (format === 'jpeg') {
-        let canvas: HTMLCanvasElement;
         const opts = {
           pixelRatio: exportScale,
           cacheBust: true,
           width: targetWidth,
-          backgroundColor: '#0d1117',
+          height: targetHeight,
+          backgroundColor: selectedBg.type === 'transparent' ? selectedCodeTheme.editorBg : '#0d1117',
+          style: {
+            transform: 'none',
+            margin: '0',
+            overflow: 'hidden',
+          },
         };
+        let canvas: HTMLCanvasElement;
         try {
           canvas = await toCanvas(node, opts);
         } catch {
@@ -202,8 +244,17 @@ export const CodeToImage: React.FC = () => {
         triggerDownload(blob, `${baseName}.jpg`);
         addToast('JPEG image downloaded', `Exported at ${exportScale}x resolution.`, 'success');
       } else if (format === 'svg') {
+        const opts = {
+          cacheBust: true,
+          width: targetWidth,
+          height: targetHeight,
+          style: {
+            transform: 'none',
+            margin: '0',
+            overflow: 'hidden',
+          },
+        };
         let dataUrl: string;
-        const opts = { cacheBust: true, width: targetWidth };
         try {
           dataUrl = await toSvg(node, opts);
         } catch {
@@ -222,7 +273,7 @@ export const CodeToImage: React.FC = () => {
     }
   };
 
-  // Copy Image directly to clipboard (with canvas fallback)
+  // Copy Image directly to clipboard
   const handleCopyImage = async () => {
     if (!previewCardRef.current || isExporting) return;
 
@@ -265,7 +316,7 @@ export const CodeToImage: React.FC = () => {
         }
       }
 
-      // Fallback: download PNG if clipboard write is forbidden or unsupported
+      // Fallback: download PNG if clipboard write is forbidden
       triggerDownload(blob, `${baseName}.png`);
       addToast('Clipboard write restricted', 'High-resolution PNG saved to your downloads instead.', 'info');
     } catch (err) {
@@ -282,115 +333,215 @@ export const CodeToImage: React.FC = () => {
     }
   };
 
+  const filteredBgPresets = useMemo(() => {
+    return BACKGROUND_PRESETS.filter((b) => b.type === bgCategory);
+  }, [bgCategory]);
+
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-        {/* Language selector & Auto-detect indicator */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-            <Code2 size={14} />
-            <span>Lang:</span>
-          </label>
-          <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-          >
-            <option value="auto" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
-              Auto Detect ({getLanguageMetadata(detectedLanguage).name})
-            </option>
-            <optgroup label="Supported Languages" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <option key={lang.id} value={lang.id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
-                  {lang.name}
+    <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Top Primary Controls Bar */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          {/* Language Selector & Detection Badge */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <Code2 size={14} />
+              <span>Lang:</span>
+            </label>
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="auto" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                Auto Detect ({getLanguageMetadata(detectedLanguage).name})
+              </option>
+              <optgroup label="Supported Languages" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang.id} value={lang.id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                    {lang.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+
+            {selectedLanguage === 'auto' ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60">
+                <Sparkles size={11} />
+                <span>{langMeta.name}</span>
+              </span>
+            ) : (
+              <button
+                onClick={() => setSelectedLanguage('auto')}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700 cursor-pointer transition-colors"
+                title="Switch back to Auto Detect"
+              >
+                <Sparkles size={11} />
+                <span>Reset to Auto</span>
+              </button>
+            )}
+          </div>
+
+          {/* Syntax Code Theme Selector */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <Palette size={14} />
+              <span>Theme:</span>
+            </label>
+            <select
+              value={codeThemeId}
+              onChange={(e) => setCodeThemeId(e.target.value)}
+              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              {CODE_THEMES.map((t) => (
+                <option key={t.id} value={t.id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                  {t.name}
                 </option>
               ))}
-            </optgroup>
-          </select>
+            </select>
+          </div>
 
-          {selectedLanguage === 'auto' ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60">
-              <Sparkles size={11} />
-              <span>{langMeta.name}</span>
-            </span>
-          ) : (
+          {/* Window Frame Style */}
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs font-bold border border-slate-200 dark:border-slate-700/60">
             <button
-              onClick={() => setSelectedLanguage('auto')}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700 cursor-pointer transition-colors"
-              title="Switch back to Auto Detect"
-            >
-              <Sparkles size={11} />
-              <span>Reset to Auto</span>
-            </button>
-          )}
-        </div>
-
-        {/* Theme Swatches */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-          {THEMES.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTheme(t.id)}
-              className={`w-6 h-6 rounded-full bg-gradient-to-tr ${t.bg} border-2 transition-transform cursor-pointer shrink-0 ${
-                theme === t.id ? 'scale-125 border-white ring-2 ring-indigo-500 shadow-md' : 'border-transparent hover:scale-110'
+              onClick={() => setWindowStyle('mac')}
+              className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                windowStyle === 'mac'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
-              title={t.label}
-              aria-label={t.label}
-            />
-          ))}
+            >
+              macOS
+            </button>
+            <button
+              onClick={() => setWindowStyle('windows')}
+              className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                windowStyle === 'windows'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              Windows
+            </button>
+            <button
+              onClick={() => setWindowStyle('none')}
+              className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                windowStyle === 'none'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              None
+            </button>
+          </div>
+
+          {/* Line Numbers & Wrap Lines Toggles */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showLineNumbers}
+                onChange={(e) => setShowLineNumbers(e.target.checked)}
+                className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 cursor-pointer"
+              />
+              <span>Line Numbers</span>
+            </label>
+
+            <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={wrapLines}
+                onChange={(e) => setWrapLines(e.target.checked)}
+                className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 cursor-pointer"
+              />
+              <WrapText size={13} className="text-slate-400" />
+              <span>Wrap Lines</span>
+            </label>
+          </div>
         </div>
 
-        {/* Window Style Selection */}
-        <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs font-bold border border-slate-200 dark:border-slate-700/60">
-          <button
-            onClick={() => setWindowStyle('mac')}
-            className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
-              windowStyle === 'mac'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            macOS
-          </button>
-          <button
-            onClick={() => setWindowStyle('windows')}
-            className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
-              windowStyle === 'windows'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            Windows
-          </button>
-          <button
-            onClick={() => setWindowStyle('none')}
-            className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
-              windowStyle === 'none'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            None
-          </button>
-        </div>
+        {/* Secondary Controls: Background & Shadow Customization */}
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
+          {/* Background Presets with Category Tabs */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <Layers size={14} />
+              <span>Background:</span>
+            </span>
 
-        {/* Line Numbers Toggle */}
-        <label className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={showLineNumbers}
-            onChange={(e) => setShowLineNumbers(e.target.checked)}
-            className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 cursor-pointer"
-          />
-          <span>Line Numbers</span>
-        </label>
+            {/* Category Switcher */}
+            <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-bold">
+              {(['gradient', 'solid', 'transparent'] as const).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    setBgCategory(cat);
+                    const firstInCat = BACKGROUND_PRESETS.find((b) => b.type === cat);
+                    if (firstInCat) setBackgroundId(firstInCat.id);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg capitalize transition-all cursor-pointer ${
+                    bgCategory === cat
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Swatches */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+              {filteredBgPresets.map((b) => (
+                <button
+                  key={b.id}
+                  onClick={() => setBackgroundId(b.id)}
+                  style={{
+                    background: b.type === 'transparent' ? 'transparent' : b.value,
+                    border: b.type === 'transparent' ? '2px dashed #94a3b8' : undefined,
+                  }}
+                  className={`w-6 h-6 rounded-full transition-transform cursor-pointer shrink-0 relative ${
+                    backgroundId === b.id
+                      ? 'scale-125 ring-2 ring-indigo-500 shadow-md ring-offset-1 dark:ring-offset-slate-900'
+                      : 'hover:scale-110'
+                  }`}
+                  title={b.name}
+                  aria-label={b.name}
+                >
+                  {b.type === 'transparent' && (
+                    <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-slate-400">
+                      T
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Drop Shadow Selector */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span>Shadow:</span>
+            </label>
+            <select
+              value={shadowId}
+              onChange={(e) => setShadowId(e.target.value)}
+              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              {DROP_SHADOWS.map((s) => (
+                <option key={s.id} value={s.id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
-      {/* Main Grid: Code Input & Live Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Source Code TextArea (Dark Mode Fixed) */}
-        <div className="lg:col-span-5 p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+      {/* Main Grid: Code Input & Live Preview Canvas */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Source Code Input Column */}
+        <div className="lg:col-span-5 p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
@@ -404,7 +555,6 @@ export const CodeToImage: React.FC = () => {
               </div>
             </div>
 
-            {/* Dark mode fixed textarea: dark:bg-slate-950 and dark:text-slate-100 */}
             <textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
@@ -415,10 +565,11 @@ export const CodeToImage: React.FC = () => {
             />
           </div>
 
-          {/* Filename and Font Settings */}
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-3">
+          {/* Typography & Frame Settings */}
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-3.5">
+            {/* Filename & Header Title Toggle */}
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-slate-400 whitespace-nowrap">Filename:</label>
+              <label className="text-xs font-bold text-slate-400 whitespace-nowrap">Title:</label>
               <input
                 type="text"
                 value={customFilename}
@@ -426,12 +577,43 @@ export const CodeToImage: React.FC = () => {
                 placeholder={langMeta.defaultFilename}
                 className="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
+              <button
+                onClick={() => setShowTitle(!showTitle)}
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer whitespace-nowrap ${
+                  showTitle
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
+                }`}
+                title="Toggle title visibility in window header"
+              >
+                {showTitle ? 'Visible' : 'Hidden'}
+              </button>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <div className="flex items-center gap-2">
-                <span className="font-bold">Font:</span>
-                {[12, 13, 14, 16].map((sz) => (
+            {/* Font Family Selection */}
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                <Type size={13} />
+                <span>Font:</span>
+              </label>
+              <select
+                value={fontId}
+                onChange={(e) => setFontId(e.target.value)}
+                className="w-48 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              >
+                {FONT_FAMILIES.map((f) => (
+                  <option key={f.id} value={f.id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Font Size & Resolution */}
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-2">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold">Size:</span>
+                {[12, 13, 14, 16, 18].map((sz) => (
                   <button
                     key={sz}
                     onClick={() => setFontSize(sz)}
@@ -446,9 +628,9 @@ export const CodeToImage: React.FC = () => {
                 ))}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="font-bold">DPR:</span>
-                {[1, 2, 3].map((scale) => (
+                {[1, 2, 3, 4].map((scale) => (
                   <button
                     key={scale}
                     onClick={() => setExportScale(scale)}
@@ -466,112 +648,163 @@ export const CodeToImage: React.FC = () => {
           </div>
         </div>
 
-        {/* Live Preview & Action Buttons */}
-        <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
-          {/* Card Container for Export */}
-          <div
-            ref={previewCardRef}
-            className={`rounded-3xl bg-gradient-to-tr ${selectedTheme.bg} shadow-2xl overflow-hidden flex items-center justify-center`}
-            style={{ padding: `${padding}px` }}
-          >
-            {/* Embedded styles ensure syntax highlighting works flawlessly in exported PNG, SVG, JPEG */}
-            <style>{`
-              .vortex-code-highlight {
-                color: #e6edf3;
-              }
-              .vortex-code-highlight .hljs-keyword { color: #ff7b72; font-weight: 600; }
-              .vortex-code-highlight .hljs-built_in { color: #ffa657; }
-              .vortex-code-highlight .hljs-type { color: #ff7b72; }
-              .vortex-code-highlight .hljs-literal { color: #79c0ff; }
-              .vortex-code-highlight .hljs-number { color: #79c0ff; }
-              .vortex-code-highlight .hljs-string { color: #a5d6ff; }
-              .vortex-code-highlight .hljs-comment { color: #8b949e; font-style: italic; }
-              .vortex-code-highlight .hljs-function { color: #d2a8ff; }
-              .vortex-code-highlight .hljs-title { color: #d2a8ff; font-weight: 600; }
-              .vortex-code-highlight .hljs-params { color: #e6edf3; }
-              .vortex-code-highlight .hljs-variable { color: #ffa657; }
-              .vortex-code-highlight .hljs-attr { color: #79c0ff; }
-              .vortex-code-highlight .hljs-tag { color: #7ee787; }
-              .vortex-code-highlight .hljs-name { color: #7ee787; }
-              .vortex-code-highlight .hljs-selector-tag { color: #ff7b72; }
-              .vortex-code-highlight .hljs-selector-class { color: #7ee787; }
-              .vortex-code-highlight .hljs-selector-id { color: #d2a8ff; }
-              .vortex-code-highlight .hljs-property { color: #79c0ff; }
-              .vortex-code-highlight .hljs-operator { color: #ff7b72; }
-              .vortex-code-highlight .hljs-punctuation { color: #c9d1d9; }
-              .vortex-code-highlight .hljs-meta { color: #ffa657; }
-              .vortex-code-highlight .hljs-subst { color: #c9d1d9; }
-            `}</style>
+        {/* Live Preview Canvas & Export Section */}
+        <div className="lg:col-span-7 flex flex-col space-y-4">
+          {/* Scrollable Canvas Workspace */}
+          <div className="w-full rounded-3xl bg-slate-100/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 p-4 sm:p-8 flex items-center justify-center overflow-x-auto min-h-[440px] no-scrollbar shadow-inner">
+            {/* Export Target Container (Naturally wraps content with w-fit, zero scrollbars) */}
+            <div
+              ref={previewCardRef}
+              className="inline-block w-fit min-w-[320px] max-w-none shrink-0 transition-all select-none"
+              style={{
+                background: selectedBg.type === 'transparent' ? 'transparent' : selectedBg.value,
+                padding: `${padding}px`,
+                borderRadius: '24px',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Embedded Syntax Theme Stylesheet */}
+              <style>{themeCss}</style>
 
-            {/* Terminal Window Box */}
-            <div className="w-full rounded-2xl bg-[#0d1117] border border-white/10 shadow-2xl overflow-hidden text-left">
-              {/* Window Title Bar */}
-              {windowStyle !== 'none' && (
-                <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-black/25">
-                  {windowStyle === 'mac' ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-xs" />
-                      <div className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-xs" />
-                      <div className="w-3 h-3 rounded-full bg-[#27c93f] shadow-xs" />
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-0.5 bg-slate-400" />
-                      <div className="w-2.5 h-2.5 border border-slate-400" />
-                      <div className="text-[10px] text-slate-400 font-bold">x</div>
-                    </div>
-                  )}
-
-                  <span className="text-[11px] font-mono text-slate-400 font-medium px-2 py-0.5 rounded-md bg-white/5">
-                    {currentFilename}
-                  </span>
-
-                  <div className="w-8" />
-                </div>
-              )}
-
-              {/* Code Lines with Syntax Highlighting */}
+              {/* Terminal Window Box */}
               <div
-                className="p-4 sm:p-6 font-mono overflow-x-auto no-scrollbar leading-relaxed vortex-code-highlight"
-                style={{ fontSize: `${fontSize}px` }}
+                className="rounded-2xl transition-all"
+                style={{
+                  backgroundColor: selectedCodeTheme.editorBg,
+                  border: `1px solid ${selectedCodeTheme.borderColor}`,
+                  boxShadow: selectedShadow.value,
+                  overflow: 'hidden',
+                  minWidth: '280px',
+                  boxSizing: 'border-box',
+                }}
               >
-                <table className="w-full border-collapse">
-                  <tbody>
-                    {highlightedLines.map((lineHtml, idx) => (
-                      <tr key={idx} className="hover:bg-white/5 transition-colors">
-                        {showLineNumbers && (
-                          <td className="pr-4 text-slate-600 select-none text-right font-mono text-[11px] w-8 align-top">
-                            {idx + 1}
-                          </td>
-                        )}
-                        <td
-                          className="whitespace-pre font-mono"
-                          dangerouslySetInnerHTML={{ __html: lineHtml || '&nbsp;' }}
-                        />
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {/* Title Bar */}
+                {windowStyle !== 'none' && (
+                  <div
+                    className="px-4 py-3 flex items-center justify-between border-b"
+                    style={{
+                      backgroundColor: selectedCodeTheme.titleBarBg,
+                      borderColor: selectedCodeTheme.borderColor,
+                    }}
+                  >
+                    {/* Window Controls */}
+                    {windowStyle === 'mac' ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-xs" />
+                        <div className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-xs" />
+                        <div className="w-3 h-3 rounded-full bg-[#27c93f] shadow-xs" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <Minus size={11} strokeWidth={2.5} />
+                        <Square size={10} strokeWidth={2.5} />
+                        <X size={11} strokeWidth={2.5} />
+                      </div>
+                    )}
+
+                    {/* Filename Header */}
+                    {showTitle && (
+                      <span
+                        className="text-[11px] font-mono px-2.5 py-0.5 rounded-md font-medium tracking-wide"
+                        style={{
+                          color: selectedCodeTheme.isLight ? '#57606a' : '#8b949e',
+                          backgroundColor: selectedCodeTheme.isLight
+                            ? 'rgba(0,0,0,0.06)'
+                            : 'rgba(255,255,255,0.06)',
+                        }}
+                      >
+                        {currentFilename}
+                      </span>
+                    )}
+
+                    <div className="w-10" />
+                  </div>
+                )}
+
+                {/* Code Table - Zero scrollbars, natural layout */}
+                <div
+                  className="p-5 sm:p-6 font-mono leading-relaxed vortex-code-highlight"
+                  style={{
+                    fontSize: `${fontSize}px`,
+                    fontFamily: selectedFont.fontFamily,
+                    backgroundColor: selectedCodeTheme.editorBg,
+                    overflow: 'visible',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <table
+                    className="border-collapse"
+                    style={{
+                      width: '100%',
+                      tableLayout: 'auto',
+                      borderSpacing: 0,
+                    }}
+                  >
+                    <tbody>
+                      {highlightedLines.map((lineHtml, idx) => (
+                        <tr key={idx} className="hover:bg-white/5 transition-colors">
+                          {showLineNumbers && (
+                            <td
+                              className="pr-4 select-none text-right font-mono text-[11px] align-top whitespace-nowrap"
+                              style={{
+                                color: selectedCodeTheme.lineNumColor,
+                                width: '2.5rem',
+                                userSelect: 'none',
+                              }}
+                            >
+                              {idx + 1}
+                            </td>
+                          )}
+                          <td
+                            className="font-mono align-top"
+                            style={{
+                              whiteSpace: wrapLines ? 'pre-wrap' : 'pre',
+                              wordBreak: wrapLines ? 'break-word' : 'normal',
+                              padding: 0,
+                              margin: 0,
+                            }}
+                            dangerouslySetInnerHTML={{ __html: lineHtml || '&nbsp;' }}
+                          />
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Controls Footer: Padding & Actions */}
+          {/* Controls Footer: Padding & Action Buttons */}
           <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-            {/* Padding slider & Raw code copy */}
+            {/* Card Padding & Raw Code Copy */}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <Sliders size={13} />
                   <span>Card Padding:</span>
                 </span>
+                <div className="flex items-center gap-1">
+                  {[16, 32, 48, 64].map((pVal) => (
+                    <button
+                      key={pVal}
+                      onClick={() => setPadding(pVal)}
+                      className={`px-2 py-0.5 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer ${
+                        padding === pVal
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {pVal}
+                    </button>
+                  ))}
+                </div>
                 <input
                   type="range"
-                  min="16"
-                  max="64"
+                  min="12"
+                  max="80"
                   value={padding}
                   onChange={(e) => setPadding(Number(e.target.value))}
-                  className="w-28 accent-indigo-500 cursor-pointer"
+                  className="w-24 accent-indigo-500 cursor-pointer"
                 />
                 <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{padding}px</span>
               </div>
@@ -601,7 +834,7 @@ export const CodeToImage: React.FC = () => {
                 <span>{isExporting === 'copy-image' ? 'Generating...' : copiedImage ? 'Copied Image!' : 'Copy Image'}</span>
               </button>
 
-              {/* Download buttons for PNG, SVG, JPEG */}
+              {/* Download Buttons for PNG, SVG, JPEG */}
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={() => handleExport('png')}
