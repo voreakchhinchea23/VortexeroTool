@@ -278,8 +278,7 @@ export const PeriodicTable: React.FC = () => {
       hoveredElement != null &&
       hoveredElement.number !== element.number &&
       (hoveredElement.group === element.group ||
-        hoveredElement.period === element.period ||
-        hoveredElement.category === element.category);
+        hoveredElement.period === element.period);
 
     const phaseColor =
       phase === 'gas'
@@ -302,59 +301,59 @@ export const PeriodicTable: React.FC = () => {
           gridColumnStart: element.gridCol + 1,
           gridRowStart: element.gridRow + 1,
         }}
-        className={`group relative flex flex-col justify-between w-[68px] h-[80px] p-1.5 rounded-lg transition-all duration-150 text-left border cursor-pointer select-none box-border overflow-hidden backdrop-blur-sm ${
+        className={`group relative flex flex-col justify-between w-full h-full pt-1.5 px-1.5 pb-1 rounded-lg transition-all duration-150 text-left border cursor-pointer select-none box-border overflow-hidden backdrop-blur-sm ${
           catMeta.bgClass
         } ${catMeta.borderClass} ${
           isMatching
-            ? 'opacity-100 scale-100'
+            ? 'opacity-100'
             : 'opacity-20 hover:opacity-75 grayscale-[60%] hover:grayscale-0'
         } ${
           isHovered
-            ? 'z-30 ring-2 ring-cyan-400 shadow-xl ' + catMeta.glowClass + ' scale-[1.04] bg-white dark:bg-slate-800'
+            ? 'z-30 ring-2 ring-cyan-400 dark:ring-cyan-300 shadow-xl ' + catMeta.glowClass + ' scale-[1.04]'
             : ''
         } ${
           !isHovered && isRelated
-            ? 'ring-1 ring-cyan-400/40 bg-cyan-500/10'
+            ? 'ring-1 ring-cyan-400/30 bg-cyan-500/5'
             : ''
         }`}
       >
         {/* Top category accent bar */}
         <div
-          className="absolute top-0 left-0 right-0 h-[2.5px] transition-colors"
+          className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg transition-colors"
           style={{ backgroundColor: catMeta.colorHex }}
         />
 
         {/* Top bar: Atomic Number & State Indicator */}
         <div className="flex items-center justify-between w-full pt-0.5">
-          <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 leading-none">
+          <span className="text-[10.5px] font-mono font-bold text-slate-500 dark:text-slate-400 leading-none">
             {langMode === 'km' ? toKhmerDigits(element.number) : element.number}
           </span>
           <span
-            title={`Phase at ${temperatureK} K: ${phase}`}
-            className={`w-1.5 h-1.5 rounded-full ${phaseColor} shadow-sm`}
+            title={`${langMode === 'km' ? 'សភាព' : 'State'}: ${phase} (${temperatureK} K)`}
+            className={`w-2 h-2 rounded-full ${phaseColor} ring-1 ring-white/60 dark:ring-slate-900/60 shadow-sm`}
           />
         </div>
 
         {/* Center: Symbol & Name */}
         <div className="text-center my-auto w-full px-0.5">
-          <div className="text-[16px] font-black tracking-tight text-slate-900 dark:text-white leading-none">
+          <div className="text-[21px] font-black tracking-tight text-slate-900 dark:text-white leading-none">
             {element.symbol}
           </div>
           <div className="mt-1 w-full overflow-hidden">
             {langMode === 'km' ? (
-              <div className="text-[8.5px] font-medium text-slate-600 dark:text-slate-300 truncate leading-tight">
+              <div className="text-[9.5px] font-medium text-slate-700 dark:text-slate-200 truncate leading-normal">
                 {element.nameKm}
               </div>
             ) : langMode === 'en' ? (
-              <div className="text-[8.5px] font-semibold text-slate-600 dark:text-slate-300 truncate leading-tight">
+              <div className="text-[9.5px] font-semibold text-slate-700 dark:text-slate-200 truncate leading-tight">
                 {element.nameEn}
               </div>
             ) : (
               <div className="leading-tight">
-                <div className="text-[8px] font-semibold text-slate-700 dark:text-slate-200 truncate leading-none">
+                <div className="text-[8.5px] font-semibold text-slate-700 dark:text-slate-200 truncate leading-none">
                   {element.nameEn}
                 </div>
-                <div className="text-[7.5px] text-slate-500 dark:text-slate-400 truncate leading-none mt-0.5">
+                <div className="text-[8px] font-medium text-slate-500 dark:text-slate-400 truncate leading-normal mt-0.5">
                   {element.nameKm}
                 </div>
               </div>
@@ -363,7 +362,7 @@ export const PeriodicTable: React.FC = () => {
         </div>
 
         {/* Bottom bar: Atomic Mass */}
-        <div className="text-[7.5px] font-mono text-slate-500 dark:text-slate-400 text-center truncate leading-none pb-0.5">
+        <div className="text-[8.5px] font-mono font-medium text-slate-500 dark:text-slate-400 text-center truncate leading-none pb-0.5">
           {langMode === 'km' ? toKhmerDigits(displayMass) : displayMass}
         </div>
       </button>
@@ -704,8 +703,8 @@ export const PeriodicTable: React.FC = () => {
 
       {/* Main Content Area */}
       {viewMode === 'table' && (() => {
-        const BASE_WIDTH = 1330;
-        const BASE_HEIGHT = 804;
+        const BASE_WIDTH = 1440;
+        const BASE_HEIGHT = 858;
         const scaledWidth = Math.round(BASE_WIDTH * zoom);
         const scaledHeight = Math.round(BASE_HEIGHT * zoom);
         const inspectionElement = hoveredElement || activeElement || CHEMICAL_ELEMENTS[0];
@@ -840,7 +839,10 @@ export const PeriodicTable: React.FC = () => {
                     transform: `scale(${zoom})`,
                     transformOrigin: 'top left',
                     transition: 'transform 0.15s ease-out',
+                    WebkitFontSmoothing: 'antialiased',
+                    backfaceVisibility: 'hidden',
                   }}
+                  className="transform-gpu"
                 >
                   {/* Strict CSS Grid: 19 columns x 11 rows */}
                   <div
@@ -850,8 +852,8 @@ export const PeriodicTable: React.FC = () => {
                       height: `${BASE_HEIGHT}px`,
                       display: 'grid',
                       gap: '4px',
-                      gridTemplateColumns: '34px repeat(18, 68px)',
-                      gridTemplateRows: '28px repeat(7, 80px) 16px repeat(2, 80px)',
+                      gridTemplateColumns: '36px repeat(18, 74px)',
+                      gridTemplateRows: '28px repeat(7, 86px) 16px repeat(2, 86px)',
                     }}
                   >
                     {/* Corner Header: Period \ Group (Row 1, Col 1) */}
@@ -914,111 +916,139 @@ export const PeriodicTable: React.FC = () => {
                         gridRowStart: 2,
                         gridRowEnd: 5,
                       }}
-                      className="flex items-stretch rounded-xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-800/80 shadow-md p-3.5 gap-4 backdrop-blur-sm relative overflow-hidden"
+                      className="flex flex-col rounded-xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800/90 shadow-md p-3.5 backdrop-blur-md relative overflow-hidden"
                     >
-                      {/* Category top accent line */}
+                      {/* Top category accent bar */}
                       <div
                         className="absolute top-0 left-0 right-0 h-1 transition-colors duration-200"
                         style={{ backgroundColor: inspectCatMeta.colorHex }}
                       />
 
-                      {/* Left: Compact Bohr Model */}
-                      <div className="w-[170px] flex-shrink-0 flex flex-col items-center justify-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
-                        {renderBohrModel(inspectionElement, 130)}
-                        <div className="mt-1.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 text-center">
-                          {inspectionElement.shells.length} {langMode === 'km' ? 'ស្រទាប់' : 'Shells'} ({inspectionElement.shells.join(', ')})
+                      {/* Header bar of the inspector */}
+                      <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-100 dark:border-slate-800/80">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: inspectCatMeta.colorHex }} />
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                            {langMode === 'km' ? 'ផ្ទាំងពិនិត្យធាតុផ្ទាល់' : langMode === 'en' ? 'Live Element Inspector' : 'Live Element Inspector • ផ្ទាំងពិនិត្យធាតុ'}
+                          </span>
                         </div>
+                        <span className="text-[10px] text-slate-400">
+                          {langMode === 'km' ? 'ចង្អុលលើធាតុណាមួយដើម្បីពិនិត្យ' : 'Hover any element to inspect'}
+                        </span>
                       </div>
 
-                      {/* Middle: Element Identity & Details */}
-                      <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span
-                              className="text-xs font-mono font-bold px-2 py-0.5 rounded-md"
-                              style={{
-                                backgroundColor: `${inspectCatMeta.colorHex}20`,
-                                color: inspectCatMeta.colorHex,
-                              }}
-                            >
-                              #{langMode === 'km' ? toKhmerDigits(inspectionElement.number) : inspectionElement.number}
-                            </span>
-                            <span
-                              className="text-xs font-semibold px-2 py-0.5 rounded-md"
-                              style={{
-                                backgroundColor: `${inspectCatMeta.colorHex}15`,
-                                color: inspectCatMeta.colorHex,
-                              }}
-                            >
-                              {langMode === 'km' ? inspectCatMeta.nameKm : inspectCatMeta.nameEn}
-                            </span>
-                            <span className="text-[11px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                              {inspectionElement.block}-block
-                            </span>
+                      {/* Content area: 3 columns */}
+                      <div className="flex-1 flex items-stretch gap-4 min-h-0">
+                        {/* Left: Compact Bohr Model */}
+                        <div className="w-[170px] flex-shrink-0 flex flex-col items-center justify-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
+                          {renderBohrModel(inspectionElement, 130)}
+                          <div className="mt-1 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 text-center">
+                            {langMode === 'km'
+                              ? `${toKhmerDigits(inspectionElement.shells.length)} ស្រទាប់ (${inspectionElement.shells.map(s => toKhmerDigits(s)).join(', ')})`
+                              : `${inspectionElement.shells.length} Shells (${inspectionElement.shells.join(', ')})`}
                           </div>
+                        </div>
 
-                          <div className="flex items-baseline gap-3 mt-1.5">
-                            <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                              {inspectionElement.symbol}
-                            </span>
-                            <div className="leading-tight">
-                              <div className="text-base font-bold text-slate-900 dark:text-white">
-                                {inspectionElement.nameEn}
+                        {/* Middle: Element Identity, Names, and Properties */}
+                        <div className="flex-1 flex flex-col justify-between min-w-0">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className="text-xs font-mono font-bold px-2 py-0.5 rounded-md"
+                                style={{
+                                  backgroundColor: `${inspectCatMeta.colorHex}20`,
+                                  color: inspectCatMeta.colorHex,
+                                }}
+                              >
+                                #{langMode === 'km' ? toKhmerDigits(inspectionElement.number) : inspectionElement.number}
+                              </span>
+                              <span
+                                className="text-xs font-semibold px-2 py-0.5 rounded-md"
+                                style={{
+                                  backgroundColor: `${inspectCatMeta.colorHex}15`,
+                                  color: inspectCatMeta.colorHex,
+                                }}
+                              >
+                                {langMode === 'km'
+                                  ? inspectCatMeta.nameKm
+                                  : langMode === 'en'
+                                  ? inspectCatMeta.nameEn
+                                  : `${inspectCatMeta.nameEn} (${inspectCatMeta.nameKm})`}
+                              </span>
+                              <span className="text-[11px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                {inspectionElement.block}-block
+                              </span>
+                            </div>
+
+                            <div className="flex items-baseline gap-3 mt-1.5">
+                              <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                                {inspectionElement.symbol}
+                              </span>
+                              <div className="leading-tight">
+                                <div className="text-base font-bold text-slate-900 dark:text-white">
+                                  {inspectionElement.nameEn}
+                                </div>
+                                <div className="text-xs font-medium text-cyan-600 dark:text-cyan-400">
+                                  {inspectionElement.nameKm}
+                                </div>
                               </div>
-                              <div className="text-xs font-medium text-cyan-600 dark:text-cyan-400">
-                                {inspectionElement.nameKm}
-                              </div>
+                            </div>
+
+                            <div className="mt-1 text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                              {langMode === 'km' ? inspectionElement.summaryKm : inspectionElement.summaryEn}
                             </div>
                           </div>
 
-                          <div className="mt-1 text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
-                            {langMode === 'km' ? inspectionElement.summaryKm : inspectionElement.summaryEn}
+                          {/* Quick metric row */}
+                          <div className="grid grid-cols-4 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 text-[11px] font-mono">
+                            <div>
+                              <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'ម៉ាស់អាតូម' : 'Weight'}</span>
+                              <span className="font-bold text-slate-800 dark:text-slate-200">
+                                {langMode === 'km' ? toKhmerDigits(inspectionElement.atomicMass) : inspectionElement.atomicMass}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'សភាពបច្ចុប្បន្ន' : 'Phase'}</span>
+                              <span className="font-bold capitalize" style={{ color: inspectPhaseColor }}>{inspectPhase}</span>
+                            </div>
+                            <div>
+                              <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'ខួប / ក្រុម' : 'Period / Grp'}</span>
+                              <span className="font-bold text-slate-800 dark:text-slate-200">
+                                {langMode === 'km' ? `ខ${toKhmerDigits(inspectionElement.period)} / ក${toKhmerDigits(inspectionElement.group)}` : `P${inspectionElement.period} / G${inspectionElement.group}`}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'រកឃើញ' : 'Discovered'}</span>
+                              <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">
+                                {langMode === 'km' ? toKhmerDigits(inspectionElement.yearDiscovered) : inspectionElement.yearDiscovered}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Quick metric row */}
-                        <div className="grid grid-cols-4 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 text-[11px] font-mono">
-                          <div>
-                            <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'ម៉ាស់អាតូម' : 'Weight'}</span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">{inspectionElement.atomicMass}</span>
+                        {/* Right: Electron configuration & click action */}
+                        <div className="w-[170px] flex-shrink-0 flex flex-col justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50">
+                          <div className="space-y-1.5">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              {langMode === 'km' ? 'ទម្រង់អេឡិចត្រុង' : 'Configuration'}
+                            </div>
+                            <div className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400 break-words leading-snug">
+                              {inspectionElement.electronConfiguration}
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400 pt-1 space-y-0.5 font-mono">
+                              <div>MP: {inspectionElement.meltingPoint ? (langMode === 'km' ? `${toKhmerDigits(inspectionElement.meltingPoint)} K` : `${inspectionElement.meltingPoint} K`) : 'N/A'}</div>
+                              <div>BP: {inspectionElement.boilingPoint ? (langMode === 'km' ? `${toKhmerDigits(inspectionElement.boilingPoint)} K` : `${inspectionElement.boilingPoint} K`) : 'N/A'}</div>
+                            </div>
                           </div>
-                          <div>
-                            <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'សភាពបច្ចុប្បន្ន' : 'Phase'}</span>
-                            <span className="font-bold capitalize" style={{ color: inspectPhaseColor }}>{inspectPhase}</span>
-                          </div>
-                          <div>
-                            <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'ខួប / ក្រុម' : 'Period / Grp'}</span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">P{inspectionElement.period} / G{inspectionElement.group}</span>
-                          </div>
-                          <div>
-                            <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'រកឃើញ' : 'Discovered'}</span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{inspectionElement.yearDiscovered}</span>
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Right: Electron configuration & click action */}
-                      <div className="w-[165px] flex-shrink-0 flex flex-col justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50">
-                        <div className="space-y-1.5">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            {langMode === 'km' ? 'ទម្រង់អេឡិចត្រុង' : 'Configuration'}
-                          </div>
-                          <div className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400 break-words leading-snug">
-                            {inspectionElement.electronConfiguration}
-                          </div>
-                          <div className="text-[10px] text-slate-500 dark:text-slate-400 pt-1 space-y-0.5">
-                            <div>MP: {inspectionElement.meltingPoint ? `${inspectionElement.meltingPoint} K` : 'N/A'}</div>
-                            <div>BP: {inspectionElement.boilingPoint ? `${inspectionElement.boilingPoint} K` : 'N/A'}</div>
-                          </div>
+                          <button
+                            onClick={() => setActiveElement(inspectionElement)}
+                            className="w-full mt-2 py-1 px-2 rounded-md bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer"
+                          >
+                            <span>{langMode === 'km' ? 'ព័ត៌មានលម្អិត' : 'Full Details'}</span>
+                            <ArrowRight size={12} />
+                          </button>
                         </div>
-
-                        <button
-                          onClick={() => setActiveElement(inspectionElement)}
-                          className="w-full mt-2 py-1 px-2 rounded-md bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer"
-                        >
-                          <span>{langMode === 'km' ? 'ព័ត៌មានលម្អិត' : 'Full Details'}</span>
-                          <ArrowRight size={12} />
-                        </button>
                       </div>
                     </div>
 
@@ -1029,13 +1059,13 @@ export const PeriodicTable: React.FC = () => {
                     <div
                       style={{ gridColumnStart: 4, gridRowStart: 7 }}
                       onClick={() => setSelectedCategory(selectedCategory === 'lanthanide' ? 'all' : 'lanthanide')}
-                      className="flex flex-col items-center justify-between w-[68px] h-[80px] p-1.5 rounded-lg border border-dashed border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 text-center cursor-pointer hover:bg-fuchsia-500/20 transition-all select-none group"
+                      className="flex flex-col items-center justify-between w-full h-full pt-1.5 px-1.5 pb-1 rounded-lg border border-dashed border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 text-center cursor-pointer hover:bg-fuchsia-500/20 transition-all select-none group"
                       title="Lanthanoids (57-71)"
                     >
-                      <span className="text-[9px] font-bold font-mono text-fuchsia-500">{langMode === 'km' ? '៥៧-៧១' : '57-71'}</span>
+                      <span className="text-[10px] font-bold font-mono text-fuchsia-500">{langMode === 'km' ? '៥៧-៧១' : '57-71'}</span>
                       <div className="my-auto">
-                        <div className="text-sm font-black">La-Lu</div>
-                        <div className="text-[8px] font-medium truncate max-w-full leading-tight">
+                        <div className="text-sm font-black tracking-tight">La-Lu</div>
+                        <div className="text-[8.5px] font-medium truncate max-w-full leading-tight">
                           {langMode === 'km' ? 'ឡង់តាណូអ៊ីត' : 'Lanthanoids'}
                         </div>
                       </div>
@@ -1046,13 +1076,13 @@ export const PeriodicTable: React.FC = () => {
                     <div
                       style={{ gridColumnStart: 4, gridRowStart: 8 }}
                       onClick={() => setSelectedCategory(selectedCategory === 'actinide' ? 'all' : 'actinide')}
-                      className="flex flex-col items-center justify-between w-[68px] h-[80px] p-1.5 rounded-lg border border-dashed border-pink-500/50 bg-pink-500/10 text-pink-600 dark:text-pink-400 text-center cursor-pointer hover:bg-pink-500/20 transition-all select-none group"
+                      className="flex flex-col items-center justify-between w-full h-full pt-1.5 px-1.5 pb-1 rounded-lg border border-dashed border-pink-500/50 bg-pink-500/10 text-pink-600 dark:text-pink-400 text-center cursor-pointer hover:bg-pink-500/20 transition-all select-none group"
                       title="Actinoids (89-103)"
                     >
-                      <span className="text-[9px] font-bold font-mono text-pink-500">{langMode === 'km' ? '៨៩-១០៣' : '89-103'}</span>
+                      <span className="text-[10px] font-bold font-mono text-pink-500">{langMode === 'km' ? '៨៩-១០៣' : '89-103'}</span>
                       <div className="my-auto">
-                        <div className="text-sm font-black">Ac-Lr</div>
-                        <div className="text-[8px] font-medium truncate max-w-full leading-tight">
+                        <div className="text-sm font-black tracking-tight">Ac-Lr</div>
+                        <div className="text-[8.5px] font-medium truncate max-w-full leading-tight">
                           {langMode === 'km' ? 'អាក់ទីណូអ៊ីត' : 'Actinoids'}
                         </div>
                       </div>
@@ -1071,7 +1101,7 @@ export const PeriodicTable: React.FC = () => {
                     <div
                       style={{ gridColumnStart: 1, gridColumnEnd: 5, gridRowStart: 10 }}
                       onClick={() => setSelectedCategory(selectedCategory === 'lanthanide' ? 'all' : 'lanthanide')}
-                      className="flex items-center justify-between px-3 py-2 rounded-lg border border-fuchsia-500/40 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300 cursor-pointer transition-all select-none group relative overflow-hidden"
+                      className="flex items-center justify-between px-3 py-2 w-full h-full rounded-lg border border-fuchsia-500/40 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300 cursor-pointer transition-all select-none group relative overflow-hidden"
                       title="Click to filter Lanthanides"
                     >
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-fuchsia-500" />
@@ -1094,7 +1124,7 @@ export const PeriodicTable: React.FC = () => {
                     <div
                       style={{ gridColumnStart: 1, gridColumnEnd: 5, gridRowStart: 11 }}
                       onClick={() => setSelectedCategory(selectedCategory === 'actinide' ? 'all' : 'actinide')}
-                      className="flex items-center justify-between px-3 py-2 rounded-lg border border-pink-500/40 bg-pink-500/10 hover:bg-pink-500/20 text-pink-700 dark:text-pink-300 cursor-pointer transition-all select-none group relative overflow-hidden"
+                      className="flex items-center justify-between px-3 py-2 w-full h-full rounded-lg border border-pink-500/40 bg-pink-500/10 hover:bg-pink-500/20 text-pink-700 dark:text-pink-300 cursor-pointer transition-all select-none group relative overflow-hidden"
                       title="Click to filter Actinides"
                     >
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-pink-500" />
@@ -1597,10 +1627,14 @@ export const PeriodicTable: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60">
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center border font-mono font-black ${
+                  className={`relative overflow-hidden w-16 h-16 rounded-2xl flex flex-col items-center justify-center border font-mono font-black ${
                     getElementCategoryMeta(activeElement.category).bgClass
                   } ${getElementCategoryMeta(activeElement.category).borderClass}`}
                 >
+                  <div
+                    className="absolute top-0 left-0 right-0 h-[3px]"
+                    style={{ backgroundColor: getElementCategoryMeta(activeElement.category).colorHex }}
+                  />
                   <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-none">
                     {langMode === 'km' ? toKhmerDigits(activeElement.number) : activeElement.number}
                   </span>
