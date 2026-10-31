@@ -168,13 +168,20 @@ export const PeriodicTable: React.FC = () => {
     return CHEMICAL_ELEMENTS.find(el => el.number === compareB) || CHEMICAL_ELEMENTS[5];
   }, [compareB]);
 
+  // Atomic mass formatting helper
+  const formatMass = (mass: number): string => {
+    if (Number.isInteger(mass)) return String(mass);
+    const rounded = Math.round(mass * 1000) / 1000;
+    return String(rounded);
+  };
+
   // Bohr atomic model SVG generator
-  const renderBohrModel = (element: ChemicalElement) => {
-    const size = 260;
+  const renderBohrModel = (element: ChemicalElement, size: number = 260) => {
     const center = size / 2;
-    const nucleusRadius = 18;
-    const minOrbitRadius = 32;
-    const maxOrbitRadius = 114;
+    const isCompact = size < 180;
+    const nucleusRadius = isCompact ? Math.max(10, size * 0.08) : 18;
+    const minOrbitRadius = isCompact ? Math.max(18, size * 0.16) : 32;
+    const maxOrbitRadius = isCompact ? Math.max(42, size * 0.44) : 114;
     const numShells = element.shells.length;
 
     return (
@@ -191,7 +198,7 @@ export const PeriodicTable: React.FC = () => {
               numShells === 1
                 ? (minOrbitRadius + maxOrbitRadius) / 2
                 : minOrbitRadius + (shellIdx / (numShells - 1)) * (maxOrbitRadius - minOrbitRadius);
-            const electronRadius = count > 20 ? 2.7 : 3.5;
+            const electronRadius = isCompact ? (count > 20 ? 1.8 : 2.2) : count > 20 ? 2.7 : 3.5;
 
             return (
               <g key={`shell-${shellIdx}`}>
@@ -201,8 +208,8 @@ export const PeriodicTable: React.FC = () => {
                   r={radius}
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1"
-                  strokeDasharray="3 3"
+                  strokeWidth={isCompact ? 0.75 : 1}
+                  strokeDasharray={isCompact ? '2 2' : '3 3'}
                   className="text-cyan-500/30 dark:text-cyan-400/30"
                 />
                 {/* Electrons distributed along the ring */}
@@ -216,7 +223,7 @@ export const PeriodicTable: React.FC = () => {
                       cx={ex}
                       cy={ey}
                       r={electronRadius}
-                      className="fill-cyan-400 dark:fill-cyan-300 drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]"
+                      className="fill-cyan-400 dark:fill-cyan-300 drop-shadow-[0_0_3px_rgba(6,182,212,0.8)]"
                     />
                   );
                 })}
@@ -233,28 +240,30 @@ export const PeriodicTable: React.FC = () => {
           />
           <text
             x={center}
-            y={center + 4}
+            y={center + (isCompact ? 3.5 : 4)}
             textAnchor="middle"
-            className="text-xs font-black fill-slate-900 dark:fill-white font-mono"
+            className={`${isCompact ? 'text-[10px]' : 'text-xs'} font-black fill-slate-900 dark:fill-white font-mono`}
           >
             {element.symbol}
           </text>
         </svg>
 
         {/* Shell electron count legend */}
-        <div className="mt-3 flex items-center gap-1.5 flex-wrap justify-center">
-          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-            {langMode === 'km' ? 'ស្រទាប់អេឡិចត្រុង:' : 'Shells (K,L,M...):'}
-          </span>
-          {element.shells.map((electrons, idx) => (
-            <span
-              key={idx}
-              className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-mono font-bold border border-cyan-500/20"
-            >
-              {langMode === 'km' ? toKhmerDigits(electrons) : electrons}
+        {!isCompact && (
+          <div className="mt-3 flex items-center gap-1.5 flex-wrap justify-center">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+              {langMode === 'km' ? 'ស្រទាប់អេឡិចត្រុង:' : 'Shells (K,L,M...):'}
             </span>
-          ))}
-        </div>
+            {element.shells.map((electrons, idx) => (
+              <span
+                key={idx}
+                className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-mono font-bold border border-cyan-500/20"
+              >
+                {langMode === 'km' ? toKhmerDigits(electrons) : electrons}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
@@ -266,11 +275,22 @@ export const PeriodicTable: React.FC = () => {
     const phase = getPhaseAtKelvin(element, temperatureK);
     const isHovered = hoveredElement?.number === element.number;
     const isRelated =
-      hoveredElement &&
+      hoveredElement != null &&
       hoveredElement.number !== element.number &&
       (hoveredElement.group === element.group ||
         hoveredElement.period === element.period ||
         hoveredElement.category === element.category);
+
+    const phaseColor =
+      phase === 'gas'
+        ? 'bg-rose-500 shadow-rose-500/40'
+        : phase === 'liquid'
+        ? 'bg-sky-500 shadow-sky-500/40'
+        : phase === 'solid'
+        ? 'bg-emerald-500 shadow-emerald-500/40'
+        : 'bg-slate-400';
+
+    const displayMass = formatMass(element.atomicMass);
 
     return (
       <button
@@ -282,55 +302,69 @@ export const PeriodicTable: React.FC = () => {
           gridColumnStart: element.gridCol + 1,
           gridRowStart: element.gridRow + 1,
         }}
-        className={`group relative flex flex-col justify-between p-1.5 sm:p-2 rounded-xl transition-all duration-200 text-left border cursor-pointer select-none min-w-[56px] min-h-[64px] sm:min-w-[68px] sm:min-h-[74px] md:min-w-[76px] md:min-h-[80px] ${
+        className={`group relative flex flex-col justify-between w-[68px] h-[80px] p-1.5 rounded-lg transition-all duration-150 text-left border cursor-pointer select-none box-border overflow-hidden backdrop-blur-sm ${
           catMeta.bgClass
         } ${catMeta.borderClass} ${
           isMatching
-            ? 'opacity-100 scale-100 hover:scale-105 hover:z-20 hover:shadow-lg ' + catMeta.glowClass
-            : 'opacity-20 scale-95 hover:opacity-80'
-        } ${isHovered ? 'ring-2 ring-cyan-400 shadow-xl z-20 scale-105' : ''} ${
-          isRelated ? 'ring-1 ring-cyan-400/40' : ''
+            ? 'opacity-100 scale-100'
+            : 'opacity-20 hover:opacity-75 grayscale-[60%] hover:grayscale-0'
+        } ${
+          isHovered
+            ? 'z-30 ring-2 ring-cyan-400 shadow-xl ' + catMeta.glowClass + ' scale-[1.04] bg-white dark:bg-slate-800'
+            : ''
+        } ${
+          !isHovered && isRelated
+            ? 'ring-1 ring-cyan-400/40 bg-cyan-500/10'
+            : ''
         }`}
       >
+        {/* Top category accent bar */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[2.5px] transition-colors"
+          style={{ backgroundColor: catMeta.colorHex }}
+        />
+
         {/* Top bar: Atomic Number & State Indicator */}
-        <div className="flex items-center justify-between w-full">
-          <span className="text-[10px] sm:text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-between w-full pt-0.5">
+          <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 leading-none">
             {langMode === 'km' ? toKhmerDigits(element.number) : element.number}
           </span>
           <span
             title={`Phase at ${temperatureK} K: ${phase}`}
-            className={`w-2 h-2 rounded-full ${
-              phase === 'gas'
-                ? 'bg-rose-500'
-                : phase === 'liquid'
-                ? 'bg-sky-500'
-                : phase === 'solid'
-                ? 'bg-emerald-500'
-                : 'bg-slate-400'
-            }`}
+            className={`w-1.5 h-1.5 rounded-full ${phaseColor} shadow-sm`}
           />
         </div>
 
-        {/* Center: Symbol */}
-        <div className="my-0.5 text-center">
-          <div className="text-sm sm:text-base md:text-lg font-black tracking-tight text-slate-900 dark:text-white leading-none">
+        {/* Center: Symbol & Name */}
+        <div className="text-center my-auto w-full px-0.5">
+          <div className="text-[16px] font-black tracking-tight text-slate-900 dark:text-white leading-none">
             {element.symbol}
           </div>
-          {/* Name in Khmer, English or stacked */}
-          <div className="truncate text-[9px] sm:text-[10px] font-medium text-slate-600 dark:text-slate-300 mt-0.5 leading-tight">
+          <div className="mt-1 w-full overflow-hidden">
             {langMode === 'km' ? (
-              element.nameKm
+              <div className="text-[8.5px] font-medium text-slate-600 dark:text-slate-300 truncate leading-tight">
+                {element.nameKm}
+              </div>
             ) : langMode === 'en' ? (
-              element.nameEn
+              <div className="text-[8.5px] font-semibold text-slate-600 dark:text-slate-300 truncate leading-tight">
+                {element.nameEn}
+              </div>
             ) : (
-              <span className="block truncate">{element.nameEn}</span>
+              <div className="leading-tight">
+                <div className="text-[8px] font-semibold text-slate-700 dark:text-slate-200 truncate leading-none">
+                  {element.nameEn}
+                </div>
+                <div className="text-[7.5px] text-slate-500 dark:text-slate-400 truncate leading-none mt-0.5">
+                  {element.nameKm}
+                </div>
+              </div>
             )}
           </div>
         </div>
 
         {/* Bottom bar: Atomic Mass */}
-        <div className="text-[8px] sm:text-[9px] font-mono text-slate-500 dark:text-slate-400 text-center truncate">
-          {langMode === 'km' ? toKhmerDigits(element.atomicMass) : element.atomicMass}
+        <div className="text-[7.5px] font-mono text-slate-500 dark:text-slate-400 text-center truncate leading-none pb-0.5">
+          {langMode === 'km' ? toKhmerDigits(displayMass) : displayMass}
         </div>
       </button>
     );
@@ -613,25 +647,25 @@ export const PeriodicTable: React.FC = () => {
 
           {/* Table Zoom Controls */}
           {viewMode === 'table' && (
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
               <button
-                onClick={() => setZoom(prev => Math.max(0.7, prev - 0.1))}
+                onClick={() => setZoom(prev => Math.max(0.5, Math.round((prev - 0.1) * 100) / 100))}
                 title="Zoom Out"
-                className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all"
               >
                 <ZoomOut size={14} />
               </button>
               <button
                 onClick={() => setZoom(1.0)}
-                title="Reset Zoom"
-                className="px-1.5 text-[11px] font-mono text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                title="Reset Zoom to 100%"
+                className="px-2 py-0.5 text-xs font-mono font-bold text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 rounded-md transition-all"
               >
                 {Math.round(zoom * 100)}%
               </button>
               <button
-                onClick={() => setZoom(prev => Math.min(1.3, prev + 0.1))}
+                onClick={() => setZoom(prev => Math.min(1.5, Math.round((prev + 0.1) * 100) / 100))}
                 title="Zoom In"
-                className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all"
               >
                 <ZoomIn size={14} />
               </button>
@@ -669,115 +703,423 @@ export const PeriodicTable: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      {viewMode === 'table' && (
-        <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-sm overflow-x-auto">
-          {/* Mobile tip banner */}
-          <div className="lg:hidden mb-3 px-3.5 py-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-cyan-800 dark:text-cyan-300 flex items-center justify-between gap-2">
-            <span>
-              {langMode === 'km'
-                ? 'គន្លឹះ៖ អូសទៅឆ្វេងស្តាំដើម្បីមើលគ្រប់ក្រុមទាំង ១៨ ឬចុចប្តូរទៅទិដ្ឋភាព "កាត" ខាងលើ។'
-                : 'Tip: Swipe horizontally to explore all 18 groups, or switch to "Cards" view above.'}
-            </span>
-          </div>
+      {viewMode === 'table' && (() => {
+        const BASE_WIDTH = 1330;
+        const BASE_HEIGHT = 804;
+        const scaledWidth = Math.round(BASE_WIDTH * zoom);
+        const scaledHeight = Math.round(BASE_HEIGHT * zoom);
+        const inspectionElement = hoveredElement || activeElement || CHEMICAL_ELEMENTS[0];
+        const inspectCatMeta = getElementCategoryMeta(inspectionElement.category);
+        const inspectPhase = getPhaseAtKelvin(inspectionElement, temperatureK);
+        const inspectPhaseColor =
+          inspectPhase === 'gas'
+            ? '#f43f5e'
+            : inspectPhase === 'liquid'
+            ? '#0284c7'
+            : inspectPhase === 'solid'
+            ? '#10b981'
+            : '#94a3b8';
 
-          <div
-            style={{
-              width: `${100 * zoom}%`,
-              minWidth: `${1060 * zoom}px`,
-              transform: `scale(${zoom})`,
-              transformOrigin: 'top left',
-              transition: 'transform 0.15s ease-out',
-            }}
-          >
-            {/* 19-Column Grid Layout: Col 1 for Periods, Cols 2-19 for Groups 1-18 */}
-            <div
-              className="grid gap-1.5 sm:gap-2"
-              style={{
-                gridTemplateColumns: '36px repeat(18, minmax(54px, 1fr))',
-                gridTemplateRows: '26px repeat(7, minmax(64px, auto)) 14px repeat(2, minmax(64px, auto))',
-              }}
-            >
-              {/* Corner header: Period \ Group */}
-              <div
-                style={{ gridColumnStart: 1, gridRowStart: 1 }}
-                className="flex items-center justify-center text-[10px] font-mono font-bold text-slate-400 select-none pb-1"
-                title="Period (Row) / Group (Column)"
-              >
-                P \ G
+        return (
+          <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-sm space-y-4">
+            {/* Table Toolbar: State Legend & Zoom Bar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs border-b border-slate-100 dark:border-slate-800 pb-3">
+              {/* State of matter legend */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="font-bold text-slate-500 dark:text-slate-400">
+                  {langMode === 'km' ? 'សភាពរូបធាតុ:' : 'States of Matter:'}
+                </span>
+                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+                  <span>{langMode === 'km' ? 'រឹង (Solid)' : 'Solid'}</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-sky-500 shadow-sm shadow-sky-500/50" />
+                  <span>{langMode === 'km' ? 'រាវ (Liquid)' : 'Liquid'}</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50" />
+                  <span>{langMode === 'km' ? 'ឧស្ម័ន (Gas)' : 'Gas'}</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-slate-400" />
+                  <span>{langMode === 'km' ? 'មិនទាន់ស្គាល់' : 'Unknown'}</span>
+                </span>
               </div>
 
-              {/* Group Numbers 1-18 along row 1 */}
-              {Array.from({ length: 18 }).map((_, idx) => (
-                <div
-                  key={`grp-${idx + 1}`}
-                  style={{ gridColumnStart: idx + 2, gridRowStart: 1 }}
-                  className="text-center text-[10px] font-mono font-bold text-slate-400 pb-1 select-none"
-                >
-                  {langMode === 'km' ? toKhmerDigits(idx + 1) : idx + 1}
+              {/* Table Zoom Controls */}
+              <div className="flex items-center gap-2 flex-wrap self-end md:self-auto">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  {langMode === 'km' ? 'ពង្រីក:' : 'Zoom:'}
+                </span>
+
+                {/* Quick Presets */}
+                <div className="flex items-center gap-1">
+                  {[
+                    { label: '50%', val: 0.5 },
+                    { label: '70%', val: 0.7 },
+                    { label: '85%', val: 0.85 },
+                    { label: '100%', val: 1.0 },
+                    { label: '125%', val: 1.25 },
+                    { label: '150%', val: 1.5 },
+                  ].map(p => (
+                    <button
+                      key={p.val}
+                      onClick={() => setZoom(p.val)}
+                      className={`px-2 py-1 rounded-lg text-[11px] font-mono font-bold transition-all ${
+                        Math.abs(zoom - p.val) < 0.02
+                          ? 'bg-cyan-600 text-white shadow-sm'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
                 </div>
-              ))}
 
-              {/* Period Numbers 1-7 along col 1 */}
-              {Array.from({ length: 7 }).map((_, pIdx) => (
-                <div
-                  key={`period-${pIdx + 1}`}
-                  style={{ gridColumnStart: 1, gridRowStart: pIdx + 2 }}
-                  className="flex flex-col items-center justify-center rounded-xl bg-slate-100/60 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 font-mono text-[11px] font-bold border border-transparent select-none"
-                  title={`Period ${pIdx + 1} (${langMode === 'km' ? `ខួបទី ${toKhmerDigits(pIdx + 1)}` : `Period ${pIdx + 1}`})`}
-                >
-                  <span className="text-[9px] uppercase tracking-wider text-slate-400">P</span>
-                  <span>{langMode === 'km' ? toKhmerDigits(pIdx + 1) : pIdx + 1}</span>
+                {/* Stepper with reset */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <button
+                    onClick={() => setZoom(prev => Math.max(0.5, Math.round((prev - 0.1) * 100) / 100))}
+                    title="Zoom Out"
+                    className="p-1 rounded text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all"
+                  >
+                    <ZoomOut size={13} />
+                  </button>
+                  <button
+                    onClick={() => setZoom(1.0)}
+                    title="Reset Zoom to 100%"
+                    className="px-1.5 text-[11px] font-mono font-bold text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 min-w-[38px] text-center"
+                  >
+                    {Math.round(zoom * 100)}%
+                  </button>
+                  <button
+                    onClick={() => setZoom(prev => Math.min(1.5, Math.round((prev + 0.1) * 100) / 100))}
+                    title="Zoom In"
+                    className="p-1 rounded text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all"
+                  >
+                    <ZoomIn size={13} />
+                  </button>
+                  <button
+                    onClick={() => setZoom(1.0)}
+                    title="Reset"
+                    className="p-1 text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all border-l border-slate-200 dark:border-slate-700 ml-0.5 pl-1"
+                  >
+                    <RotateCcw size={12} />
+                  </button>
                 </div>
-              ))}
-
-              {/* Render all 118 Elements */}
-              {CHEMICAL_ELEMENTS.map(element => renderElementCell(element))}
-
-              {/* Lanthanide Placeholder in Group 3 Period 6 (col 4, row 7) */}
-              <div
-                style={{ gridColumnStart: 4, gridRowStart: 7 }}
-                onClick={() => setSelectedCategory('lanthanide')}
-                className="flex flex-col items-center justify-center p-1.5 rounded-xl border border-dashed border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 text-center cursor-pointer hover:bg-fuchsia-500/20 transition-all select-none"
-              >
-                <span className="text-[10px] font-bold font-mono">{langMode === 'km' ? '៥៧-៧១' : '57-71'}</span>
-                <span className="text-[10px] font-bold">La-Lu</span>
-                <span className="text-[8px]">{langMode === 'km' ? 'ឡង់តាណូអ៊ីត' : 'Lanthanoids'}</span>
               </div>
+            </div>
 
-              {/* Actinide Placeholder in Group 3 Period 7 (col 4, row 8) */}
-              <div
-                style={{ gridColumnStart: 4, gridRowStart: 8 }}
-                onClick={() => setSelectedCategory('actinide')}
-                className="flex flex-col items-center justify-center p-1.5 rounded-xl border border-dashed border-pink-500/50 bg-pink-500/10 text-pink-600 dark:text-pink-400 text-center cursor-pointer hover:bg-pink-500/20 transition-all select-none"
-              >
-                <span className="text-[10px] font-bold font-mono">{langMode === 'km' ? '៨៩-១០៣' : '89-103'}</span>
-                <span className="text-[10px] font-bold">Ac-Lr</span>
-                <span className="text-[8px]">{langMode === 'km' ? 'អាក់ទីណូអ៊ីត' : 'Actinoids'}</span>
-              </div>
+            {/* Mobile tip banner */}
+            <div className="lg:hidden px-3.5 py-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-cyan-800 dark:text-cyan-300 flex items-center justify-between gap-2">
+              <span>
+                {langMode === 'km'
+                  ? 'គន្លឹះ៖ អូសទៅឆ្វេងស្តាំដើម្បីមើលគ្រប់ក្រុមទាំង ១៨ ឬជ្រើសរើសការពង្រីក ៥០% ឬ ៧០%។'
+                  : 'Tip: Swipe horizontally to explore all 18 groups, or set zoom to 50% or 70% to view more.'}
+              </span>
+            </div>
 
-              {/* Row 9 is an aesthetic gap row */}
+            {/* Scrollable Container with exact scaled dimensions */}
+            <div className="w-full overflow-x-auto pb-4 pt-1 px-0.5 custom-scrollbar">
               <div
-                style={{ gridColumnStart: 1, gridColumnEnd: 20, gridRowStart: 9 }}
-                className="h-3"
-              />
+                style={{
+                  width: `${scaledWidth}px`,
+                  height: `${scaledHeight}px`,
+                  minWidth: `${scaledWidth}px`,
+                  minHeight: `${scaledHeight}px`,
+                  margin: '0 auto',
+                  position: 'relative',
+                  transition: 'width 0.15s ease-out, height 0.15s ease-out',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${BASE_WIDTH}px`,
+                    height: `${BASE_HEIGHT}px`,
+                    transform: `scale(${zoom})`,
+                    transformOrigin: 'top left',
+                    transition: 'transform 0.15s ease-out',
+                  }}
+                >
+                  {/* Strict CSS Grid: 19 columns x 11 rows */}
+                  <div
+                    className="select-none"
+                    style={{
+                      width: `${BASE_WIDTH}px`,
+                      height: `${BASE_HEIGHT}px`,
+                      display: 'grid',
+                      gap: '4px',
+                      gridTemplateColumns: '34px repeat(18, 68px)',
+                      gridTemplateRows: '28px repeat(7, 80px) 16px repeat(2, 80px)',
+                    }}
+                  >
+                    {/* Corner Header: Period \ Group (Row 1, Col 1) */}
+                    <div
+                      style={{ gridColumnStart: 1, gridRowStart: 1 }}
+                      className="flex items-center justify-center rounded-lg bg-slate-100/70 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800/60 text-[10px] font-mono font-bold text-slate-400 select-none"
+                      title="Period (Row) / Group (Column)"
+                    >
+                      P \ G
+                    </div>
 
-              {/* Bottom row labels for Lanthanide and Actinide series */}
-              <div
-                style={{ gridColumnStart: 1, gridColumnEnd: 5, gridRowStart: 10 }}
-                className="flex items-center justify-end pr-2 text-xs font-bold text-fuchsia-600 dark:text-fuchsia-400 select-none text-right"
-              >
-                {langMode === 'km' ? 'ឡង់តាណូអ៊ីត (៥៧-៧១)' : 'Lanthanides (57-71)'}
-              </div>
-              <div
-                style={{ gridColumnStart: 1, gridColumnEnd: 5, gridRowStart: 11 }}
-                className="flex items-center justify-end pr-2 text-xs font-bold text-pink-600 dark:text-pink-400 select-none text-right"
-              >
-                {langMode === 'km' ? 'អាក់ទីណូអ៊ីត (៨៩-១០៣)' : 'Actinides (89-103)'}
+                    {/* Group Numbers 1-18 along Row 1 (Cols 2-19) */}
+                    {Array.from({ length: 18 }).map((_, idx) => {
+                      const groupNum = idx + 1;
+                      const isHoveredGroup = hoveredElement?.group === groupNum;
+                      return (
+                        <div
+                          key={`grp-${groupNum}`}
+                          style={{ gridColumnStart: idx + 2, gridRowStart: 1 }}
+                          className={`flex items-center justify-center rounded-lg border font-mono text-[11px] font-bold select-none transition-colors duration-150 ${
+                            isHoveredGroup
+                              ? 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/40 ring-1 ring-cyan-400/40'
+                              : 'bg-slate-100/70 dark:bg-slate-800/50 border-slate-200/60 dark:border-slate-800/60 text-slate-500 dark:text-slate-400'
+                          }`}
+                          title={`Group ${groupNum}`}
+                        >
+                          {langMode === 'km' ? toKhmerDigits(groupNum) : groupNum}
+                        </div>
+                      );
+                    })}
+
+                    {/* Period Numbers 1-7 along Col 1 (Rows 2-8) */}
+                    {Array.from({ length: 7 }).map((_, pIdx) => {
+                      const periodNum = pIdx + 1;
+                      const isHoveredPeriod = hoveredElement?.period === periodNum;
+                      return (
+                        <div
+                          key={`period-${periodNum}`}
+                          style={{ gridColumnStart: 1, gridRowStart: pIdx + 2 }}
+                          className={`flex flex-col items-center justify-center rounded-lg border font-mono font-bold select-none transition-colors duration-150 ${
+                            isHoveredPeriod
+                              ? 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/40 ring-1 ring-cyan-400/40'
+                              : 'bg-slate-100/70 dark:bg-slate-800/50 border-slate-200/60 dark:border-slate-800/60 text-slate-500 dark:text-slate-400'
+                          }`}
+                          title={`Period ${periodNum} (${langMode === 'km' ? `ខួបទី ${toKhmerDigits(periodNum)}` : `Period ${periodNum}`})`}
+                        >
+                          <span className="text-[9px] uppercase tracking-wider text-slate-400 leading-none">P</span>
+                          <span className="text-xs leading-none mt-1">
+                            {langMode === 'km' ? toKhmerDigits(periodNum) : periodNum}
+                          </span>
+                        </div>
+                      );
+                    })}
+
+                    {/* Center Live Element Inspector Cockpit (Rows 2-4, Cols 4-13) */}
+                    <div
+                      style={{
+                        gridColumnStart: 4,
+                        gridColumnEnd: 14,
+                        gridRowStart: 2,
+                        gridRowEnd: 5,
+                      }}
+                      className="flex items-stretch rounded-xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-800/80 shadow-md p-3.5 gap-4 backdrop-blur-sm relative overflow-hidden"
+                    >
+                      {/* Category top accent line */}
+                      <div
+                        className="absolute top-0 left-0 right-0 h-1 transition-colors duration-200"
+                        style={{ backgroundColor: inspectCatMeta.colorHex }}
+                      />
+
+                      {/* Left: Compact Bohr Model */}
+                      <div className="w-[170px] flex-shrink-0 flex flex-col items-center justify-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
+                        {renderBohrModel(inspectionElement, 130)}
+                        <div className="mt-1.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 text-center">
+                          {inspectionElement.shells.length} {langMode === 'km' ? 'ស្រទាប់' : 'Shells'} ({inspectionElement.shells.join(', ')})
+                        </div>
+                      </div>
+
+                      {/* Middle: Element Identity & Details */}
+                      <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className="text-xs font-mono font-bold px-2 py-0.5 rounded-md"
+                              style={{
+                                backgroundColor: `${inspectCatMeta.colorHex}20`,
+                                color: inspectCatMeta.colorHex,
+                              }}
+                            >
+                              #{langMode === 'km' ? toKhmerDigits(inspectionElement.number) : inspectionElement.number}
+                            </span>
+                            <span
+                              className="text-xs font-semibold px-2 py-0.5 rounded-md"
+                              style={{
+                                backgroundColor: `${inspectCatMeta.colorHex}15`,
+                                color: inspectCatMeta.colorHex,
+                              }}
+                            >
+                              {langMode === 'km' ? inspectCatMeta.nameKm : inspectCatMeta.nameEn}
+                            </span>
+                            <span className="text-[11px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                              {inspectionElement.block}-block
+                            </span>
+                          </div>
+
+                          <div className="flex items-baseline gap-3 mt-1.5">
+                            <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                              {inspectionElement.symbol}
+                            </span>
+                            <div className="leading-tight">
+                              <div className="text-base font-bold text-slate-900 dark:text-white">
+                                {inspectionElement.nameEn}
+                              </div>
+                              <div className="text-xs font-medium text-cyan-600 dark:text-cyan-400">
+                                {inspectionElement.nameKm}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-1 text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                            {langMode === 'km' ? inspectionElement.summaryKm : inspectionElement.summaryEn}
+                          </div>
+                        </div>
+
+                        {/* Quick metric row */}
+                        <div className="grid grid-cols-4 gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 text-[11px] font-mono">
+                          <div>
+                            <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'ម៉ាស់អាតូម' : 'Weight'}</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">{inspectionElement.atomicMass}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'សភាពបច្ចុប្បន្ន' : 'Phase'}</span>
+                            <span className="font-bold capitalize" style={{ color: inspectPhaseColor }}>{inspectPhase}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'ខួប / ក្រុម' : 'Period / Grp'}</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">P{inspectionElement.period} / G{inspectionElement.group}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-sans text-slate-400 font-bold uppercase">{langMode === 'km' ? 'រកឃើញ' : 'Discovered'}</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{inspectionElement.yearDiscovered}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Electron configuration & click action */}
+                      <div className="w-[165px] flex-shrink-0 flex flex-col justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50">
+                        <div className="space-y-1.5">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            {langMode === 'km' ? 'ទម្រង់អេឡិចត្រុង' : 'Configuration'}
+                          </div>
+                          <div className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400 break-words leading-snug">
+                            {inspectionElement.electronConfiguration}
+                          </div>
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400 pt-1 space-y-0.5">
+                            <div>MP: {inspectionElement.meltingPoint ? `${inspectionElement.meltingPoint} K` : 'N/A'}</div>
+                            <div>BP: {inspectionElement.boilingPoint ? `${inspectionElement.boilingPoint} K` : 'N/A'}</div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setActiveElement(inspectionElement)}
+                          className="w-full mt-2 py-1 px-2 rounded-md bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer"
+                        >
+                          <span>{langMode === 'km' ? 'ព័ត៌មានលម្អិត' : 'Full Details'}</span>
+                          <ArrowRight size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Render all 118 Elements */}
+                    {CHEMICAL_ELEMENTS.map(element => renderElementCell(element))}
+
+                    {/* Lanthanide Placeholder in Group 3 Period 6 (col 4, row 7) */}
+                    <div
+                      style={{ gridColumnStart: 4, gridRowStart: 7 }}
+                      onClick={() => setSelectedCategory(selectedCategory === 'lanthanide' ? 'all' : 'lanthanide')}
+                      className="flex flex-col items-center justify-between w-[68px] h-[80px] p-1.5 rounded-lg border border-dashed border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 text-center cursor-pointer hover:bg-fuchsia-500/20 transition-all select-none group"
+                      title="Lanthanoids (57-71)"
+                    >
+                      <span className="text-[9px] font-bold font-mono text-fuchsia-500">{langMode === 'km' ? '៥៧-៧១' : '57-71'}</span>
+                      <div className="my-auto">
+                        <div className="text-sm font-black">La-Lu</div>
+                        <div className="text-[8px] font-medium truncate max-w-full leading-tight">
+                          {langMode === 'km' ? 'ឡង់តាណូអ៊ីត' : 'Lanthanoids'}
+                        </div>
+                      </div>
+                      <span className="text-[8px] uppercase tracking-wider font-mono opacity-70">f-block</span>
+                    </div>
+
+                    {/* Actinide Placeholder in Group 3 Period 7 (col 4, row 8) */}
+                    <div
+                      style={{ gridColumnStart: 4, gridRowStart: 8 }}
+                      onClick={() => setSelectedCategory(selectedCategory === 'actinide' ? 'all' : 'actinide')}
+                      className="flex flex-col items-center justify-between w-[68px] h-[80px] p-1.5 rounded-lg border border-dashed border-pink-500/50 bg-pink-500/10 text-pink-600 dark:text-pink-400 text-center cursor-pointer hover:bg-pink-500/20 transition-all select-none group"
+                      title="Actinoids (89-103)"
+                    >
+                      <span className="text-[9px] font-bold font-mono text-pink-500">{langMode === 'km' ? '៨៩-១០៣' : '89-103'}</span>
+                      <div className="my-auto">
+                        <div className="text-sm font-black">Ac-Lr</div>
+                        <div className="text-[8px] font-medium truncate max-w-full leading-tight">
+                          {langMode === 'km' ? 'អាក់ទីណូអ៊ីត' : 'Actinoids'}
+                        </div>
+                      </div>
+                      <span className="text-[8px] uppercase tracking-wider font-mono opacity-70">f-block</span>
+                    </div>
+
+                    {/* Row 9 is an aesthetic gap row with divider line */}
+                    <div
+                      style={{ gridColumnStart: 1, gridColumnEnd: 20, gridRowStart: 9 }}
+                      className="flex items-center justify-center select-none"
+                    >
+                      <div className="w-full border-t border-dashed border-slate-200 dark:border-slate-800" />
+                    </div>
+
+                    {/* Bottom row labels for Lanthanide and Actinide series (Cols 1-4, Rows 10 and 11) */}
+                    <div
+                      style={{ gridColumnStart: 1, gridColumnEnd: 5, gridRowStart: 10 }}
+                      onClick={() => setSelectedCategory(selectedCategory === 'lanthanide' ? 'all' : 'lanthanide')}
+                      className="flex items-center justify-between px-3 py-2 rounded-lg border border-fuchsia-500/40 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300 cursor-pointer transition-all select-none group relative overflow-hidden"
+                      title="Click to filter Lanthanides"
+                    >
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-fuchsia-500" />
+                      <div className="pl-1">
+                        <div className="text-xs font-bold flex items-center gap-1.5">
+                          <span>{langMode === 'km' ? 'ឡង់តាណូអ៊ីត' : 'Lanthanide Series'}</span>
+                          <span className="text-[10px] font-mono font-normal opacity-70">
+                            ({langMode === 'km' ? '៥៧-៧១' : '57-71'})
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-fuchsia-600/80 dark:text-fuchsia-400/80 mt-0.5">
+                          {langMode === 'km' ? 'ធាតុលោហៈកម្រ (4f subshell)' : 'Rare earth metals (4f orbitals)'}
+                        </div>
+                      </div>
+                      <div className="text-right font-mono font-bold text-xs text-fuchsia-600 dark:text-fuchsia-400">
+                        La - Lu
+                      </div>
+                    </div>
+
+                    <div
+                      style={{ gridColumnStart: 1, gridColumnEnd: 5, gridRowStart: 11 }}
+                      onClick={() => setSelectedCategory(selectedCategory === 'actinide' ? 'all' : 'actinide')}
+                      className="flex items-center justify-between px-3 py-2 rounded-lg border border-pink-500/40 bg-pink-500/10 hover:bg-pink-500/20 text-pink-700 dark:text-pink-300 cursor-pointer transition-all select-none group relative overflow-hidden"
+                      title="Click to filter Actinides"
+                    >
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-pink-500" />
+                      <div className="pl-1">
+                        <div className="text-xs font-bold flex items-center gap-1.5">
+                          <span>{langMode === 'km' ? 'អាក់ទីណូអ៊ីត' : 'Actinide Series'}</span>
+                          <span className="text-[10px] font-mono font-normal opacity-70">
+                            ({langMode === 'km' ? '៨៩-១០៣' : '89-103'})
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-pink-600/80 dark:text-pink-400/80 mt-0.5">
+                          {langMode === 'km' ? 'ធាតុវិទ្យុសកម្មធ្ងន់ (5f subshell)' : 'Radioactive heavy metals (5f orbitals)'}
+                        </div>
+                      </div>
+                      <div className="text-right font-mono font-bold text-xs text-pink-600 dark:text-pink-400">
+                        Ac - Lr
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Card Grid View (Alternative Responsive View) */}
       {viewMode === 'cards' && (
@@ -785,42 +1127,65 @@ export const PeriodicTable: React.FC = () => {
           {filteredElements.map(el => {
             const catMeta = getElementCategoryMeta(el.category);
             const phase = getPhaseAtKelvin(el, temperatureK);
+            const displayMass = formatMass(el.atomicMass);
 
             return (
               <button
                 key={el.number}
                 onClick={() => setActiveElement(el)}
-                className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer ${
+                className={`relative p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-150 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer overflow-hidden backdrop-blur-sm ${
                   catMeta.bgClass
                 } ${catMeta.borderClass}`}
               >
-                <div className="flex items-center justify-between">
+                {/* Top category accent bar */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-[3px]"
+                  style={{ backgroundColor: catMeta.colorHex }}
+                />
+
+                <div className="flex items-center justify-between pt-1">
                   <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
                     #{langMode === 'km' ? toKhmerDigits(el.number) : el.number}
                   </span>
-                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded-md bg-white/40 dark:bg-black/20">
-                    {el.block}-block
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      title={`Phase at ${temperatureK} K: ${phase}`}
+                      className={`w-2 h-2 rounded-full ${
+                        phase === 'gas'
+                          ? 'bg-rose-500'
+                          : phase === 'liquid'
+                          ? 'bg-sky-500'
+                          : phase === 'solid'
+                          ? 'bg-emerald-500'
+                          : 'bg-slate-400'
+                      }`}
+                    />
+                    <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded-md bg-white/50 dark:bg-black/20 text-slate-600 dark:text-slate-300">
+                      {el.block}-block
+                    </span>
+                  </div>
                 </div>
 
-                <div className="my-3 text-center">
-                  <div className="text-2xl font-black text-slate-900 dark:text-white">
+                <div className="my-2.5 text-center">
+                  <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     {el.symbol}
                   </div>
-                  <div className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">
+                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1 truncate">
                     {langMode === 'km' ? el.nameKm : el.nameEn}
                   </div>
                   {langMode === 'both' && (
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                       {el.nameKm}
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-1 pt-2 border-t border-slate-200/40 dark:border-slate-700/40 text-[11px] font-mono text-slate-600 dark:text-slate-400">
+                <div className="space-y-1 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 text-[11px] font-mono text-slate-600 dark:text-slate-400">
                   <div className="flex justify-between">
                     <span>{langMode === 'km' ? 'ម៉ាស់:' : 'Mass:'}</span>
-                    <span className="font-bold">{el.atomicMass}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      {langMode === 'km' ? toKhmerDigits(displayMass) : displayMass}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>{langMode === 'km' ? 'សភាព:' : 'Phase:'}</span>
