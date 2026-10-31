@@ -991,10 +991,9 @@ export const KhmerLunarCalendar: React.FC = () => {
       {/* TAB 1: MONTHLY CALENDAR VIEW                         */}
       {/* ==================================================== */}
       {activeTab === 'calendar' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Main Interactive Grid (8/12) */}
-            <div className="lg:col-span-8 p-4 sm:p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+        <div className="space-y-8">
+          {/* Main Interactive Calendar Grid (Full Width & Spacious) */}
+          <div className="w-full p-4 sm:p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 sm:space-y-6">
               {/* Controls Toolbar */}
               <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
                 <div className="flex flex-wrap items-center gap-2">
@@ -1076,17 +1075,17 @@ export const KhmerLunarCalendar: React.FC = () => {
               </div>
 
               {/* Month Header Banner with Lunisolar Proclamation */}
-              <div className="py-3 px-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-center space-y-1">
-                <h3 className="font-khmer text-lg sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
+              <div className="py-4 px-5 sm:px-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-center space-y-1.5">
+                <h3 className="font-khmer text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white flex items-center justify-center gap-2 flex-wrap">
                   <span>
                     ខែ{GREGORIAN_MONTHS[calMonth].km} ឆ្នាំ{toKhmerNumber(calYear)}
                   </span>
-                  <span className="text-sm sm:text-base font-sans font-normal text-slate-400">
+                  <span className="text-base sm:text-lg md:text-xl font-sans font-normal text-slate-400">
                     ({GREGORIAN_MONTHS[calMonth].en} {calYear})
                   </span>
                 </h3>
                 {activeKhmerMonthsInView.length > 0 && (
-                  <p className="text-xs text-emerald-700 dark:text-emerald-400 font-khmer font-semibold flex items-center justify-center flex-wrap gap-x-2 gap-y-0.5">
+                  <p className="text-xs sm:text-sm text-emerald-700 dark:text-emerald-400 font-khmer font-semibold flex items-center justify-center flex-wrap gap-x-2 gap-y-0.5">
                     <span>
                       ត្រូវនឹងខែចន្ទគតិ: {activeKhmerMonthsInView.map(m => `ខែ${m}`).join(' - ')}
                     </span>
@@ -1097,35 +1096,35 @@ export const KhmerLunarCalendar: React.FC = () => {
                     )}
                   </p>
                 )}
-                <div className="flex items-center justify-center gap-3 pt-1 text-[11px] font-khmer text-slate-500 dark:text-slate-400">
-                  <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
-                    <DharmaWheelIcon size={12} className="text-amber-500" />
+                <div className="flex items-center justify-center gap-3 pt-1 text-xs font-khmer text-slate-500 dark:text-slate-400">
+                  <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold">
+                    <DharmaWheelIcon size={13} className="text-amber-500" />
                     ថ្ងៃសីល: {toKhmerNumber(currentMonthSilDays.length)} ថ្ងៃ
                   </span>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold">
-                    <Award size={12} className="text-rose-500" />
+                  <span className="inline-flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-bold">
+                    <Award size={13} className="text-rose-500" />
                     ឈប់សម្រាក: {toKhmerNumber(currentMonthHolidays.length)} ថ្ងៃ
                   </span>
                 </div>
               </div>
 
               {/* Weekday Column Headers */}
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center font-khmer">
+              <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5 text-center font-khmer">
                 {WEEKDAYS.map((wd, idx) => (
                   <div
                     key={idx}
-                    className={`py-2 px-1 rounded-xl border text-xs font-bold tracking-wide ${wd.headerColor}`}
+                    className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-bold tracking-wide shadow-xs ${wd.headerColor}`}
                   >
                     <span className="hidden sm:inline">{wd.km}</span>
                     <span className="sm:hidden">{wd.shortKm}</span>
-                    <span className="block text-[10px] font-sans font-normal opacity-75">{wd.en}</span>
+                    <span className="block text-[10px] sm:text-xs font-sans font-normal opacity-75">{wd.en}</span>
                   </div>
                 ))}
               </div>
 
               {/* Modern Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1 sm:gap-2">
+              <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
                 {calendarGrid.map((day, idx) => {
                   const lunar = day.lunar;
                   const isSil = lunar?.isSilDay;
@@ -1141,26 +1140,26 @@ export const KhmerLunarCalendar: React.FC = () => {
                       key={idx}
                       type="button"
                       onClick={() => handleSelectDay(day.dateIso)}
-                      className={`group relative min-h-[86px] sm:min-h-[100px] md:min-h-[108px] p-1.5 sm:p-2 rounded-xl flex flex-col justify-between transition-all duration-150 text-left border cursor-pointer ${
+                      className={`group relative min-h-[96px] sm:min-h-[112px] md:min-h-[124px] lg:min-h-[132px] p-2 sm:p-2.5 md:p-3 rounded-xl sm:rounded-2xl flex flex-col justify-between transition-all duration-150 text-left border cursor-pointer ${
                         !day.isCurrentMonth
                           ? 'opacity-35 hover:opacity-65 bg-slate-50/40 dark:bg-slate-900/20 border-slate-200/50 dark:border-slate-800/40'
                           : day.isSelected
-                          ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-2 border-emerald-600 dark:border-emerald-500 shadow-md ring-2 ring-emerald-500/25 z-10'
+                          ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-2 border-emerald-600 dark:border-emerald-500 shadow-lg ring-2 ring-emerald-500/25 z-10'
                           : day.isToday
                           ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500 dark:border-emerald-400'
                           : hasHoliday
-                          ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40 hover:border-emerald-400'
+                          ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40 hover:border-emerald-400 hover:shadow-sm'
                           : isSil
-                          ? 'bg-amber-50/60 dark:bg-amber-950/25 border-amber-300 dark:border-amber-800/50 hover:border-emerald-400'
-                          : 'bg-white dark:bg-slate-900/90 border-slate-200/80 dark:border-slate-800 hover:border-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                          ? 'bg-amber-50/60 dark:bg-amber-950/25 border-amber-300 dark:border-amber-800/50 hover:border-emerald-400 hover:shadow-sm'
+                          : 'bg-white dark:bg-slate-900/90 border-slate-200/80 dark:border-slate-800 hover:border-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:shadow-sm'
                       }`}
                     >
                       {/* Top Row: Solar Day Number + Observance Glyphs */}
                       <div className="w-full flex items-center justify-between">
                         <span
-                          className={`text-xs sm:text-base font-bold font-sans ${
+                          className={`text-xs sm:text-base md:text-lg font-bold font-sans ${
                             day.isToday
-                              ? 'inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-600 text-white text-[11px] sm:text-xs font-black shadow-sm'
+                              ? 'inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-600 text-white text-[11px] sm:text-xs font-black shadow-sm'
                               : day.isSelected
                               ? 'text-emerald-700 dark:text-emerald-400 font-extrabold'
                               : day.weekdayIdx === 0
@@ -1177,15 +1176,15 @@ export const KhmerLunarCalendar: React.FC = () => {
                         <div className="flex items-center gap-1">
                           {isSil && (
                             <span
-                              className="inline-flex items-center justify-center p-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                              className="inline-flex items-center justify-center p-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400"
                               title="ថ្ងៃសីល (Buddhist Observance Day)"
                             >
-                              <DharmaWheelIcon size={13} />
+                              <DharmaWheelIcon size={14} />
                             </span>
                           )}
                           {hasHoliday && (
                             <span
-                              className="w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900"
+                              className="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900"
                               title={lunar?.holidays.map(h => h.nameKm).join(', ')}
                             />
                           )}
@@ -1193,37 +1192,39 @@ export const KhmerLunarCalendar: React.FC = () => {
                       </div>
 
                       {/* Middle: Astronomical Moon Phase or Month Marker */}
-                      <div className="w-full flex items-center justify-center my-0.5">
+                      <div className="w-full flex items-center justify-center my-0.5 sm:my-1">
                         {isFullMoon ? (
-                          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-khmer font-bold text-amber-600 dark:text-amber-400">
-                            <FullMoonIcon size={14} />
+                          <div className="flex items-center gap-1 text-[10px] sm:text-xs font-khmer font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+                            <FullMoonIcon size={15} />
                             <span className="hidden sm:inline">ពេញបូណ៌មី</span>
                           </div>
                         ) : isNewMoon ? (
-                          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-khmer font-bold text-slate-600 dark:text-slate-400">
-                            <NewMoonIcon size={14} />
+                          <div className="flex items-center gap-1 text-[10px] sm:text-xs font-khmer font-bold text-slate-600 dark:text-slate-400 bg-slate-500/10 px-1.5 py-0.5 rounded-md">
+                            <NewMoonIcon size={15} />
                             <span className="hidden sm:inline">ដាច់ខែ</span>
                           </div>
                         ) : isWaxingHalf ? (
                           <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-khmer font-semibold text-amber-600 dark:text-amber-400">
-                            <WaxingHalfMoonIcon size={13} />
+                            <WaxingHalfMoonIcon size={14} />
+                            <span className="hidden md:inline">សីល ៨កើត</span>
                           </div>
                         ) : isWaningHalf ? (
                           <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-khmer font-semibold text-amber-600 dark:text-amber-400">
-                            <WaningHalfMoonIcon size={13} />
+                            <WaningHalfMoonIcon size={14} />
+                            <span className="hidden md:inline">សីល ៨រោច</span>
                           </div>
                         ) : isFirstDayOfLunarMonth && lunar ? (
-                          <span className="text-[9px] sm:text-[10px] font-khmer font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-1 py-0.5 rounded truncate max-w-full">
+                          <span className="text-[10px] sm:text-xs font-khmer font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded truncate max-w-full">
                             ខែ{lunar.khmerMonth}
                           </span>
                         ) : null}
                       </div>
 
                       {/* Bottom Row: Khmer Lunar Date representation & Holiday snippet */}
-                      <div className="w-full space-y-0.5">
+                      <div className="w-full space-y-1">
                         {lunar ? (
                           <div
-                            className={`font-khmer text-[10px] sm:text-xs leading-tight text-center ${
+                            className={`font-khmer text-[11px] sm:text-xs md:text-sm leading-tight text-center ${
                               isSil || isFullMoon
                                 ? 'font-bold text-amber-600 dark:text-amber-400'
                                 : hasHoliday
@@ -1236,13 +1237,13 @@ export const KhmerLunarCalendar: React.FC = () => {
                             </span>
                           </div>
                         ) : (
-                          <div className="text-[10px] text-slate-300 dark:text-slate-700 text-center">-</div>
+                          <div className="text-[11px] text-slate-300 dark:text-slate-700 text-center">-</div>
                         )}
 
                         {/* Holiday Mini Pill */}
                         {hasHoliday && lunar && lunar.holidays[0] && (
                           <div
-                            className="w-full truncate text-[9px] sm:text-[10px] font-khmer text-rose-700 dark:text-rose-300 bg-rose-500/15 border border-rose-500/20 rounded px-1 text-center font-medium"
+                            className="w-full truncate text-[10px] sm:text-xs font-khmer text-rose-700 dark:text-rose-300 bg-rose-500/15 border border-rose-500/20 rounded-md px-1.5 py-0.5 text-center font-medium"
                             title={lunar.holidays[0].nameKm}
                           >
                             {lunar.holidays[0].nameKm}
@@ -1289,10 +1290,43 @@ export const KhmerLunarCalendar: React.FC = () => {
               </div>
             </div>
 
-            {/* Selected Day: Authentic Cambodian Daily Tear-off Sheet (4/12) */}
-            <div className="lg:col-span-4 space-y-4 print:hidden">
+          {/* Underneath Bottom Section: Responsive Multi-Card Layout (Selected Day, Daily Tear-Off Sheet, Astrological & Monthly Highlights) */}
+          <div className="space-y-4 print:hidden">
+            {/* Section Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400">
+                  <CalendarDays size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold font-khmer text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>ព័ត៌មានលម្អិតថ្ងៃជ្រើសរើស & កាលវិភាគប្រចាំខែ</span>
+                    <span className="text-xs font-sans font-normal text-slate-400">
+                      ({selectedLunarInfo ? selectedLunarInfo.gregorianDate : selectedDateIso})
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
+                    Selected Day Tear-off Sheet, Astrological Profile & Monthly Highlights
+                  </p>
+                </div>
+              </div>
+
+              {selectedDateIso !== todayIso && (
+                <button
+                  onClick={handleJumpToToday}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors font-khmer cursor-pointer self-start sm:self-auto"
+                >
+                  <RotateCcw size={13} />
+                  <span>ត្រឡប់មកថ្ងៃនេះ Jump to Today</span>
+                </button>
+              )}
+            </div>
+
+            {/* Bottom 3-Card Responsive Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+              {/* Card 1: Selected Day Authentic Cambodian Daily Tear-off Sheet */}
               {selectedLunarInfo ? (
-                <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden space-y-4">
+                <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden flex flex-col justify-between">
                   {/* Traditional Tear-off Sheet Top Header Strip */}
                   <div className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 p-3 sm:p-4 text-white">
                     <div className="flex items-center justify-between text-xs font-khmer">
@@ -1307,153 +1341,108 @@ export const KhmerLunarCalendar: React.FC = () => {
                   </div>
 
                   {/* Tear-off Sheet Card Body */}
-                  <div className="p-5 pt-1 space-y-4">
-                    {/* Gregorian & Lunar Proclamation Header */}
-                    <div className="text-center space-y-1">
-                      <div className="text-xs font-sans font-medium text-slate-400 dark:text-slate-500">
-                        {selectedLunarInfo.gregorianDate}
-                      </div>
-                      <h4 className="font-khmer text-sm font-bold text-slate-700 dark:text-slate-300">
-                        {selectedLunarInfo.gregorianMonthText} {selectedLunarInfo.gregorianYearText}
-                      </h4>
-                    </div>
-
-                    {/* Prominent Day Number & Moon Proclamation Card */}
-                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-center space-y-2">
-                      <div className="flex items-center justify-between px-2 text-xs font-khmer text-slate-500 dark:text-slate-400">
-                        <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">
-                          ខែ{selectedLunarInfo.khmerMonth}
-                        </span>
-                        {selectedLunarInfo.isSilDay ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[11px] font-bold">
-                            <DharmaWheelIcon size={12} className="text-white" />
-                            <span>ថ្ងៃសីល</span>
-                          </span>
-                        ) : (
-                          <span>{selectedLunarInfo.isLeapMonth ? '(ខែលើក)' : 'ខែធម្មតា'}</span>
-                        )}
-                      </div>
-
-                      {/* Huge Solar Date Display */}
-                      <div
-                        className={`text-5xl sm:text-6xl font-black font-sans tracking-tight py-1 ${
-                          selectedLunarInfo.dayOfWeek === 'អាទិត្យ' || selectedLunarInfo.holidays.length > 0
-                            ? 'text-rose-600 dark:text-rose-400'
-                            : selectedLunarInfo.dayOfWeek === 'សៅរ៍'
-                            ? 'text-indigo-600 dark:text-indigo-400'
-                            : 'text-slate-900 dark:text-white'
-                        }`}
-                      >
-                        {Number(selectedDateIso.split('-')[2])}
-                      </div>
-
-                      {/* Flanked Moon Phase Proclamation */}
-                      <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-xs font-khmer font-bold text-slate-800 dark:text-slate-200">
-                        <MoonPhaseGlyph
-                          status={selectedLunarInfo.moonStatus}
-                          day={selectedLunarInfo.moonDay}
-                          size={15}
-                        />
-                        <span>
-                          {selectedLunarInfo.moonDayKhmer} {selectedLunarInfo.moonStatus}
-                        </span>
-                      </div>
-
-                      {/* Weekday Banner */}
-                      <div className="pt-1">
-                        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold font-khmer bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                          ថ្ងៃ{selectedLunarInfo.dayOfWeek} — {DAYS_OF_WEEK_EN_BY_KM[selectedLunarInfo.dayOfWeek]}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Full Proclamation Sentence */}
-                    <div className="p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/25 border border-emerald-200/80 dark:border-emerald-800/40 space-y-1">
-                      <div className="font-khmer font-bold text-sm text-slate-900 dark:text-emerald-200 leading-relaxed">
-                        {selectedLunarInfo.lunarDateText}
-                      </div>
-                      <div className="font-khmer text-xs text-slate-500 dark:text-slate-400">
-                        ត្រូវនឹង {selectedLunarInfo.gregorianDateText}
-                      </div>
-                    </div>
-
-                    {/* Observance Banner if present */}
-                    {selectedLunarInfo.observanceText && (
-                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs font-khmer text-amber-700 dark:text-amber-300 font-semibold flex items-center gap-2">
-                        <Star size={14} className="text-amber-500 shrink-0" />
-                        <span>{selectedLunarInfo.observanceText}</span>
-                      </div>
-                    )}
-
-                    {/* Holidays on this date if any */}
-                    {selectedLunarInfo.holidays.length > 0 && (
-                      <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 space-y-2">
-                        <div className="text-xs font-bold text-rose-700 dark:text-rose-300 flex items-center gap-1.5 font-khmer">
-                          <Award size={14} className="text-rose-500" />
-                          <span>បុណ្យជាតិ និងសាសនា Holiday:</span>
+                  <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      {/* Gregorian & Lunar Proclamation Header */}
+                      <div className="text-center space-y-0.5">
+                        <div className="text-xs font-sans font-medium text-slate-400 dark:text-slate-500">
+                          {selectedLunarInfo.gregorianDate}
                         </div>
-                        <div className="space-y-1.5">
-                          {selectedLunarInfo.holidays.map((h, i) => (
-                            <div key={i} className="flex items-start justify-between gap-2 text-xs">
-                              <span className="font-khmer font-bold text-slate-900 dark:text-white">{h.nameKm}</span>
-                              <span className="px-2 py-0.5 rounded-md bg-rose-200/60 dark:bg-rose-900/40 text-[10px] font-semibold text-rose-800 dark:text-rose-300 uppercase">
-                                {h.type}
-                              </span>
-                            </div>
-                          ))}
+                        <h4 className="font-khmer text-sm font-bold text-slate-700 dark:text-slate-300">
+                          {selectedLunarInfo.gregorianMonthText} {selectedLunarInfo.gregorianYearText}
+                        </h4>
+                      </div>
+
+                      {/* Prominent Day Number & Moon Proclamation Card */}
+                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-center space-y-2">
+                        <div className="flex items-center justify-between px-2 text-xs font-khmer text-slate-500 dark:text-slate-400">
+                          <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">
+                            ខែ{selectedLunarInfo.khmerMonth}
+                          </span>
+                          {selectedLunarInfo.isSilDay ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[11px] font-bold shadow-sm shadow-amber-500/30">
+                              <DharmaWheelIcon size={12} className="text-white" />
+                              <span>ថ្ងៃសីល</span>
+                            </span>
+                          ) : (
+                            <span>{selectedLunarInfo.isLeapMonth ? '(ខែលើក)' : 'ខែធម្មតា'}</span>
+                          )}
+                        </div>
+
+                        {/* Huge Solar Date Display */}
+                        <div
+                          className={`text-6xl sm:text-7xl font-black font-sans tracking-tight py-1 ${
+                            selectedLunarInfo.dayOfWeek === 'អាទិត្យ' || selectedLunarInfo.holidays.length > 0
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : selectedLunarInfo.dayOfWeek === 'សៅរ៍'
+                              ? 'text-indigo-600 dark:text-indigo-400'
+                              : 'text-slate-900 dark:text-white'
+                          }`}
+                        >
+                          {Number(selectedDateIso.split('-')[2])}
+                        </div>
+
+                        {/* Flanked Moon Phase Proclamation */}
+                        <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-xs font-khmer font-bold text-slate-800 dark:text-slate-200 shadow-xs">
+                          <MoonPhaseGlyph
+                            status={selectedLunarInfo.moonStatus}
+                            day={selectedLunarInfo.moonDay}
+                            size={16}
+                          />
+                          <span>
+                            {selectedLunarInfo.moonDayKhmer} {selectedLunarInfo.moonStatus}
+                          </span>
+                        </div>
+
+                        {/* Weekday Banner */}
+                        <div className="pt-1">
+                          <span className="inline-block px-3.5 py-1 rounded-full text-xs font-bold font-khmer bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                            ថ្ងៃ{selectedLunarInfo.dayOfWeek} — {DAYS_OF_WEEK_EN_BY_KM[selectedLunarInfo.dayOfWeek]}
+                          </span>
                         </div>
                       </div>
-                    )}
 
-                    {/* Daily Astrological Harmony & Zodiac Compatibility (ហុងស៊ុយ & ឆ្នាំរាសី) */}
-                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-                      <div className="text-xs font-bold font-khmer text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                        <Compass size={14} className="text-emerald-600 dark:text-emerald-400" />
-                        <span>ក្បួនហុងស៊ុយ & ឆ្នាំរាសីប្រចាំថ្ងៃ</span>
+                      {/* Full Proclamation Sentence */}
+                      <div className="p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/25 border border-emerald-200/80 dark:border-emerald-800/40 space-y-1">
+                        <div className="font-khmer font-bold text-sm text-slate-900 dark:text-emerald-200 leading-relaxed">
+                          {selectedLunarInfo.lunarDateText}
+                        </div>
+                        <div className="font-khmer text-xs text-slate-500 dark:text-slate-400">
+                          ត្រូវនឹង {selectedLunarInfo.gregorianDateText}
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-xs font-khmer pt-1">
-                        <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 space-y-1">
-                          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
-                            <Heart size={12} className="text-emerald-500" />
-                            <span>ឆ្នាំត្រូវគ្នា (ត្រីធាតុ):</span>
-                          </span>
-                          <div className="flex items-center gap-2 pt-0.5">
-                            {ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.compatible.map(anim => (
-                              <span key={anim} className="inline-flex items-center gap-1 text-slate-800 dark:text-slate-200 font-semibold">
-                                <ZodiacAnimalIcon name={anim} size={14} className="text-emerald-600 dark:text-emerald-400" />
-                                <span>{anim}</span>
-                              </span>
+                      {/* Observance Banner if present */}
+                      {selectedLunarInfo.observanceText && (
+                        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs font-khmer text-amber-700 dark:text-amber-300 font-semibold flex items-center gap-2">
+                          <Star size={14} className="text-amber-500 shrink-0" />
+                          <span>{selectedLunarInfo.observanceText}</span>
+                        </div>
+                      )}
+
+                      {/* Holidays on this date if any */}
+                      {selectedLunarInfo.holidays.length > 0 && (
+                        <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 space-y-2">
+                          <div className="text-xs font-bold text-rose-700 dark:text-rose-300 flex items-center gap-1.5 font-khmer">
+                            <Award size={14} className="text-rose-500" />
+                            <span>បុណ្យជាតិ និងសាសនា Holiday:</span>
+                          </div>
+                          <div className="space-y-1.5">
+                            {selectedLunarInfo.holidays.map((h, i) => (
+                              <div key={i} className="flex items-start justify-between gap-2 text-xs">
+                                <span className="font-khmer font-bold text-slate-900 dark:text-white">{h.nameKm}</span>
+                                <span className="px-2 py-0.5 rounded-md bg-rose-200/60 dark:bg-rose-900/40 text-[10px] font-semibold text-rose-800 dark:text-rose-300 uppercase">
+                                  {h.type}
+                                </span>
+                              </div>
                             ))}
                           </div>
                         </div>
-
-                        <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 space-y-1">
-                          <span className="text-[11px] text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">
-                            <ShieldAlert size={12} className="text-rose-500" />
-                            <span>ឆ្នាំឆុង (មិនត្រូវ):</span>
-                          </span>
-                          <div className="flex items-center gap-1 text-slate-800 dark:text-slate-200 font-semibold pt-0.5">
-                            {ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.clash && (
-                              <span className="inline-flex items-center gap-1">
-                                <ZodiacAnimalIcon name={ZODIAC_ANIMALS[selectedLunarInfo.animalYear].clash} size={14} className="text-rose-500" />
-                                <span>ឆ្នាំ{ZODIAC_ANIMALS[selectedLunarInfo.animalYear].clash}</span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-[11px] font-khmer text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
-                        <span>ធាតុប្រចាំឆ្នាំ: </span>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">
-                          {ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.element}
-                        </span>
-                      </div>
+                      )}
                     </div>
 
                     {/* Quick Copy Buttons */}
-                    <div className="space-y-2 pt-1">
+                    <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                       <CopyButton
                         textToCopy={selectedLunarInfo.lunarDateText}
                         label="ចម្លងកាលបរិច្ឆេទខ្មែរ (Copy Khmer Date)"
@@ -1469,69 +1458,234 @@ export const KhmerLunarCalendar: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-slate-500 font-khmer">
+                <div className="p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-slate-500 font-khmer flex items-center justify-center">
                   ជ្រើសរើសថ្ងៃណាមួយក្នុងតារាងប្រតិទិន ដើម្បីមើលព័ត៌មានលម្អិត។
                 </div>
               )}
 
-              {/* Month Highlights: Sil Days in this Month */}
-              <div className="p-4 sm:p-5 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-                <h4 className="font-khmer font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <DharmaWheelIcon size={15} className="text-amber-500" />
-                  <span>ថ្ងៃសីលក្នុងខែនេះ ({toKhmerNumber(currentMonthSilDays.length)} ថ្ងៃ)</span>
-                </h4>
-
-                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                  {currentMonthSilDays.map((d, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleSelectDay(d.dateIso)}
-                      className={`w-full p-2.5 rounded-xl border text-left transition-colors flex items-center justify-between text-xs font-khmer cursor-pointer ${
-                        d.isSelected
-                          ? 'bg-amber-500/15 border-amber-500 font-bold text-amber-700 dark:text-amber-300'
-                          : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-amber-400'
-                      }`}
-                    >
+              {/* Card 2: Daily Astrological Harmony & Zodiac Compatibility */}
+              {selectedLunarInfo && (
+                <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md p-5 sm:p-6 flex flex-col justify-between space-y-4">
+                  <div className="space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                       <div className="flex items-center gap-2">
-                        <DharmaWheelIcon size={13} className="text-amber-500" />
-                        <span>
-                          {d.lunar?.moonDayKhmer} {d.lunar?.moonStatus}
-                        </span>
-                      </div>
-                      <span className="text-slate-400 font-sans">{d.dateIso}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Month Highlights: Holidays in this Month */}
-              {currentMonthHolidays.length > 0 && (
-                <div className="p-4 sm:p-5 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-                  <h4 className="font-khmer font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Award size={15} className="text-rose-500" />
-                    <span>បុណ្យជាតិក្នុងខែនេះ ({toKhmerNumber(currentMonthHolidays.length)} ថ្ងៃ)</span>
-                  </h4>
-
-                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                    {currentMonthHolidays.map((d, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleSelectDay(d.dateIso)}
-                        className={`w-full p-2.5 rounded-xl border text-left transition-colors flex items-center justify-between text-xs font-khmer cursor-pointer ${
-                          d.isSelected
-                            ? 'bg-rose-500/15 border-rose-500 font-bold text-rose-700 dark:text-rose-300'
-                            : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-rose-400'
-                        }`}
-                      >
-                        <div className="truncate pr-2">
-                          <span className="font-semibold">{d.lunar?.holidays[0]?.nameKm}</span>
+                        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                          <Compass size={18} />
                         </div>
-                        <span className="text-slate-400 font-sans shrink-0">{d.dateIso}</span>
-                      </button>
-                    ))}
+                        <div>
+                          <h4 className="font-khmer font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                            ក្បួនហុងស៊ុយ & ឆ្នាំរាសី
+                          </h4>
+                          <span className="text-[11px] font-sans text-slate-400">Zodiac Harmony & Feng Shui</span>
+                        </div>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-khmer bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300">
+                        <ZodiacAnimalIcon name={selectedLunarInfo.animalYear} size={15} className="text-emerald-600 dark:text-emerald-400" />
+                        <span>ឆ្នាំ{selectedLunarInfo.animalYear}</span>
+                      </span>
+                    </div>
+
+                    {/* Animal Spotlight Card */}
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/60 dark:from-slate-800/50 dark:to-slate-800/20 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-extrabold font-khmer text-slate-900 dark:text-white">
+                            ឆ្នាំ{selectedLunarInfo.animalYear}
+                          </span>
+                          <span className="text-xs font-sans text-slate-400">
+                            ({ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.en})
+                          </span>
+                        </div>
+                        <div className="text-xs font-khmer text-slate-600 dark:text-slate-300 leading-relaxed">
+                          {ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.traits}
+                        </div>
+                        <div className="pt-1 flex items-center gap-2 flex-wrap">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-khmer font-bold border ${ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.elementColor}`}>
+                            {ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.element}
+                          </span>
+                          <span className="text-[11px] text-slate-400 font-khmer">
+                            ព.ស. {selectedLunarInfo.buddhistEraYearKhmer}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-emerald-600 dark:text-emerald-400 shrink-0 shadow-xs">
+                        <ZodiacAnimalIcon name={selectedLunarInfo.animalYear} size={36} />
+                      </div>
+                    </div>
+
+                    {/* Compatibility Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-khmer">
+                      {/* Compatible Tri-Harmony */}
+                      <div className="p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-800/50 space-y-2">
+                        <div className="text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+                          <Heart size={14} className="text-emerald-600 dark:text-emerald-400" />
+                          <span>ឆ្នាំត្រូវគ្នា (ត្រីធាតុ):</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.compatible.map(anim => (
+                            <span
+                              key={anim}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-emerald-300/60 dark:border-emerald-800 text-slate-800 dark:text-slate-200 font-bold shadow-xs"
+                            >
+                              <ZodiacAnimalIcon name={anim} size={15} className="text-emerald-600 dark:text-emerald-400" />
+                              <span>ឆ្នាំ{anim}</span>
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                          រាសីត្រូវធាតុគ្នា ជួយជ្រោមជ្រែង នាំលាភសំណាង និងសេចក្តីសុខ
+                        </p>
+                      </div>
+
+                      {/* Clashing Sign */}
+                      <div className="p-3 rounded-xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/70 dark:border-rose-800/50 space-y-2">
+                        <div className="text-rose-700 dark:text-rose-300 font-bold flex items-center gap-1.5">
+                          <ShieldAlert size={14} className="text-rose-500" />
+                          <span>ឆ្នាំឆុង (មិនត្រូវ):</span>
+                        </div>
+                        <div className="flex items-center gap-2 pt-0.5">
+                          {ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.clash && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-rose-300/60 dark:border-rose-800 text-rose-700 dark:text-rose-300 font-bold shadow-xs">
+                              <ZodiacAnimalIcon name={ZODIAC_ANIMALS[selectedLunarInfo.animalYear].clash} size={15} className="text-rose-500" />
+                              <span>ឆ្នាំ{ZODIAC_ANIMALS[selectedLunarInfo.animalYear].clash}</span>
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                          ឆ្នាំទល់មុខផ្ទុយធាតុ គប្បីប្រុងប្រយ័ត្នក្នុងការប្រាស្រ័យទាក់ទង
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Astronomical & Lunisolar Specifications */}
+                  <div className="space-y-2 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs font-khmer">
+                    <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                      <span>ស័កប្រចាំឆ្នាំ (Ten-Year Era Cycle):</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{selectedLunarInfo.sak}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                      <span>ប្រភេទខែចន្ទគតិ (Lunar Month Type):</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        ខែ{selectedLunarInfo.khmerMonth} ({selectedLunarInfo.isLeapMonth ? 'ខែលើក Leap' : 'ខែធម្មតា Regular'})
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                      <span>ដំណាក់ព្រះចន្ទ (Lunar Phase):</span>
+                      <span className="font-bold text-emerald-700 dark:text-emerald-400">
+                        {selectedLunarInfo.moonDayKhmer} {selectedLunarInfo.moonStatus}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
+
+              {/* Card 3: Month Highlights - Sil Days & Holidays */}
+              <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md p-5 sm:p-6 flex flex-col justify-between space-y-4 md:col-span-2 lg:col-span-1">
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <CalendarCheck size={18} />
+                      </div>
+                      <div>
+                        <h4 className="font-khmer font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                          កាលវិភាគប្រចាំខែនេះ
+                        </h4>
+                        <span className="text-[11px] font-sans text-slate-400">
+                          {GREGORIAN_MONTHS[calMonth].en} {calYear} Highlights
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('holidays')}
+                      className="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-400 hover:underline font-khmer font-semibold cursor-pointer"
+                    >
+                      <span>មើលទាំងអស់</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4">
+                    {/* Subpanel A: Sil Days in Month */}
+                    <div className="space-y-2">
+                      <h5 className="font-khmer font-bold text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                        <DharmaWheelIcon size={14} className="text-amber-500" />
+                        <span>ថ្ងៃសីលក្នុងខែនេះ ({toKhmerNumber(currentMonthSilDays.length)} ថ្ងៃ)</span>
+                      </h5>
+
+                      <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                        {currentMonthSilDays.map((d, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleSelectDay(d.dateIso)}
+                            className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between text-xs font-khmer cursor-pointer ${
+                              d.isSelected
+                                ? 'bg-amber-500/15 border-amber-500 font-bold text-amber-800 dark:text-amber-200 ring-1 ring-amber-500/30'
+                                : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-amber-400'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {d.lunar?.moonDay === 15 && d.lunar?.moonStatus === 'កើត' ? (
+                                <FullMoonIcon size={14} />
+                              ) : d.lunar?.moonDay === 8 ? (
+                                d.lunar?.moonStatus === 'កើត' ? <WaxingHalfMoonIcon size={14} /> : <WaningHalfMoonIcon size={14} />
+                              ) : (
+                                <DharmaWheelIcon size={13} className="text-amber-500" />
+                              )}
+                              <span>
+                                {d.lunar?.moonDayKhmer} {d.lunar?.moonStatus} {d.lunar?.moonDay === 15 && d.lunar?.moonStatus === 'កើត' ? '(ពេញបូណ៌មី)' : ''}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-slate-400 font-sans">{d.dateIso}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Subpanel B: Holidays in Month */}
+                    <div className="space-y-2">
+                      <h5 className="font-khmer font-bold text-xs text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+                        <Award size={14} className="text-rose-500" />
+                        <span>បុណ្យជាតិក្នុងខែនេះ ({toKhmerNumber(currentMonthHolidays.length)} ថ្ងៃ)</span>
+                      </h5>
+
+                      {currentMonthHolidays.length > 0 ? (
+                        <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                          {currentMonthHolidays.map((d, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handleSelectDay(d.dateIso)}
+                              className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between text-xs font-khmer cursor-pointer ${
+                                d.isSelected
+                                  ? 'bg-rose-500/15 border-rose-500 font-bold text-rose-800 dark:text-rose-200 ring-1 ring-rose-500/30'
+                                  : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-rose-400'
+                              }`}
+                            >
+                              <div className="truncate pr-2">
+                                <span className="font-semibold">{d.lunar?.holidays[0]?.nameKm}</span>
+                              </div>
+                              <span className="text-[11px] text-slate-400 font-sans shrink-0">{d.dateIso}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-800 text-center text-xs text-slate-400 font-khmer">
+                          គ្មានថ្ងៃឈប់សម្រាកបុណ្យជាតិក្នុងខែនេះទេ
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Note */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 font-khmer flex items-center justify-between">
+                  <span>ចុចលើថ្ងៃណាមួយដើម្បីជ្រើសរើស</span>
+                  <span className="font-sans">Click item to inspect</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
