@@ -678,6 +678,17 @@ export const FONT_FAMILIES: FontFamilyPreset[] = [
 export function generateCodeThemeCss(theme: CodeTheme): string {
   const t = theme.tokens;
   return `
+    .vortex-code-highlight,
+    .vortex-code-highlight * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    .vortex-code-highlight::-webkit-scrollbar,
+    .vortex-code-highlight *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
     .vortex-code-highlight {
       color: ${theme.textColor};
       background-color: ${theme.editorBg};

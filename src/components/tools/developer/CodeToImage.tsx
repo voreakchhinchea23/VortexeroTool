@@ -63,6 +63,7 @@ export const CodeToImage: React.FC = () => {
   const [fontSize, setFontSize] = useState<number>(14);
   const [showLineNumbers, setShowLineNumbers] = useState<boolean>(true);
   const [wrapLines, setWrapLines] = useState<boolean>(false);
+  const [widthMode, setWidthMode] = useState<'auto' | '640' | '800' | '1024'>('auto');
   const [exportScale, setExportScale] = useState<number>(2);
   const [customFilename, setCustomFilename] = useState<string>('');
   const [isExporting, setIsExporting] = useState<string | null>(null);
@@ -170,6 +171,7 @@ export const CodeToImage: React.FC = () => {
         transform: 'none',
         margin: '0',
         overflow: 'hidden',
+        boxSizing: 'border-box',
       },
     };
 
@@ -219,16 +221,26 @@ export const CodeToImage: React.FC = () => {
         triggerDownload(blob, `${baseName}.png`);
         addToast('PNG image downloaded', `Exported at ${exportScale}x resolution.`, 'success');
       } else if (format === 'jpeg') {
+        const jpegBg =
+          selectedBg.type === 'solid'
+            ? selectedBg.value
+            : selectedBg.type === 'transparent'
+              ? selectedCodeTheme.editorBg
+              : selectedCodeTheme.isLight
+                ? '#ffffff'
+                : '#0d1117';
+
         const opts = {
           pixelRatio: exportScale,
           cacheBust: true,
           width: targetWidth,
           height: targetHeight,
-          backgroundColor: selectedBg.type === 'transparent' ? selectedCodeTheme.editorBg : '#0d1117',
+          backgroundColor: jpegBg,
           style: {
             transform: 'none',
             margin: '0',
             overflow: 'hidden',
+            boxSizing: 'border-box',
           },
         };
         let canvas: HTMLCanvasElement;
@@ -252,6 +264,7 @@ export const CodeToImage: React.FC = () => {
             transform: 'none',
             margin: '0',
             overflow: 'hidden',
+            boxSizing: 'border-box',
           },
         };
         let dataUrl: string;
@@ -276,11 +289,11 @@ export const CodeToImage: React.FC = () => {
   // Copy Image directly to clipboard
   const handleCopyImage = async () => {
     if (!previewCardRef.current || isExporting) return;
+    const baseName = currentFilename.replace(/\.[^/.]+$/, '') || 'code-snippet';
 
     try {
       setIsExporting('copy-image');
       const node = previewCardRef.current;
-      const baseName = currentFilename.replace(/\.[^/.]+$/, '') || 'code-snippet';
 
       const blob = await renderPreviewToBlob(node, exportScale);
       if (!blob) {
@@ -322,9 +335,13 @@ export const CodeToImage: React.FC = () => {
     } catch (err) {
       console.error('Copy image failed: ', err);
       try {
-        const fallbackBlob = await renderPreviewToBlob(previewCardRef.current, 1);
-        triggerDownload(fallbackBlob, 'code-snippet.png');
-        addToast('Clipboard permission denied', 'PNG downloaded directly to your device instead.', 'info');
+        if (previewCardRef.current) {
+          const fallbackBlob = await renderPreviewToBlob(previewCardRef.current, 1);
+          triggerDownload(fallbackBlob, `${baseName}.png`);
+          addToast('Clipboard permission denied', 'PNG downloaded directly to your device instead.', 'info');
+        } else {
+          addToast('Copy image failed', 'Preview card unavailable.', 'error');
+        }
       } catch {
         addToast('Copy image failed', 'Could not access clipboard or render canvas.', 'error');
       }
@@ -421,7 +438,7 @@ export const CodeToImage: React.FC = () => {
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              Windows
+              Windows 11
             </button>
             <button
               onClick={() => setWindowStyle('none')}
@@ -609,6 +626,31 @@ export const CodeToImage: React.FC = () => {
               </select>
             </div>
 
+            {/* Window Width Preset */}
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-2">
+              <span className="font-bold">Width:</span>
+              <div className="flex items-center gap-1.5">
+                {[
+                  { id: 'auto', label: 'Auto' },
+                  { id: '640', label: '640px' },
+                  { id: '800', label: '800px' },
+                  { id: '1024', label: '1024px' },
+                ].map((w) => (
+                  <button
+                    key={w.id}
+                    onClick={() => setWidthMode(w.id as any)}
+                    className={`px-2 py-0.5 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer ${
+                      widthMode === w.id
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {w.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Font Size & Resolution */}
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
@@ -651,11 +693,11 @@ export const CodeToImage: React.FC = () => {
         {/* Live Preview Canvas & Export Section */}
         <div className="lg:col-span-7 flex flex-col space-y-4">
           {/* Scrollable Canvas Workspace */}
-          <div className="w-full rounded-3xl bg-slate-100/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 p-4 sm:p-8 flex items-center justify-center overflow-x-auto min-h-[440px] no-scrollbar shadow-inner">
+          <div className="w-full rounded-3xl bg-slate-100/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 p-4 sm:p-8 flex items-center overflow-x-auto min-h-[440px] no-scrollbar shadow-inner">
             {/* Export Target Container (Naturally wraps content with w-fit, zero scrollbars) */}
             <div
               ref={previewCardRef}
-              className="inline-block w-fit min-w-[320px] max-w-none shrink-0 transition-all select-none"
+              className="m-auto inline-block w-fit min-w-[320px] max-w-none shrink-0 select-none"
               style={{
                 background: selectedBg.type === 'transparent' ? 'transparent' : selectedBg.value,
                 padding: `${padding}px`,
@@ -668,44 +710,42 @@ export const CodeToImage: React.FC = () => {
 
               {/* Terminal Window Box */}
               <div
-                className="rounded-2xl transition-all"
+                className="rounded-2xl"
                 style={{
                   backgroundColor: selectedCodeTheme.editorBg,
                   border: `1px solid ${selectedCodeTheme.borderColor}`,
                   boxShadow: selectedShadow.value,
                   overflow: 'hidden',
                   minWidth: '280px',
+                  width: widthMode === 'auto' ? 'auto' : `${widthMode}px`,
+                  maxWidth: widthMode === 'auto' ? (wrapLines ? '760px' : 'none') : '100%',
                   boxSizing: 'border-box',
                 }}
               >
                 {/* Title Bar */}
                 {windowStyle !== 'none' && (
                   <div
-                    className="px-4 py-3 flex items-center justify-between border-b"
+                    className="px-4 py-3 flex items-center justify-between border-b gap-3"
                     style={{
                       backgroundColor: selectedCodeTheme.titleBarBg,
                       borderColor: selectedCodeTheme.borderColor,
                     }}
                   >
-                    {/* Window Controls */}
+                    {/* Window Controls or Left Spacer */}
                     {windowStyle === 'mac' ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-xs" />
-                        <div className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-xs" />
-                        <div className="w-3 h-3 rounded-full bg-[#27c93f] shadow-xs" />
+                      <div className="flex items-center gap-2 w-14">
+                        <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-black/15 shadow-xs" />
+                        <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-black/15 shadow-xs" />
+                        <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-black/15 shadow-xs" />
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <Minus size={11} strokeWidth={2.5} />
-                        <Square size={10} strokeWidth={2.5} />
-                        <X size={11} strokeWidth={2.5} />
-                      </div>
+                      <div className="w-14" />
                     )}
 
                     {/* Filename Header */}
                     {showTitle && (
                       <span
-                        className="text-[11px] font-mono px-2.5 py-0.5 rounded-md font-medium tracking-wide"
+                        className="text-[11px] font-mono px-2.5 py-0.5 rounded-md font-medium tracking-wide truncate max-w-[260px]"
                         style={{
                           color: selectedCodeTheme.isLight ? '#57606a' : '#8b949e',
                           backgroundColor: selectedCodeTheme.isLight
@@ -717,7 +757,16 @@ export const CodeToImage: React.FC = () => {
                       </span>
                     )}
 
-                    <div className="w-10" />
+                    {/* Windows 11 Controls or Right Spacer */}
+                    {windowStyle === 'windows' ? (
+                      <div className="flex items-center justify-end gap-3 w-14 text-slate-400">
+                        <Minus size={11} strokeWidth={2.5} />
+                        <Square size={10} strokeWidth={2.5} />
+                        <X size={11} strokeWidth={2.5} />
+                      </div>
+                    ) : (
+                      <div className="w-14" />
+                    )}
                   </div>
                 )}
 
@@ -742,14 +791,17 @@ export const CodeToImage: React.FC = () => {
                   >
                     <tbody>
                       {highlightedLines.map((lineHtml, idx) => (
-                        <tr key={idx} className="hover:bg-white/5 transition-colors">
+                        <tr key={idx}>
                           {showLineNumbers && (
                             <td
-                              className="pr-4 select-none text-right font-mono text-[11px] align-top whitespace-nowrap"
+                              className="pr-4 select-none text-right font-mono align-top"
                               style={{
                                 color: selectedCodeTheme.lineNumColor,
-                                width: '2.5rem',
+                                fontSize: `${Math.max(10, Math.round(fontSize * 0.88))}px`,
+                                width: '1%',
+                                whiteSpace: 'nowrap',
                                 userSelect: 'none',
+                                lineHeight: 'inherit',
                               }}
                             >
                               {idx + 1}
@@ -760,8 +812,10 @@ export const CodeToImage: React.FC = () => {
                             style={{
                               whiteSpace: wrapLines ? 'pre-wrap' : 'pre',
                               wordBreak: wrapLines ? 'break-word' : 'normal',
+                              overflowWrap: wrapLines ? 'break-word' : 'normal',
                               padding: 0,
                               margin: 0,
+                              lineHeight: 'inherit',
                             }}
                             dangerouslySetInnerHTML={{ __html: lineHtml || '&nbsp;' }}
                           />

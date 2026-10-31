@@ -202,7 +202,25 @@ if (!FONT_FAMILIES.some((f) => f.id === 'jetbrains_mono') || !FONT_FAMILIES.some
   console.error('Essential monospace font presets missing');
   process.exit(1);
 }
-console.log('Passed: Carbon syntax themes, backgrounds, shadows, and fonts fully verified.');
+// Test 10: Scrollbar suppression in generated CSS and index.html font links
+const sampleThemeCss = generateCodeThemeCss(CODE_THEMES[0]);
+if (!sampleThemeCss.includes('scrollbar-width: none !important') || !sampleThemeCss.includes('::-webkit-scrollbar')) {
+  console.error('Generated theme CSS is missing strict scrollbar suppression rules');
+  process.exit(1);
+}
+
+const indexHtml = fs.readFileSync('index.html', 'utf8');
+if (!indexHtml.includes('JetBrains+Mono') || !indexHtml.includes('Fira+Code')) {
+  console.error('index.html is missing JetBrains Mono or Fira Code font references');
+  process.exit(1);
+}
+
+const codeToImageSrc = fs.readFileSync('src/components/tools/developer/CodeToImage.tsx', 'utf8');
+if (!codeToImageSrc.includes('Windows 11') || !codeToImageSrc.includes('widthMode') || !codeToImageSrc.includes('m-auto')) {
+  console.error('CodeToImage.tsx is missing Windows 11 framing, widthMode, or m-auto flex centering');
+  process.exit(1);
+}
+console.log('Passed: Scrollbar suppression, Google Fonts, and layout polish verified.');
 
 console.log('All codeHighlight tests completed successfully!');
 
