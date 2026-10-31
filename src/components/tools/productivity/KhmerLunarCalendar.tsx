@@ -1140,7 +1140,7 @@ export const KhmerLunarCalendar: React.FC = () => {
                       key={idx}
                       type="button"
                       onClick={() => handleSelectDay(day.dateIso)}
-                      className={`group relative min-h-[96px] sm:min-h-[112px] md:min-h-[124px] lg:min-h-[132px] p-2 sm:p-2.5 md:p-3 rounded-xl sm:rounded-2xl flex flex-col justify-between transition-all duration-150 text-left border cursor-pointer ${
+                      className={`print-visible print:!flex group relative min-h-[96px] sm:min-h-[112px] md:min-h-[124px] lg:min-h-[132px] p-2 sm:p-2.5 md:p-3 rounded-xl sm:rounded-2xl flex flex-col justify-between transition-all duration-150 text-left border cursor-pointer ${
                         !day.isCurrentMonth
                           ? 'opacity-35 hover:opacity-65 bg-slate-50/40 dark:bg-slate-900/20 border-slate-200/50 dark:border-slate-800/40'
                           : day.isSelected
@@ -1244,7 +1244,7 @@ export const KhmerLunarCalendar: React.FC = () => {
                         {hasHoliday && lunar && lunar.holidays[0] && (
                           <div
                             className="w-full truncate text-[10px] sm:text-xs font-khmer text-rose-700 dark:text-rose-300 bg-rose-500/15 border border-rose-500/20 rounded-md px-1.5 py-0.5 text-center font-medium"
-                            title={lunar.holidays[0].nameKm}
+                            title={lunar.holidays.map(h => h.nameKm).join(', ')}
                           >
                             {lunar.holidays[0].nameKm}
                           </div>
@@ -1332,7 +1332,7 @@ export const KhmerLunarCalendar: React.FC = () => {
                     <div className="flex items-center justify-between text-xs font-khmer">
                       <div className="flex items-center gap-1.5 font-bold">
                         <ZodiacAnimalIcon name={selectedLunarInfo.animalYear} size={18} className="text-amber-300" />
-                        <span>ឆ្នាំ{selectedLunarInfo.animalYear} ({ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.en})</span>
+                        <span>សន្លឹកប្រតិទិនប្រចាំថ្ងៃ • ឆ្នាំ{selectedLunarInfo.animalYear} ({ZODIAC_ANIMALS[selectedLunarInfo.animalYear]?.en})</span>
                       </div>
                       <div className="text-[11px] opacity-90 font-medium">
                         {selectedLunarInfo.sak} • ព.ស. {selectedLunarInfo.buddhistEraYearKhmer}
@@ -1341,7 +1341,7 @@ export const KhmerLunarCalendar: React.FC = () => {
                   </div>
 
                   {/* Tear-off Sheet Card Body */}
-                  <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col justify-between">
                     <div className="space-y-4">
                       {/* Gregorian & Lunar Proclamation Header */}
                       <div className="text-center space-y-0.5">
@@ -1464,7 +1464,7 @@ export const KhmerLunarCalendar: React.FC = () => {
               )}
 
               {/* Card 2: Daily Astrological Harmony & Zodiac Compatibility */}
-              {selectedLunarInfo && (
+              {selectedLunarInfo ? (
                 <div className="rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md p-5 sm:p-6 flex flex-col justify-between space-y-4">
                   <div className="space-y-4">
                     {/* Header */}
@@ -1578,6 +1578,16 @@ export const KhmerLunarCalendar: React.FC = () => {
                       </span>
                     </div>
                   </div>
+
+                  {/* Footer Note */}
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 font-khmer flex items-center justify-between">
+                    <span>ក្បួនហុងស៊ុយ & ឆ្នាំរាសី</span>
+                    <span className="font-sans">Khmer Astrology & Zodiac Guide</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-slate-500 font-khmer flex items-center justify-center">
+                  ព័ត៌មានក្បួនហុងស៊ុយ និងឆ្នាំរាសីនឹងបង្ហាញនៅទីនេះ។
                 </div>
               )}
 
@@ -1632,11 +1642,18 @@ export const KhmerLunarCalendar: React.FC = () => {
                                 <FullMoonIcon size={14} />
                               ) : d.lunar?.moonDay === 8 ? (
                                 d.lunar?.moonStatus === 'កើត' ? <WaxingHalfMoonIcon size={14} /> : <WaningHalfMoonIcon size={14} />
+                              ) : d.lunar?.moonStatus === 'រោច' && (d.lunar?.moonDay === 14 || d.lunar?.moonDay === 15) ? (
+                                <NewMoonIcon size={14} />
                               ) : (
                                 <DharmaWheelIcon size={13} className="text-amber-500" />
                               )}
                               <span>
-                                {d.lunar?.moonDayKhmer} {d.lunar?.moonStatus} {d.lunar?.moonDay === 15 && d.lunar?.moonStatus === 'កើត' ? '(ពេញបូណ៌មី)' : ''}
+                                {d.lunar?.moonDayKhmer} {d.lunar?.moonStatus}{' '}
+                                {d.lunar?.moonDay === 15 && d.lunar?.moonStatus === 'កើត'
+                                  ? '(ពេញបូណ៌មី)'
+                                  : d.lunar?.moonStatus === 'រោច' && (d.lunar?.moonDay === 14 || d.lunar?.moonDay === 15)
+                                  ? '(ដាច់ខែ)'
+                                  : ''}
                               </span>
                             </div>
                             <span className="text-[11px] text-slate-400 font-sans">{d.dateIso}</span>
@@ -1664,8 +1681,8 @@ export const KhmerLunarCalendar: React.FC = () => {
                                   : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-rose-400'
                               }`}
                             >
-                              <div className="truncate pr-2">
-                                <span className="font-semibold">{d.lunar?.holidays[0]?.nameKm}</span>
+                              <div className="truncate pr-2" title={d.lunar?.holidays.map(h => h.nameKm).join(', ')}>
+                                <span className="font-semibold">{d.lunar?.holidays.map(h => h.nameKm).join(' & ')}</span>
                               </div>
                               <span className="text-[11px] text-slate-400 font-sans shrink-0">{d.dateIso}</span>
                             </button>

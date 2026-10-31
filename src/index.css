@@ -156,7 +156,7 @@
   }
 
   /* Completely remove non-printable components from DOM layout */
-  header, aside, footer, nav, .no-print, button, input, textarea, select {
+  header, aside, footer, nav, .no-print, button:not(.print-visible), input, textarea, select {
     display: none !important;
   }
 
