@@ -202,9 +202,14 @@ for (let i = 0; i < CHEMICAL_ELEMENTS.length; i++) {
     process.exit(1);
   }
 
-  // Shells array
+  // Shells array & atomic number sum check
   if (!Array.isArray(el.shells) || el.shells.length === 0) {
     console.error(`Invalid shells array for ${el.symbol}`);
+    process.exit(1);
+  }
+  const shellSum = el.shells.reduce((acc, count) => acc + count, 0);
+  if (shellSum !== el.number) {
+    console.error(`Shell electrons sum for ${el.symbol} (#${el.number}) is ${shellSum}, expected ${el.number}`);
     process.exit(1);
   }
 }
@@ -223,6 +228,11 @@ if (getPhaseAtKelvin(hydrogen, 300) !== 'gas') {
   console.error('Hydrogen at 300 K should be gas');
   process.exit(1);
 }
+// Negative Kelvin clamp test
+if (getPhaseAtKelvin(hydrogen, -50) !== 'solid') {
+  console.error('Negative Kelvin should clamp safely to solid');
+  process.exit(1);
+}
 
 const mercury = CHEMICAL_ELEMENTS[79]; // Hg (80), mp: 234.32, bp: 629.88
 if (getPhaseAtKelvin(mercury, 200) !== 'solid') {
@@ -238,8 +248,27 @@ if (getPhaseAtKelvin(mercury, 700) !== 'gas') {
   process.exit(1);
 }
 
+// Element with known melting point but null boiling point (Fermium #100, mp: 1800 K)
+const fermium = CHEMICAL_ELEMENTS[99]; // Fm (100)
+if (getPhaseAtKelvin(fermium, 300) !== 'solid') {
+  console.error('Fermium at 300 K should be solid');
+  process.exit(1);
+}
+if (getPhaseAtKelvin(fermium, 2000) !== 'liquid') {
+  console.error('Fermium at 2000 K (above mp 1800 K) should be liquid');
+  process.exit(1);
+}
+
 // 6c: Khmer digits conversion
-if (toKhmerDigits(118) !== '១១៨' || toKhmerDigits(79) !== '៧៩' || toKhmerDigits(0) !== '០') {
+if (
+  toKhmerDigits(118) !== '១១៨' ||
+  toKhmerDigits(79) !== '៧៩' ||
+  toKhmerDigits(0) !== '០' ||
+  toKhmerDigits('1.008') !== '១.០០៨' ||
+  toKhmerDigits(-273.15) !== '-២៧៣.១៥' ||
+  toKhmerDigits(null) !== '' ||
+  toKhmerDigits(undefined) !== ''
+) {
   console.error('toKhmerDigits failed conversion test');
   process.exit(1);
 }
@@ -263,6 +292,6 @@ if (!periodicTableColor || periodicTableColor.id !== 'periodic-table') {
   process.exit(1);
 }
 
-console.log('✓ Test 6: Complete 118 elements dataset, bilingual Khmer/English names, Bohr configurations, phase simulations, and color mappings verified.');
+console.log('✓ Test 6: Complete 118 elements dataset, Bohr shell sums, bilingual Khmer/English, phase simulations, and layout verified.');
 
 console.log('All automated verification checks PASSED successfully!');

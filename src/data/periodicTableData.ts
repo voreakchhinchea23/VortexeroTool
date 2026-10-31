@@ -3763,19 +3763,21 @@ export function getElementCategoryMeta(category: ElementCategory): CategoryMetad
 }
 
 export function getPhaseAtKelvin(element: ChemicalElement, kelvin: number): ElementState {
-  if (element.meltingPoint == null || element.boilingPoint == null) {
-    return element.standardState;
-  }
-  if (kelvin < element.meltingPoint) {
+  const safeKelvin = Math.max(0, kelvin);
+  if (element.meltingPoint != null && safeKelvin < element.meltingPoint) {
     return 'solid';
   }
-  if (kelvin < element.boilingPoint) {
+  if (element.boilingPoint != null && safeKelvin >= element.boilingPoint) {
+    return 'gas';
+  }
+  if (element.meltingPoint != null && safeKelvin >= element.meltingPoint) {
     return 'liquid';
   }
-  return 'gas';
+  return element.standardState;
 }
 
-export function toKhmerDigits(num: number | string): string {
+export function toKhmerDigits(num: number | string | null | undefined): string {
+  if (num == null) return '';
   const map: Record<string, string> = {
     '0': '០', '1': '១', '2': '២', '3': '៣', '4': '៤',
     '5': '៥', '6': '៦', '7': '៧', '8': '៨', '9': '៩'

@@ -19,7 +19,8 @@ import {
   Info,
   Scale,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  ArrowDown
 } from 'lucide-react';
 import { useToast } from '../../../context/ToastContext';
 import {
@@ -72,6 +73,10 @@ export const PeriodicTable: React.FC = () => {
     if (!activeElement) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const activeTag = (document.activeElement as HTMLElement)?.tagName;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) {
+        return;
+      }
       if (e.key === 'ArrowLeft') {
         const prevNum = activeElement.number > 1 ? activeElement.number - 1 : 118;
         const prevEl = CHEMICAL_ELEMENTS.find(el => el.number === prevNum);
@@ -96,11 +101,15 @@ export const PeriodicTable: React.FC = () => {
     return CHEMICAL_ELEMENTS.filter(el => {
       // Search match
       if (q) {
-        const matchNum = String(el.number) === q;
+        const matchNum = String(el.number) === q || toKhmerDigits(el.number) === q;
         const matchSymbol = el.symbol.toLowerCase() === q || el.symbol.toLowerCase().startsWith(q);
         const matchNameEn = el.nameEn.toLowerCase().includes(q);
         const matchNameKm = el.nameKm.toLowerCase().includes(q);
-        const matchCategory = el.category.toLowerCase().includes(q);
+        const catMeta = getElementCategoryMeta(el.category);
+        const matchCategory =
+          el.category.toLowerCase().includes(q) ||
+          catMeta.nameEn.toLowerCase().includes(q) ||
+          catMeta.nameKm.toLowerCase().includes(q);
         const matchDiscovered = el.discoveredBy.toLowerCase().includes(q);
         if (!matchNum && !matchSymbol && !matchNameEn && !matchNameKm && !matchCategory && !matchDiscovered) {
           return false;
@@ -163,9 +172,10 @@ export const PeriodicTable: React.FC = () => {
   const renderBohrModel = (element: ChemicalElement) => {
     const size = 260;
     const center = size / 2;
-    const maxRadius = size / 2 - 16;
+    const nucleusRadius = 18;
+    const minOrbitRadius = 32;
+    const maxOrbitRadius = 114;
     const numShells = element.shells.length;
-    const radiusStep = maxRadius / (numShells + 1);
 
     return (
       <div className="flex flex-col items-center">
@@ -177,7 +187,12 @@ export const PeriodicTable: React.FC = () => {
         >
           {/* Concentric shell orbits */}
           {element.shells.map((count, shellIdx) => {
-            const radius = radiusStep * (shellIdx + 1.2);
+            const radius =
+              numShells === 1
+                ? (minOrbitRadius + maxOrbitRadius) / 2
+                : minOrbitRadius + (shellIdx / (numShells - 1)) * (maxOrbitRadius - minOrbitRadius);
+            const electronRadius = count > 20 ? 2.7 : 3.5;
+
             return (
               <g key={`shell-${shellIdx}`}>
                 <circle
@@ -200,7 +215,7 @@ export const PeriodicTable: React.FC = () => {
                       key={`e-${shellIdx}-${electronIdx}`}
                       cx={ex}
                       cy={ey}
-                      r={3.5}
+                      r={electronRadius}
                       className="fill-cyan-400 dark:fill-cyan-300 drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]"
                     />
                   );
@@ -213,7 +228,7 @@ export const PeriodicTable: React.FC = () => {
           <circle
             cx={center}
             cy={center}
-            r={18}
+            r={nucleusRadius}
             className="fill-cyan-500/20 stroke-cyan-500 stroke-2 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]"
           />
           <text
@@ -236,7 +251,7 @@ export const PeriodicTable: React.FC = () => {
               key={idx}
               className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-mono font-bold border border-cyan-500/20"
             >
-              {electrons}
+              {langMode === 'km' ? toKhmerDigits(electrons) : electrons}
             </span>
           ))}
         </div>
@@ -244,7 +259,7 @@ export const PeriodicTable: React.FC = () => {
     );
   };
 
-  // Helper to render element cell in the 18-column periodic table
+  // Helper to render element cell in the 19-column periodic table
   const renderElementCell = (element: ChemicalElement) => {
     const isMatching = activeNumberSet.has(element.number);
     const catMeta = getElementCategoryMeta(element.category);
@@ -264,8 +279,8 @@ export const PeriodicTable: React.FC = () => {
         onMouseEnter={() => setHoveredElement(element)}
         onMouseLeave={() => setHoveredElement(null)}
         style={{
-          gridColumnStart: element.gridCol,
-          gridRowStart: element.gridRow,
+          gridColumnStart: element.gridCol + 1,
+          gridRowStart: element.gridRow + 1,
         }}
         className={`group relative flex flex-col justify-between p-1.5 sm:p-2 rounded-xl transition-all duration-200 text-left border cursor-pointer select-none min-w-[56px] min-h-[64px] sm:min-w-[68px] sm:min-h-[74px] md:min-w-[76px] md:min-h-[80px] ${
           catMeta.bgClass
@@ -656,76 +671,108 @@ export const PeriodicTable: React.FC = () => {
       {/* Main Content Area */}
       {viewMode === 'table' && (
         <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-sm overflow-x-auto">
+          {/* Mobile tip banner */}
+          <div className="lg:hidden mb-3 px-3.5 py-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-cyan-800 dark:text-cyan-300 flex items-center justify-between gap-2">
+            <span>
+              {langMode === 'km'
+                ? 'គន្លឹះ៖ អូសទៅឆ្វេងស្តាំដើម្បីមើលគ្រប់ក្រុមទាំង ១៨ ឬចុចប្តូរទៅទិដ្ឋភាព "កាត" ខាងលើ។'
+                : 'Tip: Swipe horizontally to explore all 18 groups, or switch to "Cards" view above.'}
+            </span>
+          </div>
+
           <div
             style={{
+              width: `${100 * zoom}%`,
+              minWidth: `${1060 * zoom}px`,
               transform: `scale(${zoom})`,
               transformOrigin: 'top left',
               transition: 'transform 0.15s ease-out',
             }}
-            className="min-w-[1020px]"
           >
-            {/* 18-Column Grid Layout */}
+            {/* 19-Column Grid Layout: Col 1 for Periods, Cols 2-19 for Groups 1-18 */}
             <div
               className="grid gap-1.5 sm:gap-2"
               style={{
-                gridTemplateColumns: 'repeat(18, minmax(54px, 1fr))',
-                gridTemplateRows: 'repeat(10, minmax(64px, auto))',
+                gridTemplateColumns: '36px repeat(18, minmax(54px, 1fr))',
+                gridTemplateRows: '26px repeat(7, minmax(64px, auto)) 14px repeat(2, minmax(64px, auto))',
               }}
             >
-              {/* Group Numbers Headers along top */}
+              {/* Corner header: Period \ Group */}
+              <div
+                style={{ gridColumnStart: 1, gridRowStart: 1 }}
+                className="flex items-center justify-center text-[10px] font-mono font-bold text-slate-400 select-none pb-1"
+                title="Period (Row) / Group (Column)"
+              >
+                P \ G
+              </div>
+
+              {/* Group Numbers 1-18 along row 1 */}
               {Array.from({ length: 18 }).map((_, idx) => (
                 <div
                   key={`grp-${idx + 1}`}
-                  style={{ gridColumnStart: idx + 1, gridRowStart: 1 }}
-                  className="text-center text-[10px] font-mono font-bold text-slate-400 pb-1"
+                  style={{ gridColumnStart: idx + 2, gridRowStart: 1 }}
+                  className="text-center text-[10px] font-mono font-bold text-slate-400 pb-1 select-none"
                 >
-                  {idx + 1}
+                  {langMode === 'km' ? toKhmerDigits(idx + 1) : idx + 1}
+                </div>
+              ))}
+
+              {/* Period Numbers 1-7 along col 1 */}
+              {Array.from({ length: 7 }).map((_, pIdx) => (
+                <div
+                  key={`period-${pIdx + 1}`}
+                  style={{ gridColumnStart: 1, gridRowStart: pIdx + 2 }}
+                  className="flex flex-col items-center justify-center rounded-xl bg-slate-100/60 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 font-mono text-[11px] font-bold border border-transparent select-none"
+                  title={`Period ${pIdx + 1} (${langMode === 'km' ? `ខួបទី ${toKhmerDigits(pIdx + 1)}` : `Period ${pIdx + 1}`})`}
+                >
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400">P</span>
+                  <span>{langMode === 'km' ? toKhmerDigits(pIdx + 1) : pIdx + 1}</span>
                 </div>
               ))}
 
               {/* Render all 118 Elements */}
               {CHEMICAL_ELEMENTS.map(element => renderElementCell(element))}
 
-              {/* Lanthanide Placeholder in Group 3 Period 6 */}
+              {/* Lanthanide Placeholder in Group 3 Period 6 (col 4, row 7) */}
               <div
-                style={{ gridColumnStart: 3, gridRowStart: 6 }}
+                style={{ gridColumnStart: 4, gridRowStart: 7 }}
                 onClick={() => setSelectedCategory('lanthanide')}
-                className="flex flex-col items-center justify-center p-1.5 rounded-xl border border-dashed border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 text-center cursor-pointer hover:bg-fuchsia-500/20 transition-all"
+                className="flex flex-col items-center justify-center p-1.5 rounded-xl border border-dashed border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 text-center cursor-pointer hover:bg-fuchsia-500/20 transition-all select-none"
               >
-                <span className="text-[10px] font-bold font-mono">57-71</span>
+                <span className="text-[10px] font-bold font-mono">{langMode === 'km' ? '៥៧-៧១' : '57-71'}</span>
                 <span className="text-[10px] font-bold">La-Lu</span>
                 <span className="text-[8px]">{langMode === 'km' ? 'ឡង់តាណូអ៊ីត' : 'Lanthanoids'}</span>
               </div>
 
-              {/* Actinide Placeholder in Group 3 Period 7 */}
+              {/* Actinide Placeholder in Group 3 Period 7 (col 4, row 8) */}
               <div
-                style={{ gridColumnStart: 3, gridRowStart: 7 }}
+                style={{ gridColumnStart: 4, gridRowStart: 8 }}
                 onClick={() => setSelectedCategory('actinide')}
-                className="flex flex-col items-center justify-center p-1.5 rounded-xl border border-dashed border-pink-500/50 bg-pink-500/10 text-pink-600 dark:text-pink-400 text-center cursor-pointer hover:bg-pink-500/20 transition-all"
+                className="flex flex-col items-center justify-center p-1.5 rounded-xl border border-dashed border-pink-500/50 bg-pink-500/10 text-pink-600 dark:text-pink-400 text-center cursor-pointer hover:bg-pink-500/20 transition-all select-none"
               >
-                <span className="text-[10px] font-bold font-mono">89-103</span>
+                <span className="text-[10px] font-bold font-mono">{langMode === 'km' ? '៨៩-១០៣' : '89-103'}</span>
                 <span className="text-[10px] font-bold">Ac-Lr</span>
                 <span className="text-[8px]">{langMode === 'km' ? 'អាក់ទីណូអ៊ីត' : 'Actinoids'}</span>
               </div>
 
-              {/* Row 8 is an aesthetic gap row */}
+              {/* Row 9 is an aesthetic gap row */}
               <div
-                style={{ gridColumnStart: 1, gridColumnEnd: 19, gridRowStart: 8 }}
-                className="h-4"
+                style={{ gridColumnStart: 1, gridColumnEnd: 20, gridRowStart: 9 }}
+                className="h-3"
               />
 
               {/* Bottom row labels for Lanthanide and Actinide series */}
               <div
-                style={{ gridColumnStart: 1, gridColumnEnd: 4, gridRowStart: 9 }}
-                className="flex items-center justify-end pr-2 text-xs font-bold text-fuchsia-600 dark:text-fuchsia-400"
+                style={{ gridColumnStart: 1, gridColumnEnd: 5, gridRowStart: 10 }}
+                className="flex items-center justify-end pr-2 text-xs font-bold text-fuchsia-600 dark:text-fuchsia-400 select-none text-right"
               >
-                {langMode === 'km' ? 'ឡង់តាណូអ៊ីត (La-Lu)' : 'Lanthanides (57-71)'}
+                {langMode === 'km' ? 'ឡង់តាណូអ៊ីត (៥៧-៧១)' : 'Lanthanides (57-71)'}
               </div>
               <div
-                style={{ gridColumnStart: 1, gridColumnEnd: 4, gridRowStart: 10 }}
-                className="flex items-center justify-end pr-2 text-xs font-bold text-pink-600 dark:text-pink-400"
+                style={{ gridColumnStart: 1, gridColumnEnd: 5, gridRowStart: 11 }}
+                className="flex items-center justify-end pr-2 text-xs font-bold text-pink-600 dark:text-pink-400 select-none text-right"
               >
-                {langMode === 'km' ? 'អាក់ទីណូអ៊ីត (Ac-Lr)' : 'Actinides (89-103)'}
+                {langMode === 'km' ? 'អាក់ទីណូអ៊ីត (៨៩-១០៣)' : 'Actinides (89-103)'}
               </div>
             </div>
           </div>
@@ -849,15 +896,23 @@ export const PeriodicTable: React.FC = () => {
                   <td className="py-3 px-4 text-slate-500 font-sans font-medium">
                     {langMode === 'km' ? 'លេខអាតូម' : 'Atomic Number'}
                   </td>
-                  <td className="py-3 px-4 font-bold">{elementA.number}</td>
-                  <td className="py-3 px-4 font-bold">{elementB.number}</td>
+                  <td className="py-3 px-4 font-bold">
+                    {langMode === 'km' ? toKhmerDigits(elementA.number) : elementA.number}
+                  </td>
+                  <td className="py-3 px-4 font-bold">
+                    {langMode === 'km' ? toKhmerDigits(elementB.number) : elementB.number}
+                  </td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4 text-slate-500 font-sans font-medium">
                     {langMode === 'km' ? 'ម៉ាស់អាតូមស្តង់ដារ' : 'Atomic Weight (u)'}
                   </td>
-                  <td className="py-3 px-4 font-bold">{elementA.atomicMass}</td>
-                  <td className="py-3 px-4 font-bold">{elementB.atomicMass}</td>
+                  <td className="py-3 px-4 font-bold">
+                    {langMode === 'km' ? toKhmerDigits(elementA.atomicMass) : elementA.atomicMass}
+                  </td>
+                  <td className="py-3 px-4 font-bold">
+                    {langMode === 'km' ? toKhmerDigits(elementB.atomicMass) : elementB.atomicMass}
+                  </td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4 text-slate-500 font-sans font-medium">
@@ -879,10 +934,14 @@ export const PeriodicTable: React.FC = () => {
                     {langMode === 'km' ? 'ខួប / ក្រុម / ប្លុក' : 'Period / Group / Block'}
                   </td>
                   <td className="py-3 px-4">
-                    P{elementA.period} / G{elementA.group} / {elementA.block}-block
+                    {langMode === 'km'
+                      ? `ខួប ${toKhmerDigits(elementA.period)} / ក្រុម ${toKhmerDigits(elementA.group)} / ប្លុក ${elementA.block}`
+                      : `P${elementA.period} / G${elementA.group} / ${elementA.block}-block`}
                   </td>
                   <td className="py-3 px-4">
-                    P{elementB.period} / G{elementB.group} / {elementB.block}-block
+                    {langMode === 'km'
+                      ? `ខួប ${toKhmerDigits(elementB.period)} / ក្រុម ${toKhmerDigits(elementB.group)} / ប្លុក ${elementB.block}`
+                      : `P${elementB.period} / G${elementB.group} / ${elementB.block}-block`}
                   </td>
                 </tr>
                 <tr>
@@ -896,18 +955,34 @@ export const PeriodicTable: React.FC = () => {
                   <td className="py-3 px-4 text-slate-500 font-sans font-medium">
                     {langMode === 'km' ? 'ស្រទាប់អេឡិចត្រុង' : 'Shell Electrons'}
                   </td>
-                  <td className="py-3 px-4">{elementA.shells.join(', ')}</td>
-                  <td className="py-3 px-4">{elementB.shells.join(', ')}</td>
+                  <td className="py-3 px-4">
+                    {langMode === 'km'
+                      ? elementA.shells.map(s => toKhmerDigits(s)).join(', ')
+                      : elementA.shells.join(', ')}
+                  </td>
+                  <td className="py-3 px-4">
+                    {langMode === 'km'
+                      ? elementB.shells.map(s => toKhmerDigits(s)).join(', ')
+                      : elementB.shells.join(', ')}
+                  </td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4 text-slate-500 font-sans font-medium">
                     {langMode === 'km' ? 'ចំណុចរលាយ' : 'Melting Point'}
                   </td>
                   <td className="py-3 px-4">
-                    {elementA.meltingPoint ? `${elementA.meltingPoint} K (${Math.round((elementA.meltingPoint - 273.15) * 10) / 10} °C)` : 'N/A'}
+                    {elementA.meltingPoint != null
+                      ? langMode === 'km'
+                        ? `${toKhmerDigits(elementA.meltingPoint)} K (${toKhmerDigits(Math.round((elementA.meltingPoint - 273.15) * 10) / 10)} °C)`
+                        : `${elementA.meltingPoint} K (${Math.round((elementA.meltingPoint - 273.15) * 10) / 10} °C)`
+                      : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                   </td>
                   <td className="py-3 px-4">
-                    {elementB.meltingPoint ? `${elementB.meltingPoint} K (${Math.round((elementB.meltingPoint - 273.15) * 10) / 10} °C)` : 'N/A'}
+                    {elementB.meltingPoint != null
+                      ? langMode === 'km'
+                        ? `${toKhmerDigits(elementB.meltingPoint)} K (${toKhmerDigits(Math.round((elementB.meltingPoint - 273.15) * 10) / 10)} °C)`
+                        : `${elementB.meltingPoint} K (${Math.round((elementB.meltingPoint - 273.15) * 10) / 10} °C)`
+                      : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                   </td>
                 </tr>
                 <tr>
@@ -915,10 +990,18 @@ export const PeriodicTable: React.FC = () => {
                     {langMode === 'km' ? 'ចំណុចរំពុះ' : 'Boiling Point'}
                   </td>
                   <td className="py-3 px-4">
-                    {elementA.boilingPoint ? `${elementA.boilingPoint} K (${Math.round((elementA.boilingPoint - 273.15) * 10) / 10} °C)` : 'N/A'}
+                    {elementA.boilingPoint != null
+                      ? langMode === 'km'
+                        ? `${toKhmerDigits(elementA.boilingPoint)} K (${toKhmerDigits(Math.round((elementA.boilingPoint - 273.15) * 10) / 10)} °C)`
+                        : `${elementA.boilingPoint} K (${Math.round((elementA.boilingPoint - 273.15) * 10) / 10} °C)`
+                      : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                   </td>
                   <td className="py-3 px-4">
-                    {elementB.boilingPoint ? `${elementB.boilingPoint} K (${Math.round((elementB.boilingPoint - 273.15) * 10) / 10} °C)` : 'N/A'}
+                    {elementB.boilingPoint != null
+                      ? langMode === 'km'
+                        ? `${toKhmerDigits(elementB.boilingPoint)} K (${toKhmerDigits(Math.round((elementB.boilingPoint - 273.15) * 10) / 10)} °C)`
+                        : `${elementB.boilingPoint} K (${Math.round((elementB.boilingPoint - 273.15) * 10) / 10} °C)`
+                      : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                   </td>
                 </tr>
                 <tr>
@@ -926,10 +1009,18 @@ export const PeriodicTable: React.FC = () => {
                     {langMode === 'km' ? 'ដង់ស៊ីតេ' : 'Density'}
                   </td>
                   <td className="py-3 px-4">
-                    {elementA.density != null ? `${elementA.density} g/cm³` : 'N/A'}
+                    {elementA.density != null
+                      ? langMode === 'km'
+                        ? `${toKhmerDigits(elementA.density)} g/cm³`
+                        : `${elementA.density} g/cm³`
+                      : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                   </td>
                   <td className="py-3 px-4">
-                    {elementB.density != null ? `${elementB.density} g/cm³` : 'N/A'}
+                    {elementB.density != null
+                      ? langMode === 'km'
+                        ? `${toKhmerDigits(elementB.density)} g/cm³`
+                        : `${elementB.density} g/cm³`
+                      : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                   </td>
                 </tr>
                 <tr>
@@ -937,18 +1028,26 @@ export const PeriodicTable: React.FC = () => {
                     {langMode === 'km' ? 'អេឡិចត្រូអវិជ្ជមាន' : 'Electronegativity'}
                   </td>
                   <td className="py-3 px-4">
-                    {elementA.electronegativity != null ? elementA.electronegativity : 'N/A'}
+                    {elementA.electronegativity != null
+                      ? langMode === 'km'
+                        ? toKhmerDigits(elementA.electronegativity)
+                        : elementA.electronegativity
+                      : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                   </td>
                   <td className="py-3 px-4">
-                    {elementB.electronegativity != null ? elementB.electronegativity : 'N/A'}
+                    {elementB.electronegativity != null
+                      ? langMode === 'km'
+                        ? toKhmerDigits(elementB.electronegativity)
+                        : elementB.electronegativity
+                      : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                   </td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4 text-slate-500 font-sans font-medium">
                     {langMode === 'km' ? 'រកឃើញដោយ' : 'Discovered By'}
                   </td>
-                  <td className="py-3 px-4 font-sans">{elementA.discoveredBy} ({elementA.yearDiscovered})</td>
-                  <td className="py-3 px-4 font-sans">{elementB.discoveredBy} ({elementB.yearDiscovered})</td>
+                  <td className="py-3 px-4 font-sans">{elementA.discoveredBy} ({langMode === 'km' ? toKhmerDigits(elementA.yearDiscovered) : elementA.yearDiscovered})</td>
+                  <td className="py-3 px-4 font-sans">{elementB.discoveredBy} ({langMode === 'km' ? toKhmerDigits(elementB.yearDiscovered) : elementB.yearDiscovered})</td>
                 </tr>
               </tbody>
             </table>
@@ -974,6 +1073,16 @@ export const PeriodicTable: React.FC = () => {
                   ? 'កើនឡើងពីលើចុះក្រោមក្នុងក្រុមនីមួយៗ (ដោយសារបន្ថែមស្រទាប់អេឡិចត្រុងថ្មី) និងថយចុះពីឆ្វេងទៅស្តាំក្នុងខួបនីមួយៗ (ដោយសារបន្ទុកនុយក្លេអ៊ែរកើនឡើង ទាញស្រទាប់អេឡិចត្រុងឱ្យរួមតូច)។'
                   : 'Increases from top to bottom within a group (as additional electron shells are added) and decreases from left to right across a period (due to increasing nuclear charge pulling electrons closer).'}
               </p>
+              <div className="flex items-center gap-2 flex-wrap text-[11px] font-mono">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ArrowRight size={12} className="text-cyan-500" />
+                  <span>{langMode === 'km' ? 'តាមខួប៖ ថយចុះ' : 'Across Period: Decreases'}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ArrowDown size={12} className="text-cyan-500" />
+                  <span>{langMode === 'km' ? 'តាមក្រុម៖ កើនឡើង' : 'Down Group: Increases'}</span>
+                </span>
+              </div>
               <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs font-mono">
                 {langMode === 'km' ? 'ធំបំផុត៖ ហ្វ្រង់ស្យូម (Fr) / សេស៊ីយូម (Cs) | តូចបំផុត៖ អេល្យូម (He)' : 'Largest: Francium (Fr) / Caesium (Cs) | Smallest: Helium (He)'}
               </div>
@@ -993,6 +1102,16 @@ export const PeriodicTable: React.FC = () => {
                   ? 'សមត្ថភាពអាតូមក្នុងការទាក់ទាញគូអេឡិចត្រុងរួមសម្ព័ន្ធ។ កើនឡើងពីឆ្វេងទៅស្តាំក្នុងខួប និងថយចុះពីលើចុះក្រោមក្នុងក្រុម។'
                   : 'Measures the tendency of an atom to attract bonding electrons. Increases from left to right across a period and decreases from top to bottom within a group.'}
               </p>
+              <div className="flex items-center gap-2 flex-wrap text-[11px] font-mono">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ArrowRight size={12} className="text-orange-500" />
+                  <span>{langMode === 'km' ? 'តាមខួប៖ កើនឡើង' : 'Across Period: Increases'}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ArrowDown size={12} className="text-orange-500" />
+                  <span>{langMode === 'km' ? 'តាមក្រុម៖ ថយចុះ' : 'Down Group: Decreases'}</span>
+                </span>
+              </div>
               <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-700 dark:text-orange-300 text-xs font-mono">
                 {langMode === 'km' ? 'ខ្ពស់បំផុត៖ ភ្លុយអ័រ (F, 3.98) | ទាបបំផុត៖ ហ្វ្រង់ស្យូម (Fr, 0.79)' : 'Highest: Fluorine (F, 3.98) | Lowest: Francium (Fr, 0.79)'}
               </div>
@@ -1012,6 +1131,16 @@ export const PeriodicTable: React.FC = () => {
                   ? 'ថាមពលអប្បបរមាដែលត្រូវការដើម្បីដកអេឡិចត្រុងមួយចេញពីអាតូមអព្យាក្រឹតក្នុងសភាពឧស្ម័ន។ កើនឡើងពីឆ្វេងទៅស្តាំ និងថយចុះពីលើចុះក្រោម។'
                   : 'The minimum energy required to remove an electron from a neutral atom in its gaseous state. Increases from left to right and decreases from top to bottom.'}
               </p>
+              <div className="flex items-center gap-2 flex-wrap text-[11px] font-mono">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ArrowRight size={12} className="text-blue-500" />
+                  <span>{langMode === 'km' ? 'តាមខួប៖ កើនឡើង' : 'Across Period: Increases'}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ArrowDown size={12} className="text-blue-500" />
+                  <span>{langMode === 'km' ? 'តាមក្រុម៖ ថយចុះ' : 'Down Group: Decreases'}</span>
+                </span>
+              </div>
               <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-700 dark:text-blue-300 text-xs font-mono">
                 {langMode === 'km' ? 'ខ្ពស់បំផុត៖ អេល្យូម (He) | ទាបបំផុត៖ ហ្វ្រង់ស្យូម (Fr)' : 'Highest: Helium (He) | Lowest: Francium (Fr)'}
               </div>
@@ -1031,6 +1160,16 @@ export const PeriodicTable: React.FC = () => {
                   ? 'កម្រិតនៃភាពងាយស្រួលដែលអាតូមបាត់បង់អេឡិចត្រុង។ កើនឡើងពីស្តាំទៅឆ្វេង និងពីលើចុះក្រោម។ លោហៈសកម្មបំផុតនៅជ្រុងខាងឆ្វេងក្រោមនៃតារាង។'
                   : 'The level of reactivity and ease with which an element loses valence electrons. Increases right-to-left and top-to-bottom toward Francium/Caesium.'}
               </p>
+              <div className="flex items-center gap-2 flex-wrap text-[11px] font-mono">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ArrowRight size={12} className="text-emerald-500" />
+                  <span>{langMode === 'km' ? 'តាមខួប៖ ថយចុះ' : 'Across Period: Decreases'}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ArrowDown size={12} className="text-emerald-500" />
+                  <span>{langMode === 'km' ? 'តាមក្រុម៖ កើនឡើង' : 'Down Group: Increases'}</span>
+                </span>
+              </div>
               <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-mono">
                 {langMode === 'km' ? 'លោហៈខ្លាំងបំផុត៖ ហ្វ្រង់ស្យូម (Fr) / សេស៊ីយូម (Cs)' : 'Most Metallic: Francium (Fr) / Caesium (Cs)'}
               </div>
@@ -1041,8 +1180,14 @@ export const PeriodicTable: React.FC = () => {
 
       {/* Rich Element Detail Modal */}
       {activeElement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-3xl my-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-6 sm:p-8 space-y-6">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md overflow-y-auto"
+          onClick={() => setActiveElement(null)}
+        >
+          <div
+            className="relative w-full max-w-3xl my-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-6 sm:p-8 space-y-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Top Navigation & Close */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -1092,7 +1237,7 @@ export const PeriodicTable: React.FC = () => {
                   } ${getElementCategoryMeta(activeElement.category).borderClass}`}
                 >
                   <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-none">
-                    {activeElement.number}
+                    {langMode === 'km' ? toKhmerDigits(activeElement.number) : activeElement.number}
                   </span>
                   <span className="text-2xl text-slate-900 dark:text-white leading-none mt-0.5">
                     {activeElement.symbol}
@@ -1121,7 +1266,9 @@ export const PeriodicTable: React.FC = () => {
                       {activeElement.block}-block
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                      Period {activeElement.period}, Group {activeElement.group}
+                      {langMode === 'km'
+                        ? `ខួបទី ${toKhmerDigits(activeElement.period)}, ក្រុមទី ${toKhmerDigits(activeElement.group)}`
+                        : `Period ${activeElement.period}, Group ${activeElement.group}`}
                     </span>
                   </div>
                 </div>
@@ -1181,7 +1328,7 @@ export const PeriodicTable: React.FC = () => {
                       {langMode === 'km' ? 'ម៉ាស់អាតូមស្តង់ដារ' : 'Atomic Weight'}
                     </span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      {activeElement.atomicMass} u
+                      {langMode === 'km' ? toKhmerDigits(activeElement.atomicMass) : activeElement.atomicMass} u
                     </span>
                   </div>
 
@@ -1190,7 +1337,15 @@ export const PeriodicTable: React.FC = () => {
                       {langMode === 'km' ? 'សភាពនៅ ២០ °C' : 'Standard State'}
                     </span>
                     <span className="text-sm font-bold capitalize text-cyan-600 dark:text-cyan-400">
-                      {activeElement.standardState}
+                      {langMode === 'km'
+                        ? (activeElement.standardState === 'gas'
+                            ? 'ឧស្ម័ន'
+                            : activeElement.standardState === 'liquid'
+                            ? 'រាវ'
+                            : activeElement.standardState === 'solid'
+                            ? 'រឹង'
+                            : 'មិនទាន់កំណត់')
+                        : activeElement.standardState}
                     </span>
                   </div>
 
@@ -1199,9 +1354,11 @@ export const PeriodicTable: React.FC = () => {
                       {langMode === 'km' ? 'ចំណុចរលាយ' : 'Melting Point'}
                     </span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      {activeElement.meltingPoint
-                        ? `${activeElement.meltingPoint} K (${Math.round((activeElement.meltingPoint - 273.15) * 10) / 10} °C)`
-                        : 'Unknown'}
+                      {activeElement.meltingPoint != null
+                        ? langMode === 'km'
+                          ? `${toKhmerDigits(activeElement.meltingPoint)} K (${toKhmerDigits(Math.round((activeElement.meltingPoint - 273.15) * 10) / 10)} °C)`
+                          : `${activeElement.meltingPoint} K (${Math.round((activeElement.meltingPoint - 273.15) * 10) / 10} °C)`
+                        : langMode === 'km' ? 'មិនទាន់ដឹង' : 'Unknown'}
                     </span>
                   </div>
 
@@ -1210,9 +1367,11 @@ export const PeriodicTable: React.FC = () => {
                       {langMode === 'km' ? 'ចំណុចរំពុះ' : 'Boiling Point'}
                     </span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      {activeElement.boilingPoint
-                        ? `${activeElement.boilingPoint} K (${Math.round((activeElement.boilingPoint - 273.15) * 10) / 10} °C)`
-                        : 'Unknown'}
+                      {activeElement.boilingPoint != null
+                        ? langMode === 'km'
+                          ? `${toKhmerDigits(activeElement.boilingPoint)} K (${toKhmerDigits(Math.round((activeElement.boilingPoint - 273.15) * 10) / 10)} °C)`
+                          : `${activeElement.boilingPoint} K (${Math.round((activeElement.boilingPoint - 273.15) * 10) / 10} °C)`
+                        : langMode === 'km' ? 'មិនទាន់ដឹង' : 'Unknown'}
                     </span>
                   </div>
 
@@ -1221,7 +1380,11 @@ export const PeriodicTable: React.FC = () => {
                       {langMode === 'km' ? 'ដង់ស៊ីតេ' : 'Density'}
                     </span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      {activeElement.density != null ? `${activeElement.density} g/cm³` : 'N/A'}
+                      {activeElement.density != null
+                        ? langMode === 'km'
+                          ? `${toKhmerDigits(activeElement.density)} g/cm³`
+                          : `${activeElement.density} g/cm³`
+                        : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                     </span>
                   </div>
 
@@ -1230,7 +1393,11 @@ export const PeriodicTable: React.FC = () => {
                       {langMode === 'km' ? 'អេឡិចត្រូអវិជ្ជមាន' : 'Electronegativity'}
                     </span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      {activeElement.electronegativity != null ? activeElement.electronegativity : 'N/A'}
+                      {activeElement.electronegativity != null
+                        ? langMode === 'km'
+                          ? toKhmerDigits(activeElement.electronegativity)
+                          : activeElement.electronegativity
+                        : langMode === 'km' ? 'មិនមាន' : 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -1241,7 +1408,7 @@ export const PeriodicTable: React.FC = () => {
                     {langMode === 'km' ? 'ប្រវត្តិស្វែងរកឃើញ:' : 'Discovery:'}
                   </span>{' '}
                   <span className="text-slate-800 dark:text-slate-200">
-                    {activeElement.discoveredBy} ({activeElement.yearDiscovered})
+                    {activeElement.discoveredBy} ({langMode === 'km' ? toKhmerDigits(activeElement.yearDiscovered) : activeElement.yearDiscovered})
                   </span>
                 </div>
               </div>
