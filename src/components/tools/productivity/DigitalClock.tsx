@@ -64,20 +64,33 @@ export type ClockTheme =
   | 'sunset_twilight'
   | 'aurora_borealis'
   | 'breathing_glow'
-  | 'neon_cyber_pulse';
+  | 'neon_cyber_pulse'
+  | 'ocean_waves'
+  | 'fire_ember'
+  | 'supernova';
 
-type Mode = 'digital' | 'stacked' | 'radial' | 'words' | 'calendar' | 'flip' | 'analog' | 'pomodoro' | 'stopwatch';
-type FontStyle = 'mono' | 'sans' | 'serif' | 'digital' | 'condensed' | 'minimal';
-type ThemeCategory = 'all' | 'animated' | 'cyber' | 'space' | 'warm' | 'minimal';
-type AnimationFx = 'auto' | 'heartbeat' | 'sunrise' | 'sunset' | 'aurora' | 'breathe' | 'none';
+export type Mode = 'digital' | 'stacked' | 'radial' | 'words' | 'calendar' | 'flip' | 'analog' | 'pomodoro' | 'stopwatch';
+export type FontStyle = 'mono' | 'sans' | 'serif' | 'digital' | 'condensed' | 'minimal';
+export type ThemeCategory = 'all' | 'animated' | 'cyber' | 'space' | 'warm' | 'minimal';
+export type AnimationFx =
+  | 'auto'
+  | 'heartbeat'
+  | 'sunrise'
+  | 'sunset'
+  | 'aurora'
+  | 'breathe'
+  | 'ocean'
+  | 'fire'
+  | 'supernova'
+  | 'none';
 
-interface LapItem {
+export interface LapItem {
   id: number;
   time: number;
   lapDuration: number;
 }
 
-interface ThemeStyles {
+export interface ThemeStyles {
   bg: string;
   clockText: string;
   glow: string;
@@ -96,6 +109,7 @@ interface ThemeStyles {
   dialTickMinor?: string;
   dialNumColor?: string;
   isLight?: boolean;
+  defaultAnimation?: AnimationFx;
 }
 
 const TIMEZONES = [
@@ -109,6 +123,836 @@ const TIMEZONES = [
   { id: 'Europe/Paris', label: 'Paris / Berlin (CET)' },
   { id: 'Australia/Sydney', label: 'Sydney (AEST)' },
 ];
+
+export const CLOCK_ANIMATION_FX_OPTIONS: { id: AnimationFx; label: string }[] = [
+  { id: 'auto', label: 'Animation: Auto (Theme)' },
+  { id: 'heartbeat', label: 'Animation: Heartbeat Pulse' },
+  { id: 'sunrise', label: 'Animation: Sunrise Dawn' },
+  { id: 'sunset', label: 'Animation: Sunset Twilight' },
+  { id: 'aurora', label: 'Animation: Aurora Waves' },
+  { id: 'breathe', label: 'Animation: Calm Breathing' },
+  { id: 'ocean', label: 'Animation: Ocean Waves' },
+  { id: 'fire', label: 'Animation: Campfire Ember' },
+  { id: 'supernova', label: 'Animation: Cosmic Supernova' },
+  { id: 'none', label: 'Animation: Off (Static)' },
+];
+
+export const CLOCK_THEMES: { id: ClockTheme; label: string; color: string; category: ThemeCategory }[] = [
+  // Dynamic & Animated
+  { id: 'heartbeat_pulse', label: 'Heartbeat Pulse', color: 'bg-[#ff1a53]', category: 'animated' },
+  { id: 'sunrise_dawn', label: 'Sunrise Dawn', color: 'bg-amber-400', category: 'animated' },
+  { id: 'sunset_twilight', label: 'Sunset Twilight', color: 'bg-orange-500', category: 'animated' },
+  { id: 'aurora_borealis', label: 'Aurora Borealis', color: 'bg-emerald-400', category: 'animated' },
+  { id: 'breathing_glow', label: 'Calm Breathing', color: 'bg-sky-400', category: 'animated' },
+  { id: 'neon_cyber_pulse', label: 'Neon Cyber Pulse', color: 'bg-[#00f0ff]', category: 'animated' },
+  { id: 'ocean_waves', label: 'Ocean Waves', color: 'bg-cyan-400', category: 'animated' },
+  { id: 'fire_ember', label: 'Campfire Ember', color: 'bg-orange-500', category: 'animated' },
+  { id: 'supernova', label: 'Cosmic Supernova', color: 'bg-fuchsia-500', category: 'animated' },
+
+  // Neon & Cyber
+  { id: 'night_city', label: 'Night City 2077', color: 'bg-[#fcee0a]', category: 'cyber' },
+  { id: 'cyberpunk', label: 'Cyber Neon', color: 'bg-cyan-400', category: 'cyber' },
+  { id: 'synthwave', label: 'Synthwave 80s', color: 'bg-fuchsia-500', category: 'cyber' },
+  { id: 'matrix', label: 'Matrix Terminal', color: 'bg-emerald-400', category: 'cyber' },
+  { id: 'toxic_lime', label: 'Acid Cyber Lime', color: 'bg-[#ccff00]', category: 'cyber' },
+  { id: 'electric_violet', label: 'Electric Ultraviolet', color: 'bg-[#d946ef]', category: 'cyber' },
+  { id: 'midnight_velocity', label: 'Midnight Velocity', color: 'bg-[#ff2b44]', category: 'cyber' },
+  { id: 'solarized_dark', label: 'Solarized Horizon', color: 'bg-[#2aa198]', category: 'cyber' },
+  { id: 'miami_sunset', label: 'Miami Vice Synth', color: 'bg-[#f72585]', category: 'cyber' },
+  { id: 'monokai_pro', label: 'Monokai Pro', color: 'bg-[#ffd866]', category: 'cyber' },
+  { id: 'crimson_eclipse', label: 'Crimson Eclipse', color: 'bg-[#ff1744]', category: 'cyber' },
+
+  // Space & Aurora
+  { id: 'tokyo_night', label: 'Tokyo Night', color: 'bg-[#7aa2f7]', category: 'space' },
+  { id: 'tokyo_rain', label: 'Tokyo Rain', color: 'bg-purple-400', category: 'space' },
+  { id: 'nord_aurora', label: 'Nordic Aurora', color: 'bg-[#88c0d0]', category: 'space' },
+  { id: 'cosmic_nebula', label: 'Cosmic Nebula', color: 'bg-pink-500', category: 'space' },
+  { id: 'frost_aurora', label: 'Glacial Frost', color: 'bg-sky-300', category: 'space' },
+  { id: 'abyss_ocean', label: 'Deep Abyss', color: 'bg-cyan-500', category: 'space' },
+
+  // Warm & Sunset
+  { id: 'amber_crt', label: 'Vintage Amber CRT', color: 'bg-[#ffb000]', category: 'warm' },
+  { id: 'luxury_gold', label: 'Royal Obsidian Gold', color: 'bg-amber-400', category: 'warm' },
+  { id: 'solar_flare', label: 'Solar Flare', color: 'bg-orange-500', category: 'warm' },
+  { id: 'warm_espresso', label: 'Warm Espresso', color: 'bg-amber-700', category: 'warm' },
+  { id: 'sahara_dune', label: 'Sahara Dune', color: 'bg-orange-400', category: 'warm' },
+  { id: 'kyoto_twilight', label: 'Kyoto Twilight', color: 'bg-rose-500', category: 'warm' },
+  { id: 'emerald', label: 'Emerald Forest', color: 'bg-teal-400', category: 'warm' },
+  { id: 'gruvbox_warm', label: 'Gruvbox Retro', color: 'bg-[#fabd2f]', category: 'warm' },
+  { id: 'california_dusk', label: 'California Dusk', color: 'bg-[#f43f5e]', category: 'warm' },
+
+  // Minimal & Studio
+  { id: 'paper_studio', label: 'Studio Paper (Light)', color: 'bg-slate-100 border border-slate-400', category: 'minimal' },
+  { id: 'alpine_glacier', label: 'Nordic Glacier (Light)', color: 'bg-sky-100 border border-sky-400', category: 'minimal' },
+  { id: 'oled', label: 'OLED Pure Black', color: 'bg-neutral-950 border border-neutral-600', category: 'minimal' },
+  { id: 'swiss_bauhaus', label: 'Swiss Bauhaus', color: 'bg-rose-500', category: 'minimal' },
+  { id: 'slate', label: 'Deep Slate', color: 'bg-slate-600', category: 'minimal' },
+  { id: 'dracula', label: 'Dracula Gothic', color: 'bg-[#ff79c6]', category: 'minimal' },
+  { id: 'catppuccin', label: 'Catppuccin Mocha', color: 'bg-[#cba6f7]', category: 'minimal' },
+  { id: 'rose_quartz', label: 'Rose Quartz', color: 'bg-pink-300', category: 'minimal' },
+  { id: 'dreamy_lilac', label: 'Dreamy Lilac', color: 'bg-purple-300', category: 'minimal' },
+  { id: 'matcha_minimal', label: 'Matcha Zen', color: 'bg-lime-400', category: 'minimal' },
+];
+
+export const getClockThemeStyles = (theme: ClockTheme): ThemeStyles => {
+  switch (theme) {
+    case 'night_city':
+      return {
+        bg: 'bg-[#08080d]',
+        clockText: 'text-[#fcee0a] drop-shadow-[0_0_35px_rgba(252,238,10,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(252,238,10,0.12),transparent_70%)]',
+        accent: 'text-[#00f0ff]',
+        border: 'border-[#fcee0a]/30',
+        badgeBg: 'bg-[#fcee0a]/15 text-[#fcee0a] border-[#fcee0a]/40',
+        handSec: '#00f0ff',
+        handMin: '#fcee0a',
+        handHr: '#ff003c',
+        dialBg: '#0e0e17',
+        dialBorder: '#fcee0a',
+        flipCard: 'bg-[#151522] text-[#fcee0a] border-[#fcee0a]/30 shadow-[#fcee0a]/20',
+        progressBar: 'bg-[#fcee0a]',
+      };
+    case 'cyberpunk':
+      return {
+        bg: 'bg-[#050814]',
+        clockText: 'text-cyan-400 drop-shadow-[0_0_35px_rgba(34,211,238,0.8)]',
+        glow: 'bg-gradient-to-tr from-cyan-500/20 via-fuchsia-500/15 to-transparent',
+        accent: 'text-fuchsia-400',
+        border: 'border-cyan-500/30',
+        badgeBg: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
+        handSec: '#22d3ee',
+        handMin: '#e879f9',
+        handHr: '#38bdf8',
+        dialBg: '#090e24',
+        dialBorder: '#22d3ee',
+        flipCard: 'bg-[#0c1430] text-cyan-300 border-cyan-500/30 shadow-cyan-500/20',
+        progressBar: 'bg-gradient-to-r from-cyan-400 to-fuchsia-500',
+      };
+    case 'synthwave':
+      return {
+        bg: 'bg-[#110726]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 via-pink-400 to-cyan-400 drop-shadow-[0_0_30px_rgba(232,121,249,0.7)]',
+        glow: 'bg-gradient-to-b from-fuchsia-500/15 via-purple-500/10 to-cyan-500/15',
+        accent: 'text-cyan-300',
+        border: 'border-fuchsia-500/30',
+        badgeBg: 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/40',
+        handSec: '#22d3ee',
+        handMin: '#f472b6',
+        handHr: '#c084fc',
+        dialBg: '#1a0c3a',
+        dialBorder: '#f472b6',
+        flipCard: 'bg-[#1c0e3d] text-fuchsia-300 border-fuchsia-500/30 shadow-fuchsia-500/20',
+        progressBar: 'bg-gradient-to-r from-fuchsia-500 via-pink-500 to-cyan-400',
+      };
+    case 'tokyo_night':
+      return {
+        bg: 'bg-[#1a1b26]',
+        clockText: 'text-[#7aa2f7] drop-shadow-[0_0_30px_rgba(122,162,247,0.75)]',
+        glow: 'bg-gradient-to-tr from-[#7aa2f7]/15 via-[#bb9af7]/10 to-transparent',
+        accent: 'text-[#f7768e]',
+        border: 'border-[#7aa2f7]/30',
+        badgeBg: 'bg-[#7aa2f7]/15 text-[#7aa2f7] border-[#7aa2f7]/40',
+        handSec: '#f7768e',
+        handMin: '#7aa2f7',
+        handHr: '#bb9af7',
+        dialBg: '#24283b',
+        dialBorder: '#7aa2f7',
+        flipCard: 'bg-[#24283b] text-[#7aa2f7] border-[#7aa2f7]/30 shadow-[#7aa2f7]/20',
+        progressBar: 'bg-gradient-to-r from-[#7aa2f7] to-[#bb9af7]',
+      };
+    case 'tokyo_rain':
+      return {
+        bg: 'bg-[#0b0b1a]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-[0_0_30px_rgba(192,132,252,0.7)]',
+        glow: 'bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-pink-500/15',
+        accent: 'text-pink-400',
+        border: 'border-purple-500/30',
+        badgeBg: 'bg-purple-500/15 text-purple-300 border-purple-500/40',
+        handSec: '#f472b6',
+        handMin: '#c084fc',
+        handHr: '#818cf8',
+        dialBg: '#15152e',
+        dialBorder: '#c084fc',
+        flipCard: 'bg-[#181838] text-purple-300 border-purple-500/30 shadow-purple-500/20',
+        progressBar: 'bg-gradient-to-r from-purple-500 via-pink-400 to-indigo-400',
+      };
+    case 'nord_aurora':
+      return {
+        bg: 'bg-[#2e3440]',
+        clockText: 'text-[#88c0d0] drop-shadow-[0_0_25px_rgba(136,192,208,0.7)]',
+        glow: 'bg-gradient-to-tr from-[#88c0d0]/15 via-[#a3be8c]/15 to-transparent',
+        accent: 'text-[#a3be8c]',
+        border: 'border-[#88c0d0]/30',
+        badgeBg: 'bg-[#88c0d0]/15 text-[#88c0d0] border-[#88c0d0]/40',
+        handSec: '#bf616a',
+        handMin: '#88c0d0',
+        handHr: '#81a1c1',
+        dialBg: '#3b4252',
+        dialBorder: '#88c0d0',
+        flipCard: 'bg-[#3b4252] text-[#88c0d0] border-[#88c0d0]/30 shadow-[#88c0d0]/20',
+        progressBar: 'bg-gradient-to-r from-[#88c0d0] to-[#a3be8c]',
+      };
+    case 'matrix':
+      return {
+        bg: 'bg-[#020d06]',
+        clockText: 'text-emerald-400 drop-shadow-[0_0_35px_rgba(52,211,153,0.85)]',
+        glow: 'bg-emerald-500/10',
+        accent: 'text-emerald-300',
+        border: 'border-emerald-500/30',
+        badgeBg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
+        handSec: '#34d399',
+        handMin: '#10b981',
+        handHr: '#059669',
+        dialBg: '#051c0d',
+        dialBorder: '#10b981',
+        flipCard: 'bg-[#062411] text-emerald-400 border-emerald-500/30 shadow-emerald-500/20',
+        progressBar: 'bg-emerald-400',
+      };
+    case 'amber_crt':
+      return {
+        bg: 'bg-[#0c0800]',
+        clockText: 'text-[#ffb000] drop-shadow-[0_0_30px_rgba(255,176,0,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,176,0,0.15),transparent_70%)]',
+        accent: 'text-[#ffd066]',
+        border: 'border-[#ffb000]/30',
+        badgeBg: 'bg-[#ffb000]/15 text-[#ffb000] border-[#ffb000]/40',
+        handSec: '#ffb000',
+        handMin: '#e69d00',
+        handHr: '#cc8b00',
+        dialBg: '#1a1200',
+        dialBorder: '#ffb000',
+        flipCard: 'bg-[#1f1500] text-[#ffb000] border-[#ffb000]/30 shadow-[#ffb000]/20',
+        progressBar: 'bg-[#ffb000]',
+      };
+    case 'dracula':
+      return {
+        bg: 'bg-[#282a36]',
+        clockText: 'text-[#ff79c6] drop-shadow-[0_0_30px_rgba(255,121,198,0.75)]',
+        glow: 'bg-gradient-to-tr from-[#ff79c6]/15 via-[#bd93f9]/15 to-[#50fa7b]/10',
+        accent: 'text-[#50fa7b]',
+        border: 'border-[#bd93f9]/30',
+        badgeBg: 'bg-[#ff79c6]/15 text-[#ff79c6] border-[#ff79c6]/40',
+        handSec: '#50fa7b',
+        handMin: '#ff79c6',
+        handHr: '#bd93f9',
+        dialBg: '#383a59',
+        dialBorder: '#ff79c6',
+        flipCard: 'bg-[#383a59] text-[#ff79c6] border-[#bd93f9]/30 shadow-[#ff79c6]/20',
+        progressBar: 'bg-gradient-to-r from-[#ff79c6] to-[#50fa7b]',
+      };
+    case 'catppuccin':
+      return {
+        bg: 'bg-[#1e1e2e]',
+        clockText: 'text-[#cba6f7] drop-shadow-[0_0_25px_rgba(203,166,247,0.7)]',
+        glow: 'bg-gradient-to-tr from-[#cba6f7]/15 via-[#f5c2e7]/15 to-[#89dceb]/10',
+        accent: 'text-[#f5c2e7]',
+        border: 'border-[#cba6f7]/30',
+        badgeBg: 'bg-[#cba6f7]/15 text-[#cba6f7] border-[#cba6f7]/40',
+        handSec: '#f5c2e7',
+        handMin: '#cba6f7',
+        handHr: '#89b4fa',
+        dialBg: '#313244',
+        dialBorder: '#cba6f7',
+        flipCard: 'bg-[#313244] text-[#cba6f7] border-[#cba6f7]/30 shadow-[#cba6f7]/20',
+        progressBar: 'bg-gradient-to-r from-[#cba6f7] to-[#f5c2e7]',
+      };
+    case 'luxury_gold':
+      return {
+        bg: 'bg-[#0a0a0d]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-500 drop-shadow-[0_0_35px_rgba(251,191,36,0.75)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.12),transparent_70%)]',
+        accent: 'text-amber-300',
+        border: 'border-amber-500/30',
+        badgeBg: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
+        handSec: '#fbbf24',
+        handMin: '#fef08a',
+        handHr: '#f59e0b',
+        dialBg: '#14141c',
+        dialBorder: '#fbbf24',
+        flipCard: 'bg-[#171722] text-amber-300 border-amber-500/30 shadow-amber-500/20',
+        progressBar: 'bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500',
+      };
+    case 'cosmic_nebula':
+      return {
+        bg: 'bg-[#060613]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-pink-500 drop-shadow-[0_0_35px_rgba(244,114,182,0.75)]',
+        glow: 'bg-gradient-to-r from-cyan-500/15 via-indigo-500/20 to-pink-500/15',
+        accent: 'text-pink-400',
+        border: 'border-indigo-500/30',
+        badgeBg: 'bg-indigo-500/15 text-pink-300 border-indigo-500/40',
+        handSec: '#ec4899',
+        handMin: '#818cf8',
+        handHr: '#38bdf8',
+        dialBg: '#0d0d26',
+        dialBorder: '#818cf8',
+        flipCard: 'bg-[#111133] text-pink-300 border-indigo-500/30 shadow-pink-500/20',
+        progressBar: 'bg-gradient-to-r from-cyan-400 via-indigo-400 to-pink-500',
+      };
+    case 'solar_flare':
+      return {
+        bg: 'bg-[#120a04]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-500 drop-shadow-[0_0_30px_rgba(251,191,36,0.75)]',
+        glow: 'bg-gradient-to-tr from-amber-500/15 via-orange-500/15 to-transparent',
+        accent: 'text-amber-400',
+        border: 'border-amber-500/30',
+        badgeBg: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
+        handSec: '#fbbf24',
+        handMin: '#f59e0b',
+        handHr: '#d97706',
+        dialBg: '#221307',
+        dialBorder: '#f59e0b',
+        flipCard: 'bg-[#261509] text-amber-400 border-amber-500/30 shadow-amber-500/20',
+        progressBar: 'bg-gradient-to-r from-amber-400 to-orange-500',
+      };
+    case 'rose_quartz':
+      return {
+        bg: 'bg-[#170e14]',
+        clockText: 'text-pink-300 drop-shadow-[0_0_25px_rgba(244,114,182,0.6)]',
+        glow: 'bg-gradient-to-tr from-pink-500/15 via-rose-500/15 to-transparent',
+        accent: 'text-pink-200',
+        border: 'border-pink-500/30',
+        badgeBg: 'bg-pink-500/15 text-pink-300 border-pink-500/40',
+        handSec: '#f472b6',
+        handMin: '#fbcfe8',
+        handHr: '#f9a8d4',
+        dialBg: '#291723',
+        dialBorder: '#f472b6',
+        flipCard: 'bg-[#291723] text-pink-300 border-pink-500/30 shadow-pink-500/20',
+        progressBar: 'bg-gradient-to-r from-pink-400 to-rose-300',
+      };
+    case 'swiss_bauhaus':
+      return {
+        bg: 'bg-slate-900',
+        clockText: 'text-white',
+        glow: 'bg-slate-800/30',
+        accent: 'text-rose-500',
+        border: 'border-slate-800',
+        badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+        handSec: '#f43f5e',
+        handMin: '#ffffff',
+        handHr: '#94a3b8',
+        dialBg: '#1e293b',
+        dialBorder: '#f43f5e',
+        flipCard: 'bg-slate-800 text-white border-slate-700 shadow-slate-950/40',
+        progressBar: 'bg-rose-500',
+      };
+    case 'oled':
+      return {
+        bg: 'bg-black',
+        clockText: 'text-white',
+        glow: 'bg-transparent',
+        accent: 'text-neutral-400',
+        border: 'border-neutral-900',
+        badgeBg: 'bg-neutral-900 text-white border-neutral-800',
+        handSec: '#ffffff',
+        handMin: '#a3a3a3',
+        handHr: '#e5e5e5',
+        dialBg: '#0a0a0a',
+        dialBorder: '#404040',
+        flipCard: 'bg-[#121212] text-white border-neutral-800 shadow-black',
+        progressBar: 'bg-white',
+      };
+    case 'emerald':
+      return {
+        bg: 'bg-[#04120c]',
+        clockText: 'text-teal-300 drop-shadow-[0_0_25px_rgba(45,212,191,0.7)]',
+        glow: 'bg-teal-500/10',
+        accent: 'text-teal-400',
+        border: 'border-teal-500/30',
+        badgeBg: 'bg-teal-500/15 text-teal-300 border-teal-500/40',
+        handSec: '#2dd4bf',
+        handMin: '#14b8a6',
+        handHr: '#0f766e',
+        dialBg: '#082418',
+        dialBorder: '#14b8a6',
+        flipCard: 'bg-[#082418] text-teal-300 border-teal-500/30 shadow-teal-500/20',
+        progressBar: 'bg-teal-400',
+      };
+    case 'slate':
+      return {
+        bg: 'bg-[#0f172a]',
+        clockText: 'text-slate-100',
+        glow: 'bg-slate-800/40',
+        accent: 'text-blue-400',
+        border: 'border-slate-800',
+        badgeBg: 'bg-blue-500/15 text-blue-300 border-blue-500/40',
+        handSec: '#3b82f6',
+        handMin: '#94a3b8',
+        handHr: '#cbd5e1',
+        dialBg: '#1e293b',
+        dialBorder: '#3b82f6',
+        flipCard: 'bg-[#1e293b] text-slate-100 border-slate-700 shadow-slate-950/40',
+        progressBar: 'bg-blue-500',
+      };
+    case 'kyoto_twilight':
+      return {
+        bg: 'bg-[#140a10]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-500 to-red-600 drop-shadow-[0_0_35px_rgba(244,63,94,0.8)]',
+        glow: 'bg-gradient-to-tr from-rose-500/15 via-amber-500/10 to-red-600/15',
+        accent: 'text-[#ff4757]',
+        border: 'border-rose-500/30',
+        badgeBg: 'bg-rose-500/15 text-rose-300 border-rose-500/40',
+        handSec: '#ff4757',
+        handMin: '#fb7185',
+        handHr: '#f43f5e',
+        dialBg: '#1f0d18',
+        dialBorder: '#ff4757',
+        flipCard: 'bg-[#220e1a] text-rose-300 border-rose-500/30 shadow-rose-500/20',
+        progressBar: 'bg-gradient-to-r from-amber-400 via-rose-500 to-red-500',
+      };
+    case 'abyss_ocean':
+      return {
+        bg: 'bg-[#020b14]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-teal-200 via-cyan-400 to-blue-500 drop-shadow-[0_0_35px_rgba(6,182,212,0.85)]',
+        glow: 'bg-gradient-to-tr from-cyan-500/15 via-teal-500/10 to-blue-600/15',
+        accent: 'text-[#00f2fe]',
+        border: 'border-cyan-500/30',
+        badgeBg: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40',
+        handSec: '#00f2fe',
+        handMin: '#38bdf8',
+        handHr: '#0284c7',
+        dialBg: '#051829',
+        dialBorder: '#00f2fe',
+        flipCard: 'bg-[#061d33] text-cyan-300 border-cyan-500/30 shadow-cyan-500/20',
+        progressBar: 'bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-500',
+      };
+    case 'paper_studio':
+      return {
+        bg: 'bg-[#f8f9fa]',
+        clockText: 'text-slate-900 drop-shadow-[0_2px_12px_rgba(0,0,0,0.06)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.04),transparent_70%)]',
+        accent: 'text-rose-600',
+        border: 'border-slate-300/80',
+        badgeBg: 'bg-slate-200/90 text-slate-800 border-slate-300',
+        handSec: '#ef4444',
+        handMin: '#1e293b',
+        handHr: '#0f172a',
+        dialBg: '#ffffff',
+        dialBorder: '#cbd5e1',
+        flipCard: 'bg-white text-slate-900 border-slate-300 shadow-xl shadow-slate-300/50',
+        subText: 'text-slate-600',
+        dialTickMajor: '#0f172a',
+        dialTickMinor: 'rgba(15,23,42,0.3)',
+        dialNumColor: '#0f172a',
+        progressBar: 'bg-rose-500',
+        isLight: true,
+      };
+    case 'warm_espresso':
+      return {
+        bg: 'bg-[#160f0a]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-amber-300 to-amber-600 drop-shadow-[0_0_25px_rgba(217,119,6,0.65)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(217,119,6,0.12),transparent_70%)]',
+        accent: 'text-[#fde68a]',
+        border: 'border-amber-600/30',
+        badgeBg: 'bg-amber-600/15 text-amber-200 border-amber-600/40',
+        handSec: '#d97706',
+        handMin: '#fde68a',
+        handHr: '#b45309',
+        dialBg: '#231710',
+        dialBorder: '#d97706',
+        flipCard: 'bg-[#271a12] text-amber-200 border-amber-600/30 shadow-amber-900/30',
+        progressBar: 'bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600',
+      };
+    case 'toxic_lime':
+      return {
+        bg: 'bg-[#050a03]',
+        clockText: 'text-[#ccff00] drop-shadow-[0_0_35px_rgba(204,255,0,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(204,255,0,0.14),transparent_70%)]',
+        accent: 'text-[#a3e635]',
+        border: 'border-[#ccff00]/30',
+        badgeBg: 'bg-[#ccff00]/15 text-[#ccff00] border-[#ccff00]/40',
+        handSec: '#ccff00',
+        handMin: '#bef264',
+        handHr: '#84cc16',
+        dialBg: '#0b1606',
+        dialBorder: '#ccff00',
+        flipCard: 'bg-[#0d1a08] text-[#ccff00] border-[#ccff00]/30 shadow-[#ccff00]/20',
+        progressBar: 'bg-[#ccff00]',
+      };
+    case 'frost_aurora':
+      return {
+        bg: 'bg-[#06111e]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-white via-sky-200 to-teal-200 drop-shadow-[0_0_30px_rgba(186,230,253,0.85)]',
+        glow: 'bg-gradient-to-tr from-sky-500/15 via-teal-500/10 to-transparent',
+        accent: 'text-[#7dd3fc]',
+        border: 'border-sky-400/30',
+        badgeBg: 'bg-sky-500/15 text-sky-200 border-sky-400/40',
+        handSec: '#38bdf8',
+        handMin: '#bae6fd',
+        handHr: '#7dd3fc',
+        dialBg: '#0b2038',
+        dialBorder: '#38bdf8',
+        flipCard: 'bg-[#0e2744] text-sky-200 border-sky-400/30 shadow-sky-500/20',
+        progressBar: 'bg-gradient-to-r from-sky-300 via-teal-200 to-blue-400',
+      };
+    case 'midnight_velocity':
+      return {
+        bg: 'bg-[#0b0c10]',
+        clockText: 'text-[#ff2b44] drop-shadow-[0_0_35px_rgba(255,43,68,0.9)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,43,68,0.14),transparent_70%)]',
+        accent: 'text-[#facc15]',
+        border: 'border-red-500/30',
+        badgeBg: 'bg-red-500/15 text-red-300 border-red-500/40',
+        handSec: '#facc15',
+        handMin: '#ff2b44',
+        handHr: '#b91c1c',
+        dialBg: '#161820',
+        dialBorder: '#ff2b44',
+        flipCard: 'bg-[#181924] text-[#ff2b44] border-red-500/30 shadow-red-500/20',
+        progressBar: 'bg-gradient-to-r from-red-600 via-rose-500 to-amber-400',
+      };
+    case 'dreamy_lilac':
+      return {
+        bg: 'bg-[#120e22]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-300 drop-shadow-[0_0_30px_rgba(216,180,254,0.7)]',
+        glow: 'bg-gradient-to-tr from-purple-500/15 via-pink-500/10 to-indigo-500/15',
+        accent: 'text-[#f472b6]',
+        border: 'border-purple-400/30',
+        badgeBg: 'bg-purple-500/15 text-purple-200 border-purple-400/40',
+        handSec: '#c084fc',
+        handMin: '#f472b6',
+        handHr: '#a855f7',
+        dialBg: '#1f183b',
+        dialBorder: '#c084fc',
+        flipCard: 'bg-[#231b42] text-purple-200 border-purple-400/30 shadow-purple-500/20',
+        progressBar: 'bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-400',
+      };
+    case 'sahara_dune':
+      return {
+        bg: 'bg-[#170e08]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-400 to-rose-400 drop-shadow-[0_0_25px_rgba(251,146,60,0.7)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(251,146,60,0.12),transparent_70%)]',
+        accent: 'text-[#fb923c]',
+        border: 'border-orange-500/30',
+        badgeBg: 'bg-orange-500/15 text-orange-200 border-orange-500/40',
+        handSec: '#f59e0b',
+        handMin: '#fb923c',
+        handHr: '#c2410c',
+        dialBg: '#26160c',
+        dialBorder: '#fb923c',
+        flipCard: 'bg-[#2a180e] text-orange-200 border-orange-500/30 shadow-orange-950/40',
+        progressBar: 'bg-gradient-to-r from-amber-300 via-orange-400 to-rose-400',
+      };
+    case 'electric_violet':
+      return {
+        bg: 'bg-[#0c0317]',
+        clockText: 'text-[#d946ef] drop-shadow-[0_0_35px_rgba(217,70,239,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(217,70,239,0.14),transparent_70%)]',
+        accent: 'text-[#f0abfc]',
+        border: 'border-fuchsia-500/30',
+        badgeBg: 'bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-500/40',
+        handSec: '#c084fc',
+        handMin: '#e879f9',
+        handHr: '#a21caf',
+        dialBg: '#1b0733',
+        dialBorder: '#d946ef',
+        flipCard: 'bg-[#20093d] text-fuchsia-200 border-fuchsia-500/30 shadow-fuchsia-500/20',
+        progressBar: 'bg-gradient-to-r from-fuchsia-400 via-purple-500 to-pink-500',
+      };
+    case 'matcha_minimal':
+      return {
+        bg: 'bg-[#09130d]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-lime-200 via-emerald-300 to-green-400 drop-shadow-[0_0_28px_rgba(163,230,53,0.7)]',
+        glow: 'bg-gradient-to-tr from-lime-500/12 via-emerald-600/10 to-transparent',
+        accent: 'text-[#bef264]',
+        border: 'border-lime-500/25',
+        badgeBg: 'bg-lime-500/15 text-lime-300 border-lime-500/35',
+        handSec: '#bef264',
+        handMin: '#86efac',
+        handHr: '#4ade80',
+        dialBg: '#0f2216',
+        dialBorder: '#86efac',
+        flipCard: 'bg-[#11261a] text-lime-300 border-lime-500/30 shadow-lime-950/40',
+        progressBar: 'bg-gradient-to-r from-lime-300 to-emerald-400',
+      };
+    case 'solarized_dark':
+      return {
+        bg: 'bg-[#002b36]',
+        clockText: 'text-[#2aa198] drop-shadow-[0_0_30px_rgba(42,161,152,0.8)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(42,161,152,0.14),transparent_70%)]',
+        accent: 'text-[#b58900]',
+        border: 'border-[#2aa198]/30',
+        badgeBg: 'bg-[#2aa198]/15 text-[#2aa198] border-[#2aa198]/40',
+        handSec: '#b58900',
+        handMin: '#2aa198',
+        handHr: '#268bd2',
+        dialBg: '#073642',
+        dialBorder: '#2aa198',
+        flipCard: 'bg-[#073642] text-[#2aa198] border-[#2aa198]/30 shadow-[#002b36]',
+        progressBar: 'bg-gradient-to-r from-[#2aa198] to-[#b58900]',
+      };
+    case 'gruvbox_warm':
+      return {
+        bg: 'bg-[#1d2021]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#ebdbb2] via-[#fabd2f] to-[#fe8019] drop-shadow-[0_0_25px_rgba(250,189,47,0.7)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(250,189,47,0.12),transparent_70%)]',
+        accent: 'text-[#fabd2f]',
+        border: 'border-[#d65d0e]/30',
+        badgeBg: 'bg-[#fabd2f]/15 text-[#fabd2f] border-[#fabd2f]/40',
+        handSec: '#fe8019',
+        handMin: '#ebdbb2',
+        handHr: '#fabd2f',
+        dialBg: '#282828',
+        dialBorder: '#fabd2f',
+        flipCard: 'bg-[#282828] text-[#ebdbb2] border-[#fabd2f]/30 shadow-black/50',
+        progressBar: 'bg-gradient-to-r from-[#fabd2f] via-[#fe8019] to-[#cc241d]',
+      };
+    case 'miami_sunset':
+      return {
+        bg: 'bg-[#0a0518]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#00f5d4] via-[#7b2cbf] to-[#f72585] drop-shadow-[0_0_35px_rgba(247,37,133,0.8)]',
+        glow: 'bg-gradient-to-tr from-[#00f5d4]/15 via-[#7209b7]/15 to-[#f72585]/15',
+        accent: 'text-[#00f5d4]',
+        border: 'border-[#f72585]/30',
+        badgeBg: 'bg-[#f72585]/15 text-[#f72585] border-[#f72585]/40',
+        handSec: '#00f5d4',
+        handMin: '#f72585',
+        handHr: '#7209b7',
+        dialBg: '#150a2e',
+        dialBorder: '#f72585',
+        flipCard: 'bg-[#1a0e38] text-[#00f5d4] border-[#f72585]/30 shadow-[#f72585]/20',
+        progressBar: 'bg-gradient-to-r from-[#00f5d4] via-[#7209b7] to-[#f72585]',
+      };
+    case 'monokai_pro':
+      return {
+        bg: 'bg-[#221f22]',
+        clockText: 'text-[#ffd866] drop-shadow-[0_0_30px_rgba(255,216,102,0.85)]',
+        glow: 'bg-gradient-to-tr from-[#ff6188]/15 via-[#ffd866]/15 to-[#a9dc76]/10',
+        accent: 'text-[#ff6188]',
+        border: 'border-[#ffd866]/30',
+        badgeBg: 'bg-[#ffd866]/15 text-[#ffd866] border-[#ffd866]/40',
+        handSec: '#ff6188',
+        handMin: '#ffd866',
+        handHr: '#78dce8',
+        dialBg: '#2d2a2e',
+        dialBorder: '#ffd866',
+        flipCard: 'bg-[#2d2a2e] text-[#ffd866] border-[#ffd866]/30 shadow-black/40',
+        progressBar: 'bg-gradient-to-r from-[#ff6188] via-[#ffd866] to-[#a9dc76]',
+      };
+    case 'alpine_glacier':
+      return {
+        bg: 'bg-[#f0f4f9]',
+        clockText: 'text-[#0f172a] drop-shadow-[0_2px_14px_rgba(15,23,42,0.08)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(2,132,199,0.08),transparent_70%)]',
+        accent: 'text-[#0284c7]',
+        border: 'border-slate-300',
+        badgeBg: 'bg-sky-100/90 text-sky-900 border-sky-300',
+        handSec: '#0284c7',
+        handMin: '#1e293b',
+        handHr: '#0f172a',
+        dialBg: '#ffffff',
+        dialBorder: '#38bdf8',
+        flipCard: 'bg-white text-slate-900 border-slate-300 shadow-xl shadow-sky-900/10',
+        subText: 'text-slate-600',
+        dialTickMajor: '#0f172a',
+        dialTickMinor: 'rgba(15,23,42,0.3)',
+        dialNumColor: '#0f172a',
+        progressBar: 'bg-gradient-to-r from-sky-400 to-blue-600',
+        isLight: true,
+      };
+    case 'crimson_eclipse':
+      return {
+        bg: 'bg-[#080305]',
+        clockText: 'text-[#ff1744] drop-shadow-[0_0_35px_rgba(255,23,68,0.9)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,23,68,0.16),transparent_70%)]',
+        accent: 'text-[#ff5252]',
+        border: 'border-[#ff1744]/30',
+        badgeBg: 'bg-[#ff1744]/15 text-[#ff5252] border-[#ff1744]/40',
+        handSec: '#ff1744',
+        handMin: '#ff5252',
+        handHr: '#b71c1c',
+        dialBg: '#140509',
+        dialBorder: '#ff1744',
+        flipCard: 'bg-[#1a080d] text-[#ff1744] border-[#ff1744]/30 shadow-[#ff1744]/20',
+        progressBar: 'bg-[#ff1744]',
+      };
+    case 'california_dusk':
+      return {
+        bg: 'bg-[#10081c]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-rose-400 to-purple-500 drop-shadow-[0_0_30px_rgba(244,63,94,0.75)]',
+        glow: 'bg-gradient-to-tr from-amber-500/15 via-rose-500/15 to-purple-600/15',
+        accent: 'text-[#fbbf24]',
+        border: 'border-rose-500/30',
+        badgeBg: 'bg-rose-500/15 text-rose-300 border-rose-500/40',
+        handSec: '#fbbf24',
+        handMin: '#fb7185',
+        handHr: '#c084fc',
+        dialBg: '#1d0f30',
+        dialBorder: '#fb7185',
+        flipCard: 'bg-[#22123a] text-rose-300 border-rose-500/30 shadow-purple-950/40',
+        progressBar: 'bg-gradient-to-r from-amber-300 via-rose-400 to-purple-500',
+      };
+    case 'heartbeat_pulse':
+      return {
+        bg: 'bg-[#080104]',
+        clockText: 'text-[#ff1a53] drop-shadow-[0_0_35px_rgba(255,26,83,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,26,83,0.22),transparent_70%)]',
+        accent: 'text-[#ff4d79]',
+        border: 'border-[#ff1a53]/40',
+        badgeBg: 'bg-[#ff1a53]/20 text-[#ff1a53] border-[#ff1a53]/50',
+        handSec: '#ff1a53',
+        handMin: '#ff4d79',
+        handHr: '#b30030',
+        dialBg: '#120208',
+        dialBorder: '#ff1a53',
+        flipCard: 'bg-[#19030c] text-[#ff1a53] border-[#ff1a53]/40 shadow-[#ff1a53]/30',
+        progressBar: 'bg-gradient-to-r from-[#b30030] via-[#ff1a53] to-[#ff4d79]',
+        defaultAnimation: 'heartbeat',
+      };
+    case 'sunrise_dawn':
+      return {
+        bg: 'bg-gradient-to-t from-[#1a0a20] via-[#2f1124] to-[#0d091a]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-300 to-rose-300 drop-shadow-[0_0_35px_rgba(251,191,36,0.85)]',
+        glow: 'bg-gradient-to-t from-amber-500/25 via-rose-500/20 to-indigo-900/10',
+        accent: 'text-amber-300',
+        border: 'border-amber-500/35',
+        badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        handSec: '#f59e0b',
+        handMin: '#fbbf24',
+        handHr: '#f43f5e',
+        dialBg: '#1c0f24',
+        dialBorder: '#fbbf24',
+        flipCard: 'bg-[#25132d] text-amber-300 border-amber-500/30 shadow-amber-500/20',
+        progressBar: 'bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500',
+        defaultAnimation: 'sunrise',
+      };
+    case 'sunset_twilight':
+      return {
+        bg: 'bg-gradient-to-b from-[#0c071e] via-[#260c2b] to-[#120618]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-400 to-purple-400 drop-shadow-[0_0_35px_rgba(249,115,22,0.8)]',
+        glow: 'bg-gradient-to-b from-purple-500/20 via-orange-500/20 to-fuchsia-900/25',
+        accent: 'text-orange-400',
+        border: 'border-orange-500/35',
+        badgeBg: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
+        handSec: '#fb923c',
+        handMin: '#f472b6',
+        handHr: '#a855f7',
+        dialBg: '#1b0c26',
+        dialBorder: '#fb923c',
+        flipCard: 'bg-[#220f30] text-orange-300 border-orange-500/30 shadow-orange-500/20',
+        progressBar: 'bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500',
+        defaultAnimation: 'sunset',
+      };
+    case 'aurora_borealis':
+      return {
+        bg: 'bg-[#030a12]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 drop-shadow-[0_0_35px_rgba(52,211,153,0.85)]',
+        glow: 'bg-gradient-to-tr from-emerald-500/25 via-teal-400/20 to-indigo-600/25',
+        accent: 'text-emerald-300',
+        border: 'border-emerald-400/35',
+        badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40',
+        handSec: '#34d399',
+        handMin: '#2dd4bf',
+        handHr: '#38bdf8',
+        dialBg: '#071622',
+        dialBorder: '#34d399',
+        flipCard: 'bg-[#0a1e2e] text-emerald-300 border-emerald-400/30 shadow-emerald-500/20',
+        progressBar: 'bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400',
+        defaultAnimation: 'aurora',
+      };
+    case 'breathing_glow':
+      return {
+        bg: 'bg-[#040a14]',
+        clockText: 'text-sky-300 drop-shadow-[0_0_35px_rgba(56,189,248,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.25),transparent_70%)]',
+        accent: 'text-cyan-300',
+        border: 'border-sky-500/35',
+        badgeBg: 'bg-sky-500/20 text-sky-300 border-sky-400/40',
+        handSec: '#38bdf8',
+        handMin: '#7dd3fc',
+        handHr: '#0284c7',
+        dialBg: '#081726',
+        dialBorder: '#38bdf8',
+        flipCard: 'bg-[#0b1f33] text-sky-300 border-sky-400/30 shadow-sky-500/20',
+        progressBar: 'bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500',
+        defaultAnimation: 'breathe',
+      };
+    case 'neon_cyber_pulse':
+      return {
+        bg: 'bg-[#06030c]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] via-[#ff00a0] to-[#ffe600] drop-shadow-[0_0_35px_rgba(0,240,255,0.9)]',
+        glow: 'bg-gradient-to-tr from-[#00f0ff]/20 via-[#ff00a0]/20 to-[#ffe600]/15',
+        accent: 'text-[#00f0ff]',
+        border: 'border-[#00f0ff]/40',
+        badgeBg: 'bg-[#00f0ff]/20 text-[#00f0ff] border-[#00f0ff]/50',
+        handSec: '#00f0ff',
+        handMin: '#ff00a0',
+        handHr: '#ffe600',
+        dialBg: '#12091f',
+        dialBorder: '#00f0ff',
+        flipCard: 'bg-[#170c29] text-[#00f0ff] border-[#00f0ff]/40 shadow-[#00f0ff]/25',
+        progressBar: 'bg-gradient-to-r from-[#00f0ff] via-[#ff00a0] to-[#ffe600]',
+        defaultAnimation: 'aurora',
+      };
+    case 'ocean_waves':
+      return {
+        bg: 'bg-[#020d1a]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-teal-300 to-blue-400 drop-shadow-[0_0_35px_rgba(45,212,191,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.25),transparent_70%)]',
+        accent: 'text-teal-300',
+        border: 'border-cyan-500/35',
+        badgeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40',
+        handSec: '#06b6d4',
+        handMin: '#2dd4bf',
+        handHr: '#3b82f6',
+        dialBg: '#051b33',
+        dialBorder: '#06b6d4',
+        flipCard: 'bg-[#07213d] text-cyan-300 border-cyan-500/30 shadow-cyan-500/20',
+        progressBar: 'bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500',
+        defaultAnimation: 'ocean',
+      };
+    case 'fire_ember':
+      return {
+        bg: 'bg-[#120502]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-red-500 drop-shadow-[0_0_35px_rgba(249,115,22,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.22),transparent_70%)]',
+        accent: 'text-amber-400',
+        border: 'border-orange-500/40',
+        badgeBg: 'bg-orange-500/20 text-orange-300 border-orange-500/50',
+        handSec: '#ef4444',
+        handMin: '#f97316',
+        handHr: '#f59e0b',
+        dialBg: '#1f0904',
+        dialBorder: '#f97316',
+        flipCard: 'bg-[#260c06] text-amber-300 border-orange-500/35 shadow-orange-500/25',
+        progressBar: 'bg-gradient-to-r from-red-500 via-orange-500 to-amber-400',
+        defaultAnimation: 'fire',
+      };
+    case 'supernova':
+      return {
+        bg: 'bg-[#090214]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#e879f9] via-[#c084fc] to-[#38bdf8] drop-shadow-[0_0_35px_rgba(192,132,252,0.85)]',
+        glow: 'bg-gradient-to-tr from-fuchsia-600/25 via-purple-600/20 to-sky-500/20',
+        accent: 'text-[#e879f9]',
+        border: 'border-purple-500/40',
+        badgeBg: 'bg-purple-500/20 text-[#e879f9] border-purple-400/50',
+        handSec: '#38bdf8',
+        handMin: '#e879f9',
+        handHr: '#c084fc',
+        dialBg: '#16082b',
+        dialBorder: '#c084fc',
+        flipCard: 'bg-[#1e0a3b] text-fuchsia-300 border-purple-500/35 shadow-purple-950/40',
+        progressBar: 'bg-gradient-to-r from-fuchsia-500 via-purple-400 to-sky-400',
+        defaultAnimation: 'supernova',
+      };
+    default:
+      return {
+        bg: 'bg-[#08080d]',
+        clockText: 'text-[#fcee0a] drop-shadow-[0_0_35px_rgba(252,238,10,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(252,238,10,0.12),transparent_70%)]',
+        accent: 'text-[#00f0ff]',
+        border: 'border-[#fcee0a]/30',
+        badgeBg: 'bg-[#fcee0a]/15 text-[#fcee0a] border-[#fcee0a]/40',
+        handSec: '#00f0ff',
+        handMin: '#fcee0a',
+        handHr: '#ff003c',
+        dialBg: '#0e0e17',
+        dialBorder: '#fcee0a',
+        flipCard: 'bg-[#151522] text-[#fcee0a] border-[#fcee0a]/30 shadow-[#fcee0a]/20',
+        progressBar: 'bg-[#fcee0a]',
+      };
+  }
+};
 
 export const DigitalClock: React.FC = () => {
   const [mode, setMode] = useState<Mode>(() => {
@@ -148,7 +992,8 @@ export const DigitalClock: React.FC = () => {
   });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isThemesCollapsed, setIsThemesCollapsed] = useState<boolean>(() => {
-    return localStorage.getItem('vortexero_clock_themes_collapsed') === 'true';
+    const saved = localStorage.getItem('vortexero_clock_themes_collapsed');
+    return saved !== null ? saved === 'true' : true;
   });
   const [keepScreenOn, setKeepScreenOn] = useState<boolean>(() => {
     return localStorage.getItem('vortexero_clock_keep_screen_on') === 'true';
@@ -156,8 +1001,10 @@ export const DigitalClock: React.FC = () => {
   const [animationFx, setAnimationFx] = useState<AnimationFx>(() => {
     return (localStorage.getItem('vortexero_clock_anim_fx') as AnimationFx) || 'auto';
   });
-  const [, setWakeLockActive] = useState<boolean>(false);
+  const [wakeLockActive, setWakeLockActive] = useState<boolean>(false);
   const wakeLockSentinelRef = useRef<any>(null);
+  const fallbackVideoRef = useRef<HTMLVideoElement | null>(null);
+  const isWakeLockSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
   // Time state
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -230,17 +1077,47 @@ export const DigitalClock: React.FC = () => {
     localStorage.setItem('vortexero_clock_anim_fx', animationFx);
   }, [animationFx]);
 
-  // Screen Wake Lock API implementation
+  // Screen Wake Lock API implementation with graceful fallback
   const requestWakeLock = async () => {
-    if (typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
-    try {
-      const sentinel = await (navigator as any).wakeLock.request('screen');
-      wakeLockSentinelRef.current = sentinel;
-      setWakeLockActive(true);
-      sentinel.addEventListener('release', () => {
+    if (isWakeLockSupported) {
+      try {
+        const sentinel = await (navigator as any).wakeLock.request('screen');
+        wakeLockSentinelRef.current = sentinel;
+        setWakeLockActive(true);
+        sentinel.addEventListener('release', () => {
+          setWakeLockActive(false);
+          wakeLockSentinelRef.current = null;
+        });
+        return;
+      } catch {
         setWakeLockActive(false);
-        wakeLockSentinelRef.current = null;
-      });
+      }
+    }
+
+    // Graceful fallback: silent 0.1s video loop
+    try {
+      if (!fallbackVideoRef.current && typeof document !== 'undefined') {
+        const vid = document.createElement('video');
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('muted', '');
+        vid.setAttribute('loop', '');
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.loop = true;
+        vid.style.position = 'fixed';
+        vid.style.top = '-9999px';
+        vid.style.opacity = '0';
+        vid.style.pointerEvents = 'none';
+        vid.style.width = '1px';
+        vid.style.height = '1px';
+        vid.src = 'data:video/mp4;base64,AAAAHGZ0eXBpc29tAAAAAGlzb21tcDQyAAAACHZyZWVhAAACgm1kYXQAAAAAAA==';
+        document.body.appendChild(vid);
+        fallbackVideoRef.current = vid;
+      }
+      if (fallbackVideoRef.current) {
+        await fallbackVideoRef.current.play();
+        setWakeLockActive(true);
+      }
     } catch {
       setWakeLockActive(false);
     }
@@ -254,6 +1131,15 @@ export const DigitalClock: React.FC = () => {
         // ignore
       }
       wakeLockSentinelRef.current = null;
+    }
+    if (fallbackVideoRef.current) {
+      try {
+        fallbackVideoRef.current.pause();
+        fallbackVideoRef.current.remove();
+      } catch {
+        // ignore
+      }
+      fallbackVideoRef.current = null;
     }
     setWakeLockActive(false);
   };
@@ -271,14 +1157,16 @@ export const DigitalClock: React.FC = () => {
   }, [keepScreenOn]);
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
+    const handleStateChange = () => {
       if (document.visibilityState === 'visible' && keepScreenOn) {
         requestWakeLock();
       }
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleStateChange);
+    document.addEventListener('fullscreenchange', handleStateChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleStateChange);
+      document.removeEventListener('fullscreenchange', handleStateChange);
     };
   }, [keepScreenOn]);
 
@@ -385,13 +1273,22 @@ export const DigitalClock: React.FC = () => {
   }, [swIsRunning]);
 
   // Fullscreen Handler
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen().catch(err => console.error(err));
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen().catch(err => console.error(err));
-      setIsFullscreen(false);
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        if (containerRef.current?.requestFullscreen) {
+          await containerRef.current.requestFullscreen();
+        }
+        setIsFullscreen(true);
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+        setIsFullscreen(false);
+      }
+    } catch {
+      // CSS fullscreen fallback for environments without Fullscreen API (e.g. iOS Safari)
+      setIsFullscreen(prev => !prev);
     }
   };
 
@@ -472,787 +1369,45 @@ export const DigitalClock: React.FC = () => {
     }
   };
 
-  // Comprehensive Aesthetic Theme Styles (28 Curated Styles)
-  const getThemeStyles = (): ThemeStyles => {
-    switch (theme) {
-      case 'night_city':
-        return {
-          bg: 'bg-[#08080d]',
-          clockText: 'text-[#fcee0a] drop-shadow-[0_0_35px_rgba(252,238,10,0.85)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(252,238,10,0.12),transparent_70%)]',
-          accent: 'text-[#00f0ff]',
-          border: 'border-[#fcee0a]/30',
-          badgeBg: 'bg-[#fcee0a]/15 text-[#fcee0a] border-[#fcee0a]/40',
-          handSec: '#00f0ff',
-          handMin: '#fcee0a',
-          handHr: '#ff003c',
-          dialBg: '#0e0e17',
-          dialBorder: '#fcee0a',
-          flipCard: 'bg-[#151522] text-[#fcee0a] border-[#fcee0a]/30 shadow-[#fcee0a]/20',
-          progressBar: 'bg-[#fcee0a]',
-        };
-      case 'cyberpunk':
-        return {
-          bg: 'bg-[#050814]',
-          clockText: 'text-cyan-400 drop-shadow-[0_0_35px_rgba(34,211,238,0.8)]',
-          glow: 'bg-gradient-to-tr from-cyan-500/20 via-fuchsia-500/15 to-transparent',
-          accent: 'text-fuchsia-400',
-          border: 'border-cyan-500/30',
-          badgeBg: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
-          handSec: '#22d3ee',
-          handMin: '#e879f9',
-          handHr: '#38bdf8',
-          dialBg: '#090e24',
-          dialBorder: '#22d3ee',
-          flipCard: 'bg-[#0c1430] text-cyan-300 border-cyan-500/30 shadow-cyan-500/20',
-          progressBar: 'bg-gradient-to-r from-cyan-400 to-fuchsia-500',
-        };
-      case 'synthwave':
-        return {
-          bg: 'bg-[#110726]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 via-pink-400 to-cyan-400 drop-shadow-[0_0_30px_rgba(232,121,249,0.7)]',
-          glow: 'bg-gradient-to-b from-fuchsia-500/15 via-purple-500/10 to-cyan-500/15',
-          accent: 'text-cyan-300',
-          border: 'border-fuchsia-500/30',
-          badgeBg: 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/40',
-          handSec: '#22d3ee',
-          handMin: '#f472b6',
-          handHr: '#c084fc',
-          dialBg: '#1a0c3a',
-          dialBorder: '#f472b6',
-          flipCard: 'bg-[#1c0e3d] text-fuchsia-300 border-fuchsia-500/30 shadow-fuchsia-500/20',
-          progressBar: 'bg-gradient-to-r from-fuchsia-500 via-pink-500 to-cyan-400',
-        };
-      case 'tokyo_night':
-        return {
-          bg: 'bg-[#1a1b26]',
-          clockText: 'text-[#7aa2f7] drop-shadow-[0_0_30px_rgba(122,162,247,0.75)]',
-          glow: 'bg-gradient-to-tr from-[#7aa2f7]/15 via-[#bb9af7]/10 to-transparent',
-          accent: 'text-[#f7768e]',
-          border: 'border-[#7aa2f7]/30',
-          badgeBg: 'bg-[#7aa2f7]/15 text-[#7aa2f7] border-[#7aa2f7]/40',
-          handSec: '#f7768e',
-          handMin: '#7aa2f7',
-          handHr: '#bb9af7',
-          dialBg: '#24283b',
-          dialBorder: '#7aa2f7',
-          flipCard: 'bg-[#24283b] text-[#7aa2f7] border-[#7aa2f7]/30 shadow-[#7aa2f7]/20',
-          progressBar: 'bg-gradient-to-r from-[#7aa2f7] to-[#bb9af7]',
-        };
-      case 'tokyo_rain':
-        return {
-          bg: 'bg-[#0b0b1a]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-[0_0_30px_rgba(192,132,252,0.7)]',
-          glow: 'bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-pink-500/15',
-          accent: 'text-pink-400',
-          border: 'border-purple-500/30',
-          badgeBg: 'bg-purple-500/15 text-purple-300 border-purple-500/40',
-          handSec: '#f472b6',
-          handMin: '#c084fc',
-          handHr: '#818cf8',
-          dialBg: '#15152e',
-          dialBorder: '#c084fc',
-          flipCard: 'bg-[#181838] text-purple-300 border-purple-500/30 shadow-purple-500/20',
-          progressBar: 'bg-gradient-to-r from-purple-500 via-pink-400 to-indigo-400',
-        };
-      case 'nord_aurora':
-        return {
-          bg: 'bg-[#2e3440]',
-          clockText: 'text-[#88c0d0] drop-shadow-[0_0_25px_rgba(136,192,208,0.7)]',
-          glow: 'bg-gradient-to-tr from-[#88c0d0]/15 via-[#a3be8c]/15 to-transparent',
-          accent: 'text-[#a3be8c]',
-          border: 'border-[#88c0d0]/30',
-          badgeBg: 'bg-[#88c0d0]/15 text-[#88c0d0] border-[#88c0d0]/40',
-          handSec: '#bf616a',
-          handMin: '#88c0d0',
-          handHr: '#81a1c1',
-          dialBg: '#3b4252',
-          dialBorder: '#88c0d0',
-          flipCard: 'bg-[#3b4252] text-[#88c0d0] border-[#88c0d0]/30 shadow-[#88c0d0]/20',
-          progressBar: 'bg-gradient-to-r from-[#88c0d0] to-[#a3be8c]',
-        };
-      case 'matrix':
-        return {
-          bg: 'bg-[#020d06]',
-          clockText: 'text-emerald-400 drop-shadow-[0_0_35px_rgba(52,211,153,0.85)]',
-          glow: 'bg-emerald-500/10',
-          accent: 'text-emerald-300',
-          border: 'border-emerald-500/30',
-          badgeBg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-          handSec: '#34d399',
-          handMin: '#10b981',
-          handHr: '#059669',
-          dialBg: '#051c0d',
-          dialBorder: '#10b981',
-          flipCard: 'bg-[#062411] text-emerald-400 border-emerald-500/30 shadow-emerald-500/20',
-          progressBar: 'bg-emerald-400',
-        };
-      case 'amber_crt':
-        return {
-          bg: 'bg-[#0c0800]',
-          clockText: 'text-[#ffb000] drop-shadow-[0_0_30px_rgba(255,176,0,0.85)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,176,0,0.15),transparent_70%)]',
-          accent: 'text-[#ffd066]',
-          border: 'border-[#ffb000]/30',
-          badgeBg: 'bg-[#ffb000]/15 text-[#ffb000] border-[#ffb000]/40',
-          handSec: '#ffb000',
-          handMin: '#e69d00',
-          handHr: '#cc8b00',
-          dialBg: '#1a1200',
-          dialBorder: '#ffb000',
-          flipCard: 'bg-[#1f1500] text-[#ffb000] border-[#ffb000]/30 shadow-[#ffb000]/20',
-          progressBar: 'bg-[#ffb000]',
-        };
-      case 'dracula':
-        return {
-          bg: 'bg-[#282a36]',
-          clockText: 'text-[#ff79c6] drop-shadow-[0_0_30px_rgba(255,121,198,0.75)]',
-          glow: 'bg-gradient-to-tr from-[#ff79c6]/15 via-[#bd93f9]/15 to-[#50fa7b]/10',
-          accent: 'text-[#50fa7b]',
-          border: 'border-[#bd93f9]/30',
-          badgeBg: 'bg-[#ff79c6]/15 text-[#ff79c6] border-[#ff79c6]/40',
-          handSec: '#50fa7b',
-          handMin: '#ff79c6',
-          handHr: '#bd93f9',
-          dialBg: '#383a59',
-          dialBorder: '#ff79c6',
-          flipCard: 'bg-[#383a59] text-[#ff79c6] border-[#bd93f9]/30 shadow-[#ff79c6]/20',
-          progressBar: 'bg-gradient-to-r from-[#ff79c6] to-[#50fa7b]',
-        };
-      case 'catppuccin':
-        return {
-          bg: 'bg-[#1e1e2e]',
-          clockText: 'text-[#cba6f7] drop-shadow-[0_0_25px_rgba(203,166,247,0.7)]',
-          glow: 'bg-gradient-to-tr from-[#cba6f7]/15 via-[#f5c2e7]/15 to-[#89dceb]/10',
-          accent: 'text-[#f5c2e7]',
-          border: 'border-[#cba6f7]/30',
-          badgeBg: 'bg-[#cba6f7]/15 text-[#cba6f7] border-[#cba6f7]/40',
-          handSec: '#f5c2e7',
-          handMin: '#cba6f7',
-          handHr: '#89b4fa',
-          dialBg: '#313244',
-          dialBorder: '#cba6f7',
-          flipCard: 'bg-[#313244] text-[#cba6f7] border-[#cba6f7]/30 shadow-[#cba6f7]/20',
-          progressBar: 'bg-gradient-to-r from-[#cba6f7] to-[#f5c2e7]',
-        };
-      case 'luxury_gold':
-        return {
-          bg: 'bg-[#0a0a0d]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-500 drop-shadow-[0_0_35px_rgba(251,191,36,0.75)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.12),transparent_70%)]',
-          accent: 'text-amber-300',
-          border: 'border-amber-500/30',
-          badgeBg: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
-          handSec: '#fbbf24',
-          handMin: '#fef08a',
-          handHr: '#f59e0b',
-          dialBg: '#14141c',
-          dialBorder: '#fbbf24',
-          flipCard: 'bg-[#171722] text-amber-300 border-amber-500/30 shadow-amber-500/20',
-          progressBar: 'bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500',
-        };
-      case 'cosmic_nebula':
-        return {
-          bg: 'bg-[#060613]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-pink-500 drop-shadow-[0_0_35px_rgba(244,114,182,0.75)]',
-          glow: 'bg-gradient-to-r from-cyan-500/15 via-indigo-500/20 to-pink-500/15',
-          accent: 'text-pink-400',
-          border: 'border-indigo-500/30',
-          badgeBg: 'bg-indigo-500/15 text-pink-300 border-indigo-500/40',
-          handSec: '#ec4899',
-          handMin: '#818cf8',
-          handHr: '#38bdf8',
-          dialBg: '#0d0d26',
-          dialBorder: '#818cf8',
-          flipCard: 'bg-[#111133] text-pink-300 border-indigo-500/30 shadow-pink-500/20',
-          progressBar: 'bg-gradient-to-r from-cyan-400 via-indigo-400 to-pink-500',
-        };
-      case 'solar_flare':
-        return {
-          bg: 'bg-[#120a04]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-500 drop-shadow-[0_0_30px_rgba(251,191,36,0.75)]',
-          glow: 'bg-gradient-to-tr from-amber-500/15 via-orange-500/15 to-transparent',
-          accent: 'text-amber-400',
-          border: 'border-amber-500/30',
-          badgeBg: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
-          handSec: '#fbbf24',
-          handMin: '#f59e0b',
-          handHr: '#d97706',
-          dialBg: '#221307',
-          dialBorder: '#f59e0b',
-          flipCard: 'bg-[#261509] text-amber-400 border-amber-500/30 shadow-amber-500/20',
-          progressBar: 'bg-gradient-to-r from-amber-400 to-orange-500',
-        };
-      case 'rose_quartz':
-        return {
-          bg: 'bg-[#170e14]',
-          clockText: 'text-pink-300 drop-shadow-[0_0_25px_rgba(244,114,182,0.6)]',
-          glow: 'bg-gradient-to-tr from-pink-500/15 via-rose-500/15 to-transparent',
-          accent: 'text-pink-200',
-          border: 'border-pink-500/30',
-          badgeBg: 'bg-pink-500/15 text-pink-300 border-pink-500/40',
-          handSec: '#f472b6',
-          handMin: '#fbcfe8',
-          handHr: '#f9a8d4',
-          dialBg: '#291723',
-          dialBorder: '#f472b6',
-          flipCard: 'bg-[#291723] text-pink-300 border-pink-500/30 shadow-pink-500/20',
-          progressBar: 'bg-gradient-to-r from-pink-400 to-rose-300',
-        };
-      case 'swiss_bauhaus':
-        return {
-          bg: 'bg-slate-900',
-          clockText: 'text-white',
-          glow: 'bg-slate-800/30',
-          accent: 'text-rose-500',
-          border: 'border-slate-800',
-          badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
-          handSec: '#f43f5e',
-          handMin: '#ffffff',
-          handHr: '#94a3b8',
-          dialBg: '#1e293b',
-          dialBorder: '#f43f5e',
-          flipCard: 'bg-slate-800 text-white border-slate-700 shadow-slate-950/40',
-          progressBar: 'bg-rose-500',
-        };
-      case 'oled':
-        return {
-          bg: 'bg-black',
-          clockText: 'text-white',
-          glow: '',
-          accent: 'text-neutral-400',
-          border: 'border-neutral-900',
-          badgeBg: 'bg-neutral-900 text-white border-neutral-800',
-          handSec: '#ffffff',
-          handMin: '#a3a3a3',
-          handHr: '#e5e5e5',
-          dialBg: '#0a0a0a',
-          dialBorder: '#404040',
-          flipCard: 'bg-[#121212] text-white border-neutral-800 shadow-black',
-          progressBar: 'bg-white',
-        };
-      case 'emerald':
-        return {
-          bg: 'bg-[#04120c]',
-          clockText: 'text-teal-300 drop-shadow-[0_0_25px_rgba(45,212,191,0.7)]',
-          glow: 'bg-teal-500/10',
-          accent: 'text-teal-400',
-          border: 'border-teal-500/30',
-          badgeBg: 'bg-teal-500/15 text-teal-300 border-teal-500/40',
-          handSec: '#2dd4bf',
-          handMin: '#14b8a6',
-          handHr: '#0f766e',
-          dialBg: '#082418',
-          dialBorder: '#14b8a6',
-          flipCard: 'bg-[#082418] text-teal-300 border-teal-500/30 shadow-teal-500/20',
-          progressBar: 'bg-teal-400',
-        };
-      case 'slate':
-        return {
-          bg: 'bg-[#0f172a]',
-          clockText: 'text-slate-100',
-          glow: 'bg-slate-800/40',
-          accent: 'text-blue-400',
-          border: 'border-slate-800',
-          badgeBg: 'bg-blue-500/15 text-blue-300 border-blue-500/40',
-          handSec: '#3b82f6',
-          handMin: '#94a3b8',
-          handHr: '#cbd5e1',
-          dialBg: '#1e293b',
-          dialBorder: '#3b82f6',
-          flipCard: 'bg-[#1e293b] text-slate-100 border-slate-700 shadow-slate-950/40',
-          progressBar: 'bg-blue-500',
-        };
-      case 'kyoto_twilight':
-        return {
-          bg: 'bg-[#140a10]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-500 to-red-600 drop-shadow-[0_0_35px_rgba(244,63,94,0.8)]',
-          glow: 'bg-gradient-to-tr from-rose-500/15 via-amber-500/10 to-red-600/15',
-          accent: 'text-[#ff4757]',
-          border: 'border-rose-500/30',
-          badgeBg: 'bg-rose-500/15 text-rose-300 border-rose-500/40',
-          handSec: '#ff4757',
-          handMin: '#fb7185',
-          handHr: '#f43f5e',
-          dialBg: '#1f0d18',
-          dialBorder: '#ff4757',
-          flipCard: 'bg-[#220e1a] text-rose-300 border-rose-500/30 shadow-rose-500/20',
-          progressBar: 'bg-gradient-to-r from-amber-400 via-rose-500 to-red-500',
-        };
-      case 'abyss_ocean':
-        return {
-          bg: 'bg-[#020b14]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-teal-200 via-cyan-400 to-blue-500 drop-shadow-[0_0_35px_rgba(6,182,212,0.85)]',
-          glow: 'bg-gradient-to-tr from-cyan-500/15 via-teal-500/10 to-blue-600/15',
-          accent: 'text-[#00f2fe]',
-          border: 'border-cyan-500/30',
-          badgeBg: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40',
-          handSec: '#00f2fe',
-          handMin: '#38bdf8',
-          handHr: '#0284c7',
-          dialBg: '#051829',
-          dialBorder: '#00f2fe',
-          flipCard: 'bg-[#061d33] text-cyan-300 border-cyan-500/30 shadow-cyan-500/20',
-          progressBar: 'bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-500',
-        };
-      case 'paper_studio':
-        return {
-          bg: 'bg-[#f8f9fa]',
-          clockText: 'text-slate-900 drop-shadow-[0_2px_12px_rgba(0,0,0,0.06)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.04),transparent_70%)]',
-          accent: 'text-rose-600',
-          border: 'border-slate-300/80',
-          badgeBg: 'bg-slate-200/90 text-slate-800 border-slate-300',
-          handSec: '#ef4444',
-          handMin: '#1e293b',
-          handHr: '#0f172a',
-          dialBg: '#ffffff',
-          dialBorder: '#cbd5e1',
-          flipCard: 'bg-white text-slate-900 border-slate-300 shadow-xl shadow-slate-300/50',
-          subText: 'text-slate-600',
-          dialTickMajor: '#0f172a',
-          dialTickMinor: 'rgba(15,23,42,0.3)',
-          dialNumColor: '#0f172a',
-          progressBar: 'bg-rose-500',
-          isLight: true,
-        };
-      case 'warm_espresso':
-        return {
-          bg: 'bg-[#160f0a]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-amber-300 to-amber-600 drop-shadow-[0_0_25px_rgba(217,119,6,0.65)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(217,119,6,0.12),transparent_70%)]',
-          accent: 'text-[#fde68a]',
-          border: 'border-amber-600/30',
-          badgeBg: 'bg-amber-600/15 text-amber-200 border-amber-600/40',
-          handSec: '#d97706',
-          handMin: '#fde68a',
-          handHr: '#b45309',
-          dialBg: '#231710',
-          dialBorder: '#d97706',
-          flipCard: 'bg-[#271a12] text-amber-200 border-amber-600/30 shadow-amber-900/30',
-          progressBar: 'bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600',
-        };
-      case 'toxic_lime':
-        return {
-          bg: 'bg-[#050a03]',
-          clockText: 'text-[#ccff00] drop-shadow-[0_0_35px_rgba(204,255,0,0.85)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(204,255,0,0.14),transparent_70%)]',
-          accent: 'text-[#a3e635]',
-          border: 'border-[#ccff00]/30',
-          badgeBg: 'bg-[#ccff00]/15 text-[#ccff00] border-[#ccff00]/40',
-          handSec: '#ccff00',
-          handMin: '#bef264',
-          handHr: '#84cc16',
-          dialBg: '#0b1606',
-          dialBorder: '#ccff00',
-          flipCard: 'bg-[#0d1a08] text-[#ccff00] border-[#ccff00]/30 shadow-[#ccff00]/20',
-          progressBar: 'bg-[#ccff00]',
-        };
-      case 'frost_aurora':
-        return {
-          bg: 'bg-[#06111e]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-white via-sky-200 to-teal-200 drop-shadow-[0_0_30px_rgba(186,230,253,0.85)]',
-          glow: 'bg-gradient-to-tr from-sky-500/15 via-teal-500/10 to-transparent',
-          accent: 'text-[#7dd3fc]',
-          border: 'border-sky-400/30',
-          badgeBg: 'bg-sky-500/15 text-sky-200 border-sky-400/40',
-          handSec: '#38bdf8',
-          handMin: '#bae6fd',
-          handHr: '#7dd3fc',
-          dialBg: '#0b2038',
-          dialBorder: '#38bdf8',
-          flipCard: 'bg-[#0e2744] text-sky-200 border-sky-400/30 shadow-sky-500/20',
-          progressBar: 'bg-gradient-to-r from-sky-300 via-teal-200 to-blue-400',
-        };
-      case 'midnight_velocity':
-        return {
-          bg: 'bg-[#0b0c10]',
-          clockText: 'text-[#ff2b44] drop-shadow-[0_0_35px_rgba(255,43,68,0.9)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,43,68,0.14),transparent_70%)]',
-          accent: 'text-[#facc15]',
-          border: 'border-red-500/30',
-          badgeBg: 'bg-red-500/15 text-red-300 border-red-500/40',
-          handSec: '#facc15',
-          handMin: '#ff2b44',
-          handHr: '#b91c1c',
-          dialBg: '#161820',
-          dialBorder: '#ff2b44',
-          flipCard: 'bg-[#181924] text-[#ff2b44] border-red-500/30 shadow-red-500/20',
-          progressBar: 'bg-gradient-to-r from-red-600 via-rose-500 to-amber-400',
-        };
-      case 'dreamy_lilac':
-        return {
-          bg: 'bg-[#120e22]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-300 drop-shadow-[0_0_30px_rgba(216,180,254,0.7)]',
-          glow: 'bg-gradient-to-tr from-purple-500/15 via-pink-500/10 to-indigo-500/15',
-          accent: 'text-[#f472b6]',
-          border: 'border-purple-400/30',
-          badgeBg: 'bg-purple-500/15 text-purple-200 border-purple-400/40',
-          handSec: '#c084fc',
-          handMin: '#f472b6',
-          handHr: '#a855f7',
-          dialBg: '#1f183b',
-          dialBorder: '#c084fc',
-          flipCard: 'bg-[#231b42] text-purple-200 border-purple-400/30 shadow-purple-500/20',
-          progressBar: 'bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-400',
-        };
-      case 'sahara_dune':
-        return {
-          bg: 'bg-[#170e08]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-400 to-rose-400 drop-shadow-[0_0_25px_rgba(251,146,60,0.7)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(251,146,60,0.12),transparent_70%)]',
-          accent: 'text-[#fb923c]',
-          border: 'border-orange-500/30',
-          badgeBg: 'bg-orange-500/15 text-orange-200 border-orange-500/40',
-          handSec: '#f59e0b',
-          handMin: '#fb923c',
-          handHr: '#c2410c',
-          dialBg: '#26160c',
-          dialBorder: '#fb923c',
-          flipCard: 'bg-[#2a180e] text-orange-200 border-orange-500/30 shadow-orange-950/40',
-          progressBar: 'bg-gradient-to-r from-amber-300 via-orange-400 to-rose-400',
-        };
-      case 'electric_violet':
-        return {
-          bg: 'bg-[#0c0317]',
-          clockText: 'text-[#d946ef] drop-shadow-[0_0_35px_rgba(217,70,239,0.85)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(217,70,239,0.14),transparent_70%)]',
-          accent: 'text-[#f0abfc]',
-          border: 'border-fuchsia-500/30',
-          badgeBg: 'bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-500/40',
-          handSec: '#c084fc',
-          handMin: '#e879f9',
-          handHr: '#a21caf',
-          dialBg: '#1b0733',
-          dialBorder: '#d946ef',
-          flipCard: 'bg-[#20093d] text-fuchsia-200 border-fuchsia-500/30 shadow-fuchsia-500/20',
-          progressBar: 'bg-gradient-to-r from-fuchsia-400 via-purple-500 to-pink-500',
-        };
-      case 'matcha_minimal':
-        return {
-          bg: 'bg-[#09130d]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-lime-200 via-emerald-300 to-green-400 drop-shadow-[0_0_28px_rgba(163,230,53,0.7)]',
-          glow: 'bg-gradient-to-tr from-lime-500/12 via-emerald-600/10 to-transparent',
-          accent: 'text-[#bef264]',
-          border: 'border-lime-500/25',
-          badgeBg: 'bg-lime-500/15 text-lime-300 border-lime-500/35',
-          handSec: '#bef264',
-          handMin: '#86efac',
-          handHr: '#4ade80',
-          dialBg: '#0f2216',
-          dialBorder: '#86efac',
-          flipCard: 'bg-[#11261a] text-lime-300 border-lime-500/30 shadow-lime-950/40',
-          progressBar: 'bg-gradient-to-r from-lime-300 to-emerald-400',
-        };
-      case 'solarized_dark':
-        return {
-          bg: 'bg-[#002b36]',
-          clockText: 'text-[#2aa198] drop-shadow-[0_0_30px_rgba(42,161,152,0.8)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(42,161,152,0.14),transparent_70%)]',
-          accent: 'text-[#b58900]',
-          border: 'border-[#2aa198]/30',
-          badgeBg: 'bg-[#2aa198]/15 text-[#2aa198] border-[#2aa198]/40',
-          handSec: '#b58900',
-          handMin: '#2aa198',
-          handHr: '#268bd2',
-          dialBg: '#073642',
-          dialBorder: '#2aa198',
-          flipCard: 'bg-[#073642] text-[#2aa198] border-[#2aa198]/30 shadow-[#002b36]',
-          progressBar: 'bg-gradient-to-r from-[#2aa198] to-[#b58900]',
-        };
-      case 'gruvbox_warm':
-        return {
-          bg: 'bg-[#1d2021]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#ebdbb2] via-[#fabd2f] to-[#fe8019] drop-shadow-[0_0_25px_rgba(250,189,47,0.7)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(250,189,47,0.12),transparent_70%)]',
-          accent: 'text-[#fabd2f]',
-          border: 'border-[#d65d0e]/30',
-          badgeBg: 'bg-[#fabd2f]/15 text-[#fabd2f] border-[#fabd2f]/40',
-          handSec: '#fe8019',
-          handMin: '#ebdbb2',
-          handHr: '#fabd2f',
-          dialBg: '#282828',
-          dialBorder: '#fabd2f',
-          flipCard: 'bg-[#282828] text-[#ebdbb2] border-[#fabd2f]/30 shadow-black/50',
-          progressBar: 'bg-gradient-to-r from-[#fabd2f] via-[#fe8019] to-[#cc241d]',
-        };
-      case 'miami_sunset':
-        return {
-          bg: 'bg-[#0a0518]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#00f5d4] via-[#7b2cbf] to-[#f72585] drop-shadow-[0_0_35px_rgba(247,37,133,0.8)]',
-          glow: 'bg-gradient-to-tr from-[#00f5d4]/15 via-[#7209b7]/15 to-[#f72585]/15',
-          accent: 'text-[#00f5d4]',
-          border: 'border-[#f72585]/30',
-          badgeBg: 'bg-[#f72585]/15 text-[#f72585] border-[#f72585]/40',
-          handSec: '#00f5d4',
-          handMin: '#f72585',
-          handHr: '#7209b7',
-          dialBg: '#150a2e',
-          dialBorder: '#f72585',
-          flipCard: 'bg-[#1a0e38] text-[#00f5d4] border-[#f72585]/30 shadow-[#f72585]/20',
-          progressBar: 'bg-gradient-to-r from-[#00f5d4] via-[#7209b7] to-[#f72585]',
-        };
-      case 'monokai_pro':
-        return {
-          bg: 'bg-[#221f22]',
-          clockText: 'text-[#ffd866] drop-shadow-[0_0_30px_rgba(255,216,102,0.85)]',
-          glow: 'bg-gradient-to-tr from-[#ff6188]/15 via-[#ffd866]/15 to-[#a9dc76]/10',
-          accent: 'text-[#ff6188]',
-          border: 'border-[#ffd866]/30',
-          badgeBg: 'bg-[#ffd866]/15 text-[#ffd866] border-[#ffd866]/40',
-          handSec: '#ff6188',
-          handMin: '#ffd866',
-          handHr: '#78dce8',
-          dialBg: '#2d2a2e',
-          dialBorder: '#ffd866',
-          flipCard: 'bg-[#2d2a2e] text-[#ffd866] border-[#ffd866]/30 shadow-black/40',
-          progressBar: 'bg-gradient-to-r from-[#ff6188] via-[#ffd866] to-[#a9dc76]',
-        };
-      case 'alpine_glacier':
-        return {
-          bg: 'bg-[#f0f4f9]',
-          clockText: 'text-[#0f172a] drop-shadow-[0_2px_14px_rgba(15,23,42,0.08)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(2,132,199,0.08),transparent_70%)]',
-          accent: 'text-[#0284c7]',
-          border: 'border-slate-300',
-          badgeBg: 'bg-sky-100/90 text-sky-900 border-sky-300',
-          handSec: '#0284c7',
-          handMin: '#1e293b',
-          handHr: '#0f172a',
-          dialBg: '#ffffff',
-          dialBorder: '#38bdf8',
-          flipCard: 'bg-white text-slate-900 border-slate-300 shadow-xl shadow-sky-900/10',
-          subText: 'text-slate-600',
-          dialTickMajor: '#0f172a',
-          dialTickMinor: 'rgba(15,23,42,0.3)',
-          dialNumColor: '#0f172a',
-          progressBar: 'bg-gradient-to-r from-sky-400 to-blue-600',
-          isLight: true,
-        };
-      case 'crimson_eclipse':
-        return {
-          bg: 'bg-[#080305]',
-          clockText: 'text-[#ff1744] drop-shadow-[0_0_35px_rgba(255,23,68,0.9)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,23,68,0.16),transparent_70%)]',
-          accent: 'text-[#ff5252]',
-          border: 'border-[#ff1744]/30',
-          badgeBg: 'bg-[#ff1744]/15 text-[#ff5252] border-[#ff1744]/40',
-          handSec: '#ff1744',
-          handMin: '#ff5252',
-          handHr: '#b71c1c',
-          dialBg: '#140509',
-          dialBorder: '#ff1744',
-          flipCard: 'bg-[#1a080d] text-[#ff1744] border-[#ff1744]/30 shadow-[#ff1744]/20',
-          progressBar: 'bg-[#ff1744]',
-        };
-      case 'california_dusk':
-        return {
-          bg: 'bg-[#10081c]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-rose-400 to-purple-500 drop-shadow-[0_0_30px_rgba(244,63,94,0.75)]',
-          glow: 'bg-gradient-to-tr from-amber-500/15 via-rose-500/15 to-purple-600/15',
-          accent: 'text-[#fbbf24]',
-          border: 'border-rose-500/30',
-          badgeBg: 'bg-rose-500/15 text-rose-300 border-rose-500/40',
-          handSec: '#fbbf24',
-          handMin: '#fb7185',
-          handHr: '#c084fc',
-          dialBg: '#1d0f30',
-          dialBorder: '#fb7185',
-          flipCard: 'bg-[#22123a] text-rose-300 border-rose-500/30 shadow-purple-950/40',
-          progressBar: 'bg-gradient-to-r from-amber-300 via-rose-400 to-purple-500',
-        };
-      case 'heartbeat_pulse':
-        return {
-          bg: 'bg-[#080104]',
-          clockText: 'text-[#ff1a53] drop-shadow-[0_0_35px_rgba(255,26,83,0.85)] animate-clock-heartbeat-subtle',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,26,83,0.22),transparent_70%)] animate-clock-heartbeat',
-          accent: 'text-[#ff4d79]',
-          border: 'border-[#ff1a53]/40',
-          badgeBg: 'bg-[#ff1a53]/20 text-[#ff1a53] border-[#ff1a53]/50',
-          handSec: '#ff1a53',
-          handMin: '#ff4d79',
-          handHr: '#b30030',
-          dialBg: '#120208',
-          dialBorder: '#ff1a53',
-          flipCard: 'bg-[#19030c] text-[#ff1a53] border-[#ff1a53]/40 shadow-[#ff1a53]/30',
-          progressBar: 'bg-gradient-to-r from-[#b30030] via-[#ff1a53] to-[#ff4d79]',
-        };
-      case 'sunrise_dawn':
-        return {
-          bg: 'bg-gradient-to-t from-[#1a0a20] via-[#2f1124] to-[#0d091a]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-300 to-rose-300 drop-shadow-[0_0_35px_rgba(251,191,36,0.85)] animate-clock-gradient-shift',
-          glow: 'bg-gradient-to-t from-amber-500/25 via-rose-500/20 to-indigo-900/10 animate-clock-sunrise-glow',
-          accent: 'text-amber-300',
-          border: 'border-amber-500/35',
-          badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-          handSec: '#f59e0b',
-          handMin: '#fbbf24',
-          handHr: '#f43f5e',
-          dialBg: '#1c0f24',
-          dialBorder: '#fbbf24',
-          flipCard: 'bg-[#25132d] text-amber-300 border-amber-500/30 shadow-amber-500/20',
-          progressBar: 'bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500',
-        };
-      case 'sunset_twilight':
-        return {
-          bg: 'bg-gradient-to-b from-[#0c071e] via-[#260c2b] to-[#120618]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-400 to-purple-400 drop-shadow-[0_0_35px_rgba(249,115,22,0.8)] animate-clock-gradient-shift',
-          glow: 'bg-gradient-to-b from-purple-500/20 via-orange-500/20 to-fuchsia-900/25 animate-clock-sunset-glow',
-          accent: 'text-orange-400',
-          border: 'border-orange-500/35',
-          badgeBg: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
-          handSec: '#fb923c',
-          handMin: '#f472b6',
-          handHr: '#a855f7',
-          dialBg: '#1b0c26',
-          dialBorder: '#fb923c',
-          flipCard: 'bg-[#220f30] text-orange-300 border-orange-500/30 shadow-orange-500/20',
-          progressBar: 'bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500',
-        };
-      case 'aurora_borealis':
-        return {
-          bg: 'bg-[#030a12]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 drop-shadow-[0_0_35px_rgba(52,211,153,0.85)] animate-clock-gradient-shift',
-          glow: 'bg-gradient-to-tr from-emerald-500/25 via-teal-400/20 to-indigo-600/25 animate-clock-aurora',
-          accent: 'text-emerald-300',
-          border: 'border-emerald-400/35',
-          badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40',
-          handSec: '#34d399',
-          handMin: '#2dd4bf',
-          handHr: '#38bdf8',
-          dialBg: '#071622',
-          dialBorder: '#34d399',
-          flipCard: 'bg-[#0a1e2e] text-emerald-300 border-emerald-400/30 shadow-emerald-500/20',
-          progressBar: 'bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400',
-        };
-      case 'breathing_glow':
-        return {
-          bg: 'bg-[#040a14]',
-          clockText: 'text-sky-300 drop-shadow-[0_0_35px_rgba(56,189,248,0.85)] animate-clock-breathe-subtle',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.25),transparent_70%)] animate-clock-breathe',
-          accent: 'text-cyan-300',
-          border: 'border-sky-500/35',
-          badgeBg: 'bg-sky-500/20 text-sky-300 border-sky-400/40',
-          handSec: '#38bdf8',
-          handMin: '#7dd3fc',
-          handHr: '#0284c7',
-          dialBg: '#081726',
-          dialBorder: '#38bdf8',
-          flipCard: 'bg-[#0b1f33] text-sky-300 border-sky-400/30 shadow-sky-500/20',
-          progressBar: 'bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500',
-        };
-      case 'neon_cyber_pulse':
-        return {
-          bg: 'bg-[#06030c]',
-          clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] via-[#ff00a0] to-[#ffe600] drop-shadow-[0_0_35px_rgba(0,240,255,0.9)] animate-clock-gradient-shift',
-          glow: 'bg-gradient-to-tr from-[#00f0ff]/20 via-[#ff00a0]/20 to-[#ffe600]/15 animate-clock-aurora',
-          accent: 'text-[#00f0ff]',
-          border: 'border-[#00f0ff]/40',
-          badgeBg: 'bg-[#00f0ff]/20 text-[#00f0ff] border-[#00f0ff]/50',
-          handSec: '#00f0ff',
-          handMin: '#ff00a0',
-          handHr: '#ffe600',
-          dialBg: '#12091f',
-          dialBorder: '#00f0ff',
-          flipCard: 'bg-[#170c29] text-[#00f0ff] border-[#00f0ff]/40 shadow-[#00f0ff]/25',
-          progressBar: 'bg-gradient-to-r from-[#00f0ff] via-[#ff00a0] to-[#ffe600]',
-        };
-      default:
-        return {
-          bg: 'bg-[#08080d]',
-          clockText: 'text-[#fcee0a] drop-shadow-[0_0_35px_rgba(252,238,10,0.85)]',
-          glow: 'bg-[radial-gradient(ellipse_at_center,rgba(252,238,10,0.12),transparent_70%)]',
-          accent: 'text-[#00f0ff]',
-          border: 'border-[#fcee0a]/30',
-          badgeBg: 'bg-[#fcee0a]/15 text-[#fcee0a] border-[#fcee0a]/40',
-          handSec: '#00f0ff',
-          handMin: '#fcee0a',
-          handHr: '#ff003c',
-          dialBg: '#0e0e17',
-          dialBorder: '#fcee0a',
-          flipCard: 'bg-[#151522] text-[#fcee0a] border-[#fcee0a]/30 shadow-[#fcee0a]/20',
-          progressBar: 'bg-[#fcee0a]',
-        };
-    }
-  };
+  const themeConfig = getClockThemeStyles(theme);
 
-  const themeConfig = getThemeStyles();
+
+
+  const effectiveAnimation: AnimationFx =
+    animationFx === 'auto'
+      ? (themeConfig.defaultAnimation || 'auto')
+      : animationFx;
 
   const getAnimationGlowClass = () => {
-    if (animationFx === 'none') return '';
-    if (animationFx === 'heartbeat') return 'animate-clock-heartbeat';
-    if (animationFx === 'sunrise') return 'animate-clock-sunrise-glow';
-    if (animationFx === 'sunset') return 'animate-clock-sunset-glow';
-    if (animationFx === 'aurora') return 'animate-clock-aurora';
-    if (animationFx === 'breathe') return 'animate-clock-breathe';
-    // auto:
-    if (themeConfig.glow?.includes('animate-')) return '';
+    if (effectiveAnimation === 'none') return '';
+    if (effectiveAnimation === 'heartbeat') return 'animate-clock-heartbeat';
+    if (effectiveAnimation === 'sunrise') return 'animate-clock-sunrise-glow';
+    if (effectiveAnimation === 'sunset') return 'animate-clock-sunset-glow';
+    if (effectiveAnimation === 'aurora') return 'animate-clock-aurora';
+    if (effectiveAnimation === 'breathe') return 'animate-clock-breathe';
+    if (effectiveAnimation === 'ocean') return 'animate-clock-ocean-tide';
+    if (effectiveAnimation === 'fire') return 'animate-clock-fire-ember';
+    if (effectiveAnimation === 'supernova') return 'animate-clock-supernova';
+    // auto with no theme specific animation:
     return ambientGlow ? 'animate-pulse-slow' : '';
   };
 
   const getAnimationTextClass = () => {
-    if (animationFx === 'none') return '';
-    if (animationFx === 'heartbeat') return 'animate-clock-heartbeat-subtle';
-    if (animationFx === 'breathe') return 'animate-clock-breathe-subtle';
-    if (animationFx === 'sunrise' || animationFx === 'sunset' || animationFx === 'aurora') {
+    if (effectiveAnimation === 'none') return '';
+    if (effectiveAnimation === 'heartbeat') return 'animate-clock-heartbeat-subtle';
+    if (effectiveAnimation === 'breathe') return 'animate-clock-breathe-subtle';
+    if (effectiveAnimation === 'ocean') return 'animate-clock-ocean-subtle';
+    if (effectiveAnimation === 'fire') return 'animate-clock-fire-subtle';
+    if (effectiveAnimation === 'supernova') return 'animate-clock-supernova-subtle';
+    if (effectiveAnimation === 'sunrise' || effectiveAnimation === 'sunset' || effectiveAnimation === 'aurora') {
       return 'animate-clock-gradient-shift';
     }
     return '';
   };
 
-  const themes: { id: ClockTheme; label: string; color: string; category: ThemeCategory }[] = [
-    // Dynamic & Animated
-    { id: 'heartbeat_pulse', label: 'Heartbeat Pulse', color: 'bg-[#ff1a53]', category: 'animated' },
-    { id: 'sunrise_dawn', label: 'Sunrise Dawn', color: 'bg-amber-400', category: 'animated' },
-    { id: 'sunset_twilight', label: 'Sunset Twilight', color: 'bg-orange-500', category: 'animated' },
-    { id: 'aurora_borealis', label: 'Aurora Borealis', color: 'bg-emerald-400', category: 'animated' },
-    { id: 'breathing_glow', label: 'Calm Breathing', color: 'bg-sky-400', category: 'animated' },
-    { id: 'neon_cyber_pulse', label: 'Neon Cyber Pulse', color: 'bg-[#00f0ff]', category: 'animated' },
+  const themes = CLOCK_THEMES;
 
-    // Neon & Cyber
-    { id: 'night_city', label: 'Night City 2077', color: 'bg-[#fcee0a]', category: 'cyber' },
-    { id: 'cyberpunk', label: 'Cyber Neon', color: 'bg-cyan-400', category: 'cyber' },
-    { id: 'synthwave', label: 'Synthwave 80s', color: 'bg-fuchsia-500', category: 'cyber' },
-    { id: 'matrix', label: 'Matrix Terminal', color: 'bg-emerald-400', category: 'cyber' },
-    { id: 'toxic_lime', label: 'Acid Cyber Lime', color: 'bg-[#ccff00]', category: 'cyber' },
-    { id: 'electric_violet', label: 'Electric Ultraviolet', color: 'bg-[#d946ef]', category: 'cyber' },
-    { id: 'midnight_velocity', label: 'Midnight Velocity', color: 'bg-[#ff2b44]', category: 'cyber' },
-    { id: 'solarized_dark', label: 'Solarized Horizon', color: 'bg-[#2aa198]', category: 'cyber' },
-    { id: 'miami_sunset', label: 'Miami Vice Synth', color: 'bg-[#f72585]', category: 'cyber' },
-    { id: 'monokai_pro', label: 'Monokai Pro', color: 'bg-[#ffd866]', category: 'cyber' },
-    { id: 'crimson_eclipse', label: 'Crimson Eclipse', color: 'bg-[#ff1744]', category: 'cyber' },
 
-    // Space & Aurora
-    { id: 'tokyo_night', label: 'Tokyo Night', color: 'bg-[#7aa2f7]', category: 'space' },
-    { id: 'tokyo_rain', label: 'Tokyo Rain', color: 'bg-purple-400', category: 'space' },
-    { id: 'nord_aurora', label: 'Nordic Aurora', color: 'bg-[#88c0d0]', category: 'space' },
-    { id: 'cosmic_nebula', label: 'Cosmic Nebula', color: 'bg-pink-500', category: 'space' },
-    { id: 'frost_aurora', label: 'Glacial Frost', color: 'bg-sky-300', category: 'space' },
-    { id: 'abyss_ocean', label: 'Deep Abyss', color: 'bg-cyan-500', category: 'space' },
-
-    // Warm & Sunset
-    { id: 'amber_crt', label: 'Vintage Amber CRT', color: 'bg-[#ffb000]', category: 'warm' },
-    { id: 'luxury_gold', label: 'Royal Obsidian Gold', color: 'bg-amber-400', category: 'warm' },
-    { id: 'solar_flare', label: 'Solar Flare', color: 'bg-orange-500', category: 'warm' },
-    { id: 'warm_espresso', label: 'Warm Espresso', color: 'bg-amber-700', category: 'warm' },
-    { id: 'sahara_dune', label: 'Sahara Dune', color: 'bg-orange-400', category: 'warm' },
-    { id: 'kyoto_twilight', label: 'Kyoto Twilight', color: 'bg-rose-500', category: 'warm' },
-    { id: 'emerald', label: 'Emerald Forest', color: 'bg-teal-400', category: 'warm' },
-    { id: 'gruvbox_warm', label: 'Gruvbox Retro', color: 'bg-[#fabd2f]', category: 'warm' },
-    { id: 'california_dusk', label: 'California Dusk', color: 'bg-[#f43f5e]', category: 'warm' },
-
-    // Minimal & Studio
-    { id: 'paper_studio', label: 'Studio Paper (Light)', color: 'bg-slate-100 border border-slate-400', category: 'minimal' },
-    { id: 'alpine_glacier', label: 'Nordic Glacier (Light)', color: 'bg-sky-100 border border-sky-400', category: 'minimal' },
-    { id: 'oled', label: 'OLED Pure Black', color: 'bg-neutral-950 border border-neutral-600', category: 'minimal' },
-    { id: 'swiss_bauhaus', label: 'Swiss Bauhaus', color: 'bg-rose-500', category: 'minimal' },
-    { id: 'slate', label: 'Deep Slate', color: 'bg-slate-600', category: 'minimal' },
-    { id: 'dracula', label: 'Dracula Gothic', color: 'bg-[#ff79c6]', category: 'minimal' },
-    { id: 'catppuccin', label: 'Catppuccin Mocha', color: 'bg-[#cba6f7]', category: 'minimal' },
-    { id: 'rose_quartz', label: 'Rose Quartz', color: 'bg-pink-300', category: 'minimal' },
-    { id: 'dreamy_lilac', label: 'Dreamy Lilac', color: 'bg-purple-300', category: 'minimal' },
-    { id: 'matcha_minimal', label: 'Matcha Zen', color: 'bg-lime-400', category: 'minimal' },
-  ];
 
   const filteredThemes = themeCategory === 'all'
     ? themes
@@ -1573,16 +1728,20 @@ export const DigitalClock: React.FC = () => {
                 : 'border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
             title={
-              typeof navigator !== 'undefined' && 'wakeLock' in navigator
-                ? keepScreenOn
+              keepScreenOn
+                ? wakeLockActive
                   ? 'Keep Screen On: Active (Display will stay awake)'
-                  : 'Keep Screen On: Inactive (Click to prevent display sleep)'
-                : 'Keep Screen On: Screen Wake Lock not supported in this browser'
+                  : 'Keep Screen On: Active (Sleep prevention active)'
+                : isWakeLockSupported
+                  ? 'Keep Screen On: Inactive (Click to prevent display sleep)'
+                  : 'Keep Screen On: Inactive (Click to activate fallback keep awake)'
             }
           >
             <Sun size={14} className={keepScreenOn ? 'animate-pulse text-amber-500' : ''} />
             <span className="hidden sm:inline">Keep Awake</span>
-            {keepScreenOn && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+            {keepScreenOn && (
+              <span className={`w-1.5 h-1.5 rounded-full ${wakeLockActive ? 'bg-amber-500' : 'bg-amber-400/80'}`} />
+            )}
           </button>
 
           {/* Fullscreen Button */}
@@ -1665,13 +1824,11 @@ export const DigitalClock: React.FC = () => {
                 className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
                 title="Dynamic background & glow animation style"
               >
-                <option value="auto">Animation: Auto (Theme)</option>
-                <option value="heartbeat">Animation: Heartbeat Pulse</option>
-                <option value="sunrise">Animation: Sunrise Dawn</option>
-                <option value="sunset">Animation: Sunset Twilight</option>
-                <option value="aurora">Animation: Aurora Waves</option>
-                <option value="breathe">Animation: Breathing Glow</option>
-                <option value="none">Animation: Off</option>
+                {CLOCK_ANIMATION_FX_OPTIONS.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -1800,12 +1957,16 @@ export const DigitalClock: React.FC = () => {
             {(() => {
               const activeObj = themes.find(t => t.id === theme) || themes[0];
               return (
-                <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <button
+                  onClick={() => setIsThemesCollapsed(!isThemesCollapsed)}
+                  className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                  title={isThemesCollapsed ? 'Click to open theme gallery' : 'Click to collapse theme gallery'}
+                >
                   <span className={`w-2.5 h-2.5 rounded-full shrink-0 shadow-xs ${activeObj.color}`} />
                   <span className="font-mono text-[11px] truncate max-w-[130px] sm:max-w-[190px]">
                     {activeObj.label}
                   </span>
-                </div>
+                </button>
               );
             })()}
 
@@ -1882,7 +2043,7 @@ export const DigitalClock: React.FC = () => {
       <div
         ref={containerRef}
         className={`relative overflow-hidden rounded-3xl ${themeConfig.bg} ${themeConfig.border} border p-6 sm:p-14 min-h-[460px] flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 select-none ${
-          isFullscreen ? 'fixed inset-0 z-50 rounded-none h-screen w-screen border-none p-6 sm:p-12' : ''
+          isFullscreen ? 'fixed inset-0 z-50 rounded-none h-screen h-[100dvh] w-screen w-full border-none p-4 sm:p-8 md:p-12 overflow-hidden' : ''
         }`}
       >
         {/* Glow backdrop layer with dynamic animations */}
@@ -1955,7 +2116,9 @@ export const DigitalClock: React.FC = () => {
               <span
                 className={`tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
-                    ? 'text-8xl sm:text-9xl md:text-[13rem] lg:text-[17rem] xl:text-[21rem]'
+                    ? showSeconds
+                      ? 'text-[clamp(4.2rem,min(15vw,26vh),19rem)]'
+                      : 'text-[clamp(5.2rem,min(22vw,36vh),25rem)]'
                     : 'text-6xl sm:text-8xl md:text-9xl'
                 }`}
               >
@@ -1967,7 +2130,7 @@ export const DigitalClock: React.FC = () => {
                     <span className="animate-pulse opacity-90 mx-0.5 sm:mx-1">:</span>
                     <span className={`opacity-90 ${
                       isFullscreen
-                        ? 'text-5xl sm:text-7xl md:text-9xl lg:text-[11rem] xl:text-[13rem]'
+                        ? 'text-[clamp(2.6rem,min(9.5vw,16vh),12rem)]'
                         : 'text-4xl sm:text-6xl md:text-7xl'
                     }`}>
                       {secondsStr}
@@ -1979,7 +2142,7 @@ export const DigitalClock: React.FC = () => {
               {!is24Hour && (
                 <span className={`font-extrabold uppercase ${themeConfig.accent} ${
                   isFullscreen
-                    ? 'text-3xl sm:text-5xl md:text-6xl lg:text-7xl ml-3 sm:ml-5'
+                    ? 'text-[clamp(1.5rem,min(4.5vw,7vh),4.5rem)] ml-3 sm:ml-5'
                     : 'text-xl sm:text-3xl ml-2'
                 }`}>
                   {ampm}
@@ -1989,7 +2152,7 @@ export const DigitalClock: React.FC = () => {
 
             {showDate && (
               <p className={`font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'} ${
-                isFullscreen ? 'text-xl sm:text-3xl md:text-4xl lg:text-5xl pt-4' : 'text-base sm:text-xl'
+                isFullscreen ? 'text-[clamp(1.1rem,min(2.8vw,4vh),2.5rem)] pt-4' : 'text-base sm:text-xl'
               }`}>
                 {dateStr}
               </p>
@@ -1999,12 +2162,12 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 2: Modern StandBy Stacked Mode (Vertical Large Digits) */}
         {mode === 'stacked' && (
-          <div className={`relative z-10 flex flex-col items-center justify-center my-auto ${isFullscreen ? 'space-y-4 py-8' : 'space-y-2 py-4'}`}>
+          <div className={`relative z-10 flex flex-col items-center justify-center my-auto ${isFullscreen ? 'space-y-4 py-4 sm:py-6' : 'space-y-2 py-4'}`}>
             <div className="flex flex-col items-center select-none">
               <span
                 className={`tracking-tight font-black ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
-                    ? 'text-8xl sm:text-[13rem] md:text-[17rem] lg:text-[21rem] xl:text-[25rem] leading-[0.78]'
+                    ? 'text-[clamp(5rem,min(30vw,36vh),24rem)] leading-[0.78]'
                     : 'text-7xl sm:text-9xl md:text-[10rem] lg:text-[11rem] leading-[0.85]'
                 }`}
               >
@@ -2013,7 +2176,7 @@ export const DigitalClock: React.FC = () => {
               <span
                 className={`tracking-tight font-black ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
-                    ? 'text-8xl sm:text-[13rem] md:text-[17rem] lg:text-[21rem] xl:text-[25rem] leading-[0.78]'
+                    ? 'text-[clamp(5rem,min(30vw,36vh),24rem)] leading-[0.78]'
                     : 'text-7xl sm:text-9xl md:text-[10rem] lg:text-[11rem] leading-[0.85]'
                 }`}
               >
@@ -2021,7 +2184,7 @@ export const DigitalClock: React.FC = () => {
               </span>
             </div>
 
-            <div className={`flex flex-wrap items-center justify-center gap-3 ${isFullscreen ? 'pt-6 sm:pt-8' : 'pt-3'}`}>
+            <div className={`flex flex-wrap items-center justify-center gap-3 ${isFullscreen ? 'pt-4 sm:pt-6' : 'pt-3'}`}>
               {!is24Hour && (
                 <span className={`rounded-xl font-black uppercase tracking-wider border ${themeConfig.badgeBg} ${
                   isFullscreen ? 'px-4 py-1.5 text-base sm:text-xl' : 'px-2.5 py-0.5 text-xs sm:text-sm'
@@ -2054,7 +2217,7 @@ export const DigitalClock: React.FC = () => {
           <div className="relative z-10 flex flex-col items-center space-y-4 my-auto">
             <div className={`relative flex items-center justify-center ${
               isFullscreen
-                ? 'w-80 h-80 sm:w-[28rem] sm:h-[28rem] md:w-[38rem] md:h-[38rem] lg:w-[46rem] lg:h-[46rem]'
+                ? 'w-[clamp(18rem,min(72vh,82vw),46rem)] h-[clamp(18rem,min(72vh,82vw),46rem)]'
                 : 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96'
             }`}>
               <svg viewBox="0 0 320 320" className="w-full h-full drop-shadow-2xl select-none">
@@ -2145,7 +2308,7 @@ export const DigitalClock: React.FC = () => {
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
                 <div className={`font-black ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
-                    ? 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
+                    ? 'text-[clamp(2.5rem,min(11vw,14vh),7rem)]'
                     : 'text-2xl sm:text-3xl md:text-4xl'
                 }`}>
                   {hoursStr}:{minutesStr}
@@ -2153,21 +2316,21 @@ export const DigitalClock: React.FC = () => {
                 <div className="flex items-center gap-1.5 mt-0.5">
                   {showSeconds && (
                     <span className={`font-mono font-bold ${themeConfig.accent} ${
-                      isFullscreen ? 'text-base sm:text-2xl md:text-3xl' : 'text-xs sm:text-sm'
+                      isFullscreen ? 'text-[clamp(1.2rem,min(3.5vw,4.5vh),2.5rem)]' : 'text-xs sm:text-sm'
                     }`}>
                       :{secondsStr}
                     </span>
                   )}
                   {!is24Hour && (
                     <span className={`font-bold uppercase ${themeConfig.accent} ${
-                      isFullscreen ? 'text-sm sm:text-xl' : 'text-[10px] sm:text-xs'
+                      isFullscreen ? 'text-[clamp(1rem,min(2.5vw,3.5vh),2rem)]' : 'text-[10px] sm:text-xs'
                     }`}>
                       {ampm}
                     </span>
                   )}
                 </div>
                 <div className={`font-mono tracking-wider opacity-70 ${themeConfig.subText || 'text-slate-400'} ${
-                  isFullscreen ? 'text-xs sm:text-base md:text-lg mt-2' : 'text-[10px] mt-1'
+                  isFullscreen ? 'text-xs sm:text-base md:text-lg mt-1' : 'text-[10px] mt-1'
                 }`}>
                   {Math.round(secProgress * 100)}%
                 </div>
@@ -2217,7 +2380,7 @@ export const DigitalClock: React.FC = () => {
 
             {/* Conversational Phrase */}
             <h3 className={`font-black uppercase tracking-tight ${themeConfig.accent} ${
-              isFullscreen ? 'text-3xl sm:text-5xl md:text-6xl lg:text-7xl' : 'text-2xl sm:text-4xl md:text-5xl'
+              isFullscreen ? 'text-[clamp(1.8rem,min(6vw,7.5vh),5rem)]' : 'text-2xl sm:text-4xl md:text-5xl'
             }`}>
               {wordClockData.phrase}
             </h3>
@@ -2226,13 +2389,13 @@ export const DigitalClock: React.FC = () => {
             <h1
               className={`font-black tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                 isFullscreen
-                  ? 'text-7xl sm:text-9xl md:text-[11rem] lg:text-[14rem]'
+                  ? 'text-[clamp(4.2rem,min(14vw,19vh),13rem)]'
                   : 'text-6xl sm:text-8xl md:text-9xl'
               }`}
             >
               {wordClockData.targetHour}
               {wordClockData.isOclock && (
-                <span className={`opacity-80 ml-3 ${isFullscreen ? 'text-5xl sm:text-7xl' : 'text-4xl sm:text-6xl'}`}>
+                <span className={`opacity-80 ml-3 ${isFullscreen ? 'text-[clamp(2.5rem,min(8vw,11vh),7.5rem)]' : 'text-4xl sm:text-6xl'}`}>
                   O&apos;CLOCK
                 </span>
               )}
@@ -2240,7 +2403,7 @@ export const DigitalClock: React.FC = () => {
 
             {/* Natural Period */}
             <p className={`font-bold uppercase tracking-widest ${themeConfig.subText || 'text-slate-400'} ${
-              isFullscreen ? 'text-xl sm:text-3xl md:text-4xl' : 'text-base sm:text-2xl'
+              isFullscreen ? 'text-[clamp(1.1rem,min(3.5vw,5vh),3.25rem)]' : 'text-base sm:text-2xl'
             }`}>
               {wordClockData.period}
             </p>
@@ -2389,13 +2552,13 @@ export const DigitalClock: React.FC = () => {
         {/* Mode 3: Flip Card Clock Mode */}
         {mode === 'flip' && (
           <div className="relative z-10 space-y-6 my-auto">
-            <div className={`flex items-center justify-center ${isFullscreen ? 'gap-4 sm:gap-8' : 'gap-3 sm:gap-6'}`}>
+            <div className={`flex items-center justify-center ${isFullscreen ? 'gap-3 sm:gap-6' : 'gap-3 sm:gap-6'}`}>
               {/* Hours Card */}
               <div className="flex flex-col items-center">
                 <div
                   className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden ${
                     isFullscreen
-                      ? 'w-36 sm:w-56 md:w-72 lg:w-80 h-48 sm:h-72 md:h-96 lg:h-[26rem] rounded-[2.5rem]'
+                      ? 'w-[clamp(6rem,min(18vw,23vh),18rem)] h-[clamp(8rem,min(25vw,31vh),25rem)] rounded-[2.5rem]'
                       : 'w-24 sm:w-36 md:w-44 h-32 sm:h-44 md:h-52 rounded-3xl'
                   }`}
                 >
@@ -2404,9 +2567,9 @@ export const DigitalClock: React.FC = () => {
                   <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
                   <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
                   <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                  <span className={`font-black ${getFontFamilyClass()} relative z-15 ${
+                  <span className={`font-black ${getFontFamilyClass()} ${getAnimationTextClass()} relative z-15 ${
                     isFullscreen
-                      ? 'text-7xl sm:text-9xl md:text-[11rem] lg:text-[13rem]'
+                      ? 'text-[clamp(4.2rem,min(13vw,17vh),13rem)]'
                       : 'text-5xl sm:text-7xl md:text-8xl'
                   }`}>
                     {hoursStr}
@@ -2420,7 +2583,7 @@ export const DigitalClock: React.FC = () => {
               </div>
 
               <div className={`font-black animate-pulse ${themeConfig.accent} ${
-                isFullscreen ? 'text-6xl sm:text-8xl lg:text-9xl' : 'text-4xl sm:text-6xl'
+                isFullscreen ? 'text-[clamp(3.5rem,min(9vw,12vh),8rem)]' : 'text-4xl sm:text-6xl'
               }`}>:</div>
 
               {/* Minutes Card */}
@@ -2428,7 +2591,7 @@ export const DigitalClock: React.FC = () => {
                 <div
                   className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden ${
                     isFullscreen
-                      ? 'w-36 sm:w-56 md:w-72 lg:w-80 h-48 sm:h-72 md:h-96 lg:h-[26rem] rounded-[2.5rem]'
+                      ? 'w-[clamp(6rem,min(18vw,23vh),18rem)] h-[clamp(8rem,min(25vw,31vh),25rem)] rounded-[2.5rem]'
                       : 'w-24 sm:w-36 md:w-44 h-32 sm:h-44 md:h-52 rounded-3xl'
                   }`}
                 >
@@ -2437,9 +2600,9 @@ export const DigitalClock: React.FC = () => {
                   <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
                   <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
                   <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                  <span className={`font-black ${getFontFamilyClass()} relative z-15 ${
+                  <span className={`font-black ${getFontFamilyClass()} ${getAnimationTextClass()} relative z-15 ${
                     isFullscreen
-                      ? 'text-7xl sm:text-9xl md:text-[11rem] lg:text-[13rem]'
+                      ? 'text-[clamp(4.2rem,min(13vw,17vh),13rem)]'
                       : 'text-5xl sm:text-7xl md:text-8xl'
                   }`}>
                     {minutesStr}
@@ -2455,14 +2618,14 @@ export const DigitalClock: React.FC = () => {
               {showSeconds && (
                 <>
                   <div className={`font-black animate-pulse ${themeConfig.accent} ${
-                    isFullscreen ? 'text-6xl sm:text-8xl lg:text-9xl' : 'text-4xl sm:text-6xl'
+                    isFullscreen ? 'text-[clamp(3.5rem,min(9vw,12vh),8rem)]' : 'text-4xl sm:text-6xl'
                   }`}>:</div>
                   {/* Seconds Card */}
                   <div className="flex flex-col items-center">
                     <div
                       className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden opacity-90 ${
                         isFullscreen
-                          ? 'w-28 sm:w-44 md:w-56 lg:w-64 h-40 sm:h-56 md:h-72 lg:h-80 rounded-[2rem]'
+                          ? 'w-[clamp(4.8rem,min(13vw,17vh),13rem)] h-[clamp(6.2rem,min(18vw,23vh),18rem)] rounded-[2rem]'
                           : 'w-20 sm:w-28 md:w-36 h-28 sm:h-36 md:h-44 rounded-3xl'
                       }`}
                     >
@@ -2471,9 +2634,9 @@ export const DigitalClock: React.FC = () => {
                       <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
                       <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
                       <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                      <span className={`font-black ${getFontFamilyClass()} relative z-15 ${
+                      <span className={`font-black ${getFontFamilyClass()} ${getAnimationTextClass()} relative z-15 ${
                         isFullscreen
-                          ? 'text-5xl sm:text-7xl md:text-8xl lg:text-9xl'
+                          ? 'text-[clamp(3.2rem,min(9vw,12vh),9rem)]'
                           : 'text-4xl sm:text-6xl md:text-7xl'
                       }`}>
                         {secondsStr}
@@ -2514,7 +2677,7 @@ export const DigitalClock: React.FC = () => {
           <div className="relative z-10 flex flex-col items-center space-y-5 my-auto">
             <div className={`relative flex items-center justify-center ${
               isFullscreen
-                ? 'w-80 h-80 sm:w-[32rem] sm:h-[32rem] md:w-[44rem] md:h-[44rem] lg:w-[50rem] lg:h-[50rem]'
+                ? 'w-[clamp(18rem,min(72vh,82vw),46rem)] h-[clamp(18rem,min(72vh,82vw),46rem)]'
                 : 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96'
             }`}>
               <svg
@@ -2650,7 +2813,7 @@ export const DigitalClock: React.FC = () => {
             {/* Sub Digital Readout */}
             <div className={`flex items-center gap-2 font-bold ${getFontFamilyClass()} ${
               themeConfig.isLight ? 'text-slate-800' : 'text-slate-200'
-            } ${isFullscreen ? 'text-2xl sm:text-4xl md:text-5xl pt-3' : 'text-xl'}`}>
+            } ${isFullscreen ? 'text-[clamp(1.4rem,min(3.8vw,4.8vh),3.2rem)] pt-3' : 'text-xl'}`}>
               <span>{hoursStr}:{minutesStr}{showSeconds ? `:${secondsStr}` : ''}</span>
               {!is24Hour && (
                 <span className={`uppercase ${themeConfig.accent} ${isFullscreen ? 'text-lg sm:text-2xl' : 'text-xs'}`}>
@@ -2660,7 +2823,7 @@ export const DigitalClock: React.FC = () => {
             </div>
 
             {showDate && (
-              <p className={`${themeConfig.subText || 'text-slate-400'} ${isFullscreen ? 'text-base sm:text-xl' : 'text-xs'}`}>
+              <p className={`${themeConfig.subText || 'text-slate-400'} ${isFullscreen ? 'text-[clamp(1rem,min(2.5vw,3vh),2rem)]' : 'text-xs'}`}>
                 {dateStr}
               </p>
             )}
@@ -2677,7 +2840,7 @@ export const DigitalClock: React.FC = () => {
             </span>
 
             <div className={`tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
-              isFullscreen ? 'text-8xl sm:text-[12rem] md:text-[15rem] lg:text-[18rem]' : 'text-7xl sm:text-9xl'
+              isFullscreen ? 'text-[clamp(5.5rem,min(22vw,32vh),22rem)]' : 'text-7xl sm:text-9xl'
             }`}>
               {pomoMinutes}:{pomoSeconds}
             </div>
@@ -2719,10 +2882,10 @@ export const DigitalClock: React.FC = () => {
         {mode === 'stopwatch' && (
           <div className={`relative z-10 space-y-6 my-auto w-full ${isFullscreen ? 'max-w-2xl' : 'max-w-md'}`}>
             <div className={`tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
-              isFullscreen ? 'text-8xl sm:text-[11rem] md:text-[14rem] lg:text-[16rem]' : 'text-6xl sm:text-8xl'
+              isFullscreen ? 'text-[clamp(5rem,min(18vw,26vh),18rem)]' : 'text-6xl sm:text-8xl'
             }`}>
               {swMinutes}:{swSeconds}
-              <span className={`opacity-80 ${isFullscreen ? 'text-5xl sm:text-7xl md:text-8xl' : 'text-3xl sm:text-5xl'}`}>
+              <span className={`opacity-80 ${isFullscreen ? 'text-[clamp(3rem,min(11vw,16vh),10rem)]' : 'text-3xl sm:text-5xl'}`}>
                 .{swMs}
               </span>
             </div>

@@ -432,6 +432,112 @@ if (!FONT_FAMILIES.some((f) => f.id === 'jetbrains_mono') || !FONT_FAMILIES.some
 
 console.log('✓ Test 8: Authentic Carbon syntax themes, backgrounds, shadows, and font presets verified.');
 
+// Test 9: DigitalClock aesthetics, animations, wake lock styles, and zero emojis
+import {
+  CLOCK_THEMES,
+  CLOCK_ANIMATION_FX_OPTIONS,
+  getClockThemeStyles,
+  ClockTheme,
+  AnimationFx,
+} from '../components/tools/productivity/DigitalClock';
+
+if (!Array.isArray(CLOCK_THEMES) || CLOCK_THEMES.length !== 45) {
+  console.error(`Expected exactly 45 clock themes, found ${CLOCK_THEMES?.length}`);
+  process.exit(1);
+}
+
+const clockThemeIds = new Set<string>();
+const dynamicThemeIds = [
+  'heartbeat_pulse',
+  'sunrise_dawn',
+  'sunset_twilight',
+  'aurora_borealis',
+  'breathing_glow',
+  'neon_cyber_pulse',
+  'ocean_waves',
+  'fire_ember',
+  'supernova',
+];
+
+for (const theme of CLOCK_THEMES) {
+  if (clockThemeIds.has(theme.id)) {
+    console.error(`Duplicate clock theme ID: ${theme.id}`);
+    process.exit(1);
+  }
+  clockThemeIds.add(theme.id);
+
+  if (!theme.label || !theme.color || !theme.category) {
+    console.error(`Invalid structure in theme ${theme.id}`);
+    process.exit(1);
+  }
+
+  // Strict emoji prohibition check
+  if (emojiRegex.test(theme.label) || emojiRegex.test(theme.id)) {
+    console.error(`Clock theme ${theme.id} contains prohibited emoji characters`);
+    process.exit(1);
+  }
+
+  // Verify theme styles object completeness
+  const style = getClockThemeStyles(theme.id);
+  const requiredProps = [
+    'bg',
+    'clockText',
+    'glow',
+    'accent',
+    'border',
+    'badgeBg',
+    'handSec',
+    'handMin',
+    'handHr',
+    'dialBg',
+    'dialBorder',
+    'flipCard',
+    'progressBar',
+  ] as const;
+
+  for (const prop of requiredProps) {
+    if (!style[prop] || typeof style[prop] !== 'string') {
+      console.error(`Theme ${theme.id} missing required style prop: ${prop}`);
+      process.exit(1);
+    }
+  }
+
+  // If theme is in dynamicThemeIds, ensure category is 'animated' and defaultAnimation is defined
+  if (dynamicThemeIds.includes(theme.id)) {
+    if (theme.category !== 'animated') {
+      console.error(`Dynamic theme ${theme.id} must have category 'animated'`);
+      process.exit(1);
+    }
+    if (!style.defaultAnimation) {
+      console.error(`Dynamic theme ${theme.id} must define defaultAnimation`);
+      process.exit(1);
+    }
+  }
+}
+
+// Verify Animation FX options
+if (!Array.isArray(CLOCK_ANIMATION_FX_OPTIONS) || CLOCK_ANIMATION_FX_OPTIONS.length !== 10) {
+  console.error(`Expected 10 animation fx options, found ${CLOCK_ANIMATION_FX_OPTIONS?.length}`);
+  process.exit(1);
+}
+
+const animIds = new Set<string>();
+for (const opt of CLOCK_ANIMATION_FX_OPTIONS) {
+  if (animIds.has(opt.id)) {
+    console.error(`Duplicate animation option ID: ${opt.id}`);
+    process.exit(1);
+  }
+  animIds.add(opt.id);
+
+  if (emojiRegex.test(opt.label) || emojiRegex.test(opt.id)) {
+    console.error(`Animation option ${opt.id} contains prohibited emoji characters`);
+    process.exit(1);
+  }
+}
+
+console.log('✓ Test 9: DigitalClock 45 aesthetic themes, dynamic animations FX, and wake lock styles verified.');
+
 console.log('All automated verification checks PASSED successfully!');
+
 
 

@@ -335,11 +335,102 @@
   }
 }
 
+@keyframes clock-ocean-tide {
+  0%, 100% {
+    transform: scale(0.98) translateY(0);
+    filter: hue-rotate(0deg) saturate(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.08) translateY(-1.5%);
+    filter: hue-rotate(30deg) saturate(1.3);
+    opacity: 0.95;
+  }
+}
+
+@keyframes clock-ocean-subtle {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(0.95);
+  }
+  50% {
+    transform: scale(1.015);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes clock-fire-ember {
+  0%, 100% {
+    transform: scale(0.99);
+    filter: brightness(0.9) saturate(1);
+    opacity: 0.7;
+  }
+  25% {
+    transform: scale(1.04);
+    filter: brightness(1.2) saturate(1.35);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.01);
+    filter: brightness(1.05) saturate(1.15);
+    opacity: 0.8;
+  }
+  75% {
+    transform: scale(1.06);
+    filter: brightness(1.25) saturate(1.4);
+    opacity: 1;
+  }
+}
+
+@keyframes clock-fire-subtle {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  30% {
+    transform: scale(1.018);
+    filter: brightness(1.25);
+  }
+  65% {
+    transform: scale(1.01);
+    filter: brightness(1.1);
+  }
+  85% {
+    transform: scale(1.025);
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes clock-supernova {
+  0%, 100% {
+    transform: scale(0.97) rotate(0deg);
+    filter: hue-rotate(0deg) brightness(0.95);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.12) rotate(1.5deg);
+    filter: hue-rotate(45deg) brightness(1.35);
+    opacity: 1;
+  }
+}
+
+@keyframes clock-supernova-subtle {
+  0%, 100% {
+    transform: scale(0.99);
+    filter: brightness(0.95);
+  }
+  50% {
+    transform: scale(1.022);
+    filter: brightness(1.28);
+  }
+}
+
 .animate-clock-heartbeat {
   animation: clock-heartbeat 1.25s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .animate-clock-heartbeat-subtle {
+  display: inline-block;
   animation: clock-heartbeat-subtle 1.25s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
@@ -362,11 +453,43 @@
 }
 
 .animate-clock-breathe-subtle {
+  display: inline-block;
   animation: clock-breathe-subtle 6s ease-in-out infinite;
 }
 
+.animate-clock-ocean-tide {
+  animation: clock-ocean-tide 10s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+.animate-clock-ocean-subtle {
+  display: inline-block;
+  animation: clock-ocean-subtle 10s ease-in-out infinite;
+}
+
+.animate-clock-fire-ember {
+  animation: clock-fire-ember 4s ease-in-out infinite;
+}
+
+.animate-clock-fire-subtle {
+  display: inline-block;
+  animation: clock-fire-subtle 4s ease-in-out infinite;
+}
+
+.animate-clock-supernova {
+  animation: clock-supernova 8s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+.animate-clock-supernova-subtle {
+  display: inline-block;
+  animation: clock-supernova-subtle 8s ease-in-out infinite;
+}
+
 .animate-clock-gradient-shift {
+  display: inline-block;
   animation: clock-gradient-shift 8s ease infinite;
   background-size: 200% auto;
 }
+
 
