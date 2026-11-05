@@ -137,6 +137,19 @@ export const CLOCK_ANIMATION_FX_OPTIONS: { id: AnimationFx; label: string }[] = 
   { id: 'none', label: 'Animation: Off (Static)' },
 ];
 
+export const RADIAL_GAUGE_CONFIG = {
+  viewBoxSize: 320,
+  center: 160,
+  hoursRadius: 146,
+  minutesRadius: 131,
+  secondsRadius: 116,
+  innerChamberRadius: 104,
+  hoursStrokeWidth: 6.5,
+  minutesStrokeWidth: 6,
+  secondsStrokeWidth: 5.5,
+  centerSafeInsetPercent: 19,
+} as const;
+
 export const CLOCK_THEMES: { id: ClockTheme; label: string; color: string; category: ThemeCategory }[] = [
   // Dynamic & Animated
   { id: 'heartbeat_pulse', label: 'Heartbeat Pulse', color: 'bg-[#ff1a53]', category: 'animated' },
@@ -1520,27 +1533,33 @@ export const DigitalClock: React.FC = () => {
   const hrProgress = ((displayTime.getHours() % maxHours) + minValue / 60) / maxHours;
   const minProgress = (minValue + secValue / 60) / 60;
   const secProgress = (secValue + 1) / 60;
+  const dayProgress = Math.round(((displayTime.getHours() * 3600 + minValue * 60 + secValue) / 86400) * 100);
+  const isWideFont = fontStyle === 'digital' || fontStyle === 'minimal';
 
-  // Arc circumferences for radii: r1=130 (Hours), r2=104 (Minutes), r3=78 (Seconds)
-  const r1Circumference = 2 * Math.PI * 130;
-  const r2Circumference = 2 * Math.PI * 104;
-  const r3Circumference = 2 * Math.PI * 78;
+  // Arc circumferences for radii: r1=146 (Hours), r2=131 (Minutes), r3=116 (Seconds)
+  const r1Radius = RADIAL_GAUGE_CONFIG.hoursRadius;
+  const r2Radius = RADIAL_GAUGE_CONFIG.minutesRadius;
+  const r3Radius = RADIAL_GAUGE_CONFIG.secondsRadius;
+
+  const r1Circumference = 2 * Math.PI * r1Radius;
+  const r2Circumference = 2 * Math.PI * r2Radius;
+  const r3Circumference = 2 * Math.PI * r3Radius;
 
   const r1Offset = r1Circumference * (1 - Math.min(1, Math.max(0, hrProgress)));
   const r2Offset = r2Circumference * (1 - Math.min(1, Math.max(0, minProgress)));
   const r3Offset = r3Circumference * (1 - Math.min(1, Math.max(0, secProgress)));
 
   const r1TipAngle = ((hrProgress * 360 - 90) * Math.PI) / 180;
-  const r1TipX = 160 + 130 * Math.cos(r1TipAngle);
-  const r1TipY = 160 + 130 * Math.sin(r1TipAngle);
+  const r1TipX = 160 + r1Radius * Math.cos(r1TipAngle);
+  const r1TipY = 160 + r1Radius * Math.sin(r1TipAngle);
 
   const r2TipAngle = ((minProgress * 360 - 90) * Math.PI) / 180;
-  const r2TipX = 160 + 104 * Math.cos(r2TipAngle);
-  const r2TipY = 160 + 104 * Math.sin(r2TipAngle);
+  const r2TipX = 160 + r2Radius * Math.cos(r2TipAngle);
+  const r2TipY = 160 + r2Radius * Math.sin(r2TipAngle);
 
   const r3TipAngle = ((secProgress * 360 - 90) * Math.PI) / 180;
-  const r3TipX = 160 + 78 * Math.cos(r3TipAngle);
-  const r3TipY = 160 + 78 * Math.sin(r3TipAngle);
+  const r3TipX = 160 + r3Radius * Math.cos(r3TipAngle);
+  const r3TipY = 160 + r3Radius * Math.sin(r3TipAngle);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -2111,15 +2130,21 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 1: Digital Display Mode (Horizontal) */}
         {mode === 'digital' && (
-          <div className={`relative z-10 my-auto ${isFullscreen ? 'space-y-6 sm:space-y-8' : 'space-y-4'}`}>
-            <div className="flex items-baseline justify-center gap-1 sm:gap-3">
+          <div className={`relative z-10 my-auto max-w-full px-2 ${isFullscreen ? 'space-y-6 sm:space-y-8' : 'space-y-4'}`}>
+            <div className="flex flex-wrap items-baseline justify-center gap-1 sm:gap-3 max-w-full">
               <span
-                className={`tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                className={`leading-none ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
                     ? showSeconds
-                      ? 'text-[clamp(4.2rem,min(15vw,26vh),19rem)]'
-                      : 'text-[clamp(5.2rem,min(22vw,36vh),25rem)]'
-                    : 'text-6xl sm:text-8xl md:text-9xl'
+                      ? isWideFont
+                        ? 'text-[clamp(2.2rem,min(10.5vw,22vh),13.5rem)]'
+                        : 'text-[clamp(2.8rem,min(13.5vw,25vh),17rem)]'
+                      : isWideFont
+                        ? 'text-[clamp(3rem,min(15vw,30vh),18rem)]'
+                        : 'text-[clamp(3.8rem,min(19vw,34vh),22rem)]'
+                    : isWideFont
+                      ? 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
+                      : 'text-5xl sm:text-7xl md:text-8xl lg:text-9xl'
                 }`}
               >
                 {hoursStr}
@@ -2130,8 +2155,12 @@ export const DigitalClock: React.FC = () => {
                     <span className="animate-pulse opacity-90 mx-0.5 sm:mx-1">:</span>
                     <span className={`opacity-90 ${
                       isFullscreen
-                        ? 'text-[clamp(2.6rem,min(9.5vw,16vh),12rem)]'
-                        : 'text-4xl sm:text-6xl md:text-7xl'
+                        ? isWideFont
+                          ? 'text-[clamp(1.4rem,min(6vw,13vh),7.5rem)]'
+                          : 'text-[clamp(1.8rem,min(8vw,15vh),10rem)]'
+                        : isWideFont
+                          ? 'text-2xl sm:text-4xl md:text-5xl'
+                          : 'text-3xl sm:text-5xl md:text-6xl'
                     }`}>
                       {secondsStr}
                     </span>
@@ -2142,8 +2171,8 @@ export const DigitalClock: React.FC = () => {
               {!is24Hour && (
                 <span className={`font-extrabold uppercase ${themeConfig.accent} ${
                   isFullscreen
-                    ? 'text-[clamp(1.5rem,min(4.5vw,7vh),4.5rem)] ml-3 sm:ml-5'
-                    : 'text-xl sm:text-3xl ml-2'
+                    ? 'text-[clamp(1.1rem,min(3.2vw,5.5vh),3.5rem)] ml-2 sm:ml-4'
+                    : 'text-lg sm:text-2xl md:text-3xl ml-1.5 sm:ml-2'
                 }`}>
                   {ampm}
                 </span>
@@ -2152,7 +2181,7 @@ export const DigitalClock: React.FC = () => {
 
             {showDate && (
               <p className={`font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'} ${
-                isFullscreen ? 'text-[clamp(1.1rem,min(2.8vw,4vh),2.5rem)] pt-4' : 'text-base sm:text-xl'
+                isFullscreen ? 'text-[clamp(1rem,min(2.5vw,3.8vh),2.25rem)] pt-3' : 'text-base sm:text-xl'
               }`}>
                 {dateStr}
               </p>
@@ -2162,21 +2191,21 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 2: Modern StandBy Stacked Mode (Vertical Large Digits) */}
         {mode === 'stacked' && (
-          <div className={`relative z-10 flex flex-col items-center justify-center my-auto ${isFullscreen ? 'space-y-4 py-4 sm:py-6' : 'space-y-2 py-4'}`}>
+          <div className={`relative z-10 flex flex-col items-center justify-center my-auto max-w-full ${isFullscreen ? 'space-y-4 py-4 sm:py-6' : 'space-y-2 py-4'}`}>
             <div className="flex flex-col items-center select-none">
               <span
-                className={`tracking-tight font-black ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                className={`font-black ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
-                    ? 'text-[clamp(5rem,min(30vw,36vh),24rem)] leading-[0.78]'
+                    ? 'text-[clamp(4.5rem,min(26vw,32vh),21rem)] leading-[0.82]'
                     : 'text-7xl sm:text-9xl md:text-[10rem] lg:text-[11rem] leading-[0.85]'
                 }`}
               >
                 {hoursStr}
               </span>
               <span
-                className={`tracking-tight font-black ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                className={`font-black ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
-                    ? 'text-[clamp(5rem,min(30vw,36vh),24rem)] leading-[0.78]'
+                    ? 'text-[clamp(4.5rem,min(26vw,32vh),21rem)] leading-[0.82]'
                     : 'text-7xl sm:text-9xl md:text-[10rem] lg:text-[11rem] leading-[0.85]'
                 }`}
               >
@@ -2214,37 +2243,48 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode: Chronograph Radial Gauge */}
         {mode === 'radial' && (
-          <div className="relative z-10 flex flex-col items-center space-y-4 my-auto">
+          <div className="relative z-10 flex flex-col items-center space-y-3 sm:space-y-4 my-auto max-w-full">
             <div className={`relative flex items-center justify-center ${
               isFullscreen
-                ? 'w-[clamp(18rem,min(72vh,82vw),46rem)] h-[clamp(18rem,min(72vh,82vw),46rem)]'
+                ? 'w-[clamp(17rem,min(68vh,78vw),42rem)] h-[clamp(17rem,min(68vh,78vw),42rem)]'
                 : 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96'
             }`}>
               <svg viewBox="0 0 320 320" className="w-full h-full drop-shadow-2xl select-none">
-                {/* Background Track Rings */}
-                <circle
-                  cx="160"
-                  cy="160"
-                  r="130"
-                  fill="none"
-                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                  strokeWidth="8"
-                />
+                {/* Inner Chronometer Chamber Backdrop */}
                 <circle
                   cx="160"
                   cy="160"
                   r="104"
+                  fill={themeConfig.dialBg}
+                  fillOpacity={themeConfig.isLight ? '0.65' : '0.45'}
+                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'}
+                  strokeWidth="1"
+                />
+
+                {/* Background Track Rings (r1=146, r2=131, r3=116) */}
+                <circle
+                  cx="160"
+                  cy="160"
+                  r={r1Radius}
                   fill="none"
                   stroke={themeConfig.isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                  strokeWidth="7"
+                  strokeWidth="6.5"
                 />
                 <circle
                   cx="160"
                   cy="160"
-                  r="78"
+                  r={r2Radius}
                   fill="none"
                   stroke={themeConfig.isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
                   strokeWidth="6"
+                />
+                <circle
+                  cx="160"
+                  cy="160"
+                  r={r3Radius}
+                  fill="none"
+                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
+                  strokeWidth="5.5"
                 />
 
                 {/* Progress Arcs */}
@@ -2252,35 +2292,35 @@ export const DigitalClock: React.FC = () => {
                 <circle
                   cx="160"
                   cy="160"
-                  r="130"
+                  r={r1Radius}
                   fill="none"
                   stroke={themeConfig.handHr}
-                  strokeWidth="8"
+                  strokeWidth="6.5"
                   strokeLinecap="round"
                   strokeDasharray={r1Circumference}
                   strokeDashoffset={r1Offset}
                   transform="rotate(-90 160 160)"
                   className="transition-all duration-300"
-                  style={{ filter: `drop-shadow(0 0 6px ${themeConfig.handHr})` }}
+                  style={{ filter: `drop-shadow(0 0 5px ${themeConfig.handHr})` }}
                 />
-                <circle cx={r1TipX} cy={r1TipY} r="4.5" fill="#ffffff" stroke={themeConfig.handHr} strokeWidth="2" />
+                <circle cx={r1TipX} cy={r1TipY} r="4" fill="#ffffff" stroke={themeConfig.handHr} strokeWidth="2" />
 
                 {/* Minutes Ring */}
                 <circle
                   cx="160"
                   cy="160"
-                  r="104"
+                  r={r2Radius}
                   fill="none"
                   stroke={themeConfig.handMin}
-                  strokeWidth="7"
+                  strokeWidth="6"
                   strokeLinecap="round"
                   strokeDasharray={r2Circumference}
                   strokeDashoffset={r2Offset}
                   transform="rotate(-90 160 160)"
                   className="transition-all duration-300"
-                  style={{ filter: `drop-shadow(0 0 6px ${themeConfig.handMin})` }}
+                  style={{ filter: `drop-shadow(0 0 5px ${themeConfig.handMin})` }}
                 />
-                <circle cx={r2TipX} cy={r2TipY} r="4" fill="#ffffff" stroke={themeConfig.handMin} strokeWidth="2" />
+                <circle cx={r2TipX} cy={r2TipY} r="3.75" fill="#ffffff" stroke={themeConfig.handMin} strokeWidth="1.75" />
 
                 {/* Seconds Ring */}
                 {showSeconds && (
@@ -2288,58 +2328,64 @@ export const DigitalClock: React.FC = () => {
                     <circle
                       cx="160"
                       cy="160"
-                      r="78"
+                      r={r3Radius}
                       fill="none"
                       stroke={themeConfig.handSec}
-                      strokeWidth="6"
+                      strokeWidth="5.5"
                       strokeLinecap="round"
                       strokeDasharray={r3Circumference}
                       strokeDashoffset={r3Offset}
                       transform="rotate(-90 160 160)"
                       className="transition-all duration-300"
-                      style={{ filter: `drop-shadow(0 0 6px ${themeConfig.handSec})` }}
+                      style={{ filter: `drop-shadow(0 0 5px ${themeConfig.handSec})` }}
                     />
-                    <circle cx={r3TipX} cy={r3TipY} r="3.5" fill="#ffffff" stroke={themeConfig.handSec} strokeWidth="1.5" />
+                    <circle cx={r3TipX} cy={r3TipY} r="3.25" fill="#ffffff" stroke={themeConfig.handSec} strokeWidth="1.5" />
                   </>
                 )}
               </svg>
 
-              {/* Center Digital Display Inside Radial Rings */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
-                <div className={`font-black ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+              {/* Center Digital Display Strictly Bounded Inside Inner Circle */}
+              <div className="absolute inset-[19%] rounded-full flex flex-col items-center justify-center pointer-events-none select-none px-2">
+                <div className={`font-black leading-none tracking-tight whitespace-nowrap ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
-                    ? 'text-[clamp(2.5rem,min(11vw,14vh),7rem)]'
-                    : 'text-2xl sm:text-3xl md:text-4xl'
+                    ? isWideFont
+                      ? 'text-[clamp(1.35rem,min(6.2vh,7.2vw),3.85rem)]'
+                      : 'text-[clamp(1.65rem,min(7.8vh,9vw),4.85rem)]'
+                    : isWideFont
+                      ? 'text-xl sm:text-2xl md:text-3xl'
+                      : 'text-2xl sm:text-3xl md:text-[2.5rem]'
                 }`}>
                   {hoursStr}:{minutesStr}
                 </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
+                <div className={`flex items-center justify-center gap-1.5 ${isFullscreen ? 'mt-2 sm:mt-2.5' : 'mt-1.5'}`}>
                   {showSeconds && (
-                    <span className={`font-mono font-bold ${themeConfig.accent} ${
-                      isFullscreen ? 'text-[clamp(1.2rem,min(3.5vw,4.5vh),2.5rem)]' : 'text-xs sm:text-sm'
+                    <span className={`font-mono font-bold leading-none ${themeConfig.accent} ${
+                      isFullscreen ? 'text-[clamp(0.85rem,min(2.4vh,2.8vw),1.6rem)]' : 'text-xs sm:text-sm'
                     }`}>
                       :{secondsStr}
                     </span>
                   )}
                   {!is24Hour && (
-                    <span className={`font-bold uppercase ${themeConfig.accent} ${
-                      isFullscreen ? 'text-[clamp(1rem,min(2.5vw,3.5vh),2rem)]' : 'text-[10px] sm:text-xs'
+                    <span className={`font-extrabold uppercase tracking-wider rounded-md border leading-none ${themeConfig.badgeBg} ${
+                      isFullscreen
+                        ? 'px-2 py-0.5 text-[clamp(0.65rem,min(1.6vh,2vw),1.05rem)]'
+                        : 'px-1.5 py-0.5 text-[10px] sm:text-xs'
                     }`}>
                       {ampm}
                     </span>
                   )}
                 </div>
-                <div className={`font-mono tracking-wider opacity-70 ${themeConfig.subText || 'text-slate-400'} ${
-                  isFullscreen ? 'text-xs sm:text-base md:text-lg mt-1' : 'text-[10px] mt-1'
+                <div className={`font-mono font-semibold uppercase tracking-widest opacity-75 leading-none ${themeConfig.subText || 'text-slate-400'} ${
+                  isFullscreen ? 'text-[clamp(0.6rem,min(1.4vh,1.7vw),0.95rem)] mt-1.5 sm:mt-2' : 'text-[10px] mt-1'
                 }`}>
-                  {Math.round(secProgress * 100)}%
+                  DAY {dayProgress}%
                 </div>
               </div>
             </div>
 
             {/* Radial Legend Badges */}
             <div className={`flex flex-wrap items-center justify-center font-semibold ${
-              isFullscreen ? 'text-sm sm:text-base gap-6 pt-3' : 'text-xs gap-3'
+              isFullscreen ? 'text-xs sm:text-sm md:text-base gap-5 sm:gap-6 pt-2' : 'text-xs gap-3'
             }`}>
               <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeConfig.handHr }} />
@@ -2359,7 +2405,7 @@ export const DigitalClock: React.FC = () => {
 
             {showDate && (
               <p className={`font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'} ${
-                isFullscreen ? 'text-base sm:text-xl pt-2' : 'text-xs sm:text-sm'
+                isFullscreen ? 'text-sm sm:text-lg pt-1' : 'text-xs sm:text-sm'
               }`}>
                 {dateStr}
               </p>
@@ -2369,8 +2415,8 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode: Typographic Word Clock */}
         {mode === 'words' && (
-          <div className={`relative z-10 flex flex-col items-center justify-center my-auto select-none ${
-            isFullscreen ? 'max-w-5xl px-6 py-12 space-y-8' : 'max-w-2xl px-4 py-6 space-y-4'
+          <div className={`relative z-10 flex flex-col items-center justify-center my-auto select-none w-full ${
+            isFullscreen ? 'max-w-7xl px-4 sm:px-8 py-8 space-y-5 sm:space-y-6' : 'max-w-3xl px-4 py-6 space-y-4'
           }`}>
             <span className={`font-bold uppercase tracking-widest border ${themeConfig.badgeBg} ${
               isFullscreen ? 'px-5 py-2 text-sm sm:text-base rounded-full' : 'px-3 py-1 text-xs rounded-full'
@@ -2380,22 +2426,26 @@ export const DigitalClock: React.FC = () => {
 
             {/* Conversational Phrase */}
             <h3 className={`font-black uppercase tracking-tight ${themeConfig.accent} ${
-              isFullscreen ? 'text-[clamp(1.8rem,min(6vw,7.5vh),5rem)]' : 'text-2xl sm:text-4xl md:text-5xl'
+              isFullscreen ? 'text-[clamp(1.6rem,min(5vw,7vh),4.25rem)]' : 'text-2xl sm:text-4xl md:text-5xl'
             }`}>
               {wordClockData.phrase}
             </h3>
 
             {/* Hero Target Hour */}
             <h1
-              className={`font-black tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+              className={`font-black leading-none flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 max-w-full ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                 isFullscreen
-                  ? 'text-[clamp(4.2rem,min(14vw,19vh),13rem)]'
-                  : 'text-6xl sm:text-8xl md:text-9xl'
+                  ? isWideFont
+                    ? 'text-[clamp(2.5rem,min(8.5vw,14vh),8.5rem)]'
+                    : 'text-[clamp(3.2rem,min(11vw,16vh),10.5rem)]'
+                  : isWideFont
+                    ? 'text-4xl sm:text-6xl md:text-7xl'
+                    : 'text-5xl sm:text-7xl md:text-8xl'
               }`}
             >
-              {wordClockData.targetHour}
+              <span>{wordClockData.targetHour}</span>
               {wordClockData.isOclock && (
-                <span className={`opacity-80 ml-3 ${isFullscreen ? 'text-[clamp(2.5rem,min(8vw,11vh),7.5rem)]' : 'text-4xl sm:text-6xl'}`}>
+                <span className={`opacity-80 ${isFullscreen ? 'text-[clamp(1.8rem,min(5.5vw,9vh),5.5rem)]' : 'text-2xl sm:text-4xl md:text-5xl'}`}>
                   O&apos;CLOCK
                 </span>
               )}
@@ -2403,13 +2453,13 @@ export const DigitalClock: React.FC = () => {
 
             {/* Natural Period */}
             <p className={`font-bold uppercase tracking-widest ${themeConfig.subText || 'text-slate-400'} ${
-              isFullscreen ? 'text-[clamp(1.1rem,min(3.5vw,5vh),3.25rem)]' : 'text-base sm:text-2xl'
+              isFullscreen ? 'text-[clamp(1rem,min(3vw,4.5vh),2.75rem)]' : 'text-base sm:text-2xl'
             }`}>
               {wordClockData.period}
             </p>
 
             {/* Bottom Digital Verification Pill */}
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
               <span className={`rounded-xl font-mono font-bold border ${themeConfig.border} ${
                 themeConfig.isLight ? 'bg-slate-200/80 text-slate-800' : 'bg-white/10 text-slate-200'
               } ${isFullscreen ? 'px-4 py-2 text-sm sm:text-lg' : 'px-3 py-1 text-xs sm:text-sm'}`}>
@@ -2429,28 +2479,32 @@ export const DigitalClock: React.FC = () => {
         {/* Mode: Executive Desk Station Calendar Dashboard */}
         {mode === 'calendar' && (
           <div className={`relative z-10 grid grid-cols-1 lg:grid-cols-12 items-center justify-center my-auto w-full select-none ${
-            isFullscreen ? 'max-w-7xl px-6 py-10 gap-10 lg:gap-14' : 'max-w-4xl px-2 py-4 gap-8'
+            isFullscreen ? 'max-w-7xl px-4 sm:px-6 py-8 gap-8 lg:gap-12' : 'max-w-4xl px-2 py-4 gap-8'
           }`}>
             {/* Left / Main Section: Big Time & Day Focus */}
-            <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
-              <div className="flex items-baseline gap-2">
-                <span className={`font-black tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+            <div className="lg:col-span-7 min-w-0 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
+              <div className="flex flex-wrap items-baseline justify-center lg:justify-start gap-x-2 gap-y-1 max-w-full">
+                <span className={`font-black leading-none ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${themeConfig.clockText} ${getAnimationTextClass()} ${
                   isFullscreen
-                    ? 'text-6xl sm:text-8xl md:text-[9rem] lg:text-[11rem]'
-                    : 'text-5xl sm:text-7xl md:text-8xl'
+                    ? isWideFont
+                      ? 'text-[clamp(2.5rem,min(5.2vw,10vh),4.75rem)]'
+                      : 'text-[clamp(3rem,min(6.8vw,12vh),6.5rem)]'
+                    : isWideFont
+                      ? 'text-3xl sm:text-5xl md:text-6xl'
+                      : 'text-4xl sm:text-6xl md:text-7xl'
                 }`}>
                   {hoursStr}:{minutesStr}
                 </span>
                 {showSeconds && (
                   <span className={`font-mono font-bold opacity-80 ${themeConfig.accent} ${
-                    isFullscreen ? 'text-3xl sm:text-5xl md:text-6xl' : 'text-2xl sm:text-4xl'
+                    isFullscreen ? 'text-[clamp(1.25rem,min(2.6vw,5vh),2.75rem)]' : 'text-xl sm:text-2xl md:text-3xl'
                   }`}>
                     :{secondsStr}
                   </span>
                 )}
                 {!is24Hour && (
                   <span className={`font-black uppercase ml-1 ${themeConfig.accent} ${
-                    isFullscreen ? 'text-xl sm:text-3xl' : 'text-base sm:text-xl'
+                    isFullscreen ? 'text-[clamp(1rem,min(1.8vw,3.5vh),1.75rem)]' : 'text-sm sm:text-lg'
                   }`}>
                     {ampm}
                   </span>
@@ -2496,8 +2550,8 @@ export const DigitalClock: React.FC = () => {
             </div>
 
             {/* Right Section: Mini Calendar Matrix */}
-            <div className={`lg:col-span-5 border backdrop-blur-xl ${
-              isFullscreen ? 'p-7 sm:p-9 rounded-[2.5rem]' : 'p-5 rounded-3xl'
+            <div className={`lg:col-span-5 min-w-0 border backdrop-blur-xl ${
+              isFullscreen ? 'p-6 sm:p-8 rounded-[2.5rem]' : 'p-5 rounded-3xl'
             } ${
               themeConfig.isLight
                 ? 'bg-white/90 border-slate-300 shadow-lg text-slate-800'
@@ -2551,14 +2605,14 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 3: Flip Card Clock Mode */}
         {mode === 'flip' && (
-          <div className="relative z-10 space-y-6 my-auto">
-            <div className={`flex items-center justify-center ${isFullscreen ? 'gap-3 sm:gap-6' : 'gap-3 sm:gap-6'}`}>
+          <div className="relative z-10 space-y-6 my-auto max-w-full">
+            <div className={`flex items-center justify-center ${isFullscreen ? 'gap-2 sm:gap-5' : 'gap-2.5 sm:gap-5'}`}>
               {/* Hours Card */}
               <div className="flex flex-col items-center">
                 <div
                   className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden ${
                     isFullscreen
-                      ? 'w-[clamp(6rem,min(18vw,23vh),18rem)] h-[clamp(8rem,min(25vw,31vh),25rem)] rounded-[2.5rem]'
+                      ? 'w-[clamp(5.5rem,min(17vw,22vh),17rem)] h-[clamp(7.5rem,min(24vw,30vh),24rem)] rounded-[2.5rem]'
                       : 'w-24 sm:w-36 md:w-44 h-32 sm:h-44 md:h-52 rounded-3xl'
                   }`}
                 >
@@ -2567,10 +2621,14 @@ export const DigitalClock: React.FC = () => {
                   <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
                   <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
                   <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                  <span className={`font-black ${getFontFamilyClass()} ${getAnimationTextClass()} relative z-15 ${
+                  <span className={`font-black leading-none ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${getAnimationTextClass()} relative z-15 ${
                     isFullscreen
-                      ? 'text-[clamp(4.2rem,min(13vw,17vh),13rem)]'
-                      : 'text-5xl sm:text-7xl md:text-8xl'
+                      ? isWideFont
+                        ? 'text-[clamp(2.4rem,min(8.2vw,10.5vh),8.2rem)]'
+                        : 'text-[clamp(3.1rem,min(10.2vw,13vh),10.2rem)]'
+                      : isWideFont
+                        ? 'text-4xl sm:text-5xl md:text-6xl'
+                        : 'text-5xl sm:text-7xl md:text-8xl'
                   }`}>
                     {hoursStr}
                   </span>
@@ -2583,7 +2641,7 @@ export const DigitalClock: React.FC = () => {
               </div>
 
               <div className={`font-black animate-pulse ${themeConfig.accent} ${
-                isFullscreen ? 'text-[clamp(3.5rem,min(9vw,12vh),8rem)]' : 'text-4xl sm:text-6xl'
+                isFullscreen ? 'text-[clamp(2.5rem,min(7vw,10vh),6.5rem)]' : 'text-4xl sm:text-6xl'
               }`}>:</div>
 
               {/* Minutes Card */}
@@ -2591,7 +2649,7 @@ export const DigitalClock: React.FC = () => {
                 <div
                   className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden ${
                     isFullscreen
-                      ? 'w-[clamp(6rem,min(18vw,23vh),18rem)] h-[clamp(8rem,min(25vw,31vh),25rem)] rounded-[2.5rem]'
+                      ? 'w-[clamp(5.5rem,min(17vw,22vh),17rem)] h-[clamp(7.5rem,min(24vw,30vh),24rem)] rounded-[2.5rem]'
                       : 'w-24 sm:w-36 md:w-44 h-32 sm:h-44 md:h-52 rounded-3xl'
                   }`}
                 >
@@ -2600,10 +2658,14 @@ export const DigitalClock: React.FC = () => {
                   <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
                   <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
                   <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                  <span className={`font-black ${getFontFamilyClass()} ${getAnimationTextClass()} relative z-15 ${
+                  <span className={`font-black leading-none ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${getAnimationTextClass()} relative z-15 ${
                     isFullscreen
-                      ? 'text-[clamp(4.2rem,min(13vw,17vh),13rem)]'
-                      : 'text-5xl sm:text-7xl md:text-8xl'
+                      ? isWideFont
+                        ? 'text-[clamp(2.4rem,min(8.2vw,10.5vh),8.2rem)]'
+                        : 'text-[clamp(3.1rem,min(10.2vw,13vh),10.2rem)]'
+                      : isWideFont
+                        ? 'text-4xl sm:text-5xl md:text-6xl'
+                        : 'text-5xl sm:text-7xl md:text-8xl'
                   }`}>
                     {minutesStr}
                   </span>
@@ -2618,14 +2680,14 @@ export const DigitalClock: React.FC = () => {
               {showSeconds && (
                 <>
                   <div className={`font-black animate-pulse ${themeConfig.accent} ${
-                    isFullscreen ? 'text-[clamp(3.5rem,min(9vw,12vh),8rem)]' : 'text-4xl sm:text-6xl'
+                    isFullscreen ? 'text-[clamp(2.5rem,min(7vw,10vh),6.5rem)]' : 'text-4xl sm:text-6xl'
                   }`}>:</div>
                   {/* Seconds Card */}
                   <div className="flex flex-col items-center">
                     <div
                       className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden opacity-90 ${
                         isFullscreen
-                          ? 'w-[clamp(4.8rem,min(13vw,17vh),13rem)] h-[clamp(6.2rem,min(18vw,23vh),18rem)] rounded-[2rem]'
+                          ? 'w-[clamp(4.4rem,min(12.5vw,16.5vh),12.5rem)] h-[clamp(5.8rem,min(17.5vw,22.5vh),17.5rem)] rounded-[2rem]'
                           : 'w-20 sm:w-28 md:w-36 h-28 sm:h-36 md:h-44 rounded-3xl'
                       }`}
                     >
@@ -2634,10 +2696,14 @@ export const DigitalClock: React.FC = () => {
                       <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
                       <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
                       <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                      <span className={`font-black ${getFontFamilyClass()} ${getAnimationTextClass()} relative z-15 ${
+                      <span className={`font-black leading-none ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${getAnimationTextClass()} relative z-15 ${
                         isFullscreen
-                          ? 'text-[clamp(3.2rem,min(9vw,12vh),9rem)]'
-                          : 'text-4xl sm:text-6xl md:text-7xl'
+                          ? isWideFont
+                            ? 'text-[clamp(1.75rem,min(5.8vw,7.8vh),5.8rem)]'
+                            : 'text-[clamp(2.3rem,min(7.4vw,9.8vh),7.4rem)]'
+                          : isWideFont
+                            ? 'text-3xl sm:text-4xl md:text-5xl'
+                            : 'text-4xl sm:text-6xl md:text-7xl'
                       }`}>
                         {secondsStr}
                       </span>
@@ -2652,9 +2718,9 @@ export const DigitalClock: React.FC = () => {
               )}
 
               {!is24Hour && (
-                <div className="flex flex-col justify-center self-center pl-2">
+                <div className="flex flex-col justify-center self-center pl-1 sm:pl-2">
                   <span className={`font-extrabold uppercase ${themeConfig.accent} ${
-                    isFullscreen ? 'text-3xl sm:text-5xl lg:text-6xl' : 'text-xl sm:text-3xl'
+                    isFullscreen ? 'text-xl sm:text-3xl lg:text-5xl' : 'text-lg sm:text-2xl'
                   }`}>
                     {ampm}
                   </span>
@@ -2674,10 +2740,10 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 4: Razor-Sharp SVG Analog Chronometer */}
         {mode === 'analog' && (
-          <div className="relative z-10 flex flex-col items-center space-y-5 my-auto">
+          <div className="relative z-10 flex flex-col items-center space-y-4 my-auto max-w-full">
             <div className={`relative flex items-center justify-center ${
               isFullscreen
-                ? 'w-[clamp(18rem,min(72vh,82vw),46rem)] h-[clamp(18rem,min(72vh,82vw),46rem)]'
+                ? 'w-[clamp(17rem,min(68vh,78vw),42rem)] h-[clamp(17rem,min(68vh,78vw),42rem)]'
                 : 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96'
             }`}>
               <svg
@@ -2811,19 +2877,19 @@ export const DigitalClock: React.FC = () => {
             </div>
 
             {/* Sub Digital Readout */}
-            <div className={`flex items-center gap-2 font-bold ${getFontFamilyClass()} ${
+            <div className={`flex items-center gap-2 font-bold ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${
               themeConfig.isLight ? 'text-slate-800' : 'text-slate-200'
-            } ${isFullscreen ? 'text-[clamp(1.4rem,min(3.8vw,4.8vh),3.2rem)] pt-3' : 'text-xl'}`}>
+            } ${isFullscreen ? 'text-[clamp(1.25rem,min(3.4vw,4.4vh),2.8rem)] pt-2' : 'text-xl'}`}>
               <span>{hoursStr}:{minutesStr}{showSeconds ? `:${secondsStr}` : ''}</span>
               {!is24Hour && (
-                <span className={`uppercase ${themeConfig.accent} ${isFullscreen ? 'text-lg sm:text-2xl' : 'text-xs'}`}>
+                <span className={`uppercase ${themeConfig.accent} ${isFullscreen ? 'text-base sm:text-xl' : 'text-xs'}`}>
                   {ampm}
                 </span>
               )}
             </div>
 
             {showDate && (
-              <p className={`${themeConfig.subText || 'text-slate-400'} ${isFullscreen ? 'text-[clamp(1rem,min(2.5vw,3vh),2rem)]' : 'text-xs'}`}>
+              <p className={`${themeConfig.subText || 'text-slate-400'} ${isFullscreen ? 'text-[clamp(0.95rem,min(2.2vw,2.8vh),1.75rem)]' : 'text-xs'}`}>
                 {dateStr}
               </p>
             )}
@@ -2832,15 +2898,21 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 5: Pomodoro Focus Timer Mode */}
         {mode === 'pomodoro' && (
-          <div className="relative z-10 space-y-6 my-auto">
+          <div className="relative z-10 space-y-6 my-auto max-w-full px-2">
             <span className={`rounded-full font-bold uppercase tracking-widest border backdrop-blur-md ${themeConfig.badgeBg} ${
               isFullscreen ? 'px-6 py-2 text-sm sm:text-base' : 'px-4 py-1.5 text-xs'
             }`}>
               {pomoMode === 'work' ? 'Focus Session' : 'Short Break'}
             </span>
 
-            <div className={`tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
-              isFullscreen ? 'text-[clamp(5.5rem,min(22vw,32vh),22rem)]' : 'text-7xl sm:text-9xl'
+            <div className={`leading-none ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+              isFullscreen
+                ? isWideFont
+                  ? 'text-[clamp(3.2rem,min(14vw,26vh),15rem)]'
+                  : 'text-[clamp(4.2rem,min(18vw,30vh),20rem)]'
+                : isWideFont
+                  ? 'text-5xl sm:text-7xl md:text-8xl'
+                  : 'text-7xl sm:text-9xl'
             }`}>
               {pomoMinutes}:{pomoSeconds}
             </div>
@@ -2880,12 +2952,26 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 6: Stopwatch & Lap Counter Mode */}
         {mode === 'stopwatch' && (
-          <div className={`relative z-10 space-y-6 my-auto w-full ${isFullscreen ? 'max-w-2xl' : 'max-w-md'}`}>
-            <div className={`tracking-tight leading-none ${getFontFamilyClass()} ${themeConfig.clockText} ${getAnimationTextClass()} ${
-              isFullscreen ? 'text-[clamp(5rem,min(18vw,26vh),18rem)]' : 'text-6xl sm:text-8xl'
+          <div className={`relative z-10 space-y-6 my-auto w-full px-2 ${isFullscreen ? 'max-w-6xl' : 'max-w-3xl'}`}>
+            <div className={`leading-none ${getFontFamilyClass()} ${isWideFont ? 'tracking-tight' : ''} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+              isFullscreen
+                ? isWideFont
+                  ? 'text-[clamp(2.8rem,min(11vw,22vh),12rem)]'
+                  : 'text-[clamp(3.5rem,min(14.5vw,25vh),16rem)]'
+                : isWideFont
+                  ? 'text-4xl sm:text-6xl md:text-7xl'
+                  : 'text-5xl sm:text-7xl md:text-8xl'
             }`}>
               {swMinutes}:{swSeconds}
-              <span className={`opacity-80 ${isFullscreen ? 'text-[clamp(3rem,min(11vw,16vh),10rem)]' : 'text-3xl sm:text-5xl'}`}>
+              <span className={`opacity-80 ${
+                isFullscreen
+                  ? isWideFont
+                    ? 'text-[clamp(1.6rem,min(6.5vw,13vh),7rem)]'
+                    : 'text-[clamp(2rem,min(8.5vw,15vh),9.5rem)]'
+                  : isWideFont
+                    ? 'text-2xl sm:text-3xl md:text-4xl'
+                    : 'text-3xl sm:text-4xl md:text-5xl'
+              }`}>
                 .{swMs}
               </span>
             </div>
@@ -2947,7 +3033,7 @@ export const DigitalClock: React.FC = () => {
             {/* Lap list */}
             {swLaps.length > 0 && (
               <div
-                className={`max-h-36 overflow-y-auto space-y-1 p-2 rounded-2xl ${
+                className={`max-h-36 max-w-md mx-auto overflow-y-auto space-y-1 p-2 rounded-2xl ${
                   themeConfig.isLight
                     ? 'bg-slate-100 border border-slate-300 text-slate-800'
                     : 'bg-black/30 border border-white/10 text-slate-300'

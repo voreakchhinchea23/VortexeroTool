@@ -433,9 +433,12 @@ if (!FONT_FAMILIES.some((f) => f.id === 'jetbrains_mono') || !FONT_FAMILIES.some
 console.log('✓ Test 8: Authentic Carbon syntax themes, backgrounds, shadows, and font presets verified.');
 
 // Test 9: DigitalClock aesthetics, animations, wake lock styles, and zero emojis
+import fs from 'fs';
+import path from 'path';
 import {
   CLOCK_THEMES,
   CLOCK_ANIMATION_FX_OPTIONS,
+  RADIAL_GAUGE_CONFIG,
   getClockThemeStyles,
   ClockTheme,
   AnimationFx,
@@ -537,7 +540,38 @@ for (const opt of CLOCK_ANIMATION_FX_OPTIONS) {
 
 console.log('✓ Test 9: DigitalClock 45 aesthetic themes, dynamic animations FX, and wake lock styles verified.');
 
+// Test 10: Radial Chronograph geometry & fullscreen overflow protection verification
+const innerClearRadius = RADIAL_GAUGE_CONFIG.secondsRadius - RADIAL_GAUGE_CONFIG.secondsStrokeWidth / 2;
+const innerClearDiameterRatio = (2 * innerClearRadius) / RADIAL_GAUGE_CONFIG.viewBoxSize;
+
+if (
+  RADIAL_GAUGE_CONFIG.hoursRadius <= RADIAL_GAUGE_CONFIG.minutesRadius ||
+  RADIAL_GAUGE_CONFIG.minutesRadius <= RADIAL_GAUGE_CONFIG.secondsRadius ||
+  innerClearDiameterRatio < 0.7
+) {
+  console.error(`Radial Chronograph inner clear diameter ratio (${innerClearDiameterRatio.toFixed(3)}) is too small`);
+  process.exit(1);
+}
+
+const safeBoxDiameterRatio = (100 - 2 * RADIAL_GAUGE_CONFIG.centerSafeInsetPercent) / 100;
+if (safeBoxDiameterRatio >= innerClearDiameterRatio) {
+  console.error('Radial center safe box must be strictly smaller than the innermost ring clear diameter');
+  process.exit(1);
+}
+
+const digitalClockSource = fs.readFileSync(
+  path.resolve(process.cwd(), 'src/components/tools/productivity/DigitalClock.tsx'),
+  'utf-8'
+);
+if (emojiRegex.test(digitalClockSource)) {
+  console.error('DigitalClock.tsx source contains prohibited emoji characters');
+  process.exit(1);
+}
+
+console.log('✓ Test 10: Radial Chronograph ring geometry, inner circle clearance (>70% viewBox), and zero-emoji source verified.');
+
 console.log('All automated verification checks PASSED successfully!');
+
 
 
 
