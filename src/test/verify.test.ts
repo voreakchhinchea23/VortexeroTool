@@ -543,19 +543,21 @@ console.log('✓ Test 9: DigitalClock 45 aesthetic themes, dynamic animations FX
 // Test 10: Radial Chronograph geometry & fullscreen overflow protection verification
 const innerClearRadius = RADIAL_GAUGE_CONFIG.secondsRadius - RADIAL_GAUGE_CONFIG.secondsStrokeWidth / 2;
 const innerClearDiameterRatio = (2 * innerClearRadius) / RADIAL_GAUGE_CONFIG.viewBoxSize;
+const innerChamberDiameterRatio = (2 * RADIAL_GAUGE_CONFIG.innerChamberRadius) / RADIAL_GAUGE_CONFIG.viewBoxSize;
 
 if (
   RADIAL_GAUGE_CONFIG.hoursRadius <= RADIAL_GAUGE_CONFIG.minutesRadius ||
   RADIAL_GAUGE_CONFIG.minutesRadius <= RADIAL_GAUGE_CONFIG.secondsRadius ||
-  innerClearDiameterRatio < 0.7
+  RADIAL_GAUGE_CONFIG.secondsRadius <= RADIAL_GAUGE_CONFIG.innerChamberRadius ||
+  innerClearDiameterRatio < 0.72
 ) {
   console.error(`Radial Chronograph inner clear diameter ratio (${innerClearDiameterRatio.toFixed(3)}) is too small`);
   process.exit(1);
 }
 
 const safeBoxDiameterRatio = (100 - 2 * RADIAL_GAUGE_CONFIG.centerSafeInsetPercent) / 100;
-if (safeBoxDiameterRatio >= innerClearDiameterRatio) {
-  console.error('Radial center safe box must be strictly smaller than the innermost ring clear diameter');
+if (safeBoxDiameterRatio >= innerChamberDiameterRatio || innerChamberDiameterRatio >= innerClearDiameterRatio) {
+  console.error('Radial center safe box must be strictly inside both the inner chamber backdrop and the innermost ring');
   process.exit(1);
 }
 
@@ -568,10 +570,19 @@ if (emojiRegex.test(digitalClockSource)) {
   process.exit(1);
 }
 
-console.log('✓ Test 10: Radial Chronograph ring geometry, inner circle clearance (>70% viewBox), and zero-emoji source verified.');
+if (!digitalClockSource.includes('--radial-d') || !digitalClockSource.includes('text-[calc(var(--radial-d)*')) {
+  console.error('DigitalClock.tsx must size Radial Chronograph center typography proportionally to --radial-d');
+  process.exit(1);
+}
+
+if (
+  /getFontFamilyClass\([^)]*\)[^`]*tracking-tight/.test(digitalClockSource) ||
+  /tracking-tight[^`]*getFontFamilyClass\(/.test(digitalClockSource)
+) {
+  console.error('DigitalClock.tsx has conflicting tracking-tight utility alongside getFontFamilyClass()');
+  process.exit(1);
+}
+
+console.log('✓ Test 10: Radial Chronograph ring geometry (>73% clear diameter), proportional --radial-d typography, non-conflicting font utilities, and zero-emoji source verified.');
 
 console.log('All automated verification checks PASSED successfully!');
-
-
-
-
