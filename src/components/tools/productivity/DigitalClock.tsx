@@ -17,8 +17,6 @@ import {
   Type,
   ChevronDown,
   ChevronUp,
-  ChevronLeft,
-  ChevronRight,
   Sun,
   Activity,
   Heart,
@@ -3451,12 +3449,6 @@ export const DigitalClock: React.FC = () => {
   const activeAnalogMeta =
     ANALOG_STYLES.find((s) => s.id === analogStyle) || ANALOG_STYLES[0];
 
-  const cycleAnalogStyle = (delta: number) => {
-    const idx = ANALOG_STYLES.findIndex((s) => s.id === analogStyle);
-    const nextIdx = ((idx === -1 ? 0 : idx) + delta + ANALOG_STYLES.length) % ANALOG_STYLES.length;
-    setAnalogStyle(ANALOG_STYLES[nextIdx].id);
-  };
-
   const handleDailyMix = () => {
     const otherStyles = ANALOG_STYLES.filter((s) => s.id !== analogStyle);
     const otherThemes = themes.filter((t) => t.id !== theme);
@@ -4837,7 +4829,7 @@ export const DigitalClock: React.FC = () => {
           <div className="relative z-10 flex flex-col items-center space-y-3 sm:space-y-4 my-auto max-w-full">
             <div className={`relative flex items-center justify-center ${
               isFullscreen
-                ? 'w-[clamp(14rem,min(54vh,72vw),34rem)] h-[clamp(14rem,min(54vh,72vw),34rem)]'
+                ? 'w-[clamp(16rem,min(74vh,84vw),46rem)] h-[clamp(16rem,min(74vh,84vw),46rem)]'
                 : 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96'
             }`}>
               <AnalogClockDial
@@ -4855,91 +4847,24 @@ export const DigitalClock: React.FC = () => {
               />
             </div>
 
-            {/* Sub Digital Readout (toggleable) */}
-            {showAnalogSubDigital && (
+            {/* Sub Digital Readout (toggleable in standard view; hidden in fullscreen to showcase only the big clock) */}
+            {!isFullscreen && showAnalogSubDigital && (
               <div className={`flex items-center gap-2 ${getFontFamilyClass(true)} ${
                 themeConfig.isLight ? 'text-slate-800' : 'text-slate-200'
-              } ${isFullscreen ? 'text-[clamp(1.2rem,min(3vw,4vh),2.5rem)] pt-1' : 'text-xl'}`}>
+              } text-xl`}>
                 <span>{hoursStr}:{minutesStr}{showSeconds ? `:${secondsStr}` : ''}</span>
                 {!is24Hour && (
-                  <span className={`uppercase ${themeConfig.accent} ${isFullscreen ? 'text-base sm:text-xl' : 'text-xs'}`}>
+                  <span className={`uppercase ${themeConfig.accent} text-xs`}>
                     {ampm}
                   </span>
                 )}
               </div>
             )}
 
-            {showDate && (
-              <p className={`${themeConfig.subText || 'text-slate-400'} ${isFullscreen ? 'text-[clamp(0.85rem,min(1.9vw,2.4vh),1.5rem)]' : 'text-xs'}`}>
+            {!isFullscreen && showDate && (
+              <p className={`${themeConfig.subText || 'text-slate-400'} text-xs`}>
                 {dateStr}
               </p>
-            )}
-
-            {/* Discreet Fullscreen Quick-Switcher */}
-            {isFullscreen && (
-              <div
-                className={`flex flex-wrap items-center justify-center gap-1.5 pt-1 opacity-60 hover:opacity-100 focus-within:opacity-100 transition-opacity ${
-                  themeConfig.isLight ? 'text-slate-700' : 'text-slate-300'
-                }`}
-              >
-                <button
-                  onClick={() => cycleAnalogStyle(-1)}
-                  className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
-                    themeConfig.isLight
-                      ? 'bg-black/5 hover:bg-black/10 border-slate-300/80'
-                      : 'bg-white/5 hover:bg-white/15 border-white/15'
-                  }`}
-                  title="Previous analog dial style"
-                  aria-label="Previous analog dial style"
-                >
-                  <ChevronLeft size={14} />
-                </button>
-                <span
-                  className={`px-3 py-1 rounded-xl border text-xs font-bold tracking-wide flex items-center gap-1.5 ${
-                    themeConfig.isLight
-                      ? 'bg-black/5 border-slate-300/80'
-                      : 'bg-white/5 border-white/15'
-                  }`}
-                >
-                  <AnalogStyleGlyph styleId={analogStyle} />
-                  <span>{activeAnalogMeta.label}</span>
-                </span>
-                <button
-                  onClick={() => cycleAnalogStyle(1)}
-                  className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
-                    themeConfig.isLight
-                      ? 'bg-black/5 hover:bg-black/10 border-slate-300/80'
-                      : 'bg-white/5 hover:bg-white/15 border-white/15'
-                  }`}
-                  title="Next analog dial style"
-                  aria-label="Next analog dial style"
-                >
-                  <ChevronRight size={14} />
-                </button>
-                <button
-                  onClick={() => setAnalogMotion(analogMotion === 'sweep' ? 'tick' : 'sweep')}
-                  className={`px-2.5 py-1 rounded-xl border text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                    themeConfig.isLight
-                      ? 'bg-black/5 hover:bg-black/10 border-slate-300/80'
-                      : 'bg-white/5 hover:bg-white/15 border-white/15'
-                  }`}
-                  title="Toggle sweep or tick second hand movement"
-                >
-                  {analogMotion}
-                </button>
-                <button
-                  onClick={handleDailyMix}
-                  className={`px-2.5 py-1 rounded-xl border text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer ${
-                    themeConfig.isLight
-                      ? 'bg-black/5 hover:bg-black/10 border-slate-300/80'
-                      : 'bg-white/5 hover:bg-white/15 border-white/15'
-                  }`}
-                  title="Daily Mix: randomize dial style and color theme"
-                >
-                  <Shuffle size={11} />
-                  <span>Mix</span>
-                </button>
-              </div>
             )}
           </div>
         )}
