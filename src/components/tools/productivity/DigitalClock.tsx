@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useId, useMemo } from 'react';
 import {
   Clock,
   Maximize,
@@ -17,9 +17,13 @@ import {
   Type,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Sun,
   Activity,
   Heart,
+  Watch,
+  Shuffle,
 } from 'lucide-react';
 
 export type ClockTheme =
@@ -72,6 +76,24 @@ export type ClockTheme =
 export type Mode = 'digital' | 'stacked' | 'radial' | 'words' | 'calendar' | 'flip' | 'analog' | 'pomodoro' | 'stopwatch';
 export type FontStyle = 'mono' | 'sans' | 'serif' | 'digital' | 'condensed' | 'minimal';
 export type ThemeCategory = 'all' | 'animated' | 'cyber' | 'space' | 'warm' | 'minimal';
+export type AnalogStyle =
+  | 'chronometer'
+  | 'bauhaus'
+  | 'diver'
+  | 'roman'
+  | 'pilot'
+  | 'atelier'
+  | 'telemetry'
+  | 'california';
+export type AnalogMotion = 'sweep' | 'tick';
+
+export interface AnalogStyleMeta {
+  id: AnalogStyle;
+  label: string;
+  tagline: string;
+  category: 'Classic' | 'Modern' | 'Sport' | 'Technical';
+}
+
 export type AnimationFx =
   | 'auto'
   | 'heartbeat'
@@ -111,6 +133,57 @@ export interface ThemeStyles {
   isLight?: boolean;
   defaultAnimation?: AnimationFx;
 }
+
+export const ANALOG_STYLES: AnalogStyleMeta[] = [
+  {
+    id: 'chronometer',
+    label: 'Chronometer',
+    tagline: 'Dauphine hands, railway minute track and 3 o clock date aperture',
+    category: 'Classic',
+  },
+  {
+    id: 'bauhaus',
+    label: 'Bauhaus',
+    tagline: 'Swiss modernist architectural batons and iconic lollipop second hand',
+    category: 'Modern',
+  },
+  {
+    id: 'diver',
+    label: 'Diver Pro',
+    tagline: 'Coin-edge 60m sport bezel, lume plots and broad-arrow hands',
+    category: 'Sport',
+  },
+  {
+    id: 'roman',
+    label: 'Roman',
+    tagline: 'Sunburst guilloche medallion, serif Roman numerals and Breguet hands',
+    category: 'Classic',
+  },
+  {
+    id: 'pilot',
+    label: 'Pilot GMT',
+    tagline: 'Flieger orientation triangle and live 6 o clock day-reserve sub-dial',
+    category: 'Technical',
+  },
+  {
+    id: 'atelier',
+    label: 'Atelier',
+    tagline: 'Minimalist gallery dial with sculpted 12 o clock concave orb',
+    category: 'Modern',
+  },
+  {
+    id: 'telemetry',
+    label: 'Telemetry',
+    tagline: 'Bearing azimuth reticle, skeleton hands and trailing radar sweep',
+    category: 'Technical',
+  },
+  {
+    id: 'california',
+    label: 'California',
+    tagline: 'Vintage explorer half-Roman upper and Arabic lower field dial',
+    category: 'Sport',
+  },
+];
 
 const TIMEZONES = [
   { id: 'local', label: 'Local Device Time' },
@@ -1210,6 +1283,1630 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
   );
 };
 
+interface AnalogTimeSnapshot {
+  hours24: number;
+  minutes: number;
+  seconds: number;
+  milliseconds: number;
+  dayNum: number;
+  weekdayShort: string;
+  monthShort: string;
+}
+
+const tzSnapshotFormatterCache = new Map<string, Intl.DateTimeFormat>();
+
+const getTimezoneSnapshot = (nowMs: number, timezone: string): AnalogTimeSnapshot => {
+  const ms = ((nowMs % 1000) + 1000) % 1000;
+  if (timezone && timezone !== 'local') {
+    try {
+      let formatter = tzSnapshotFormatterCache.get(timezone);
+      if (!formatter) {
+        formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: timezone,
+          hourCycle: 'h23',
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          weekday: 'short',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+        tzSnapshotFormatterCache.set(timezone, formatter);
+      }
+      const parts = formatter.formatToParts(nowMs);
+      const map: Record<string, string> = {};
+      for (const p of parts) {
+        if (p.type !== 'literal') {
+          map[p.type] = p.value;
+        }
+      }
+      return {
+        hours24: Number(map.hour ?? 0) % 24,
+        minutes: Number(map.minute ?? 0) % 60,
+        seconds: Number(map.second ?? 0) % 60,
+        milliseconds: ms,
+        dayNum: Number(map.day ?? 1),
+        weekdayShort: (map.weekday || 'DAY').slice(0, 3).toUpperCase(),
+        monthShort: (map.month || 'JAN').slice(0, 3).toUpperCase(),
+      };
+    } catch {
+      // Fall back to local date snapshot below
+    }
+  }
+
+  const d = new Date(nowMs);
+  return {
+    hours24: d.getHours(),
+    minutes: d.getMinutes(),
+    seconds: d.getSeconds(),
+    milliseconds: ms,
+    dayNum: d.getDate(),
+    weekdayShort: d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 3).toUpperCase(),
+    monthShort: d.toLocaleDateString('en-US', { month: 'short' }).slice(0, 3).toUpperCase(),
+  };
+};
+
+const getAnalogSvgFont = (fontStyle: FontStyle, forceSerif = false) => {
+  if (forceSerif || fontStyle === 'serif') {
+    return {
+      fontFamily: "Georgia, 'Times New Roman', serif",
+      fontWeight: fontStyle === 'minimal' ? '500' : '700',
+      scale: 1,
+    };
+  }
+  switch (fontStyle) {
+    case 'mono':
+      return {
+        fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, monospace",
+        fontWeight: '700',
+        scale: 0.92,
+      };
+    case 'digital':
+      return {
+        fontFamily: "'Orbitron', 'JetBrains Mono', monospace",
+        fontWeight: '700',
+        scale: 0.82,
+      };
+    case 'condensed':
+      return {
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        fontWeight: '800',
+        scale: 1.04,
+      };
+    case 'minimal':
+      return {
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        fontWeight: '300',
+        scale: 0.98,
+      };
+    case 'sans':
+    default:
+      return {
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        fontWeight: '700',
+        scale: 1,
+      };
+  }
+};
+
+export const AnalogStyleGlyph: React.FC<{ styleId: AnalogStyle }> = ({ styleId }) => {
+  return (
+    <svg viewBox="0 0 20 20" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
+      <circle cx="10" cy="10" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.85" />
+      {styleId === 'chronometer' && (
+        <>
+          <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" strokeWidth="0.7" strokeOpacity="0.45" />
+          <line x1="10" y1="10" x2="10" y2="5.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="10" y1="10" x2="13.8" y2="10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'bauhaus' && (
+        <>
+          <line x1="10" y1="2.8" x2="10" y2="5.5" stroke="currentColor" strokeWidth="1.8" />
+          <line x1="10" y1="10" x2="14.5" y2="6.5" stroke="currentColor" strokeWidth="1.3" />
+          <circle cx="14.5" cy="6.5" r="1.7" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'diver' && (
+        <>
+          <circle cx="10" cy="10" r="6.8" fill="none" stroke="currentColor" strokeWidth="2.4" strokeOpacity="0.3" />
+          <polygon points="10,4.8 8.3,2.2 11.7,2.2" fill="currentColor" />
+          <line x1="10" y1="10" x2="13.5" y2="12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'roman' && (
+        <>
+          <circle cx="10" cy="10" r="4.5" fill="none" stroke="currentColor" strokeWidth="0.75" strokeOpacity="0.5" />
+          <line x1="10" y1="10" x2="10" y2="5" stroke="currentColor" strokeWidth="1.2" />
+          <circle cx="10" cy="6.8" r="1.4" fill="none" stroke="currentColor" strokeWidth="1" />
+        </>
+      )}
+      {styleId === 'pilot' && (
+        <>
+          <polygon points="10,3.2 8.2,6.2 11.8,6.2" fill="currentColor" />
+          <circle cx="10" cy="13.8" r="2.1" fill="none" stroke="currentColor" strokeWidth="1" />
+          <line x1="10" y1="10" x2="13.8" y2="10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'atelier' && (
+        <>
+          <circle cx="10" cy="4.8" r="1.8" fill="currentColor" />
+          <line x1="10" y1="10" x2="13.2" y2="12.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <line x1="10" y1="10" x2="7.2" y2="7.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'telemetry' && (
+        <>
+          <line x1="3" y1="10" x2="17" y2="10" stroke="currentColor" strokeWidth="0.7" strokeOpacity="0.45" strokeDasharray="1.5 1.5" />
+          <line x1="10" y1="3" x2="10" y2="17" stroke="currentColor" strokeWidth="0.7" strokeOpacity="0.45" strokeDasharray="1.5 1.5" />
+          <path d="M10,10 L10,3.5 A6.5,6.5 0 0 1 15.6,6.8 Z" fill="currentColor" fillOpacity="0.35" />
+        </>
+      )}
+      {styleId === 'california' && (
+        <>
+          <polygon points="10,5.2 8.4,3 11.6,3" fill="currentColor" />
+          <line x1="3.4" y1="10" x2="5.6" y2="10" stroke="currentColor" strokeWidth="1.4" />
+          <line x1="14.4" y1="10" x2="16.6" y2="10" stroke="currentColor" strokeWidth="1.4" />
+          <line x1="10" y1="10" x2="13.2" y2="7.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </>
+      )}
+    </svg>
+  );
+};
+
+interface AnalogDialFaceProps {
+  uid: string;
+  styleId: AnalogStyle;
+  themeConfig: ThemeStyles;
+  fontStyle: FontStyle;
+  is24Hour: boolean;
+  showDate: boolean;
+  dayProgress: number;
+  ampm: string;
+  dayNum: number;
+  weekdayShort: string;
+  monthShort: string;
+  timezoneLabel: string;
+}
+
+const AnalogDialFace: React.FC<AnalogDialFaceProps> = React.memo(({
+  uid,
+  styleId,
+  themeConfig,
+  fontStyle,
+  is24Hour,
+  showDate,
+  dayProgress,
+  ampm,
+  dayNum,
+  weekdayShort,
+  monthShort,
+  timezoneLabel,
+}) => {
+  const isLight = Boolean(themeConfig.isLight);
+  const dialBase = themeConfig.dialBg;
+  const borderAccent = themeConfig.dialBorder;
+  const secColor = themeConfig.handSec;
+  const majorTick = themeConfig.dialTickMajor || (isLight ? '#0f172a' : 'rgba(255,255,255,0.92)');
+  const minorTick = themeConfig.dialTickMinor || (isLight ? 'rgba(15,23,42,0.34)' : 'rgba(255,255,255,0.28)');
+  const numColor = themeConfig.dialNumColor || (isLight ? '#0f172a' : 'rgba(248,250,252,0.92)');
+  const hairline = isLight ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.12)';
+  const subtleInk = isLight ? 'rgba(15,23,42,0.58)' : 'rgba(255,255,255,0.56)';
+  const recessedBg = isLight ? 'rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.42)';
+  const fontMeta = getAnalogSvgFont(fontStyle, styleId === 'roman');
+  const dayStr = dayNum.toString().padStart(2, '0');
+
+  // Diver dark ceramic bezel ink stays bright white for crisp sports bezel readability
+  const diverBezelBg = isLight ? '#1e293b' : '#090d16';
+  const diverBezelInk = '#f8fafc';
+
+  // Pilot 6 o'clock day-reserve sub-dial coordinates (center 150, 204, r=24)
+  const pilotSubCx = 150;
+  const pilotSubCy = 204;
+  const pilotSubR = 17.5;
+  const pilotArcCircumference = 2 * Math.PI * pilotSubR;
+  const pilotArcSpan = pilotArcCircumference * 0.75; // 270 degree gauge
+  const pilotFilledSpan = (Math.min(100, Math.max(0, dayProgress)) / 100) * pilotArcSpan;
+
+  return (
+    <g>
+      {/* Dial Outer Base Circle */}
+      <circle
+        cx="150"
+        cy="150"
+        r="143"
+        fill={dialBase}
+        stroke={borderAccent}
+        strokeWidth={styleId === 'atelier' ? '1.8' : styleId === 'telemetry' ? '1.5' : '3.5'}
+        strokeOpacity={styleId === 'atelier' ? '0.55' : styleId === 'telemetry' ? '0.35' : '0.55'}
+      />
+
+      {/* Recessed Sunburst Depth Sheen Overlay */}
+      <circle cx="150" cy="150" r="141.5" fill={`url(#${uid}-dial-depth)`} pointerEvents="none" />
+
+      {/* STYLE 1: CHRONOMETER */}
+      {styleId === 'chronometer' && (
+        <g>
+          <circle cx="150" cy="150" r="137" fill="none" stroke={hairline} strokeWidth="1" />
+          <circle cx="150" cy="150" r="131" fill="none" stroke={hairline} strokeWidth="0.9" />
+          <circle cx="150" cy="150" r="122" fill="none" stroke={hairline} strokeWidth="0.9" />
+
+          {/* 60 Railway Minute Rungs */}
+          {[...Array(60)].map((_, i) => {
+            const isHour = i % 5 === 0;
+            const isQuad = i % 15 === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1="19"
+                x2="150"
+                y2="28"
+                stroke={isQuad ? borderAccent : isHour ? majorTick : minorTick}
+                strokeWidth={isQuad ? '2.5' : isHour ? '1.9' : '0.95'}
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+
+          {/* Applied Metallic Hour Batons */}
+          {[...Array(12)].map((_, idx) => {
+            if (showDate && idx === 3) return null;
+            if (idx === 0) {
+              return (
+                <g key={idx}>
+                  <rect x="146.8" y="30.5" width="2.4" height="10" rx="0.8" fill={majorTick} />
+                  <rect x="150.8" y="30.5" width="2.4" height="10" rx="0.8" fill={majorTick} />
+                </g>
+              );
+            }
+            return (
+              <rect
+                key={idx}
+                x={idx % 3 === 0 ? '148' : '148.7'}
+                y="30.5"
+                width={idx % 3 === 0 ? '4' : '2.6'}
+                height={idx % 3 === 0 ? '10.5' : '8.5'}
+                rx="1"
+                fill={idx % 3 === 0 ? borderAccent : majorTick}
+                fillOpacity={idx % 3 === 0 ? '0.95' : '0.8'}
+                transform={`rotate(${idx * 30} 150 150)`}
+              />
+            );
+          })}
+
+          {/* Crisp Hour Numerals (3 replaced cleanly by date aperture when showDate) */}
+          {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, idx) => {
+            if (showDate && num === 3) return null;
+            const rad = ((idx * 30 - 90) * Math.PI) / 180;
+            const r = 95;
+            return (
+              <text
+                key={num}
+                x={150 + r * Math.cos(rad)}
+                y={150 + r * Math.sin(rad)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize={13.5 * fontMeta.scale}
+                fontWeight={fontMeta.fontWeight}
+                fontFamily={fontMeta.fontFamily}
+              >
+                {num}
+              </text>
+            );
+          })}
+
+          {/* Framed 3 o'clock Date Window */}
+          {showDate && (
+            <g>
+              <rect
+                x="231"
+                y="141"
+                width="27"
+                height="18"
+                rx="3"
+                fill={recessedBg}
+                stroke={borderAccent}
+                strokeWidth="1.2"
+                strokeOpacity="0.75"
+              />
+              <text
+                x="244.5"
+                y="150"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize="10.5"
+                fontWeight="700"
+                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+              >
+                {dayStr}
+              </text>
+            </g>
+          )}
+
+          {/* Brand & Chronometer Micro Signature */}
+          <text
+            x="150"
+            y="84"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6.4"
+            fontWeight="700"
+            letterSpacing="2.2"
+            fontFamily="system-ui, sans-serif"
+          >
+            CHRONOMETER
+          </text>
+          <text
+            x="150"
+            y="211"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={secColor}
+            fillOpacity="0.88"
+            fontSize="6.5"
+            fontWeight="700"
+            letterSpacing="2"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            {showDate ? `${weekdayShort} • ${monthShort}` : 'AUTOMATIC'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 2: SWISS BAUHAUS */}
+      {styleId === 'bauhaus' && (
+        <g>
+          <circle cx="150" cy="150" r="139" fill="none" stroke={hairline} strokeWidth="0.8" />
+          {[...Array(60)].map((_, i) => {
+            const isHour = i % 5 === 0;
+            const isQuad = i % 15 === 0;
+            const isTwelve = i === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1="14.5"
+                x2="150"
+                y2={isTwelve ? '44' : isQuad ? '42' : isHour ? '37' : '22'}
+                stroke={isTwelve ? secColor : isHour ? majorTick : minorTick}
+                strokeWidth={isTwelve ? '6' : isQuad ? '4.6' : isHour ? '3.4' : '1.2'}
+                strokeLinecap="butt"
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+
+          <text
+            x="150"
+            y="86"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6.8"
+            fontWeight="700"
+            letterSpacing="3"
+            fontFamily="system-ui, sans-serif"
+          >
+            BAUHAUS
+          </text>
+
+          {showDate && (
+            <g>
+              <rect
+                x="126"
+                y="200"
+                width="48"
+                height="16"
+                rx="8"
+                fill={recessedBg}
+                stroke={hairline}
+                strokeWidth="1"
+              />
+              <text
+                x="150"
+                y="208"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize="8"
+                fontWeight="700"
+                letterSpacing="0.8"
+                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+              >
+                {weekdayShort} {dayStr}
+              </text>
+            </g>
+          )}
+        </g>
+      )}
+
+      {/* STYLE 3: DIVER PRO SUBMARINER */}
+      {styleId === 'diver' && (
+        <g>
+          {/* Coin-Edge Outer Notches */}
+          {[...Array(72)].map((_, i) => (
+            <line
+              key={i}
+              x1="150"
+              y1="4.8"
+              x2="150"
+              y2="8"
+              stroke={borderAccent}
+              strokeOpacity="0.45"
+              strokeWidth="1.2"
+              transform={`rotate(${i * 5} 150 150)`}
+            />
+          ))}
+
+          {/* Ceramic Graduated Dive Bezel */}
+          <circle cx="150" cy="150" r="132" fill="none" stroke={diverBezelBg} strokeWidth="22" />
+          <circle cx="150" cy="150" r="132" fill="none" stroke={borderAccent} strokeWidth="22" strokeOpacity="0.1" />
+          <circle cx="150" cy="150" r="143" fill="none" stroke={borderAccent} strokeWidth="1.5" strokeOpacity="0.65" />
+          <circle cx="150" cy="150" r="121" fill="none" stroke={borderAccent} strokeWidth="1.4" strokeOpacity="0.55" />
+
+          {/* 12 o'clock Luminous Bezel Triangle + Pip */}
+          <polygon points="150,27.5 143,10.5 157,10.5" fill={secColor} fillOpacity="0.92" />
+          <circle cx="150" cy="16.5" r="2.2" fill="#ffffff" />
+
+          {/* First-15 Minute Decompression Bezel Hash Ticks + 5-min Markers */}
+          {[...Array(60)].map((_, i) => {
+            if (i === 0) return null;
+            if (i % 10 === 0) return null; // numbers placed cleanly at 10,20,30,40,50
+            if (i < 15) {
+              return (
+                <line
+                  key={i}
+                  x1="150"
+                  y1="11.5"
+                  x2="150"
+                  y2={i % 5 === 0 ? '24.5' : '19'}
+                  stroke={diverBezelInk}
+                  strokeOpacity={i % 5 === 0 ? '0.92' : '0.68'}
+                  strokeWidth={i % 5 === 0 ? '2.2' : '1.1'}
+                  transform={`rotate(${i * 6} 150 150)`}
+                />
+              );
+            }
+            if (i % 5 === 0) {
+              return (
+                <line
+                  key={i}
+                  x1="150"
+                  y1="12.5"
+                  x2="150"
+                  y2="23.5"
+                  stroke={diverBezelInk}
+                  strokeOpacity="0.78"
+                  strokeWidth="2.2"
+                  transform={`rotate(${i * 6} 150 150)`}
+                />
+              );
+            }
+            return null;
+          })}
+
+          {/* Bezel Numerals: 10, 20, 30, 40, 50 */}
+          {[10, 20, 30, 40, 50].map((val) => {
+            const flipBottom = val >= 20 && val <= 40;
+            return (
+              <text
+                key={val}
+                x="150"
+                y="18.2"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={diverBezelInk}
+                fontSize="10.2"
+                fontWeight="800"
+                fontFamily="system-ui, sans-serif"
+                transform={`rotate(${val * 6} 150 150)${flipBottom ? ' rotate(180 150 18.2)' : ''}`}
+              >
+                {val}
+              </text>
+            );
+          })}
+
+          {/* Inner Dial Minute Ticks */}
+          {[...Array(60)].map((_, i) => (
+            <line
+              key={i}
+              x1="150"
+              y1="32"
+              x2="150"
+              y2={i % 5 === 0 ? '38.5' : '36'}
+              stroke={i % 5 === 0 ? majorTick : minorTick}
+              strokeWidth={i % 5 === 0 ? '1.8' : '0.9'}
+              transform={`rotate(${i * 6} 150 150)`}
+            />
+          ))}
+
+          {/* Diver Lume Hour Plots */}
+          {/* 12: Inverted Triangle */}
+          <polygon points="150,62 141.5,43.5 158.5,43.5" fill={majorTick} stroke={borderAccent} strokeWidth="1.2" />
+          {/* 6 & 9: Bold Luminous Rectangles */}
+          <rect x="146.8" y="236" width="6.4" height="17" rx="1.6" fill={majorTick} stroke={borderAccent} strokeWidth="1.2" />
+          <rect x="47" y="146.8" width="17" height="6.4" rx="1.6" fill={majorTick} stroke={borderAccent} strokeWidth="1.2" />
+
+          {/* 3: Cyclops Framed Date Aperture or Rectangle Plot */}
+          {showDate ? (
+            <g>
+              <rect
+                x="227"
+                y="140.5"
+                width="26"
+                height="19"
+                rx="3.5"
+                fill={recessedBg}
+                stroke={borderAccent}
+                strokeWidth="1.5"
+              />
+              <text
+                x="240"
+                y="150"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize="10.8"
+                fontWeight="800"
+                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+              >
+                {dayStr}
+              </text>
+            </g>
+          ) : (
+            <rect x="236" y="146.8" width="17" height="6.4" rx="1.6" fill={majorTick} stroke={borderAccent} strokeWidth="1.2" />
+          )}
+
+          {/* Circular Lume Dots at 1, 2, 4, 5, 7, 8, 10, 11 */}
+          {[1, 2, 4, 5, 7, 8, 10, 11].map((hr) => {
+            const rad = ((hr * 30 - 90) * Math.PI) / 180;
+            const r = 97;
+            return (
+              <circle
+                key={hr}
+                cx={150 + r * Math.cos(rad)}
+                cy={150 + r * Math.sin(rad)}
+                r="5.2"
+                fill={majorTick}
+                stroke={borderAccent}
+                strokeWidth="1.4"
+              />
+            );
+          })}
+
+          <text
+            x="150"
+            y="84"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6.4"
+            fontWeight="800"
+            letterSpacing="2.2"
+            fontFamily="system-ui, sans-serif"
+          >
+            SUBMARINE PRO
+          </text>
+          <text
+            x="150"
+            y="214"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={secColor}
+            fontSize="6.2"
+            fontWeight="700"
+            letterSpacing="1.6"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            200M / 660FT
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 4: HERITAGE ROMAN */}
+      {styleId === 'roman' && (
+        <g>
+          <circle cx="150" cy="150" r="138" fill="none" stroke={borderAccent} strokeWidth="1" strokeOpacity="0.4" />
+          {/* Outer 60 Pearl Dots */}
+          {[...Array(60)].map((_, i) => (
+            <circle
+              key={i}
+              cx="150"
+              cy="17"
+              r={i % 5 === 0 ? '2.1' : '0.95'}
+              fill={i % 5 === 0 ? borderAccent : minorTick}
+              transform={`rotate(${i * 6} 150 150)`}
+            />
+          ))}
+
+          {/* Guilloche Inner Sunburst Medallion */}
+          <g clipPath={`url(#${uid}-roman-clip)`} opacity={isLight ? '0.09' : '0.075'}>
+            {[...Array(36)].map((_, i) => (
+              <line
+                key={i}
+                x1="150"
+                y1="72"
+                x2="150"
+                y2="150"
+                stroke={majorTick}
+                strokeWidth="0.9"
+                transform={`rotate(${i * 10} 150 150)`}
+              />
+            ))}
+          </g>
+          <circle cx="150" cy="150" r="76" fill="none" stroke={hairline} strokeWidth="1" />
+          <circle cx="150" cy="150" r="71" fill="none" stroke={borderAccent} strokeWidth="0.9" strokeOpacity="0.35" />
+
+          {/* Roman Numerals I - XII */}
+          {['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'].map((roman, idx) => {
+            const rad = ((idx * 30 - 90) * Math.PI) / 180;
+            const r = 106;
+            return (
+              <text
+                key={roman}
+                x={150 + r * Math.cos(rad)}
+                y={150 + r * Math.sin(rad)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={idx % 3 === 0 ? borderAccent : numColor}
+                fontSize={13.5 * fontMeta.scale}
+                fontWeight="700"
+                fontFamily={fontMeta.fontFamily}
+                letterSpacing="0.5"
+              >
+                {roman}
+              </text>
+            );
+          })}
+
+          <text
+            x="150"
+            y="102"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6.4"
+            fontWeight="700"
+            letterSpacing="2.4"
+            fontFamily="Georgia, serif"
+          >
+            GENEVE
+          </text>
+
+          {showDate && (
+            <g>
+              <rect
+                x="133"
+                y="196"
+                width="34"
+                height="17"
+                rx="2.5"
+                fill={recessedBg}
+                stroke={borderAccent}
+                strokeWidth="1.1"
+                strokeOpacity="0.65"
+              />
+              <text
+                x="150"
+                y="204.5"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize="9.5"
+                fontWeight="700"
+                fontFamily="Georgia, serif"
+              >
+                {dayStr}
+              </text>
+            </g>
+          )}
+        </g>
+      )}
+
+      {/* STYLE 5: PILOT COCKPIT */}
+      {styleId === 'pilot' && (
+        <g>
+          <circle cx="150" cy="150" r="137" fill="none" stroke={hairline} strokeWidth="1" />
+
+          {/* 60 Bold Instrument Minute Ticks */}
+          {[...Array(60)].map((_, i) => {
+            const isHour = i % 5 === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1="15.5"
+                x2="150"
+                y2={isHour ? '29.5' : '24'}
+                stroke={isHour ? majorTick : minorTick}
+                strokeWidth={isHour ? '3.1' : '1.2'}
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+
+          {/* Flieger 12 o'clock Triangle + Flanking Dots */}
+          <polygon points="150,35.5 141.5,53.5 158.5,53.5" fill={secColor} />
+          <circle cx="137" cy="45" r="2.3" fill={majorTick} />
+          <circle cx="163" cy="45" r="2.3" fill={majorTick} />
+
+          {/* Aviation Numerals 1-11 (6 reserved for Day-Reserve Sub-Dial) */}
+          {[1, 2, 3, 4, 5, 7, 8, 9, 10, 11].map((num) => {
+            const rad = ((num * 30 - 90) * Math.PI) / 180;
+            const r = 101;
+            return (
+              <text
+                key={num}
+                x={150 + r * Math.cos(rad)}
+                y={150 + r * Math.sin(rad)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize={16 * fontMeta.scale}
+                fontWeight={fontMeta.fontWeight}
+                fontFamily={fontMeta.fontFamily}
+              >
+                {num}
+              </text>
+            );
+          })}
+
+          {/* Optional Inner 24-Hour Military Ring when 24-Hour mode active */}
+          {is24Hour && [13, 14, 15, 16, 17, 19, 20, 21, 22, 23].map((num) => {
+            const rad = (((num % 12) * 30 - 90) * Math.PI) / 180;
+            const r = 74;
+            return (
+              <text
+                key={num}
+                x={150 + r * Math.cos(rad)}
+                y={150 + r * Math.sin(rad)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={borderAccent}
+                fillOpacity="0.65"
+                fontSize="7.4"
+                fontWeight="700"
+                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+              >
+                {num}
+              </text>
+            );
+          })}
+
+          {/* Top Instrument Tag */}
+          <text
+            x="150"
+            y="84"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6.4"
+            fontWeight="800"
+            letterSpacing="2.2"
+            fontFamily="system-ui, sans-serif"
+          >
+            FLIEGER GMT
+          </text>
+
+          {/* Cockpit Date Plate when enabled */}
+          {showDate && (
+            <g>
+              <rect
+                x="122"
+                y="94"
+                width="56"
+                height="15"
+                rx="3"
+                fill={recessedBg}
+                stroke={hairline}
+                strokeWidth="1"
+              />
+              <text
+                x="150"
+                y="101.5"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize="7.8"
+                fontWeight="700"
+                letterSpacing="0.8"
+                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+              >
+                {weekdayShort} {monthShort} {dayStr}
+              </text>
+            </g>
+          )}
+
+          {/* Live 6-o'clock Power Reserve / Day Progress Sub-Dial */}
+          <g>
+            <circle cx={pilotSubCx} cy={pilotSubCy} r="24" fill={recessedBg} stroke={hairline} strokeWidth="1.2" />
+            <circle
+              cx={pilotSubCx}
+              cy={pilotSubCy}
+              r={pilotSubR}
+              fill="none"
+              stroke={hairline}
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              strokeDasharray={`${pilotArcSpan} ${pilotArcCircumference}`}
+              transform={`rotate(135 ${pilotSubCx} ${pilotSubCy})`}
+            />
+            <circle
+              cx={pilotSubCx}
+              cy={pilotSubCy}
+              r={pilotSubR}
+              fill="none"
+              stroke={secColor}
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              strokeDasharray={`${pilotFilledSpan} ${pilotArcCircumference}`}
+              transform={`rotate(135 ${pilotSubCx} ${pilotSubCy})`}
+            />
+            <text
+              x={pilotSubCx}
+              y={pilotSubCy + 11.5}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill={subtleInk}
+              fontSize="5.8"
+              fontWeight="800"
+              letterSpacing="0.7"
+              fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            >
+              DAY {dayProgress}%
+            </text>
+          </g>
+        </g>
+      )}
+
+      {/* STYLE 6: ATELIER DOT GALLERY MINIMAL */}
+      {styleId === 'atelier' && (
+        <g>
+          {/* Minimalist Cardinal Hairlines at 3, 6, 9 */}
+          {[90, 180, 270].map((deg) => (
+            <line
+              key={deg}
+              x1="150"
+              y1="14"
+              x2="150"
+              y2="21.5"
+              stroke={minorTick}
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              transform={`rotate(${deg} 150 150)`}
+            />
+          ))}
+
+          {/* Sculpted Signature 12 o'clock Concave Orb */}
+          <circle cx="150" cy="40" r="11.5" fill={`url(#${uid}-atelier-orb)`} stroke={borderAccent} strokeOpacity="0.45" strokeWidth="1" />
+          <circle cx="146.5" cy="36.5" r="3" fill="#ffffff" fillOpacity="0.28" />
+
+          <text
+            x="150"
+            y="228"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6"
+            fontWeight="600"
+            letterSpacing="3.4"
+            fontFamily="system-ui, sans-serif"
+          >
+            ATELIER
+          </text>
+
+          {showDate && (
+            <text
+              x="150"
+              y="210"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill={numColor}
+              fillOpacity="0.68"
+              fontSize="8.5"
+              fontWeight="600"
+              letterSpacing="1.6"
+              fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            >
+              {weekdayShort} • {dayStr}
+            </text>
+          )}
+        </g>
+      )}
+
+      {/* STYLE 7: TELEMETRY HUD */}
+      {styleId === 'telemetry' && (
+        <g>
+          {/* Broken Segmented Tactical Rings */}
+          <circle
+            cx="150"
+            cy="150"
+            r="142.5"
+            fill="none"
+            stroke={borderAccent}
+            strokeWidth="2.5"
+            strokeOpacity="0.5"
+            strokeDasharray="66 18"
+            transform="rotate(-33 150 150)"
+          />
+          <circle cx="150" cy="150" r="134" fill="none" stroke={hairline} strokeWidth="0.9" />
+          <circle cx="150" cy="150" r="95" fill="none" stroke={hairline} strokeWidth="0.9" strokeDasharray="4 5" />
+          <circle cx="150" cy="150" r="56" fill="none" stroke={hairline} strokeWidth="0.8" />
+
+          {/* Crosshair Center Reticle Lines */}
+          <line x1="36" y1="150" x2="132" y2="150" stroke={hairline} strokeWidth="0.9" strokeDasharray="3 4" />
+          <line x1="168" y1="150" x2="264" y2="150" stroke={hairline} strokeWidth="0.9" strokeDasharray="3 4" />
+          <line x1="150" y1="36" x2="150" y2="132" stroke={hairline} strokeWidth="0.9" strokeDasharray="3 4" />
+          <line x1="150" y1="168" x2="150" y2="264" stroke={hairline} strokeWidth="0.9" strokeDasharray="3 4" />
+
+          {/* 90 Precision Degree / Sector Ticks */}
+          {[...Array(60)].map((_, i) => {
+            const isMajor = i % 5 === 0;
+            const isQuad = i % 15 === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1="19"
+                x2="150"
+                y2={isQuad ? '30' : isMajor ? '27' : '23.5'}
+                stroke={isQuad ? secColor : isMajor ? majorTick : minorTick}
+                strokeWidth={isQuad ? '2.2' : isMajor ? '1.5' : '0.8'}
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+
+          {/* Azimuth Cardinal Degree Markers */}
+          {[
+            { label: '000°', x: 150, y: 40 },
+            { label: '090°', x: 256, y: 150 },
+            { label: '180°', x: 150, y: 260 },
+            { label: '270°', x: 44, y: 150 },
+          ].map((item) => (
+            <text
+              key={item.label}
+              x={item.x}
+              y={item.y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill={borderAccent}
+              fontSize="7.4"
+              fontWeight="700"
+              fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            >
+              {item.label}
+            </text>
+          ))}
+
+          {/* Four-Quadrant Telemetry Status Tags */}
+          <text
+            x="96"
+            y="96"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6.8"
+            fontWeight="700"
+            letterSpacing="1"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            {timezoneLabel}
+          </text>
+          <text
+            x="204"
+            y="96"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={secColor}
+            fontSize="6.8"
+            fontWeight="700"
+            letterSpacing="1"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            {is24Hour ? '24H-SYS' : `${ampm || '12H'}`}
+          </text>
+          <text
+            x="96"
+            y="204"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6.8"
+            fontWeight="700"
+            letterSpacing="0.8"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            DAY {dayProgress}%
+          </text>
+          <text
+            x="204"
+            y="204"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={numColor}
+            fillOpacity="0.82"
+            fontSize="6.8"
+            fontWeight="700"
+            letterSpacing="0.8"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            {showDate ? `${monthShort} ${dayStr}` : 'ONLINE'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 8: CALIFORNIA FIELD */}
+      {styleId === 'california' && (
+        <g>
+          <circle cx="150" cy="150" r="137" fill="none" stroke={hairline} strokeWidth="1" />
+          <circle cx="150" cy="150" r="131" fill="none" stroke={hairline} strokeWidth="0.9" />
+          <circle cx="150" cy="150" r="123" fill="none" stroke={hairline} strokeWidth="0.9" />
+
+          {[...Array(60)].map((_, i) => (
+            <line
+              key={i}
+              x1="150"
+              y1="19"
+              x2="150"
+              y2="27"
+              stroke={i % 5 === 0 ? majorTick : minorTick}
+              strokeWidth={i % 5 === 0 ? '2' : '0.9'}
+              transform={`rotate(${i * 6} 150 150)`}
+            />
+          ))}
+
+          {/* Luminous Perimeter Pips at Every Hour */}
+          {[...Array(12)].map((_, idx) => {
+            const rad = ((idx * 30 - 90) * Math.PI) / 180;
+            return (
+              <circle
+                key={idx}
+                cx={150 + 118 * Math.cos(rad)}
+                cy={150 + 118 * Math.sin(rad)}
+                r={idx === 0 ? '2.5' : '1.7'}
+                fill={idx % 3 === 0 ? secColor : borderAccent}
+              />
+            );
+          })}
+
+          {/* 12 o'clock Inverted Explorer Triangle */}
+          <polygon points="150,60 141.5,42 158.5,42" fill={majorTick} stroke={borderAccent} strokeWidth="1.1" />
+
+          {/* Upper Semicircle Roman Numerals: I, II, X, XI */}
+          {[
+            { idx: 1, text: 'I' },
+            { idx: 2, text: 'II' },
+            { idx: 10, text: 'X' },
+            { idx: 11, text: 'XI' },
+          ].map(({ idx, text }) => {
+            const rad = ((idx * 30 - 90) * Math.PI) / 180;
+            const r = 98;
+            return (
+              <text
+                key={text}
+                x={150 + r * Math.cos(rad)}
+                y={150 + r * Math.sin(rad)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize={14.5 * fontMeta.scale}
+                fontWeight={fontMeta.fontWeight}
+                fontFamily={fontMeta.fontFamily}
+              >
+                {text}
+              </text>
+            );
+          })}
+
+          {/* Cardinal 6 and 9 Horizontal / Vertical Explorer Batons */}
+          <rect x="147.2" y="236" width="5.6" height="16" rx="2" fill={majorTick} stroke={borderAccent} strokeWidth="0.9" />
+          <rect x="48" y="147.2" width="16" height="5.6" rx="2" fill={majorTick} stroke={borderAccent} strokeWidth="0.9" />
+
+          {/* Cardinal 3: Vintage Framed Date Aperture or Horizontal Baton */}
+          {showDate ? (
+            <g>
+              <rect
+                x="228"
+                y="141"
+                width="27"
+                height="18"
+                rx="3"
+                fill={recessedBg}
+                stroke={borderAccent}
+                strokeWidth="1.2"
+                strokeOpacity="0.75"
+              />
+              <text
+                x="241.5"
+                y="150"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize="10.2"
+                fontWeight="700"
+                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+              >
+                {dayStr}
+              </text>
+            </g>
+          ) : (
+            <rect x="236" y="147.2" width="16" height="5.6" rx="2" fill={majorTick} stroke={borderAccent} strokeWidth="0.9" />
+          )}
+
+          {/* Lower Semicircle Arabic Numerals: 4, 5, 7, 8 */}
+          {[4, 5, 7, 8].map((num) => {
+            const rad = ((num * 30 - 90) * Math.PI) / 180;
+            const r = 98;
+            return (
+              <text
+                key={num}
+                x={150 + r * Math.cos(rad)}
+                y={150 + r * Math.sin(rad)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={numColor}
+                fontSize={14.5 * fontMeta.scale}
+                fontWeight={fontMeta.fontWeight}
+                fontFamily={fontMeta.fontFamily}
+              >
+                {num}
+              </text>
+            );
+          })}
+
+          <text
+            x="150"
+            y="84"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={subtleInk}
+            fontSize="6.4"
+            fontWeight="700"
+            letterSpacing="2.2"
+            fontFamily="system-ui, sans-serif"
+          >
+            CALIFORNIA FIELD
+          </text>
+          <text
+            x="150"
+            y="212"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={secColor}
+            fillOpacity="0.9"
+            fontSize="6.4"
+            fontWeight="700"
+            letterSpacing="1.8"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            {showDate ? `${weekdayShort} • ${monthShort}` : 'EXPLORER'}
+          </text>
+        </g>
+      )}
+    </g>
+  );
+});
+
+export interface AnalogClockDialProps {
+  styleId: AnalogStyle;
+  motionMode: AnalogMotion;
+  timezone: string;
+  baseTime: Date;
+  is24Hour: boolean;
+  showSeconds: boolean;
+  showDate: boolean;
+  fontStyle: FontStyle;
+  themeConfig: ThemeStyles;
+  dayProgress: number;
+  ampm: string;
+}
+
+export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
+  styleId,
+  motionMode,
+  timezone,
+  baseTime,
+  is24Hour,
+  showSeconds,
+  showDate,
+  fontStyle,
+  themeConfig,
+  dayProgress,
+  ampm,
+}) => {
+  const uid = useId().replace(/:/g, '');
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setPrefersReducedMotion(mq.matches);
+    update();
+    mq.addEventListener?.('change', update);
+    return () => mq.removeEventListener?.('change', update);
+  }, []);
+
+  const isSweeping = motionMode === 'sweep' && showSeconds && !prefersReducedMotion;
+  const [liveSnapshot, setLiveSnapshot] = useState<AnalogTimeSnapshot>(() =>
+    getTimezoneSnapshot(Date.now(), timezone)
+  );
+
+  useEffect(() => {
+    if (!isSweeping) return;
+    let rafId = 0;
+    const loop = () => {
+      setLiveSnapshot(getTimezoneSnapshot(Date.now(), timezone));
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, [isSweeping, timezone]);
+
+  const activeSnapshot: AnalogTimeSnapshot = useMemo(() => {
+    if (isSweeping) return liveSnapshot;
+    return {
+      hours24: baseTime.getHours(),
+      minutes: baseTime.getMinutes(),
+      seconds: baseTime.getSeconds(),
+      milliseconds: 0,
+      dayNum: baseTime.getDate(),
+      weekdayShort: baseTime.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 3).toUpperCase(),
+      monthShort: baseTime.toLocaleDateString('en-US', { month: 'short' }).slice(0, 3).toUpperCase(),
+    };
+  }, [isSweeping, liveSnapshot, baseTime]);
+
+  const secFloat = activeSnapshot.seconds + (isSweeping ? activeSnapshot.milliseconds / 1000 : 0);
+  const secAngle = secFloat * 6;
+  const minAngle = activeSnapshot.minutes * 6 + secFloat * 0.1;
+  const hrAngle = (activeSnapshot.hours24 % 12) * 30 + activeSnapshot.minutes * 0.5 + secFloat * (0.5 / 60);
+
+  const isLight = Boolean(themeConfig.isLight);
+  const dialBase = themeConfig.dialBg;
+  const borderAccent = themeConfig.dialBorder;
+  const secColor = themeConfig.handSec;
+  const minColor = themeConfig.handMin;
+  const hrColor = themeConfig.handHr;
+  const bevelEdge = isLight ? 'rgba(15,23,42,0.2)' : 'rgba(255,255,255,0.22)';
+  const shadowColor = isLight ? 'rgba(15,23,42,0.18)' : 'rgba(0,0,0,0.6)';
+  const handShadowStyle = { filter: `drop-shadow(0 2px 4px ${shadowColor})` };
+
+  const timezoneLabel = useMemo(() => {
+    if (!timezone || timezone === 'local') return 'LOCAL';
+    const segment = timezone.split('/').pop() || timezone;
+    return segment.replace(/_/g, ' ').slice(0, 6).toUpperCase();
+  }, [timezone]);
+
+  // Pilot 6 o'clock day-reserve sub-dial needle angle (-135deg to +135deg)
+  const pilotNeedleAngle = -135 + (Math.min(100, Math.max(0, dayProgress)) / 100) * 270;
+
+  return (
+    <svg viewBox="0 0 300 300" className="w-full h-full drop-shadow-2xl select-none">
+      <defs>
+        <radialGradient id={`${uid}-dial-depth`} cx="50%" cy="46%" r="55%">
+          <stop offset="0%" stopColor={isLight ? '#ffffff' : '#ffffff'} stopOpacity={isLight ? '0.55' : '0.06'} />
+          <stop offset="68%" stopColor={isLight ? '#e2e8f0' : '#000000'} stopOpacity="0" />
+          <stop offset="100%" stopColor={isLight ? '#0f172a' : '#000000'} stopOpacity={isLight ? '0.09' : '0.38'} />
+        </radialGradient>
+
+        <radialGradient id={`${uid}-atelier-orb`} cx="35%" cy="32%" r="65%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
+          <stop offset="35%" stopColor={secColor} stopOpacity="0.95" />
+          <stop offset="100%" stopColor={borderAccent} stopOpacity="0.95" />
+        </radialGradient>
+
+        <linearGradient id={`${uid}-radar-grad`} x1="15%" y1="65%" x2="95%" y2="5%">
+          <stop offset="0%" stopColor={secColor} stopOpacity="0" />
+          <stop offset="55%" stopColor={secColor} stopOpacity="0.09" />
+          <stop offset="100%" stopColor={secColor} stopOpacity="0.28" />
+        </linearGradient>
+
+        <linearGradient id={`${uid}-glass-sheen`} x1="0%" y1="0%" x2="80%" y2="85%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity={isLight ? '0.45' : '0.11'} />
+          <stop offset="42%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+
+        <clipPath id={`${uid}-roman-clip`}>
+          <circle cx="150" cy="150" r="76" />
+        </clipPath>
+      </defs>
+
+      {/* Memoized Static Watch Dial Layers */}
+      <AnalogDialFace
+        uid={uid}
+        styleId={styleId}
+        themeConfig={themeConfig}
+        fontStyle={fontStyle}
+        is24Hour={is24Hour}
+        showDate={showDate}
+        dayProgress={dayProgress}
+        ampm={ampm}
+        dayNum={activeSnapshot.dayNum}
+        weekdayShort={activeSnapshot.weekdayShort}
+        monthShort={activeSnapshot.monthShort}
+        timezoneLabel={timezoneLabel}
+      />
+
+      {/* Telemetry Dynamic Radar Sweep Cone */}
+      {styleId === 'telemetry' && showSeconds && (
+        <g transform={`rotate(${secAngle} 150 150)`} pointerEvents="none">
+          <path
+            d="M 150 150 L 65.7 56.4 A 126 126 0 0 1 150 24 Z"
+            fill={`url(#${uid}-radar-grad)`}
+          />
+        </g>
+      )}
+
+      {/* Pilot Sub-Dial Live Needle */}
+      {styleId === 'pilot' && (
+        <g transform={`rotate(${pilotNeedleAngle} 150 204)`} pointerEvents="none">
+          <line x1="150" y1="208" x2="150" y2="190" stroke={secColor} strokeWidth="1.8" strokeLinecap="round" />
+          <circle cx="150" cy="204" r="2.2" fill={secColor} />
+        </g>
+      )}
+
+      {/* ================= HOUR HAND BY STYLE ================= */}
+      <g transform={`rotate(${hrAngle} 150 150)`} style={handShadowStyle}>
+        {styleId === 'chronometer' && (
+          <>
+            <polygon
+              points="150,162 144.6,146 147.6,76 150,70 152.4,76 155.4,146"
+              fill={hrColor}
+              stroke={bevelEdge}
+              strokeWidth="0.7"
+            />
+            <polygon points="150,162 150,70 152.4,76 155.4,146" fill="#000000" fillOpacity="0.22" />
+            <line x1="150" y1="138" x2="150" y2="83" stroke="#ffffff" strokeOpacity="0.72" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'bauhaus' && (
+          <polygon
+            points="146.3,162 146.3,82 150,75 153.7,82 153.7,162"
+            fill={hrColor}
+            stroke={bevelEdge}
+            strokeWidth="0.7"
+          />
+        )}
+
+        {styleId === 'diver' && (
+          <>
+            <rect x="147.3" y="105" width="5.4" height="55" rx="1.4" fill={hrColor} stroke={bevelEdge} strokeWidth="0.7" />
+            <circle cx="150" cy="97.5" r="8.4" fill={dialBase} stroke={hrColor} strokeWidth="2.8" />
+            <line x1="150" y1="97.5" x2="150" y2="89.5" stroke={hrColor} strokeWidth="1.6" />
+            <line x1="150" y1="97.5" x2="156.9" y2="101.5" stroke={hrColor} strokeWidth="1.6" />
+            <line x1="150" y1="97.5" x2="143.1" y2="101.5" stroke={hrColor} strokeWidth="1.6" />
+            <polygon points="147.2,90 150,74 152.8,90" fill={hrColor} />
+          </>
+        )}
+
+        {styleId === 'roman' && (
+          <>
+            <polygon points="148.2,158 148.8,94 151.2,94 151.8,158" fill={hrColor} />
+            <circle cx="150" cy="161" r="2.6" fill={hrColor} />
+            <circle cx="150" cy="88" r="5.8" fill="none" stroke={hrColor} strokeWidth="2.5" />
+            <polygon points="148.7,82.5 150,67 151.3,82.5" fill={hrColor} />
+          </>
+        )}
+
+        {styleId === 'pilot' && (
+          <>
+            <polygon
+              points="150,162 144.8,144 146.5,84 150,72 153.5,84 155.2,144"
+              fill={hrColor}
+              stroke={bevelEdge}
+              strokeWidth="0.9"
+            />
+            <polygon points="147.8,138 148,87 150,78 152,87 152.2,138" fill="#ffffff" fillOpacity="0.32" />
+          </>
+        )}
+
+        {styleId === 'atelier' && (
+          <polygon
+            points="150,158 147.4,144 148.6,78 150,71 151.4,78 152.6,144"
+            fill={hrColor}
+          />
+        )}
+
+        {styleId === 'telemetry' && (
+          <>
+            <polygon
+              points="146.5,160 144.8,104 150,73 155.2,104 153.5,160"
+              fill={dialBase}
+              fillOpacity="0.35"
+              stroke={hrColor}
+              strokeWidth="2.2"
+              strokeLinejoin="round"
+            />
+            <polygon points="147.8,90 150,73 152.2,90" fill={hrColor} />
+          </>
+        )}
+
+        {styleId === 'california' && (
+          <>
+            <polygon
+              points="148,158 146.2,112 144.4,102 150,72 155.6,102 153.8,112 152,158"
+              fill={hrColor}
+              stroke={bevelEdge}
+              strokeWidth="0.7"
+            />
+            <polygon
+              points="147,108 146.3,102 150,79 153.7,102 153,108"
+              fill="#ffffff"
+              fillOpacity="0.45"
+            />
+          </>
+        )}
+      </g>
+
+      {/* ================= MINUTE HAND BY STYLE ================= */}
+      <g transform={`rotate(${minAngle} 150 150)`} style={handShadowStyle}>
+        {styleId === 'chronometer' && (
+          <>
+            <polygon
+              points="150,166 146.2,146 148.5,43 150,35 151.5,43 153.8,146"
+              fill={minColor}
+              stroke={bevelEdge}
+              strokeWidth="0.7"
+            />
+            <polygon points="150,166 150,35 151.5,43 153.8,146" fill="#000000" fillOpacity="0.2" />
+            <line x1="150" y1="138" x2="150" y2="50" stroke="#ffffff" strokeOpacity="0.75" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'bauhaus' && (
+          <polygon
+            points="147.4,166 147.4,40 150,33 152.6,40 152.6,166"
+            fill={minColor}
+            stroke={bevelEdge}
+            strokeWidth="0.6"
+          />
+        )}
+
+        {styleId === 'diver' && (
+          <>
+            <polygon
+              points="147.5,164 146.8,108 148.4,42 150,35 151.6,42 153.2,108 152.5,164"
+              fill={minColor}
+              stroke={bevelEdge}
+              strokeWidth="0.7"
+            />
+            <line x1="150" y1="132" x2="150" y2="49" stroke="#ffffff" strokeOpacity="0.75" strokeWidth="1.6" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'roman' && (
+          <>
+            <polygon points="148.4,162 149.1,59 150,32 150.9,59 151.6,162" fill={minColor} />
+            <circle cx="150" cy="54" r="3.8" fill="none" stroke={minColor} strokeWidth="2.1" />
+          </>
+        )}
+
+        {styleId === 'pilot' && (
+          <>
+            <polygon
+              points="150,165 146.5,144 147.8,44 150,33 152.2,44 153.5,144"
+              fill={minColor}
+              stroke={bevelEdge}
+              strokeWidth="0.8"
+            />
+            <polygon points="148.8,138 148.8,47 150,39 151.2,47 151.2,138" fill="#ffffff" fillOpacity="0.35" />
+          </>
+        )}
+
+        {styleId === 'atelier' && (
+          <polygon points="150,162 148.2,146 149,38 150,31 151,38 151.8,146" fill={minColor} />
+        )}
+
+        {styleId === 'telemetry' && (
+          <>
+            <polygon
+              points="147.3,164 146.2,63 150,33 153.8,63 152.7,164"
+              fill={dialBase}
+              fillOpacity="0.35"
+              stroke={minColor}
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+            <polygon points="148.2,52 150,33 151.8,52" fill={minColor} />
+          </>
+        )}
+
+        {styleId === 'california' && (
+          <>
+            <rect x="148" y="62" width="4" height="100" rx="1" fill={minColor} stroke={bevelEdge} strokeWidth="0.6" />
+            <polygon points="149,62 150,34 151,62" fill={minColor} />
+          </>
+        )}
+      </g>
+
+      {/* ================= SECOND HAND BY STYLE ================= */}
+      {showSeconds && (
+        <g transform={`rotate(${secAngle} 150 150)`}>
+          {styleId === 'bauhaus' ? (
+            <>
+              <line x1="150" y1="184" x2="150" y2="164" stroke={secColor} strokeWidth="4.5" strokeLinecap="butt" />
+              <line x1="150" y1="164" x2="150" y2="52" stroke={secColor} strokeWidth="2.3" strokeLinecap="round" />
+              <circle
+                cx="150"
+                cy="49"
+                r="8.2"
+                fill={secColor}
+                style={{ filter: `drop-shadow(0 0 6px ${secColor})` }}
+              />
+              <circle cx="150" cy="49" r="3" fill="#ffffff" fillOpacity="0.4" />
+            </>
+          ) : styleId === 'diver' ? (
+            <>
+              <line x1="150" y1="178" x2="150" y2="33" stroke={secColor} strokeWidth="2" strokeLinecap="round" />
+              <circle cx="150" cy="52" r="4" fill="#ffffff" stroke={secColor} strokeWidth="1.8" />
+              <circle cx="150" cy="173" r="3.4" fill={secColor} />
+            </>
+          ) : styleId === 'atelier' ? (
+            <>
+              <line x1="150" y1="166" x2="150" y2="29" stroke={secColor} strokeWidth="1.35" strokeLinecap="round" />
+              <circle cx="150" cy="171" r="3.4" fill="none" stroke={secColor} strokeWidth="1.3" />
+            </>
+          ) : styleId === 'telemetry' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="27" stroke={secColor} strokeWidth="1.6" strokeLinecap="round" />
+              <circle
+                cx="150"
+                cy="33"
+                r="2.6"
+                fill="#ffffff"
+                stroke={secColor}
+                strokeWidth="1.5"
+                style={{ filter: `drop-shadow(0 0 6px ${secColor})` }}
+              />
+            </>
+          ) : styleId === 'roman' ? (
+            <>
+              <line x1="150" y1="168" x2="150" y2="31" stroke={secColor} strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="150" cy="172.5" r="3.4" fill="none" stroke={secColor} strokeWidth="1.4" />
+            </>
+          ) : (
+            <>
+              <line x1="150" y1="150" x2="150" y2="177" stroke={secColor} strokeWidth="2.6" strokeLinecap="round" />
+              <polygon points="150,164 153.6,172 150,181 146.4,172" fill={secColor} />
+              <line
+                x1="150"
+                y1="150"
+                x2="150"
+                y2="30"
+                stroke={secColor}
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                style={{ filter: `drop-shadow(0 0 5px ${secColor})` }}
+              />
+            </>
+          )}
+        </g>
+      )}
+
+      {/* Center Pivot Cap */}
+      <circle
+        cx="150"
+        cy="150"
+        r={styleId === 'atelier' ? '5.2' : '6.8'}
+        fill={secColor}
+        stroke={isLight ? '#ffffff' : '#020617'}
+        strokeWidth="1.8"
+      />
+      <circle cx="150" cy="150" r="2.2" fill={isLight ? '#0f172a' : '#ffffff'} />
+
+      {/* Subtle Curved Sapphire Crystal Specular Sheen */}
+      <circle cx="150" cy="150" r="141" fill={`url(#${uid}-glass-sheen)`} pointerEvents="none" />
+    </svg>
+  );
+};
+
 export const DigitalClock: React.FC = () => {
   const [mode, setMode] = useState<Mode>(() => {
     return (localStorage.getItem('vortexero_clock_mode') as Mode) || 'digital';
@@ -1256,6 +2953,17 @@ export const DigitalClock: React.FC = () => {
   });
   const [animationFx, setAnimationFx] = useState<AnimationFx>(() => {
     return (localStorage.getItem('vortexero_clock_anim_fx') as AnimationFx) || 'auto';
+  });
+  const [analogStyle, setAnalogStyle] = useState<AnalogStyle>(() => {
+    const saved = localStorage.getItem('vortexero_clock_analog_style') as AnalogStyle | null;
+    return saved && ANALOG_STYLES.some((s) => s.id === saved) ? saved : 'chronometer';
+  });
+  const [analogMotion, setAnalogMotion] = useState<AnalogMotion>(() => {
+    const saved = localStorage.getItem('vortexero_clock_analog_motion');
+    return saved === 'tick' ? 'tick' : 'sweep';
+  });
+  const [showAnalogSubDigital, setShowAnalogSubDigital] = useState<boolean>(() => {
+    return localStorage.getItem('vortexero_clock_analog_subdigital') !== 'false';
   });
   const [wakeLockActive, setWakeLockActive] = useState<boolean>(false);
   const wakeLockSentinelRef = useRef<any>(null);
@@ -1332,6 +3040,18 @@ export const DigitalClock: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('vortexero_clock_anim_fx', animationFx);
   }, [animationFx]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_analog_style', analogStyle);
+  }, [analogStyle]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_analog_motion', analogMotion);
+  }, [analogMotion]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_analog_subdigital', String(showAnalogSubDigital));
+  }, [showAnalogSubDigital]);
 
   // Screen Wake Lock API implementation with graceful fallback
   const requestWakeLock = async () => {
@@ -1665,14 +3385,9 @@ export const DigitalClock: React.FC = () => {
   const swSeconds = Math.floor((swTime % 60000) / 1000).toString().padStart(2, '0');
   const swMs = Math.floor((swTime % 1000) / 10).toString().padStart(2, '0');
 
-  // Exact Analog Angles
+  // Base Seconds / Minutes values used by Radial Gauge & Dial progress
   const secValue = displayTime.getSeconds();
   const minValue = displayTime.getMinutes();
-  const hrValue = displayTime.getHours() % 12;
-
-  const secAngle = secValue * 6;
-  const minAngle = minValue * 6 + secValue * 0.1;
-  const hrAngle = hrValue * 30 + minValue * 0.5;
 
   // Font styling class helper (returns non-conflicting family, weight, and tracking classes)
   const getFontFamilyClass = (compact = false) => {
@@ -1698,8 +3413,6 @@ export const DigitalClock: React.FC = () => {
   };
 
   const themeConfig = getClockThemeStyles(theme);
-
-
 
   const effectiveAnimation: AnimationFx =
     animationFx === 'auto'
@@ -1735,7 +3448,27 @@ export const DigitalClock: React.FC = () => {
 
   const themes = CLOCK_THEMES;
 
+  const activeAnalogMeta =
+    ANALOG_STYLES.find((s) => s.id === analogStyle) || ANALOG_STYLES[0];
 
+  const cycleAnalogStyle = (delta: number) => {
+    const idx = ANALOG_STYLES.findIndex((s) => s.id === analogStyle);
+    const nextIdx = ((idx === -1 ? 0 : idx) + delta + ANALOG_STYLES.length) % ANALOG_STYLES.length;
+    setAnalogStyle(ANALOG_STYLES[nextIdx].id);
+  };
+
+  const handleDailyMix = () => {
+    const otherStyles = ANALOG_STYLES.filter((s) => s.id !== analogStyle);
+    const otherThemes = themes.filter((t) => t.id !== theme);
+    if (otherStyles.length > 0) {
+      const nextStyle = otherStyles[Math.floor(Math.random() * otherStyles.length)];
+      setAnalogStyle(nextStyle.id);
+    }
+    if (otherThemes.length > 0) {
+      const nextTheme = otherThemes[Math.floor(Math.random() * otherThemes.length)];
+      setTheme(nextTheme.id);
+    }
+  };
 
   const filteredThemes = themeCategory === 'all'
     ? themes
@@ -2265,6 +3998,100 @@ export const DigitalClock: React.FC = () => {
         </div>
       ) : null}
 
+      {/* Analog Dial Style Studio Bar (shown only when mode === 'analog') */}
+      {mode === 'analog' && (
+        <div
+          data-testid="analog-style-bar"
+          className="p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl shadow-xs flex flex-col gap-2.5"
+        >
+          {/* Header Row: Title & Active Horological Tagline + Movement & Mix Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
+                <Watch size={13} className="text-brand-500" />
+                Dial Style
+              </span>
+              <span className="hidden md:inline-block text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate border-l border-slate-200 dark:border-slate-700 pl-2">
+                {activeAnalogMeta.tagline}
+              </span>
+            </div>
+
+            {/* Movement Mode, Sub-Readout & Daily Shuffle */}
+            <div className="flex flex-wrap items-center gap-2 shrink-0 ml-auto">
+              <div
+                className="flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-bold"
+                title="Second hand movement: smooth 60fps mechanical sweep or 1Hz quartz tick"
+              >
+                <button
+                  onClick={() => setAnalogMotion('sweep')}
+                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                    analogMotion === 'sweep'
+                      ? 'bg-white dark:bg-slate-700 shadow-xs text-brand-600 dark:text-brand-300'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                  }`}
+                >
+                  Sweep
+                </button>
+                <button
+                  onClick={() => setAnalogMotion('tick')}
+                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                    analogMotion === 'tick'
+                      ? 'bg-white dark:bg-slate-700 shadow-xs text-brand-600 dark:text-brand-300'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                  }`}
+                >
+                  Tick
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowAnalogSubDigital(!showAnalogSubDigital)}
+                className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-bold transition-colors cursor-pointer whitespace-nowrap ${
+                  showAnalogSubDigital
+                    ? 'bg-brand-50 dark:bg-brand-950/60 border-brand-500 text-brand-600 dark:text-brand-300'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+                }`}
+                title="Show or hide digital readout underneath the analog dial"
+              >
+                Sub-Digital
+              </button>
+
+              <button
+                onClick={handleDailyMix}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 whitespace-nowrap shadow-xs"
+                title="Shuffle a fresh analog dial style and color theme combo"
+              >
+                <Shuffle size={12} />
+                <span>Daily Mix</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 8 Selectable Analog Watch Faces */}
+          <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
+            {ANALOG_STYLES.map((st) => {
+              const isActive = analogStyle === st.id;
+              return (
+                <button
+                  key={st.id}
+                  onClick={() => setAnalogStyle(st.id)}
+                  title={`${st.label} - ${st.tagline}`}
+                  data-analog-style={st.id}
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                    isActive
+                      ? 'bg-brand-600 text-white border-brand-500 shadow-sm shadow-brand-500/25'
+                      : 'bg-slate-100/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <AnalogStyleGlyph styleId={st.id} />
+                  <span>{st.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Aesthetic Theme Swatches (Collapsible Section) */}
       <div className="p-4 rounded-3xl bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl transition-all duration-300">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
@@ -2378,7 +4205,7 @@ export const DigitalClock: React.FC = () => {
         ref={containerRef}
         className={`${themeConfig.bg} ${themeConfig.border} border flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 select-none ${
           isFullscreen
-            ? 'fixed inset-0 z-50 rounded-none h-screen h-[100dvh] min-h-0 w-screen w-full border-none px-4 sm:px-8 md:px-12 pt-16 sm:pt-20 pb-6 sm:pb-10 overflow-y-auto overflow-x-hidden no-scrollbar'
+            ? 'fixed inset-0 z-[100] !mt-0 rounded-none h-screen h-[100dvh] min-h-0 w-screen w-full border-none px-4 sm:px-8 md:px-12 pt-16 sm:pt-20 pb-6 sm:pb-10 overflow-y-auto overflow-x-hidden no-scrollbar'
             : 'relative rounded-3xl p-6 sm:p-14 min-h-[460px] overflow-hidden'
         }`}
       >
@@ -3005,160 +4832,114 @@ export const DigitalClock: React.FC = () => {
           </div>
         )}
 
-        {/* Mode 4: Razor-Sharp SVG Analog Chronometer */}
+        {/* Mode 4: Razor-Sharp Multi-Style SVG Analog Horology Studio */}
         {mode === 'analog' && (
           <div className="relative z-10 flex flex-col items-center space-y-3 sm:space-y-4 my-auto max-w-full">
             <div className={`relative flex items-center justify-center ${
               isFullscreen
-                ? 'w-[clamp(14.5rem,min(58vh,72vw),36rem)] h-[clamp(14.5rem,min(58vh,72vw),36rem)]'
+                ? 'w-[clamp(14rem,min(54vh,72vw),34rem)] h-[clamp(14rem,min(54vh,72vw),34rem)]'
                 : 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96'
             }`}>
-              <svg
-                viewBox="0 0 300 300"
-                className="w-full h-full drop-shadow-2xl select-none"
-              >
-                {/* Watch Outer Ring & Dial Face */}
-                <circle
-                  cx="150"
-                  cy="150"
-                  r="142"
-                  fill={themeConfig.dialBg}
-                  stroke={themeConfig.dialBorder}
-                  strokeWidth="3.5"
-                  strokeOpacity="0.4"
-                />
-                <circle
-                  cx="150"
-                  cy="150"
-                  r="134"
-                  fill="none"
-                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'}
-                  strokeWidth="1.5"
-                />
+              <AnalogClockDial
+                styleId={analogStyle}
+                motionMode={analogMotion}
+                timezone={selectedTimezone}
+                baseTime={displayTime}
+                is24Hour={is24Hour}
+                showSeconds={showSeconds}
+                showDate={showDate}
+                fontStyle={fontStyle}
+                themeConfig={themeConfig}
+                dayProgress={dayProgress}
+                ampm={ampm}
+              />
+            </div>
 
-                {/* 60 Minute / Second Tick Marks */}
-                {[...Array(60)].map((_, i) => {
-                  const isHourTick = i % 5 === 0;
-                  const isMajorTick = i % 15 === 0;
-                  return (
-                    <line
-                      key={i}
-                      x1="150"
-                      y1={isMajorTick ? '18' : isHourTick ? '22' : '26'}
-                      x2="150"
-                      y2={isMajorTick ? '36' : isHourTick ? '32' : '29'}
-                      stroke={
-                        isMajorTick
-                          ? (themeConfig.dialTickMajor || '#ffffff')
-                          : isHourTick
-                            ? (themeConfig.dialTickMinor || 'rgba(255,255,255,0.7)')
-                            : (themeConfig.dialTickMinor ? themeConfig.dialTickMinor : 'rgba(255,255,255,0.2)')
-                      }
-                      strokeWidth={isMajorTick ? '3.5' : isHourTick ? '2' : '1'}
-                      strokeLinecap="round"
-                      transform={`rotate(${i * 6} 150 150)`}
-                    />
-                  );
-                })}
-
-                {/* 12 Hour Numbers */}
-                {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, idx) => {
-                  const angleRad = ((idx * 30 - 90) * Math.PI) / 180;
-                  const radius = 104;
-                  const x = 150 + radius * Math.cos(angleRad);
-                  const y = 150 + radius * Math.sin(angleRad) + 5;
-                  return (
-                    <text
-                      key={num}
-                      x={x}
-                      y={y}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill={themeConfig.dialNumColor || (themeConfig.isLight ? '#0f172a' : 'rgba(255,255,255,0.85)')}
-                      fontSize="14"
-                      fontWeight="bold"
-                      fontFamily="sans-serif"
-                    >
-                      {num}
-                    </text>
-                  );
-                })}
-
-                {/* Hour Hand */}
-                <line
-                  x1="150"
-                  y1="150"
-                  x2="150"
-                  y2="76"
-                  stroke={themeConfig.handHr}
-                  strokeWidth="6"
-                  strokeLinecap="round"
-                  transform={`rotate(${hrAngle} 150 150)`}
-                  style={{ filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.5))' }}
-                />
-
-                {/* Minute Hand */}
-                <line
-                  x1="150"
-                  y1="150"
-                  x2="150"
-                  y2="46"
-                  stroke={themeConfig.handMin}
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  transform={`rotate(${minAngle} 150 150)`}
-                  style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}
-                />
-
-                {/* Second Hand with Counterweight */}
-                {showSeconds && (
-                  <g transform={`rotate(${secAngle} 150 150)`}>
-                    {/* Tail counterweight */}
-                    <line
-                      x1="150"
-                      y1="150"
-                      x2="150"
-                      y2="175"
-                      stroke={themeConfig.handSec}
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    />
-                    {/* Main needle */}
-                    <line
-                      x1="150"
-                      y1="150"
-                      x2="150"
-                      y2="34"
-                      stroke={themeConfig.handSec}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      style={{ filter: `drop-shadow(0 0 6px ${themeConfig.handSec})` }}
-                    />
-                  </g>
+            {/* Sub Digital Readout (toggleable) */}
+            {showAnalogSubDigital && (
+              <div className={`flex items-center gap-2 ${getFontFamilyClass(true)} ${
+                themeConfig.isLight ? 'text-slate-800' : 'text-slate-200'
+              } ${isFullscreen ? 'text-[clamp(1.2rem,min(3vw,4vh),2.5rem)] pt-1' : 'text-xl'}`}>
+                <span>{hoursStr}:{minutesStr}{showSeconds ? `:${secondsStr}` : ''}</span>
+                {!is24Hour && (
+                  <span className={`uppercase ${themeConfig.accent} ${isFullscreen ? 'text-base sm:text-xl' : 'text-xs'}`}>
+                    {ampm}
+                  </span>
                 )}
-
-                {/* Center Pivot Pin */}
-                <circle cx="150" cy="150" r="7" fill={themeConfig.handSec} stroke={themeConfig.isLight ? '#fff' : '#000'} strokeWidth="2" />
-                <circle cx="150" cy="150" r="2.5" fill={themeConfig.isLight ? '#0f172a' : '#ffffff'} />
-              </svg>
-            </div>
-
-            {/* Sub Digital Readout */}
-            <div className={`flex items-center gap-2 ${getFontFamilyClass(true)} ${
-              themeConfig.isLight ? 'text-slate-800' : 'text-slate-200'
-            } ${isFullscreen ? 'text-[clamp(1.2rem,min(3.2vw,4.2vh),2.6rem)] pt-1' : 'text-xl'}`}>
-              <span>{hoursStr}:{minutesStr}{showSeconds ? `:${secondsStr}` : ''}</span>
-              {!is24Hour && (
-                <span className={`uppercase ${themeConfig.accent} ${isFullscreen ? 'text-base sm:text-xl' : 'text-xs'}`}>
-                  {ampm}
-                </span>
-              )}
-            </div>
+              </div>
+            )}
 
             {showDate && (
-              <p className={`${themeConfig.subText || 'text-slate-400'} ${isFullscreen ? 'text-[clamp(0.9rem,min(2vw,2.6vh),1.6rem)]' : 'text-xs'}`}>
+              <p className={`${themeConfig.subText || 'text-slate-400'} ${isFullscreen ? 'text-[clamp(0.85rem,min(1.9vw,2.4vh),1.5rem)]' : 'text-xs'}`}>
                 {dateStr}
               </p>
+            )}
+
+            {/* Discreet Fullscreen Quick-Switcher */}
+            {isFullscreen && (
+              <div
+                className={`flex flex-wrap items-center justify-center gap-1.5 pt-1 opacity-60 hover:opacity-100 focus-within:opacity-100 transition-opacity ${
+                  themeConfig.isLight ? 'text-slate-700' : 'text-slate-300'
+                }`}
+              >
+                <button
+                  onClick={() => cycleAnalogStyle(-1)}
+                  className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
+                    themeConfig.isLight
+                      ? 'bg-black/5 hover:bg-black/10 border-slate-300/80'
+                      : 'bg-white/5 hover:bg-white/15 border-white/15'
+                  }`}
+                  title="Previous analog dial style"
+                  aria-label="Previous analog dial style"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <span
+                  className={`px-3 py-1 rounded-xl border text-xs font-bold tracking-wide flex items-center gap-1.5 ${
+                    themeConfig.isLight
+                      ? 'bg-black/5 border-slate-300/80'
+                      : 'bg-white/5 border-white/15'
+                  }`}
+                >
+                  <AnalogStyleGlyph styleId={analogStyle} />
+                  <span>{activeAnalogMeta.label}</span>
+                </span>
+                <button
+                  onClick={() => cycleAnalogStyle(1)}
+                  className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
+                    themeConfig.isLight
+                      ? 'bg-black/5 hover:bg-black/10 border-slate-300/80'
+                      : 'bg-white/5 hover:bg-white/15 border-white/15'
+                  }`}
+                  title="Next analog dial style"
+                  aria-label="Next analog dial style"
+                >
+                  <ChevronRight size={14} />
+                </button>
+                <button
+                  onClick={() => setAnalogMotion(analogMotion === 'sweep' ? 'tick' : 'sweep')}
+                  className={`px-2.5 py-1 rounded-xl border text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                    themeConfig.isLight
+                      ? 'bg-black/5 hover:bg-black/10 border-slate-300/80'
+                      : 'bg-white/5 hover:bg-white/15 border-white/15'
+                  }`}
+                  title="Toggle sweep or tick second hand movement"
+                >
+                  {analogMotion}
+                </button>
+                <button
+                  onClick={handleDailyMix}
+                  className={`px-2.5 py-1 rounded-xl border text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer ${
+                    themeConfig.isLight
+                      ? 'bg-black/5 hover:bg-black/10 border-slate-300/80'
+                      : 'bg-white/5 hover:bg-white/15 border-white/15'
+                  }`}
+                  title="Daily Mix: randomize dial style and color theme"
+                >
+                  <Shuffle size={11} />
+                  <span>Mix</span>
+                </button>
+              </div>
             )}
           </div>
         )}

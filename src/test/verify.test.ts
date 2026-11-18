@@ -624,5 +624,76 @@ if (
 
 console.log('✓ Test 11: FlipClockCard 3D split-flap component and CSS animations verified.');
 
-console.log('All automated verification checks PASSED successfully!');
+// Test 12: Multi-style Analog horology studio verification
+import {
+  ANALOG_STYLES,
+  AnalogClockDial,
+  AnalogStyleGlyph,
+} from '../components/tools/productivity/DigitalClock';
 
+if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length < 8) {
+  console.error(`Expected at least 8 Analog watch styles, found ${ANALOG_STYLES?.length}`);
+  process.exit(1);
+}
+
+const analogIds = new Set<string>();
+const expectedAnalogIds = [
+  'chronometer',
+  'bauhaus',
+  'diver',
+  'roman',
+  'pilot',
+  'atelier',
+  'telemetry',
+  'california',
+];
+
+for (const st of ANALOG_STYLES) {
+  if (analogIds.has(st.id)) {
+    console.error(`Duplicate analog dial style ID: ${st.id}`);
+    process.exit(1);
+  }
+  analogIds.add(st.id);
+
+  if (!st.label || !st.tagline || !st.category) {
+    console.error(`Incomplete metadata for analog style: ${st.id}`);
+    process.exit(1);
+  }
+
+  if (emojiRegex.test(st.label) || emojiRegex.test(st.tagline) || emojiRegex.test(st.id)) {
+    console.error(`Analog style ${st.id} contains prohibited emoji characters`);
+    process.exit(1);
+  }
+}
+
+for (const reqAnalogId of expectedAnalogIds) {
+  if (!analogIds.has(reqAnalogId)) {
+    console.error(`Missing required analog dial style: ${reqAnalogId}`);
+    process.exit(1);
+  }
+}
+
+if (typeof AnalogClockDial !== 'function' || typeof AnalogStyleGlyph !== 'function') {
+  console.error('AnalogClockDial and AnalogStyleGlyph components must be exported from DigitalClock.tsx');
+  process.exit(1);
+}
+
+const requiredAnalogTokens = [
+  'vortexero_clock_analog_style',
+  'vortexero_clock_analog_motion',
+  'vortexero_clock_analog_subdigital',
+  '<AnalogClockDial',
+  'requestAnimationFrame',
+  'analog-style-bar',
+];
+
+for (const token of requiredAnalogTokens) {
+  if (!digitalClockSource.includes(token)) {
+    console.error(`DigitalClock.tsx missing required analog token: ${token}`);
+    process.exit(1);
+  }
+}
+
+console.log(`✓ Test 12: Analog Horology Studio (${ANALOG_STYLES.length} dial styles, sweep/tick motion, persistence) verified.`);
+
+console.log('All automated verification checks PASSED successfully!');
