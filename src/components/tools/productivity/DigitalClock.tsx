@@ -967,6 +967,249 @@ export const getClockThemeStyles = (theme: ClockTheme): ThemeStyles => {
   }
 };
 
+export interface FlipClockCardProps {
+  value: string;
+  label: string;
+  isFullscreen: boolean;
+  isWideFont: boolean;
+  variant?: 'primary' | 'secondary';
+  themeConfig: ThemeStyles;
+  fontClassName: string;
+  animationTextClass: string;
+}
+
+export const FlipClockCard: React.FC<FlipClockCardProps> = ({
+  value,
+  label,
+  isFullscreen,
+  isWideFont,
+  variant = 'primary',
+  themeConfig,
+  fontClassName,
+  animationTextClass,
+}) => {
+  const [flipState, setFlipState] = useState({
+    current: value,
+    previous: value,
+    flipKey: 0,
+    isFlipping: false,
+  });
+
+  if (value !== flipState.current) {
+    setFlipState({
+      current: value,
+      previous: flipState.current,
+      flipKey: flipState.flipKey + 1,
+      isFlipping: true,
+    });
+  }
+
+  useEffect(() => {
+    if (!flipState.isFlipping) return;
+    const activeKey = flipState.flipKey;
+    const fallbackTimer = setTimeout(() => {
+      setFlipState((prev) =>
+        prev.flipKey === activeKey && prev.isFlipping
+          ? { ...prev, previous: prev.current, isFlipping: false }
+          : prev
+      );
+    }, 620);
+    return () => clearTimeout(fallbackTimer);
+  }, [flipState.isFlipping, flipState.flipKey]);
+
+  const handleFlipAnimationEnd = (e: React.AnimationEvent<HTMLDivElement>) => {
+    if (e.animationName !== 'flip-clock-bottom-settle') return;
+    const activeKey = flipState.flipKey;
+    setFlipState((prev) =>
+      prev.flipKey === activeKey && prev.isFlipping
+        ? { ...prev, previous: prev.current, isFlipping: false }
+        : prev
+    );
+  };
+
+  const isSecondary = variant === 'secondary';
+  const sizeClass = isSecondary
+    ? isFullscreen
+      ? 'w-[clamp(3.5rem,min(12.5vw,16.5vh),12.5rem)] h-[clamp(4.8rem,min(17.5vw,22.5vh),17.5rem)]'
+      : 'w-16 sm:w-28 md:w-36 h-24 sm:h-36 md:h-44'
+    : isFullscreen
+      ? 'w-[clamp(4.2rem,min(17vw,22vh),17rem)] h-[clamp(5.8rem,min(24vw,30vh),24rem)]'
+      : 'w-20 sm:w-36 md:w-44 h-28 sm:h-44 md:h-52';
+
+  const radiusClass = isSecondary
+    ? isFullscreen
+      ? 'rounded-2xl sm:rounded-[2rem]'
+      : 'rounded-2xl sm:rounded-3xl'
+    : isFullscreen
+      ? 'rounded-3xl sm:rounded-[2.5rem]'
+      : 'rounded-2xl sm:rounded-3xl';
+
+  const textSizeClass = isSecondary
+    ? isFullscreen
+      ? isWideFont
+        ? 'text-[clamp(1.45rem,min(5.8vw,7.8vh),5.8rem)]'
+        : 'text-[clamp(1.85rem,min(7.4vw,9.8vh),7.4rem)]'
+      : isWideFont
+        ? 'text-2xl sm:text-4xl md:text-5xl'
+        : 'text-3xl sm:text-6xl md:text-7xl'
+    : isFullscreen
+      ? isWideFont
+        ? 'text-[clamp(1.9rem,min(8.2vw,10.5vh),8.2rem)]'
+        : 'text-[clamp(2.4rem,min(10.2vw,13vh),10.2rem)]'
+      : isWideFont
+        ? 'text-3xl sm:text-5xl md:text-6xl'
+        : 'text-4xl sm:text-7xl md:text-8xl';
+
+  const digitClass = `leading-none tabular-nums ${fontClassName} ${textSizeClass}`;
+  const isLight = !!themeConfig.isLight;
+  const topSheenClass = isLight
+    ? 'bg-gradient-to-b from-white/70 to-slate-900/[0.02]'
+    : 'bg-gradient-to-b from-white/10 to-transparent';
+  const bottomDepthClass = isLight
+    ? 'bg-gradient-to-t from-slate-900/[0.07] via-transparent to-slate-900/[0.03]'
+    : 'bg-gradient-to-t from-black/25 via-transparent to-black/15';
+  const dynamicShadowGradientTop = isLight
+    ? 'bg-gradient-to-b from-slate-900/20 to-slate-900/45'
+    : 'bg-gradient-to-b from-black/35 to-black/75';
+  const dynamicShadowGradientBottom = isLight
+    ? 'bg-gradient-to-b from-slate-900/45 to-slate-900/15'
+    : 'bg-gradient-to-b from-black/75 to-black/30';
+
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        className={`relative select-none ${sizeClass} ${radiusClass} ${isSecondary ? 'opacity-90' : ''} ${animationTextClass}`}
+        aria-label={`${label}: ${flipState.current}`}
+      >
+        <div className={`flip-clock-stage relative w-full h-full ${radiusClass}`}>
+          {/* Unified base silhouette for outer card drop shadow */}
+          <div
+            className={`absolute inset-0 ${radiusClass} ${themeConfig.flipCard} shadow-2xl pointer-events-none z-0`}
+          />
+
+          {/* 1. Static Upper Half (NEW value revealed beneath the falling flap) */}
+          <div
+            className={`flip-card-half-top absolute inset-x-0 top-0 h-1/2 overflow-hidden border-t border-x ${themeConfig.flipCard} !shadow-none z-[1]`}
+          >
+            <div className="absolute inset-x-0 top-0 h-[200%] flex items-center justify-center">
+              <span className={digitClass}>{flipState.current}</span>
+            </div>
+            <div className={`absolute inset-0 ${topSheenClass} pointer-events-none`} />
+            <div
+              className={`absolute inset-x-0 bottom-0 h-[1px] ${
+                isLight ? 'bg-slate-900/10' : 'bg-black/35'
+              } pointer-events-none`}
+            />
+            {flipState.isFlipping && (
+              <div
+                key={`top-reveal-${flipState.flipKey}`}
+                className={`absolute inset-0 ${dynamicShadowGradientTop} animate-flip-top-reveal-shadow pointer-events-none`}
+              />
+            )}
+          </div>
+
+          {/* 2. Static Lower Half (OLD value until the descending flap lands) */}
+          <div
+            className={`flip-card-half-bottom absolute inset-x-0 bottom-0 h-1/2 overflow-hidden border-b border-x ${themeConfig.flipCard} !shadow-none z-[1]`}
+          >
+            <div className="absolute inset-x-0 bottom-0 h-[200%] flex items-center justify-center">
+              <span className={digitClass}>
+                {flipState.isFlipping ? flipState.previous : flipState.current}
+              </span>
+            </div>
+            <div className={`absolute inset-0 ${bottomDepthClass} pointer-events-none`} />
+            <div
+              className={`absolute inset-x-0 top-0 h-[1px] ${
+                isLight ? 'bg-white/80' : 'bg-white/10'
+              } pointer-events-none`}
+            />
+            {flipState.isFlipping && (
+              <div
+                key={`bot-cast-${flipState.flipKey}`}
+                className={`absolute inset-0 ${dynamicShadowGradientBottom} animate-flip-bottom-cast-shadow pointer-events-none`}
+              />
+            )}
+          </div>
+
+          {/* 3. Flipping Upper Flap (OLD value folding forward 0deg -> -90deg) */}
+          {flipState.isFlipping && (
+            <div
+              key={`top-flap-${flipState.flipKey}`}
+              className={`flip-card-half-top animate-flip-top-flap absolute inset-x-0 top-0 h-1/2 overflow-hidden border-t border-x ${themeConfig.flipCard} !shadow-none z-[3]`}
+            >
+              <div className="absolute inset-x-0 top-0 h-[200%] flex items-center justify-center">
+                <span className={digitClass}>{flipState.previous}</span>
+              </div>
+              <div className={`absolute inset-0 ${topSheenClass} pointer-events-none`} />
+              <div
+                className={`absolute inset-x-0 bottom-0 h-[1px] ${
+                  isLight ? 'bg-slate-900/15' : 'bg-black/45'
+                } pointer-events-none`}
+              />
+              <div
+                className={`absolute inset-0 ${dynamicShadowGradientTop} animate-flip-top-flap-shadow pointer-events-none`}
+              />
+            </div>
+          )}
+
+          {/* 4. Flipping Lower Flap (NEW value swinging down 90deg -> 0deg) */}
+          {flipState.isFlipping && (
+            <div
+              key={`bot-flap-${flipState.flipKey}`}
+              onAnimationEnd={handleFlipAnimationEnd}
+              className={`flip-card-half-bottom animate-flip-bottom-flap absolute inset-x-0 bottom-0 h-1/2 overflow-hidden border-b border-x ${themeConfig.flipCard} !shadow-none z-[4]`}
+            >
+              <div className="absolute inset-x-0 bottom-0 h-[200%] flex items-center justify-center">
+                <span className={digitClass}>{flipState.current}</span>
+              </div>
+              <div className={`absolute inset-0 ${bottomDepthClass} pointer-events-none`} />
+              <div
+                className={`absolute inset-x-0 top-0 h-[1px] ${
+                  isLight ? 'bg-white/90' : 'bg-white/15'
+                } pointer-events-none`}
+              />
+              <div
+                className={`absolute inset-0 ${dynamicShadowGradientBottom} animate-flip-bottom-flap-light pointer-events-none`}
+              />
+            </div>
+          )}
+
+          {/* Mechanical Center Split Seam & Side Hinge Brackets */}
+          <div
+            className={`absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] z-20 pointer-events-none ${
+              isLight
+                ? 'bg-slate-900/20 shadow-[0_1px_0_rgba(255,255,255,0.8)]'
+                : 'bg-black/60 shadow-[0_1px_0_rgba(255,255,255,0.06)]'
+            }`}
+          />
+          <div
+            className={`absolute left-[1px] top-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-3.5 sm:h-4 rounded-r-md z-30 pointer-events-none ${
+              isLight
+                ? 'bg-slate-400/75 border-y border-r border-slate-500/35 shadow-inner'
+                : 'bg-black/70 border-y border-r border-white/10 shadow-inner'
+            }`}
+          />
+          <div
+            className={`absolute right-[1px] top-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-3.5 sm:h-4 rounded-l-md z-30 pointer-events-none ${
+              isLight
+                ? 'bg-slate-400/75 border-y border-l border-slate-500/35 shadow-inner'
+                : 'bg-black/70 border-y border-l border-white/10 shadow-inner'
+            }`}
+          />
+        </div>
+      </div>
+
+      <span
+        className={`uppercase font-extrabold ${themeConfig.subText || 'text-slate-500'} ${
+          isFullscreen ? 'text-xs sm:text-base mt-2 sm:mt-3' : 'text-[10px] sm:text-xs mt-2'
+        }`}
+      >
+        {label}
+      </span>
+    </div>
+  );
+};
+
 export const DigitalClock: React.FC = () => {
   const [mode, setMode] = useState<Mode>(() => {
     return (localStorage.getItem('vortexero_clock_mode') as Mode) || 'digital';
@@ -1242,15 +1485,57 @@ export const DigitalClock: React.FC = () => {
     }
   };
 
-  // Clock Ticker
+  const playFlipSound = () => {
+    if (!soundEnabled) return;
+    try {
+      const ctx = getAudioContext();
+      const now = ctx.currentTime;
+
+      // Soft mechanical card release thud
+      const bodyOsc = ctx.createOscillator();
+      const bodyGain = ctx.createGain();
+      bodyOsc.type = 'triangle';
+      bodyOsc.frequency.setValueAtTime(220, now);
+      bodyOsc.frequency.exponentialRampToValueAtTime(75, now + 0.045);
+      bodyGain.gain.setValueAtTime(0.035, now);
+      bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+      bodyOsc.connect(bodyGain);
+      bodyGain.connect(ctx.destination);
+      bodyOsc.start(now);
+      bodyOsc.stop(now + 0.05);
+
+      // Delayed snap matching lower flap landing
+      const snapOsc = ctx.createOscillator();
+      const snapGain = ctx.createGain();
+      snapOsc.type = 'triangle';
+      snapOsc.frequency.setValueAtTime(520, now + 0.26);
+      snapOsc.frequency.exponentialRampToValueAtTime(140, now + 0.295);
+      snapGain.gain.setValueAtTime(0.03, now + 0.26);
+      snapGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+      snapOsc.connect(snapGain);
+      snapGain.connect(ctx.destination);
+      snapOsc.start(now + 0.26);
+      snapOsc.stop(now + 0.3);
+    } catch {
+      // Ignore
+    }
+  };
+
+  // Wall-clock-aligned Clock Ticker (prevents second-boundary drift or skipped seconds)
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-      if (soundEnabled && mode === 'analog') {
-        playTickSound();
-      }
-    }, 1000);
-    return () => clearInterval(timer);
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const scheduleNextTick = () => {
+      const msUntilNextSecond = 1000 - (Date.now() % 1000) + 8;
+      timeoutId = setTimeout(() => {
+        setCurrentTime(new Date());
+        if (soundEnabled && mode === 'analog') {
+          playTickSound();
+        }
+        scheduleNextTick();
+      }, msUntilNextSecond);
+    };
+    scheduleNextTick();
+    return () => clearTimeout(timeoutId);
   }, [soundEnabled, mode]);
 
   // Pomodoro Ticker
@@ -1336,6 +1621,32 @@ export const DigitalClock: React.FC = () => {
   const hoursStr = hours.toString().padStart(2, '0');
   const minutesStr = displayTime.getMinutes().toString().padStart(2, '0');
   const secondsStr = displayTime.getSeconds().toString().padStart(2, '0');
+
+  const prevFlipAudioRef = useRef({
+    mode,
+    hoursStr,
+    minutesStr,
+    secondsStr,
+    showSeconds,
+  });
+
+  useEffect(() => {
+    const prev = prevFlipAudioRef.current;
+    prevFlipAudioRef.current = { mode, hoursStr, minutesStr, secondsStr, showSeconds };
+    const digitChanged =
+      prev.hoursStr !== hoursStr ||
+      prev.minutesStr !== minutesStr ||
+      (showSeconds && prev.secondsStr !== secondsStr);
+    if (
+      mode === 'flip' &&
+      prev.mode === 'flip' &&
+      prev.showSeconds === showSeconds &&
+      digitChanged &&
+      soundEnabled
+    ) {
+      playFlipSound();
+    }
+  }, [mode, hoursStr, minutesStr, secondsStr, showSeconds, soundEnabled]);
 
   // Format Date
   const dateStr = displayTime.toLocaleDateString(undefined, {
@@ -2065,10 +2376,10 @@ export const DigitalClock: React.FC = () => {
       {/* Main Clock Canvas Display */}
       <div
         ref={containerRef}
-        className={`relative rounded-3xl ${themeConfig.bg} ${themeConfig.border} border flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 select-none ${
+        className={`${themeConfig.bg} ${themeConfig.border} border flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 select-none ${
           isFullscreen
             ? 'fixed inset-0 z-50 rounded-none h-screen h-[100dvh] min-h-0 w-screen w-full border-none px-4 sm:px-8 md:px-12 pt-16 sm:pt-20 pb-6 sm:pb-10 overflow-y-auto overflow-x-hidden no-scrollbar'
-            : 'p-6 sm:p-14 min-h-[460px] overflow-hidden'
+            : 'relative rounded-3xl p-6 sm:p-14 min-h-[460px] overflow-hidden'
         }`}
       >
         {/* Glow backdrop layer with dynamic animations */}
@@ -2627,74 +2938,32 @@ export const DigitalClock: React.FC = () => {
           <div className="relative z-10 space-y-6 my-auto max-w-full">
             <div className={`flex flex-wrap items-center justify-center ${isFullscreen ? 'gap-2 sm:gap-5' : 'gap-2 sm:gap-5'}`}>
               {/* Hours Card */}
-              <div className="flex flex-col items-center">
-                <div
-                  className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden ${
-                    isFullscreen
-                      ? 'w-[clamp(4.2rem,min(17vw,22vh),17rem)] h-[clamp(5.8rem,min(24vw,30vh),24rem)] rounded-3xl sm:rounded-[2.5rem]'
-                      : 'w-20 sm:w-36 md:w-44 h-28 sm:h-44 md:h-52 rounded-2xl sm:rounded-3xl'
-                  }`}
-                >
-                  <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none z-10" />
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent pointer-events-none z-10" />
-                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
-                  <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
-                  <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                  <span className={`leading-none ${getFontFamilyClass(true)} ${getAnimationTextClass()} relative z-15 ${
-                    isFullscreen
-                      ? isWideFont
-                        ? 'text-[clamp(1.9rem,min(8.2vw,10.5vh),8.2rem)]'
-                        : 'text-[clamp(2.4rem,min(10.2vw,13vh),10.2rem)]'
-                      : isWideFont
-                        ? 'text-3xl sm:text-5xl md:text-6xl'
-                        : 'text-4xl sm:text-7xl md:text-8xl'
-                  }`}>
-                    {hoursStr}
-                  </span>
-                </div>
-                <span className={`uppercase font-extrabold ${themeConfig.subText || 'text-slate-500'} ${
-                  isFullscreen ? 'text-xs sm:text-base mt-2 sm:mt-3' : 'text-[10px] sm:text-xs mt-2'
-                }`}>
-                  Hours
-                </span>
-              </div>
+              <FlipClockCard
+                value={hoursStr}
+                label="Hours"
+                isFullscreen={isFullscreen}
+                isWideFont={isWideFont}
+                variant="primary"
+                themeConfig={themeConfig}
+                fontClassName={getFontFamilyClass(true)}
+                animationTextClass={getAnimationTextClass()}
+              />
 
               <div className={`font-black animate-pulse ${themeConfig.accent} ${
                 isFullscreen ? 'text-[clamp(1.8rem,min(7vw,10vh),6.5rem)]' : 'text-3xl sm:text-6xl'
               }`}>:</div>
 
               {/* Minutes Card */}
-              <div className="flex flex-col items-center">
-                <div
-                  className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden ${
-                    isFullscreen
-                      ? 'w-[clamp(4.2rem,min(17vw,22vh),17rem)] h-[clamp(5.8rem,min(24vw,30vh),24rem)] rounded-3xl sm:rounded-[2.5rem]'
-                      : 'w-20 sm:w-36 md:w-44 h-28 sm:h-44 md:h-52 rounded-2xl sm:rounded-3xl'
-                  }`}
-                >
-                  <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none z-10" />
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent pointer-events-none z-10" />
-                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
-                  <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
-                  <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                  <span className={`leading-none ${getFontFamilyClass(true)} ${getAnimationTextClass()} relative z-15 ${
-                    isFullscreen
-                      ? isWideFont
-                        ? 'text-[clamp(1.9rem,min(8.2vw,10.5vh),8.2rem)]'
-                        : 'text-[clamp(2.4rem,min(10.2vw,13vh),10.2rem)]'
-                      : isWideFont
-                        ? 'text-3xl sm:text-5xl md:text-6xl'
-                        : 'text-4xl sm:text-7xl md:text-8xl'
-                  }`}>
-                    {minutesStr}
-                  </span>
-                </div>
-                <span className={`uppercase font-extrabold ${themeConfig.subText || 'text-slate-500'} ${
-                  isFullscreen ? 'text-xs sm:text-base mt-2 sm:mt-3' : 'text-[10px] sm:text-xs mt-2'
-                }`}>
-                  Minutes
-                </span>
-              </div>
+              <FlipClockCard
+                value={minutesStr}
+                label="Minutes"
+                isFullscreen={isFullscreen}
+                isWideFont={isWideFont}
+                variant="primary"
+                themeConfig={themeConfig}
+                fontClassName={getFontFamilyClass(true)}
+                animationTextClass={getAnimationTextClass()}
+              />
 
               {showSeconds && (
                 <>
@@ -2702,37 +2971,16 @@ export const DigitalClock: React.FC = () => {
                     isFullscreen ? 'text-[clamp(1.8rem,min(7vw,10vh),6.5rem)]' : 'text-3xl sm:text-6xl'
                   }`}>:</div>
                   {/* Seconds Card */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`relative border flex items-center justify-center ${themeConfig.flipCard} shadow-2xl overflow-hidden opacity-90 ${
-                        isFullscreen
-                          ? 'w-[clamp(3.5rem,min(12.5vw,16.5vh),12.5rem)] h-[clamp(4.8rem,min(17.5vw,22.5vh),17.5rem)] rounded-2xl sm:rounded-[2rem]'
-                          : 'w-16 sm:w-28 md:w-36 h-24 sm:h-36 md:h-44 rounded-2xl sm:rounded-3xl'
-                      }`}
-                    >
-                      <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none z-10" />
-                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent pointer-events-none z-10" />
-                      <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-r-md bg-black/60 shadow-inner z-30" />
-                      <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 rounded-l-md bg-black/60 shadow-inner z-30" />
-                      <div className="absolute inset-x-0 top-1/2 h-[2px] bg-black/50 shadow-sm z-20" />
-                      <span className={`leading-none ${getFontFamilyClass(true)} ${getAnimationTextClass()} relative z-15 ${
-                        isFullscreen
-                          ? isWideFont
-                            ? 'text-[clamp(1.45rem,min(5.8vw,7.8vh),5.8rem)]'
-                            : 'text-[clamp(1.85rem,min(7.4vw,9.8vh),7.4rem)]'
-                          : isWideFont
-                            ? 'text-2xl sm:text-4xl md:text-5xl'
-                            : 'text-3xl sm:text-6xl md:text-7xl'
-                      }`}>
-                        {secondsStr}
-                      </span>
-                    </div>
-                    <span className={`uppercase font-extrabold ${themeConfig.subText || 'text-slate-500'} ${
-                      isFullscreen ? 'text-xs sm:text-base mt-2 sm:mt-3' : 'text-[10px] sm:text-xs mt-2'
-                    }`}>
-                      Seconds
-                    </span>
-                  </div>
+                  <FlipClockCard
+                    value={secondsStr}
+                    label="Seconds"
+                    isFullscreen={isFullscreen}
+                    isWideFont={isWideFont}
+                    variant="secondary"
+                    themeConfig={themeConfig}
+                    fontClassName={getFontFamilyClass(true)}
+                    animationTextClass={getAnimationTextClass()}
+                  />
                 </>
               )}
 

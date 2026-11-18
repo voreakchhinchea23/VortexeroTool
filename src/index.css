@@ -492,4 +492,173 @@
   background-size: 200% auto;
 }
 
+/* =========================================================
+   Split-Flap Mechanical Flip Clock 3D Animations
+   ========================================================= */
+.flip-clock-stage {
+  perspective: 1000px;
+}
+
+.flip-card-half-top {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.flip-card-half-bottom {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
+@keyframes flip-clock-top-fall {
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes flip-clock-top-hide {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes flip-clock-bottom-show {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  100% {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@keyframes flip-clock-bottom-fall {
+  0% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes flip-clock-bottom-settle {
+  0% {
+    transform: rotateX(0deg);
+  }
+  45% {
+    transform: rotateX(4deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes flip-clock-shadow-out {
+  0% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes flip-clock-shadow-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes flip-clock-shadow-out-soft {
+  0% {
+    opacity: 0.38;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes flip-clock-cast-shadow {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.58;
+  }
+}
+
+.animate-flip-top-flap {
+  transform-origin: 50% 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
+  animation:
+    flip-clock-top-fall 260ms cubic-bezier(0.4, 0, 0.9, 0.45) forwards,
+    flip-clock-top-hide 1ms linear 260ms forwards;
+}
+
+.animate-flip-bottom-flap {
+  opacity: 0;
+  visibility: hidden;
+  transform: rotateX(90deg);
+  transform-origin: 50% 0%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
+  animation:
+    flip-clock-bottom-show 1ms linear 260ms forwards,
+    flip-clock-bottom-fall 220ms cubic-bezier(0.15, 0.55, 0.3, 1) 260ms forwards,
+    flip-clock-bottom-settle 90ms ease-out 480ms forwards;
+}
+
+.animate-flip-top-reveal-shadow {
+  opacity: 0.55;
+  animation: flip-clock-shadow-out 260ms cubic-bezier(0.4, 0, 0.9, 0.45) forwards;
+}
+
+.animate-flip-top-flap-shadow {
+  opacity: 0;
+  animation: flip-clock-shadow-in 260ms cubic-bezier(0.4, 0, 0.9, 0.45) forwards;
+}
+
+.animate-flip-bottom-flap-light {
+  opacity: 0.38;
+  animation: flip-clock-shadow-out-soft 220ms cubic-bezier(0.15, 0.55, 0.3, 1) 260ms forwards;
+}
+
+.animate-flip-bottom-cast-shadow {
+  opacity: 0;
+  animation: flip-clock-cast-shadow 220ms cubic-bezier(0.15, 0.55, 0.3, 1) 260ms forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flip-top-flap {
+    display: none;
+  }
+  .animate-flip-bottom-flap {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    animation: none;
+  }
+  .animate-flip-top-reveal-shadow,
+  .animate-flip-top-flap-shadow,
+  .animate-flip-bottom-flap-light,
+  .animate-flip-bottom-cast-shadow {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+
 

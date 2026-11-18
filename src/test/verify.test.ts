@@ -585,4 +585,44 @@ if (
 
 console.log('✓ Test 10: Radial Chronograph ring geometry (>73% clear diameter), proportional --radial-d typography, non-conflicting font utilities, and zero-emoji source verified.');
 
+// Test 11: Flip Clock 3D split-flap component & CSS animation verification
+import { FlipClockCard } from '../components/tools/productivity/DigitalClock';
+
+if (typeof FlipClockCard !== 'function') {
+  console.error('FlipClockCard component must be exported from DigitalClock.tsx');
+  process.exit(1);
+}
+
+const indexCssSource = fs.readFileSync(path.resolve(process.cwd(), 'src/index.css'), 'utf-8');
+const requiredFlipCssTokens = [
+  '.flip-clock-stage',
+  'perspective:',
+  '.flip-card-half-top',
+  '.flip-card-half-bottom',
+  '@keyframes flip-clock-top-fall',
+  '@keyframes flip-clock-bottom-fall',
+  '@keyframes flip-clock-bottom-settle',
+  '.animate-flip-top-flap',
+  '.animate-flip-bottom-flap',
+];
+
+for (const token of requiredFlipCssTokens) {
+  if (!indexCssSource.includes(token)) {
+    console.error(`src/index.css missing required split-flap CSS token: ${token}`);
+    process.exit(1);
+  }
+}
+
+if (
+  !digitalClockSource.includes('<FlipClockCard') ||
+  !digitalClockSource.includes('animate-flip-top-flap') ||
+  !digitalClockSource.includes('animate-flip-bottom-flap')
+) {
+  console.error('DigitalClock.tsx must render FlipClockCard with animated top and bottom flaps');
+  process.exit(1);
+}
+
+console.log('✓ Test 11: FlipClockCard 3D split-flap component and CSS animations verified.');
+
 console.log('All automated verification checks PASSED successfully!');
+
