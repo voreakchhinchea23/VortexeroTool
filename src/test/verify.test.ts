@@ -624,15 +624,17 @@ if (
 
 console.log('✓ Test 11: FlipClockCard 3D split-flap component and CSS animations verified.');
 
-// Test 12: Multi-style Analog horology studio verification
+// Test 12: Multi-style Analog horology studio & animated background scenes verification
 import {
   ANALOG_STYLES,
   AnalogClockDial,
   AnalogStyleGlyph,
+  CLOCK_BG_FX_OPTIONS,
+  ClockBackgroundLayer,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length < 8) {
-  console.error(`Expected at least 8 Analog watch styles, found ${ANALOG_STYLES?.length}`);
+if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 14) {
+  console.error(`Expected 14 Analog watch styles, found ${ANALOG_STYLES?.length}`);
   process.exit(1);
 }
 
@@ -646,6 +648,12 @@ const expectedAnalogIds = [
   'atelier',
   'telemetry',
   'california',
+  'tourbillon',
+  'celestial',
+  'chronograph',
+  'artdeco',
+  'orbital',
+  'kintsugi',
 ];
 
 for (const st of ANALOG_STYLES) {
@@ -678,22 +686,80 @@ if (typeof AnalogClockDial !== 'function' || typeof AnalogStyleGlyph !== 'functi
   process.exit(1);
 }
 
+if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 7) {
+  console.error(`Expected 7 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
+  process.exit(1);
+}
+
+const bgIds = new Set<string>();
+const expectedBgIds = ['aurora', 'orbital', 'starfield', 'grid', 'bokeh', 'ripple', 'none'];
+for (const bg of CLOCK_BG_FX_OPTIONS) {
+  if (bgIds.has(bg.id)) {
+    console.error(`Duplicate background FX ID: ${bg.id}`);
+    process.exit(1);
+  }
+  bgIds.add(bg.id);
+
+  if (!bg.label || !bg.shortLabel || !bg.tagline) {
+    console.error(`Incomplete metadata for background FX: ${bg.id}`);
+    process.exit(1);
+  }
+
+  if (emojiRegex.test(bg.label) || emojiRegex.test(bg.shortLabel) || emojiRegex.test(bg.tagline)) {
+    console.error(`Background FX ${bg.id} contains prohibited emoji characters`);
+    process.exit(1);
+  }
+}
+
+for (const reqBgId of expectedBgIds) {
+  if (!bgIds.has(reqBgId)) {
+    console.error(`Missing required background FX preset: ${reqBgId}`);
+    process.exit(1);
+  }
+}
+
+if (typeof ClockBackgroundLayer !== 'object' && typeof ClockBackgroundLayer !== 'function') {
+  console.error('ClockBackgroundLayer component must be exported from DigitalClock.tsx');
+  process.exit(1);
+}
+
 const requiredAnalogTokens = [
   'vortexero_clock_analog_style',
   'vortexero_clock_analog_motion',
   'vortexero_clock_analog_subdigital',
+  'vortexero_clock_bg_fx',
   '<AnalogClockDial',
+  '<ClockBackgroundLayer',
+  'bg-fx-select',
   'requestAnimationFrame',
   'analog-style-bar',
 ];
 
 for (const token of requiredAnalogTokens) {
   if (!digitalClockSource.includes(token)) {
-    console.error(`DigitalClock.tsx missing required analog token: ${token}`);
+    console.error(`DigitalClock.tsx missing required analog/background token: ${token}`);
     process.exit(1);
   }
 }
 
-console.log(`✓ Test 12: Analog Horology Studio (${ANALOG_STYLES.length} dial styles, sweep/tick motion, persistence) verified.`);
+const requiredBgCssTokens = [
+  '.animate-bg-aurora-a',
+  '.animate-bg-aurora-b',
+  '.animate-bg-spin-cw',
+  '.animate-bg-spin-ccw',
+  '.animate-bg-star-twinkle',
+  '.animate-bg-grid-scroll',
+  '.animate-bg-bokeh-float',
+  '.animate-bg-ripple',
+];
+
+for (const cssToken of requiredBgCssTokens) {
+  if (!indexCssSource.includes(cssToken)) {
+    console.error(`src/index.css missing required background animation CSS token: ${cssToken}`);
+    process.exit(1);
+  }
+}
+
+console.log(`✓ Test 12: Analog Horology Studio (${ANALOG_STYLES.length} dial styles, ${CLOCK_BG_FX_OPTIONS.length} animated background scenes, sweep/tick motion) verified.`);
 
 console.log('All automated verification checks PASSED successfully!');
