@@ -787,4 +787,94 @@ for (const cssToken of requiredBgCssTokens) {
 
 console.log(`✓ Test 12: Analog Horology Studio (${ANALOG_STYLES.length} dial styles, ${CLOCK_BG_FX_OPTIONS.length} animated background scenes, sweep/tick motion) verified.`);
 
+// Test 13: Radial Gauge Studio (12 scenic/kinetic styles, Sweep/Tick motion, cosmic contrast protection)
+import {
+  RADIAL_STYLES,
+  RADIAL_DARK_CHAMBER_STYLES,
+  RadialClockGauge,
+  RadialStyleGlyph,
+} from '../components/tools/productivity/DigitalClock';
+
+if (!Array.isArray(RADIAL_STYLES) || RADIAL_STYLES.length !== 12) {
+  console.error(`Expected 12 Radial Gauge styles, found ${RADIAL_STYLES?.length}`);
+  process.exit(1);
+}
+
+const radialIds = new Set<string>();
+const expectedRadialIds = [
+  'chronograph',
+  'solar_orbit',
+  'galaxy_vortex',
+  'supernova',
+  'blackhole_lens',
+  'cyber_hud',
+  'segmented_led',
+  'turbine',
+  'waveform',
+  'dna_helix',
+  'synth_prism',
+  'fractal_mandala',
+];
+
+for (const st of RADIAL_STYLES) {
+  if (radialIds.has(st.id)) {
+    console.error(`Duplicate radial gauge style ID: ${st.id}`);
+    process.exit(1);
+  }
+  radialIds.add(st.id);
+
+  if (!st.label || !st.tagline || !st.category) {
+    console.error(`Incomplete metadata for radial style: ${st.id}`);
+    process.exit(1);
+  }
+
+  if (emojiRegex.test(st.label) || emojiRegex.test(st.tagline) || emojiRegex.test(st.id)) {
+    console.error(`Radial style ${st.id} contains prohibited emoji characters`);
+    process.exit(1);
+  }
+}
+
+for (const reqRadialId of expectedRadialIds) {
+  if (!radialIds.has(reqRadialId)) {
+    console.error(`Missing required radial gauge style: ${reqRadialId}`);
+    process.exit(1);
+  }
+}
+
+if (
+  !(RADIAL_DARK_CHAMBER_STYLES instanceof Set) ||
+  RADIAL_DARK_CHAMBER_STYLES.size !== 5 ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('solar_orbit') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('galaxy_vortex') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('supernova') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('blackhole_lens') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('synth_prism')
+) {
+  console.error('RADIAL_DARK_CHAMBER_STYLES must be exported and list the 5 dark cosmic/outrun radial chambers');
+  process.exit(1);
+}
+
+if (typeof RadialClockGauge !== 'function' || typeof RadialStyleGlyph !== 'function') {
+  console.error('RadialClockGauge and RadialStyleGlyph components must be exported from DigitalClock.tsx');
+  process.exit(1);
+}
+
+const requiredRadialTokens = [
+  'vortexero_clock_radial_style',
+  'vortexero_clock_radial_motion',
+  'vortexero_clock_radial_telemetry',
+  '<RadialClockGauge',
+  'radial-style-bar',
+  'data-radial-style',
+];
+
+for (const token of requiredRadialTokens) {
+  if (!digitalClockSource.includes(token)) {
+    console.error(`DigitalClock.tsx missing required radial gauge studio token: ${token}`);
+    process.exit(1);
+  }
+}
+
+console.log(`✓ Test 13: Radial Gauge Studio (${RADIAL_STYLES.length} cosmic/kinetic styles, Sweep/Tick motion, dark chamber protection) verified.`);
+
 console.log('All automated verification checks PASSED successfully!');

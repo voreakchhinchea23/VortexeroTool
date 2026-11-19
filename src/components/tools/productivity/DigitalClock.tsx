@@ -22,6 +22,7 @@ import {
   Heart,
   Watch,
   Shuffle,
+  Compass,
 } from 'lucide-react';
 
 export type ClockTheme =
@@ -95,6 +96,19 @@ export type AnalogStyle =
   | 'blackhole'
   | 'gears'
   | 'cyberwave';
+export type RadialStyle =
+  | 'chronograph'
+  | 'solar_orbit'
+  | 'galaxy_vortex'
+  | 'supernova'
+  | 'blackhole_lens'
+  | 'cyber_hud'
+  | 'segmented_led'
+  | 'turbine'
+  | 'waveform'
+  | 'dna_helix'
+  | 'synth_prism'
+  | 'fractal_mandala';
 export type AnalogMotion = 'sweep' | 'tick';
 
 export type BackgroundFx =
@@ -115,6 +129,13 @@ export interface AnalogStyleMeta {
   label: string;
   tagline: string;
   category: 'Classic' | 'Modern' | 'Sport' | 'Technical';
+}
+
+export interface RadialStyleMeta {
+  id: RadialStyle;
+  label: string;
+  tagline: string;
+  category: 'Classic' | 'Cosmic' | 'Technical' | 'Modern';
 }
 
 export type AnimationFx =
@@ -279,6 +300,89 @@ export const ANALOG_STYLES: AnalogStyleMeta[] = [
     category: 'Modern',
   },
 ];
+
+export const RADIAL_STYLES: RadialStyleMeta[] = [
+  {
+    id: 'chronograph',
+    label: 'Chronograph',
+    tagline: 'Precision 3-track chronometer with calibrated Vernier bezel and specular glow',
+    category: 'Classic',
+  },
+  {
+    id: 'solar_orbit',
+    label: 'Solar System',
+    tagline: 'Live J2000 planetary ephemeris with ringed Saturn, Earth-Moon and comet wake',
+    category: 'Cosmic',
+  },
+  {
+    id: 'galaxy_vortex',
+    label: 'Spiral Galaxy',
+    tagline: 'Rotating 4-arm barred galactic nebula halo enclosing a dark starlit core',
+    category: 'Cosmic',
+  },
+  {
+    id: 'supernova',
+    label: 'Pulsar Nebula',
+    tagline: 'Rotating relativistic twin magnetar beams and ionized shockwave arcs',
+    category: 'Cosmic',
+  },
+  {
+    id: 'blackhole_lens',
+    label: 'Singularity',
+    tagline: 'Gravitational lensing Einstein photon ring framing the event horizon',
+    category: 'Cosmic',
+  },
+  {
+    id: 'cyber_hud',
+    label: 'Cyber HUD',
+    tagline: 'Aerospace optical reticle with rotating azimuth degree ring and radar sweep',
+    category: 'Technical',
+  },
+  {
+    id: 'segmented_led',
+    label: 'VU Turbine',
+    tagline: 'Illuminated optical block equalizer matrix with decaying phosphor trail',
+    category: 'Modern',
+  },
+  {
+    id: 'turbine',
+    label: 'Mach Iris',
+    tagline: 'Rotating 16-blade swept titanium turbofan stator and riveted aerospace bezel',
+    category: 'Technical',
+  },
+  {
+    id: 'waveform',
+    label: 'Sonic Wave',
+    tagline: 'Live oscillating polar Fourier harmonic waves and acoustic resonance nodes',
+    category: 'Modern',
+  },
+  {
+    id: 'dna_helix',
+    label: 'Bio Helix',
+    tagline: 'Counter-twisting coiled double-helix strands with illuminated genetic base rungs',
+    category: 'Technical',
+  },
+  {
+    id: 'synth_prism',
+    label: 'Synthwave',
+    tagline: '80s Outrun sliced horizon crest, chromatic spectrum tracks and laser perspective grid',
+    category: 'Modern',
+  },
+  {
+    id: 'fractal_mandala',
+    label: 'Sacred Mandala',
+    tagline: 'Counter-rotating celestial brass lotus filigree and geometric astrolabe crown',
+    category: 'Classic',
+  },
+];
+
+export const RADIAL_DARK_CHAMBER_STYLES: ReadonlySet<RadialStyle> = new Set([
+  'solar_orbit',
+  'galaxy_vortex',
+  'supernova',
+  'blackhole_lens',
+  'synth_prism',
+]);
 
 export const CLOCK_BG_FX_OPTIONS: {
   id: BackgroundFx;
@@ -1751,6 +1855,248 @@ const DIAL_DEEP_STARS: { x: number; y: number; r: number; op: number }[] = (() =
   }
   return stars;
 })();
+
+// Radial Gauge Studio deterministic helpers & precomputed tables (320x320 viewBox, center 160,160)
+const ensureBrightHex = (hex: string | undefined, fallback: string): string => {
+  if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return fallback;
+  let clean = hex.slice(1);
+  if (clean.length === 3) {
+    clean = clean
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+  if (clean.length !== 6) return fallback;
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return fallback;
+  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+  if (lum >= 110) return hex;
+  const maxC = Math.max(r, g, b);
+  const minC = Math.min(r, g, b);
+  if (maxC - minC < 32 || maxC === 0) return fallback;
+  const scale = 242 / maxC;
+  const nr = Math.min(255, Math.round(r * scale + 28));
+  const ng = Math.min(255, Math.round(g * scale + 28));
+  const nb = Math.min(255, Math.round(b * scale + 28));
+  return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+};
+
+const RADIAL_GALAXY_ARMS = [
+  { main: buildSpiralPath(160, 160, 12, 240, 86, 152, 34), sub: buildSpiralPath(160, 160, 26, 215, 92, 146, 28), tone: 'c1' as const },
+  { main: buildSpiralPath(160, 160, 192, 240, 86, 152, 34), sub: buildSpiralPath(160, 160, 206, 215, 92, 146, 28), tone: 'c2' as const },
+  { main: buildSpiralPath(160, 160, 102, 200, 94, 144, 28), sub: buildSpiralPath(160, 160, 114, 180, 98, 138, 24), tone: 'c3' as const },
+  { main: buildSpiralPath(160, 160, 282, 200, 94, 144, 28), sub: buildSpiralPath(160, 160, 294, 180, 98, 138, 24), tone: 'c1' as const },
+];
+
+const RADIAL_GALAXY_STARS: { x: number; y: number; r: number; op: number; hue: 'white' | 'gold' | 'c1' | 'c2' | 'pink' }[] = (() => {
+  const rng = makeSeededRng(73109);
+  const out: { x: number; y: number; r: number; op: number; hue: 'white' | 'gold' | 'c1' | 'c2' | 'pink' }[] = [];
+  const starts = [12, 192, 102, 282];
+  const hues: ('white' | 'gold' | 'c1' | 'c2' | 'pink')[] = ['white', 'white', 'c1', 'c2', 'gold', 'pink'];
+  for (let i = 0; i < 88; i++) {
+    const arm = starts[i % 4];
+    const t = Math.pow(rng(), 0.72);
+    const sweep = i % 4 < 2 ? 235 : 195;
+    const spread = (rng() - 0.5) * (14 + t * 24);
+    const angleRad = ((arm + sweep * t + spread) * Math.PI) / 180;
+    const rad = 88 + t * 64 + (rng() - 0.5) * 8;
+    out.push({
+      x: Number((160 + rad * Math.cos(angleRad)).toFixed(2)),
+      y: Number((160 + rad * Math.sin(angleRad)).toFixed(2)),
+      r: Number((0.6 + rng() * 1.4).toFixed(2)),
+      op: Number((0.38 + rng() * 0.6).toFixed(2)),
+      hue: hues[Math.floor(rng() * hues.length)],
+    });
+  }
+  return out;
+})();
+
+const RADIAL_COSMIC_STARS: { x: number; y: number; r: number; op: number }[] = (() => {
+  const rng = makeSeededRng(58241);
+  const out: { x: number; y: number; r: number; op: number }[] = [];
+  for (let i = 0; i < 64; i++) {
+    const a = rng() * Math.PI * 2;
+    const rad = 22 + Math.sqrt(rng()) * 130;
+    // Keep inner time-chamber dust delicate so digits always read crisply
+    const opBase = rad < 94 ? 0.14 + rng() * 0.22 : 0.3 + rng() * 0.55;
+    out.push({
+      x: Number((160 + rad * Math.cos(a)).toFixed(2)),
+      y: Number((160 + rad * Math.sin(a)).toFixed(2)),
+      r: Number((0.5 + rng() * 1.05).toFixed(2)),
+      op: Number(opBase.toFixed(2)),
+    });
+  }
+  return out;
+})();
+
+const RADIAL_ASTEROID_BELT: { x: number; y: number; r: number; op: number }[] = (() => {
+  const rng = makeSeededRng(19403);
+  const out: { x: number; y: number; r: number; op: number }[] = [];
+  for (let i = 0; i < 48; i++) {
+    const a = (i / 48) * Math.PI * 2 + (rng() - 0.5) * 0.08;
+    const rad = 126.1 + (rng() - 0.5) * 2.2;
+    out.push({
+      x: Number((160 + rad * Math.cos(a)).toFixed(2)),
+      y: Number((160 + rad * Math.sin(a)).toFixed(2)),
+      r: Number((0.45 + rng() * 0.7).toFixed(2)),
+      op: Number((0.28 + rng() * 0.48).toFixed(2)),
+    });
+  }
+  return out;
+})();
+
+interface RadialSegmentSpec {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  frac: number;
+}
+
+const buildRadialSegmentSpecs = (count: number, rIn: number, rOut: number): RadialSegmentSpec[] => {
+  const items: RadialSegmentSpec[] = [];
+  for (let i = 0; i < count; i++) {
+    const deg = (i / count) * 360 - 90;
+    const rad = (deg * Math.PI) / 180;
+    items.push({
+      x1: Number((160 + rIn * Math.cos(rad)).toFixed(2)),
+      y1: Number((160 + rIn * Math.sin(rad)).toFixed(2)),
+      x2: Number((160 + rOut * Math.cos(rad)).toFixed(2)),
+      y2: Number((160 + rOut * Math.sin(rad)).toFixed(2)),
+      frac: (i + 1) / count,
+    });
+  }
+  return items;
+};
+
+const RADIAL_LED_24 = buildRadialSegmentSpecs(24, 143.5, 152.5);
+const RADIAL_LED_12 = buildRadialSegmentSpecs(12, 143.5, 152.5);
+const RADIAL_LED_60_MIN = buildRadialSegmentSpecs(60, 130.5, 137.5);
+const RADIAL_LED_60_SEC = buildRadialSegmentSpecs(60, 117.2, 122.8);
+
+const RADIAL_TURBINE_BLADES: string[] = (() => {
+  const blades: string[] = [];
+  const count = 16;
+  for (let i = 0; i < count; i++) {
+    const base = (i * 2 * Math.PI) / count;
+    const aIn1 = base;
+    const aIn2 = base + 0.14;
+    const aMid = base + 0.24;
+    const aOut1 = base + 0.34;
+    const aOut2 = base + 0.44;
+    const rIn = 109.5;
+    const rMid = 130;
+    const rOut = 150.5;
+    const p1x = (160 + rIn * Math.cos(aIn1)).toFixed(2);
+    const p1y = (160 + rIn * Math.sin(aIn1)).toFixed(2);
+    const c1x = (160 + rMid * Math.cos(aMid - 0.06)).toFixed(2);
+    const c1y = (160 + rMid * Math.sin(aMid - 0.06)).toFixed(2);
+    const p2x = (160 + rOut * Math.cos(aOut1)).toFixed(2);
+    const p2y = (160 + rOut * Math.sin(aOut1)).toFixed(2);
+    const p3x = (160 + rOut * Math.cos(aOut2)).toFixed(2);
+    const p3y = (160 + rOut * Math.sin(aOut2)).toFixed(2);
+    const c2x = (160 + rMid * Math.cos(aMid + 0.08)).toFixed(2);
+    const c2y = (160 + rMid * Math.sin(aMid + 0.08)).toFixed(2);
+    const p4x = (160 + rIn * Math.cos(aIn2)).toFixed(2);
+    const p4y = (160 + rIn * Math.sin(aIn2)).toFixed(2);
+    blades.push(`M ${p1x} ${p1y} Q ${c1x} ${c1y} ${p2x} ${p2y} L ${p3x} ${p3y} Q ${c2x} ${c2y} ${p4x} ${p4y} Z`);
+  }
+  return blades;
+})();
+
+const RADIAL_MANDALA_PETALS: string[] = (() => {
+  const petals: string[] = [];
+  const count = 12;
+  for (let i = 0; i < count; i++) {
+    const a0 = (i * 2 * Math.PI) / count - Math.PI / 2;
+    const aL = a0 - 0.22;
+    const aR = a0 + 0.22;
+    const xBaseL = (160 + 109 * Math.cos(aL)).toFixed(2);
+    const yBaseL = (160 + 109 * Math.sin(aL)).toFixed(2);
+    const xTip = (160 + 153.5 * Math.cos(a0)).toFixed(2);
+    const yTip = (160 + 153.5 * Math.sin(a0)).toFixed(2);
+    const xCtrlL = (160 + 132 * Math.cos(a0 - 0.26)).toFixed(2);
+    const yCtrlL = (160 + 132 * Math.sin(a0 - 0.26)).toFixed(2);
+    const xCtrlR = (160 + 132 * Math.cos(a0 + 0.26)).toFixed(2);
+    const yCtrlR = (160 + 132 * Math.sin(a0 + 0.26)).toFixed(2);
+    const xBaseR = (160 + 109 * Math.cos(aR)).toFixed(2);
+    const yBaseR = (160 + 109 * Math.sin(aR)).toFixed(2);
+    petals.push(`M ${xBaseL} ${yBaseL} Q ${xCtrlL} ${yCtrlL} ${xTip} ${yTip} Q ${xCtrlR} ${yCtrlR} ${xBaseR} ${yBaseR}`);
+  }
+  return petals;
+})();
+
+const buildPolarHarmonicPath = (
+  cx: number,
+  cy: number,
+  baseR: number,
+  amp: number,
+  lobes: number,
+  phaseRad: number,
+  progressFrac: number,
+  steps = 72
+): { d: string; tipX: number; tipY: number } => {
+  const clamped = Math.min(1, Math.max(0.002, progressFrac));
+  const segs = Math.max(4, Math.round(steps * clamped));
+  const cmds: string[] = [];
+  let lastX = cx;
+  let lastY = cy - baseR;
+  for (let i = 0; i <= segs; i++) {
+    const t = (i / segs) * clamped;
+    const theta = -Math.PI / 2 + t * Math.PI * 2;
+    const r = baseR + amp * Math.sin(lobes * (t * Math.PI * 2) + phaseRad);
+    const x = cx + r * Math.cos(theta);
+    const y = cy + r * Math.sin(theta);
+    lastX = x;
+    lastY = y;
+    cmds.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`);
+  }
+  if (clamped >= 0.999) cmds.push('Z');
+  return { d: cmds.join(' '), tipX: lastX, tipY: lastY };
+};
+
+const buildToroidalHelixData = (
+  cx: number,
+  cy: number,
+  meanR: number,
+  amp: number,
+  cycles: number,
+  phaseRad: number,
+  numRungs = 40
+) => {
+  const steps = 96;
+  const pathA: string[] = [];
+  const pathB: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const theta = -Math.PI / 2 + t * Math.PI * 2;
+    const wave = amp * Math.sin(cycles * (t * Math.PI * 2) + phaseRad);
+    const rA = meanR + wave;
+    const rB = meanR - wave;
+    pathA.push(`${i === 0 ? 'M' : 'L'} ${(cx + rA * Math.cos(theta)).toFixed(2)} ${(cy + rA * Math.sin(theta)).toFixed(2)}`);
+    pathB.push(`${i === 0 ? 'M' : 'L'} ${(cx + rB * Math.cos(theta)).toFixed(2)} ${(cy + rB * Math.sin(theta)).toFixed(2)}`);
+  }
+  pathA.push('Z');
+  pathB.push('Z');
+  const rungs: { x1: number; y1: number; x2: number; y2: number; frac: number }[] = [];
+  for (let i = 0; i < numRungs; i++) {
+    const t = i / numRungs;
+    const theta = -Math.PI / 2 + t * Math.PI * 2;
+    const wave = amp * Math.sin(cycles * (t * Math.PI * 2) + phaseRad);
+    const rA = meanR + wave;
+    const rB = meanR - wave;
+    rungs.push({
+      x1: Number((cx + rA * Math.cos(theta)).toFixed(2)),
+      y1: Number((cy + rA * Math.sin(theta)).toFixed(2)),
+      x2: Number((cx + rB * Math.cos(theta)).toFixed(2)),
+      y2: Number((cy + rB * Math.sin(theta)).toFixed(2)),
+      frac: (i + 1) / numRungs,
+    });
+  }
+  return { strandA: pathA.join(' '), strandB: pathB.join(' '), rungs };
+};
 
 // Precomputed Background Canvas geometry (800x600 viewBox)
 const BG_SOLAR_PLANETS: {
@@ -6496,6 +6842,1384 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
   );
 };
 
+export const RadialStyleGlyph: React.FC<{ styleId: RadialStyle; className?: string }> = ({
+  styleId,
+  className = 'w-4 h-4 shrink-0',
+}) => {
+  switch (styleId) {
+    case 'chronograph':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeOpacity="0.28" strokeWidth="1.6" />
+          <path d="M 10 2 A 8 8 0 1 1 3.2 14.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M 10 4.8 A 5.2 5.2 0 1 1 5.6 12.8" stroke="currentColor" strokeOpacity="0.72" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="10" cy="10" r="1.4" fill="currentColor" />
+        </svg>
+      );
+    case 'solar_orbit':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="2.2" fill="#fbbf24" />
+          <circle cx="10" cy="10" r="5.4" stroke="#38bdf8" strokeOpacity="0.55" strokeWidth="1" />
+          <circle cx="10" cy="10" r="8.2" stroke="#f59e0b" strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 1.6" />
+          <circle cx="14.2" cy="6.6" r="1.35" fill="#38bdf8" />
+          <g transform="translate(5.5 14.5) rotate(-25)">
+            <ellipse cx="0" cy="0" rx="3.2" ry="1.1" stroke="#fde68a" strokeWidth="0.9" />
+            <circle cx="0" cy="0" r="1.4" fill="#f59e0b" />
+          </g>
+        </svg>
+      );
+    case 'galaxy_vortex':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="2.1" fill="#fef08a" />
+          <path d="M 10 10 C 13 6, 17 8, 16.5 13" stroke="#38bdf8" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M 10 10 C 7 14, 3 12, 3.5 7" stroke="#c084fc" strokeWidth="1.6" strokeLinecap="round" />
+          <circle cx="14.5" cy="4.8" r="0.8" fill="#ffffff" />
+          <circle cx="5.2" cy="15.2" r="0.8" fill="#7dd3fc" />
+        </svg>
+      );
+    case 'supernova':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.5" stroke="#a855f7" strokeOpacity="0.5" strokeWidth="1.4" strokeDasharray="3 2" />
+          <line x1="10" y1="1.8" x2="10" y2="18.2" stroke="#38bdf8" strokeWidth="1.4" strokeLinecap="round" />
+          <line x1="2.2" y1="10" x2="17.8" y2="10" stroke="#f472b6" strokeWidth="1.2" strokeLinecap="round" />
+          <circle cx="10" cy="10" r="2.6" fill="#ffffff" stroke="#38bdf8" strokeWidth="1" />
+        </svg>
+      );
+    case 'blackhole_lens':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="4" fill="#020617" stroke="#fb923c" strokeWidth="1.4" />
+          <ellipse cx="10" cy="10" rx="8.4" ry="2.6" transform="rotate(-18 10 10)" stroke="#fde68a" strokeWidth="1.4" />
+          <path d="M 6.2 8.2 A 4.8 4.4 0 0 1 13.8 8.2" stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+      );
+    case 'cyber_hud':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <path d="M 3 7 V 3 H 7 M 13 3 H 17 V 7 M 17 13 V 17 H 13 M 7 17 H 3 V 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <circle cx="10" cy="10" r="4.6" stroke="currentColor" strokeWidth="1.3" strokeDasharray="4 2" />
+          <polygon points="10,4.2 11.4,6.4 8.6,6.4" fill="currentColor" />
+        </svg>
+      );
+    case 'segmented_led':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, idx) => {
+            const rad = ((deg - 90) * Math.PI) / 180;
+            const active = idx < 6;
+            return (
+              <line
+                key={deg}
+                x1={10 + 5.2 * Math.cos(rad)}
+                y1={10 + 5.2 * Math.sin(rad)}
+                x2={10 + 8.0 * Math.cos(rad)}
+                y2={10 + 8.0 * Math.sin(rad)}
+                stroke="currentColor"
+                strokeOpacity={active ? 1 : 0.25}
+                strokeWidth="2.1"
+                strokeLinecap="round"
+              />
+            );
+          })}
+        </svg>
+      );
+    case 'turbine':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="10" cy="10" r="2.2" fill="currentColor" />
+          {[0, 60, 120, 180, 240, 300].map((deg) => (
+            <path
+              key={deg}
+              d="M 10 7.8 Q 13 5.5 16.5 5.2"
+              transform={`rotate(${deg} 10 10)`}
+              stroke="currentColor"
+              strokeWidth="1.35"
+              strokeLinecap="round"
+            />
+          ))}
+        </svg>
+      );
+    case 'waveform':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeOpacity="0.25" strokeWidth="1" />
+          <path
+            d="M 2.5 10 Q 5 5.5 7.5 10 T 12.5 10 T 17.5 10"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+          />
+          <circle cx="15.5" cy="7" r="1.4" fill="currentColor" />
+        </svg>
+      );
+    case 'dna_helix':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <path d="M 3 5 Q 10 15 17 5" stroke="#22d3ee" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M 3 15 Q 10 5 17 15" stroke="#f472b6" strokeWidth="1.6" strokeLinecap="round" />
+          <line x1="6.5" y1="8.2" x2="6.5" y2="11.8" stroke="currentColor" strokeWidth="1.2" />
+          <line x1="10" y1="6.8" x2="10" y2="13.2" stroke="currentColor" strokeWidth="1.2" />
+          <line x1="13.5" y1="8.2" x2="13.5" y2="11.8" stroke="currentColor" strokeWidth="1.2" />
+        </svg>
+      );
+    case 'synth_prism':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="9.5" r="6.8" fill="#ec4899" fillOpacity="0.22" stroke="#f472b6" strokeWidth="1.4" />
+          <line x1="4" y1="11.5" x2="16" y2="11.5" stroke="#fde047" strokeWidth="1.3" />
+          <line x1="5" y1="14" x2="15" y2="14" stroke="#22d3ee" strokeWidth="1.3" />
+          <polygon points="10,4.5 13.5,10 6.5,10" stroke="#fde047" strokeWidth="1.2" fill="none" />
+        </svg>
+      );
+    case 'fractal_mandala':
+    default:
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1.2" />
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+            <ellipse
+              key={deg}
+              cx="10"
+              cy="5.2"
+              rx="1.6"
+              ry="3.2"
+              transform={`rotate(${deg} 10 10)`}
+              stroke="currentColor"
+              strokeWidth="1.05"
+            />
+          ))}
+        </svg>
+      );
+  }
+};
+
+export interface RadialClockGaugeProps {
+  styleId: RadialStyle;
+  motionMode: AnalogMotion;
+  timezone: string;
+  baseTime: Date;
+  is24Hour: boolean;
+  showSeconds: boolean;
+  showDate: boolean;
+  fontStyle: FontStyle;
+  fontClassName: string;
+  animationTextClass: string;
+  themeConfig: ThemeStyles;
+  isFullscreen: boolean;
+}
+
+export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
+  styleId,
+  motionMode,
+  timezone,
+  baseTime,
+  is24Hour,
+  showSeconds,
+  showDate,
+  fontStyle,
+  fontClassName,
+  animationTextClass,
+  themeConfig,
+  isFullscreen,
+}) => {
+  const rUid = useId().replace(/:/g, '');
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setPrefersReducedMotion(mq.matches);
+    update();
+    mq.addEventListener?.('change', update);
+    return () => mq.removeEventListener?.('change', update);
+  }, []);
+
+  const hasKineticLoop =
+    motionMode === 'sweep' &&
+    !prefersReducedMotion &&
+    (showSeconds || !['chronograph', 'segmented_led'].includes(styleId));
+
+  const [liveSnapshot, setLiveSnapshot] = useState<AnalogTimeSnapshot>(() =>
+    getTimezoneSnapshot(Date.now(), timezone)
+  );
+
+  useEffect(() => {
+    if (!hasKineticLoop) return;
+    let rafId = 0;
+    const loop = () => {
+      setLiveSnapshot(getTimezoneSnapshot(Date.now(), timezone));
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, [hasKineticLoop, timezone]);
+
+  const activeSnapshot: AnalogTimeSnapshot = useMemo(() => {
+    if (hasKineticLoop) return liveSnapshot;
+    return {
+      nowMs: baseTime.getTime(),
+      hours24: baseTime.getHours(),
+      minutes: baseTime.getMinutes(),
+      seconds: baseTime.getSeconds(),
+      milliseconds: 0,
+      dayNum: baseTime.getDate(),
+      weekdayShort: baseTime.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 3).toUpperCase(),
+      monthShort: baseTime.toLocaleDateString('en-US', { month: 'short' }).slice(0, 3).toUpperCase(),
+    };
+  }, [hasKineticLoop, liveSnapshot, baseTime]);
+
+  const isSweeping = motionMode === 'sweep' && !prefersReducedMotion;
+  const maxHours = is24Hour ? 24 : 12;
+  const secFloat = activeSnapshot.seconds + (isSweeping ? activeSnapshot.milliseconds / 1000 : 0);
+  const minFloat = activeSnapshot.minutes + secFloat / 60;
+  const hrFloat = (activeSnapshot.hours24 % maxHours) + minFloat / 60;
+  const continuousSec = activeSnapshot.nowMs / 1000;
+
+  const hrProgress = Math.min(1, Math.max(0.002, hrFloat / maxHours));
+  const minProgress = Math.min(1, Math.max(0.002, minFloat / 60));
+  const secProgress = Math.min(
+    1,
+    Math.max(0.002, isSweeping ? secFloat / 60 : (activeSnapshot.seconds + 1) / 60)
+  );
+
+  let dispH = activeSnapshot.hours24;
+  let localAmpm = '';
+  if (!is24Hour) {
+    localAmpm = dispH >= 12 ? 'PM' : 'AM';
+    dispH = dispH % 12 || 12;
+  }
+  const hoursStr = dispH.toString().padStart(2, '0');
+  const minutesStr = activeSnapshot.minutes.toString().padStart(2, '0');
+  const secondsStr = activeSnapshot.seconds.toString().padStart(2, '0');
+  const liveDayProgress = Math.round(
+    ((activeSnapshot.hours24 * 3600 + activeSnapshot.minutes * 60 + activeSnapshot.seconds) / 86400) * 100
+  );
+  const isWideFont = fontStyle === 'digital' || fontStyle === 'minimal';
+
+  // Ring geometry anchored strictly to RADIAL_GAUGE_CONFIG
+  const cx = RADIAL_GAUGE_CONFIG.center;
+  const cy = RADIAL_GAUGE_CONFIG.center;
+  const r1Radius = RADIAL_GAUGE_CONFIG.hoursRadius;
+  const r2Radius = RADIAL_GAUGE_CONFIG.minutesRadius;
+  const r3Radius = RADIAL_GAUGE_CONFIG.secondsRadius;
+  const innerR = RADIAL_GAUGE_CONFIG.innerChamberRadius;
+
+  const r1Circ = 2 * Math.PI * r1Radius;
+  const r2Circ = 2 * Math.PI * r2Radius;
+  const r3Circ = 2 * Math.PI * r3Radius;
+
+  const r1Offset = r1Circ * (1 - hrProgress);
+  const r2Offset = r2Circ * (1 - minProgress);
+  const r3Offset = r3Circ * (1 - secProgress);
+
+  const r1TipRad = ((hrProgress * 360 - 90) * Math.PI) / 180;
+  const r1TipX = cx + r1Radius * Math.cos(r1TipRad);
+  const r1TipY = cy + r1Radius * Math.sin(r1TipRad);
+  const r1Deg = hrProgress * 360;
+
+  const r2TipRad = ((minProgress * 360 - 90) * Math.PI) / 180;
+  const r2TipX = cx + r2Radius * Math.cos(r2TipRad);
+  const r2TipY = cy + r2Radius * Math.sin(r2TipRad);
+  const r2Deg = minProgress * 360;
+
+  const r3TipRad = ((secProgress * 360 - 90) * Math.PI) / 180;
+  const r3TipX = cx + r3Radius * Math.cos(r3TipRad);
+  const r3TipY = cy + r3Radius * Math.sin(r3TipRad);
+  const r3Deg = secProgress * 360;
+
+  // Color system with dark cosmic cavity contrast protection
+  const isLight = Boolean(themeConfig.isLight);
+  const isDarkChamber = RADIAL_DARK_CHAMBER_STYLES.has(styleId);
+  const useLightInkOnDark = isLight && isDarkChamber;
+
+  const boostDark = isDarkChamber || !isLight;
+  const ringHr = boostDark ? ensureBrightHex(themeConfig.handHr, '#fbbf24') : themeConfig.handHr;
+  const ringMin = boostDark ? ensureBrightHex(themeConfig.handMin, '#38bdf8') : themeConfig.handMin;
+  const ringSec = boostDark ? ensureBrightHex(themeConfig.handSec, '#f43f5e') : themeConfig.handSec;
+  const ringBorder = boostDark ? ensureBrightHex(themeConfig.dialBorder, '#38bdf8') : themeConfig.dialBorder;
+
+  const trackStroke = isDarkChamber
+    ? 'rgba(255,255,255,0.11)'
+    : isLight
+      ? 'rgba(15,23,42,0.10)'
+      : 'rgba(255,255,255,0.09)';
+
+  // Kinetic motion angles
+  const kineticSec = prefersReducedMotion ? 0 : continuousSec;
+  const galaxySpinDeg = (kineticSec * 6.5) % 360;
+  const galaxyCounterDeg = (-kineticSec * 2.2) % 360;
+  const turbineSpinDeg = (kineticSec * 16) % 360;
+  const turbineStatorDeg = (-kineticSec * 6) % 360;
+  const hudVernierDeg = (kineticSec * 4) % 360;
+  const earthMoonDeg = (kineticSec * 46) % 360;
+  const blackholePlasmaDeg = (kineticSec * 36) % 360;
+  const mandalaOuterDeg = (kineticSec * 3.5) % 360;
+  const mandalaInnerDeg = (-kineticSec * 5.2) % 360;
+  const solarLongitudes = styleId === 'solar_orbit' ? computeSolarSystemLongitudes(activeSnapshot.nowMs) : null;
+
+  // Real-time Polar Wave & Toroidal Helix geometries
+  const wavePhase = kineticSec * 3.4;
+  const waveHr =
+    styleId === 'waveform' ? buildPolarHarmonicPath(cx, cy, r1Radius, 2.3, 12, wavePhase, hrProgress, 72) : null;
+  const waveMin =
+    styleId === 'waveform'
+      ? buildPolarHarmonicPath(cx, cy, r2Radius, 2.5, 18, -wavePhase * 1.25, minProgress, 84)
+      : null;
+  const waveSec =
+    styleId === 'waveform' && showSeconds
+      ? buildPolarHarmonicPath(cx, cy, r3Radius, 2.5, 24, wavePhase * 1.6, secProgress, 84)
+      : null;
+  const waveGhostHr =
+    styleId === 'waveform' ? buildPolarHarmonicPath(cx, cy, r1Radius, 2.3, 12, wavePhase, 1, 72).d : '';
+  const waveGhostMin =
+    styleId === 'waveform' ? buildPolarHarmonicPath(cx, cy, r2Radius, 2.5, 18, -wavePhase * 1.25, 1, 84).d : '';
+  const waveGhostSec =
+    styleId === 'waveform' && showSeconds
+      ? buildPolarHarmonicPath(cx, cy, r3Radius, 2.5, 24, wavePhase * 1.6, 1, 84).d
+      : '';
+
+  const helixData =
+    styleId === 'dna_helix' ? buildToroidalHelixData(cx, cy, r2Radius, 9.2, 12, kineticSec * 1.4, 48) : null;
+
+  // Center text classes
+  const clockTextClass = useLightInkOnDark
+    ? 'text-white drop-shadow-[0_0_24px_rgba(56,189,248,0.65)]'
+    : themeConfig.clockText;
+  const accentTextClass = useLightInkOnDark ? 'text-sky-300' : themeConfig.accent;
+  const badgeClass = useLightInkOnDark ? 'bg-sky-400/20 text-sky-200 border-sky-400/40' : themeConfig.badgeBg;
+  const subTextClass = useLightInkOnDark ? 'text-slate-300' : themeConfig.subText || 'text-slate-400';
+
+  const dateMicroLabel = `${activeSnapshot.weekdayShort} ${activeSnapshot.monthShort} ${activeSnapshot.dayNum}`;
+
+  return (
+    <div
+      style={
+        isFullscreen
+          ? ({ '--radial-d': 'clamp(16rem, min(72vh, 84vw), 46rem)' } as React.CSSProperties)
+          : undefined
+      }
+      className={`relative flex items-center justify-center ${
+        isFullscreen
+          ? 'w-[var(--radial-d)] h-[var(--radial-d)]'
+          : 'w-72 h-72 sm:w-80 sm:h-80 md:w-[25rem] md:h-[25rem]'
+      }`}
+    >
+      <svg
+        viewBox={`0 0 ${RADIAL_GAUGE_CONFIG.viewBoxSize} ${RADIAL_GAUGE_CONFIG.viewBoxSize}`}
+        className="w-full h-full drop-shadow-2xl select-none"
+      >
+        <defs>
+          <radialGradient id={`${rUid}-space-lens`} cx="50%" cy="48%" r="54%">
+            <stop offset="0%" stopColor="#0f1b3d" stopOpacity="0.96" />
+            <stop offset="56%" stopColor="#060b1c" stopOpacity="0.98" />
+            <stop offset="100%" stopColor="#02040a" stopOpacity="1" />
+          </radialGradient>
+
+          <radialGradient id={`${rUid}-bh-lens`} cx="50%" cy="50%" r="54%">
+            <stop offset="0%" stopColor="#000000" stopOpacity="1" />
+            <stop offset="56%" stopColor="#040208" stopOpacity="0.99" />
+            <stop offset="100%" stopColor="#0d0512" stopOpacity="1" />
+          </radialGradient>
+
+          <radialGradient id={`${rUid}-galaxy-core`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#02040a" stopOpacity="0.95" />
+            <stop offset="48%" stopColor="#091028" stopOpacity="0.88" />
+            <stop offset="72%" stopColor={ringMin} stopOpacity="0.34" />
+            <stop offset="88%" stopColor="#a855f7" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="#02040a" stopOpacity="0" />
+          </radialGradient>
+
+          <radialGradient id={`${rUid}-solar-corona`} cx="50%" cy="50%" r="50%">
+            <stop offset="52%" stopColor="#02040a" stopOpacity="0" />
+            <stop offset="68%" stopColor="#f59e0b" stopOpacity="0.34" />
+            <stop offset="78%" stopColor="#fef08a" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="#ea580c" stopOpacity="0" />
+          </radialGradient>
+
+          <linearGradient id={`${rUid}-pulsar-beam`} x1="50%" y1="100%" x2="50%" y2="0%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.82" />
+            <stop offset="45%" stopColor={ringSec} stopOpacity="0.48" />
+            <stop offset="100%" stopColor={ringMin} stopOpacity="0" />
+          </linearGradient>
+
+          <linearGradient id={`${rUid}-pulsar-beam-rev`} x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.82" />
+            <stop offset="45%" stopColor={ringSec} stopOpacity="0.48" />
+            <stop offset="100%" stopColor={ringMin} stopOpacity="0" />
+          </linearGradient>
+
+          <linearGradient id={`${rUid}-bh-accretion`} x1="0%" y1="50%" x2="100%" y2="50%">
+            <stop offset="0%" stopColor="#9a3412" stopOpacity="0.14" />
+            <stop offset="22%" stopColor="#f97316" stopOpacity="0.88" />
+            <stop offset="48%" stopColor="#fffbeb" stopOpacity="0.98" />
+            <stop offset="76%" stopColor="#fbbf24" stopOpacity="0.82" />
+            <stop offset="100%" stopColor="#7c2d12" stopOpacity="0.14" />
+          </linearGradient>
+
+          <linearGradient id={`${rUid}-radar-wedge`} x1="50%" y1="50%" x2="88%" y2="8%">
+            <stop offset="0%" stopColor={ringSec} stopOpacity="0" />
+            <stop offset="65%" stopColor={ringSec} stopOpacity="0.08" />
+            <stop offset="100%" stopColor={ringSec} stopOpacity="0.32" />
+          </linearGradient>
+
+          <linearGradient id={`${rUid}-turbine-blade`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={isLight ? '#cbd5e1' : '#94a3b8'} stopOpacity="0.52" />
+            <stop offset="52%" stopColor={isLight ? '#64748b' : '#475569'} stopOpacity="0.28" />
+            <stop offset="100%" stopColor={isLight ? '#334155' : '#1e293b'} stopOpacity="0.58" />
+          </linearGradient>
+
+          <linearGradient id={`${rUid}-synth-sky`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#060214" />
+            <stop offset="52%" stopColor="#1b063d" />
+            <stop offset="84%" stopColor="#581c87" />
+            <stop offset="100%" stopColor="#db2777" />
+          </linearGradient>
+
+          <linearGradient id={`${rUid}-synth-spectrum`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fde047" />
+            <stop offset="35%" stopColor="#f43f5e" />
+            <stop offset="70%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#22d3ee" />
+          </linearGradient>
+
+          <filter id={`${rUid}-nebula-blur`} x="-35%" y="-35%" width="170%" height="170%">
+            <feGaussianBlur stdDeviation="4.8" />
+          </filter>
+
+          <filter id={`${rUid}-soft-glow`} x="-35%" y="-35%" width="170%" height="170%">
+            <feGaussianBlur stdDeviation="2.6" />
+          </filter>
+
+          <clipPath id={`${rUid}-outer-lens-clip`}>
+            <circle cx={cx} cy={cy} r="155.5" />
+          </clipPath>
+
+          <clipPath id={`${rUid}-chamber-clip`}>
+            <circle cx={cx} cy={cy} r={innerR} />
+          </clipPath>
+
+          <path id={`${rUid}-bottom-date-arc`} d="M 78 214 A 98 98 0 0 0 242 214" />
+        </defs>
+
+        {/* ================= OUTER LENS & SCENIC BACKDROP (CLIPPED TO r=155.5) ================= */}
+        <g clipPath={`url(#${rUid}-outer-lens-clip)`}>
+          {isDarkChamber && (
+            <circle
+              cx={cx}
+              cy={cy}
+              r="155.5"
+              fill={
+                styleId === 'blackhole_lens'
+                  ? `url(#${rUid}-bh-lens)`
+                  : styleId === 'synth_prism'
+                    ? `url(#${rUid}-synth-sky)`
+                    : `url(#${rUid}-space-lens)`
+              }
+            />
+          )}
+
+          {/* STYLE 2: SOLAR SYSTEM COSMIC PLANETARIUM BACKDROP */}
+          {styleId === 'solar_orbit' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="154" fill={`url(#${rUid}-solar-corona)`} />
+              {RADIAL_COSMIC_STARS.map((st, idx) => (
+                <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill="#e2e8f0" fillOpacity={st.op} />
+              ))}
+              {/* Asteroid Belt & Ephemeris Reference Trails */}
+              {RADIAL_ASTEROID_BELT.map((ast, idx) => (
+                <circle key={idx} cx={ast.x} cy={ast.y} r={ast.r} fill="#94a3b8" fillOpacity={ast.op} />
+              ))}
+              <circle cx={cx} cy={cy} r="113" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
+              <circle cx={cx} cy={cy} r="141" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
+              <circle cx={cx} cy={cy} r="154" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.6" strokeDasharray="2 4" />
+              {/* Live J2000 Background Ephemeris Micro-Planets */}
+              {solarLongitudes &&
+                [
+                  { deg: solarLongitudes.mercury, r: 113, size: 2.0, col: '#cbd5e1' },
+                  { deg: solarLongitudes.venus, r: 127, size: 2.6, col: '#fde68a' },
+                  { deg: solarLongitudes.mars, r: 141, size: 2.4, col: '#fb7185' },
+                  { deg: solarLongitudes.jupiter, r: 154, size: 3.1, col: '#fdba74' },
+                ].map((pl, idx) => {
+                  const rad = ((pl.deg - 90) * Math.PI) / 180;
+                  const px = cx + pl.r * Math.cos(rad);
+                  const py = cy + pl.r * Math.sin(rad);
+                  return <circle key={idx} cx={px} cy={py} r={pl.size} fill={pl.col} fillOpacity="0.78" />;
+                })}
+            </g>
+          )}
+
+          {/* STYLE 3: SPIRAL GALAXY ROTATING NEBULA & STAR CLUSTERS */}
+          {styleId === 'galaxy_vortex' && (
+            <g pointerEvents="none">
+              <g transform={`rotate(${galaxyCounterDeg} ${cx} ${cy})`}>
+                {RADIAL_COSMIC_STARS.map((st, idx) => (
+                  <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill="#cbd5e1" fillOpacity={st.op * 0.7} />
+                ))}
+              </g>
+              <g transform={`rotate(${galaxySpinDeg} ${cx} ${cy})`}>
+                <circle cx={cx} cy={cy} r="154" fill={`url(#${rUid}-galaxy-core)`} />
+                <g filter={`url(#${rUid}-nebula-blur)`}>
+                  {RADIAL_GALAXY_ARMS.map((arm, idx) => {
+                    const armCol = arm.tone === 'c1' ? ringSec : arm.tone === 'c2' ? '#a855f7' : '#38bdf8';
+                    return (
+                      <g key={idx}>
+                        <path d={arm.main} fill="none" stroke={armCol} strokeWidth="16" strokeOpacity="0.34" strokeLinecap="round" />
+                        <path d={arm.main} fill="none" stroke={armCol} strokeWidth="7.5" strokeOpacity="0.45" strokeLinecap="round" />
+                        <path d={arm.sub} fill="none" stroke="#f472b6" strokeWidth="5.5" strokeOpacity="0.3" strokeLinecap="round" />
+                      </g>
+                    );
+                  })}
+                </g>
+                {RADIAL_GALAXY_STARS.map((st, idx) => {
+                  const col =
+                    st.hue === 'white'
+                      ? '#ffffff'
+                      : st.hue === 'gold'
+                        ? '#fde68a'
+                        : st.hue === 'pink'
+                          ? '#f472b6'
+                          : st.hue === 'c1'
+                            ? ringSec
+                            : '#7dd3fc';
+                  return <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill={col} fillOpacity={st.op} />;
+                })}
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 4: PULSAR NEBULA ROTATING MAGNETAR BEAMS */}
+          {styleId === 'supernova' && (
+            <g pointerEvents="none">
+              {RADIAL_COSMIC_STARS.map((st, idx) => (
+                <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill="#f8fafc" fillOpacity={st.op * 0.72} />
+              ))}
+              <g filter={`url(#${rUid}-nebula-blur)`}>
+                <circle cx={cx} cy={cy} r="138" fill="none" stroke={ringMin} strokeWidth="15" strokeOpacity="0.2" />
+                <circle cx={cx} cy={cy} r="122" fill="none" stroke="#c084fc" strokeWidth="11" strokeOpacity="0.2" />
+              </g>
+              {/* Twin Opposing Relativistic Pulsar Beams Sweeping Around the Annulus */}
+              <g transform={`rotate(${r3Deg} ${cx} ${cy})`}>
+                <path
+                  d="M 148 52 L 136 2 L 184 2 L 172 52 Z"
+                  fill={`url(#${rUid}-pulsar-beam)`}
+                  filter={`url(#${rUid}-soft-glow)`}
+                />
+                <line x1={cx} y1="52" x2={cx} y2="6" stroke="#ffffff" strokeWidth="1.6" strokeOpacity="0.72" />
+                <path
+                  d="M 148 268 L 136 318 L 184 318 L 172 268 Z"
+                  fill={`url(#${rUid}-pulsar-beam-rev)`}
+                  filter={`url(#${rUid}-soft-glow)`}
+                />
+                <line x1={cx} y1="268" x2={cx} y2="314" stroke="#ffffff" strokeWidth="1.6" strokeOpacity="0.72" />
+                <circle cx={cx} cy={cy} r="141" fill="none" stroke="#ffffff" strokeWidth="0.85" strokeOpacity="0.28" strokeDasharray="3 9" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 5: SINGULARITY GRAVITATIONAL LENSING PLANE */}
+          {styleId === 'blackhole_lens' && (
+            <g pointerEvents="none">
+              {RADIAL_COSMIC_STARS.filter((_, i) => i % 2 === 0).map((st, idx) => (
+                <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill="#e2e8f0" fillOpacity={st.op * 0.65} />
+              ))}
+              <g transform={`rotate(-14 ${cx} ${cy})`}>
+                {/* Upper & Lower Warped Gravitational Lensing Arches */}
+                <g filter={`url(#${rUid}-soft-glow)`}>
+                  <path d="M 38 158 A 122 118 0 0 1 282 158" fill="none" stroke="#ea580c" strokeWidth="14" strokeOpacity="0.42" />
+                  <path d="M 44 158 A 116 112 0 0 1 276 158" fill="none" stroke="#fde68a" strokeWidth="5.5" strokeOpacity="0.68" />
+                  <path d="M 42 162 A 118 112 0 0 0 278 162" fill="none" stroke="#f97316" strokeWidth="9" strokeOpacity="0.34" />
+                  {/* Asymmetric Relativistic Doppler Equator Wings */}
+                  <ellipse cx={cx} cy={cy} rx="154" ry="22" fill="none" stroke={`url(#${rUid}-bh-accretion)`} strokeWidth="13" strokeOpacity="0.78" />
+                  <path d="M 6 160 L 54 156 L 54 164 Z" fill="#fffbeb" fillOpacity="0.72" />
+                  <path d="M 314 160 L 266 157 L 266 163 Z" fill="#f97316" fillOpacity="0.58" />
+                </g>
+                {/* Crisp Inner Accretion Highlight Filaments */}
+                <ellipse cx={cx} cy={cy} rx="153" ry="18" fill="none" stroke="#fffbeb" strokeWidth="1.4" strokeOpacity="0.62" />
+                {/* Live Relativistic Accretion Filaments */}
+                {[0, 120, 240].map((offset, idx) => {
+                  const deg = (blackholePlasmaDeg + offset) % 360;
+                  const rad = (deg * Math.PI) / 180;
+                  const rx = 148 - idx * 7;
+                  const ry = rx * 0.24;
+                  const px = cx + rx * Math.cos(rad);
+                  const py = cy + ry * Math.sin(rad);
+                  const hiddenBehindCore = Math.hypot(px - cx, py - cy) < innerR - 4;
+                  if (hiddenBehindCore) return null;
+                  return <ellipse key={idx} cx={px} cy={py} rx="5" ry="1.8" fill="#fffbeb" fillOpacity="0.92" />;
+                })}
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 11: SYNTHWAVE OUTRUN LASER HORIZON */}
+          {styleId === 'synth_prism' && (
+            <g pointerEvents="none">
+              {RADIAL_COSMIC_STARS.slice(0, 36).map((st, idx) => (
+                <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill="#f0abfc" fillOpacity={st.op * 0.8} />
+              ))}
+              {/* Perspective Laser Horizon Grid Across Lower Outer Annulus */}
+              <g stroke="#22d3ee" strokeOpacity="0.34" strokeWidth="0.9">
+                <line x1="6" y1="226" x2="314" y2="226" />
+                <line x1="12" y1="244" x2="308" y2="244" />
+                <line x1="22" y1="264" x2="298" y2="264" />
+                <line x1="40" y1="286" x2="280" y2="286" />
+                {[-3, -2, -1, 0, 1, 2, 3].map((k) => (
+                  <line key={k} x1={cx + k * 14} y1="160" x2={cx + k * 66} y2="316" stroke="#f472b6" strokeOpacity="0.28" />
+                ))}
+              </g>
+              {/* Top Glowing Outrun Sun Corona Arc */}
+              <circle cx={cx} cy="72" r="56" fill="#f97316" fillOpacity="0.16" filter={`url(#${rUid}-nebula-blur)`} />
+            </g>
+          )}
+
+          {/* STYLE 8: MACH TURBINE ROTATING STATOR & COMPRESSOR BLADES */}
+          {styleId === 'turbine' && (
+            <g pointerEvents="none">
+              <g transform={`rotate(${turbineStatorDeg} ${cx} ${cy})`}>
+                {Array.from({ length: 12 }).map((_, idx) => {
+                  const deg = idx * 30;
+                  return (
+                    <line
+                      key={idx}
+                      x1={cx}
+                      y1="52"
+                      x2={cx}
+                      y2="7"
+                      transform={`rotate(${deg} ${cx} ${cy})`}
+                      stroke={ringHr}
+                      strokeWidth="1.2"
+                      strokeOpacity="0.24"
+                    />
+                  );
+                })}
+              </g>
+              <g transform={`rotate(${turbineSpinDeg} ${cx} ${cy})`}>
+                {RADIAL_TURBINE_BLADES.map((d, idx) => (
+                  <path
+                    key={idx}
+                    d={d}
+                    fill={`url(#${rUid}-turbine-blade)`}
+                    stroke={isLight ? 'rgba(15,23,42,0.22)' : 'rgba(255,255,255,0.16)'}
+                    strokeWidth="0.7"
+                  />
+                ))}
+              </g>
+              {/* Outer Riveted Aerospace Stator Ring */}
+              <circle cx={cx} cy={cy} r="154.2" fill="none" stroke={trackStroke} strokeWidth="2.5" />
+              {Array.from({ length: 12 }).map((_, idx) => {
+                const rad = (idx * 30 * Math.PI) / 180;
+                return (
+                  <circle
+                    key={idx}
+                    cx={cx + 154.2 * Math.cos(rad)}
+                    cy={cy + 154.2 * Math.sin(rad)}
+                    r="1.75"
+                    fill={isLight ? '#475569' : '#94a3b8'}
+                    stroke={isLight ? '#0f172a' : '#020617'}
+                    strokeWidth="0.6"
+                  />
+                );
+              })}
+            </g>
+          )}
+
+          {/* STYLE 12: SACRED MANDALA ROTATING FILIGREE */}
+          {styleId === 'fractal_mandala' && (
+            <g pointerEvents="none">
+              <g transform={`rotate(${mandalaOuterDeg} ${cx} ${cy})`}>
+                {RADIAL_MANDALA_PETALS.map((d, idx) => (
+                  <path
+                    key={idx}
+                    d={d}
+                    fill={ringHr}
+                    fillOpacity="0.06"
+                    stroke={ringHr}
+                    strokeOpacity="0.34"
+                    strokeWidth="1.05"
+                  />
+                ))}
+              </g>
+              <g transform={`rotate(${mandalaInnerDeg + 15} ${cx} ${cy})`}>
+                {RADIAL_MANDALA_PETALS.map((d, idx) => (
+                  <path
+                    key={idx}
+                    d={d}
+                    fill="none"
+                    stroke={ringMin}
+                    strokeOpacity="0.28"
+                    strokeWidth="0.85"
+                    strokeDasharray="3 2"
+                  />
+                ))}
+              </g>
+              <circle cx={cx} cy={cy} r="154" fill="none" stroke={ringBorder} strokeWidth="0.9" strokeOpacity="0.4" />
+            </g>
+          )}
+
+          {/* STYLE 6: CYBER HUD TARGETING OPTICS & RADAR WEDGE */}
+          {styleId === 'cyber_hud' && (
+            <g pointerEvents="none">
+              <g transform={`rotate(${hudVernierDeg} ${cx} ${cy})`}>
+                {Array.from({ length: 36 }).map((_, idx) => {
+                  const deg = idx * 10;
+                  const major = idx % 3 === 0;
+                  const rad = (deg * Math.PI) / 180;
+                  return (
+                    <line
+                      key={idx}
+                      x1={cx + (major ? 151.5 : 153) * Math.cos(rad)}
+                      y1={cy + (major ? 151.5 : 153) * Math.sin(rad)}
+                      x2={cx + 155 * Math.cos(rad)}
+                      y2={cy + 155 * Math.sin(rad)}
+                      stroke={ringSec}
+                      strokeOpacity={major ? 0.65 : 0.25}
+                      strokeWidth={major ? 1.4 : 0.8}
+                    />
+                  );
+                })}
+              </g>
+              {/* 4 Corner Targeting Lock Brackets */}
+              {[45, 135, 225, 315].map((deg) => (
+                <path
+                  key={deg}
+                  d="M 150 6 L 160 4 L 170 6"
+                  transform={`rotate(${deg} ${cx} ${cy})`}
+                  fill="none"
+                  stroke={ringMin}
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeOpacity="0.72"
+                />
+              ))}
+              {/* Sweeping Radar Sector Wedge Following Seconds Angle */}
+              {showSeconds && (
+                <g transform={`rotate(${r3Deg} ${cx} ${cy})`}>
+                  <path
+                    d="M 160 52 A 108 108 0 0 0 112 63 L 94 25 A 150 150 0 0 1 160 10 Z"
+                    fill={`url(#${rUid}-radar-wedge)`}
+                  />
+                </g>
+              )}
+            </g>
+          )}
+
+          {/* STYLE 1: CHRONOGRAPH CALIBRATED VERNIER BEZEL */}
+          {styleId === 'chronograph' && (
+            <g pointerEvents="none">
+              {Array.from({ length: 60 }).map((_, idx) => {
+                const rad = (((idx * 6 - 90) * Math.PI) / 180);
+                const major = idx % 5 === 0;
+                return (
+                  <line
+                    key={idx}
+                    x1={cx + (major ? 152 : 153.2) * Math.cos(rad)}
+                    y1={cy + (major ? 152 : 153.2) * Math.sin(rad)}
+                    x2={cx + 155.2 * Math.cos(rad)}
+                    y2={cy + 155.2 * Math.sin(rad)}
+                    stroke={isLight ? '#0f172a' : '#ffffff'}
+                    strokeOpacity={major ? 0.45 : 0.16}
+                    strokeWidth={major ? 1.4 : 0.8}
+                    strokeLinecap="round"
+                  />
+                );
+              })}
+            </g>
+          )}
+        </g>
+
+        {/* ================= INNER CHRONOMETER CHAMBER BACKDROP (ALWAYS QUIET & CRISP) ================= */}
+        <circle
+          cx={cx}
+          cy={cy}
+          r={innerR}
+          fill={isDarkChamber ? (styleId === 'blackhole_lens' ? '#000000' : '#050918') : themeConfig.dialBg}
+          fillOpacity={isDarkChamber ? (styleId === 'galaxy_vortex' ? 0.78 : 0.88) : isLight ? 0.68 : 0.5}
+          stroke={
+            styleId === 'blackhole_lens'
+              ? '#fb923c'
+              : styleId === 'solar_orbit'
+                ? '#fbbf24'
+                : styleId === 'cyber_hud'
+                  ? ringSec
+                  : isDarkChamber
+                    ? 'rgba(255,255,255,0.22)'
+                    : isLight
+                      ? 'rgba(15,23,42,0.1)'
+                      : 'rgba(255,255,255,0.1)'
+          }
+          strokeOpacity={styleId === 'blackhole_lens' || styleId === 'solar_orbit' ? 0.85 : 0.45}
+          strokeWidth={styleId === 'blackhole_lens' || styleId === 'solar_orbit' ? 1.8 : 1.1}
+        />
+
+        {/* Subtle Inner Chamfer Ring & Optional Curved Bottom Date Engraving */}
+        <circle
+          cx={cx}
+          cy={cy}
+          r={innerR - 4}
+          fill="none"
+          stroke={isDarkChamber ? 'rgba(255,255,255,0.09)' : isLight ? 'rgba(15,23,42,0.06)' : 'rgba(255,255,255,0.06)'}
+          strokeWidth="0.7"
+          strokeDasharray={styleId === 'cyber_hud' ? '6 4' : undefined}
+        />
+
+        {/* Einstein Photon Ring Bloom on Black Hole Rim */}
+        {styleId === 'blackhole_lens' && (
+          <g pointerEvents="none">
+            <circle cx={cx} cy={cy} r={innerR + 0.8} fill="none" stroke="#fffbeb" strokeWidth="1.2" strokeOpacity="0.92" />
+            <circle
+              cx={cx}
+              cy={cy}
+              r={innerR + 2.2}
+              fill="none"
+              stroke="#fb923c"
+              strokeWidth="4.2"
+              strokeOpacity="0.48"
+              filter={`url(#${rUid}-soft-glow)`}
+            />
+          </g>
+        )}
+
+        {/* Style Signature Engraving at Top Rim of Chamber & Curved Date at Bottom Rim in Fullscreen */}
+        <text
+          x={cx}
+          y={cy - innerR + 14}
+          textAnchor="middle"
+          fontSize="5.6"
+          fontWeight="700"
+          letterSpacing="1.8"
+          fill={isDarkChamber || !isLight ? '#e2e8f0' : '#334155'}
+          fillOpacity="0.52"
+          style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}
+        >
+          {styleId === 'solar_orbit'
+            ? 'HELIOCENTRIC J2000'
+            : styleId === 'galaxy_vortex'
+              ? 'SPIRAL CORE NGC-72'
+              : styleId === 'supernova'
+                ? 'PULSAR MAGNETAR'
+                : styleId === 'blackhole_lens'
+                  ? 'EVENT HORIZON'
+                  : styleId === 'cyber_hud'
+                    ? 'HUD // OPTICS'
+                    : styleId === 'segmented_led'
+                      ? 'VU SPECTRUM'
+                      : styleId === 'turbine'
+                        ? 'MACH COMPRESSOR'
+                        : styleId === 'waveform'
+                          ? 'CYMATIC HARMONIC'
+                          : styleId === 'dna_helix'
+                            ? 'GENOME HELIX'
+                            : styleId === 'synth_prism'
+                              ? 'OUTRUN HORIZON'
+                              : styleId === 'fractal_mandala'
+                                ? 'ASTROLABE ROSETTE'
+                                : 'CHRONOGRAPH'}
+        </text>
+
+        {isFullscreen && showDate && (
+          <text
+            fontSize="6.5"
+            fontWeight="700"
+            letterSpacing="1.6"
+            fill={isDarkChamber || !isLight ? '#f1f5f9' : '#1e293b'}
+            fillOpacity="0.72"
+            style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}
+          >
+            <textPath href={`#${rUid}-bottom-date-arc`} startOffset="50%" textAnchor="middle">
+              {dateMicroLabel}
+            </textPath>
+          </text>
+        )}
+
+        {/* ================= RING PROGRESS LAYERS BY STYLE ================= */}
+        {styleId === 'segmented_led' ? (
+          /* STYLE 7: VU TURBINE CRYSTAL LED SEGMENTS */
+          <g>
+            {/* Outer Hours Block Segments */}
+            {(() => {
+              const hrBlocks = is24Hour ? RADIAL_LED_24 : RADIAL_LED_12;
+              const activeHrIdx = Math.min(hrBlocks.length - 1, Math.floor(hrProgress * hrBlocks.length));
+              return hrBlocks.map((seg, idx) => {
+                const lit = idx <= activeHrIdx;
+                const isHead = idx === activeHrIdx;
+                return (
+                  <line
+                    key={`hr-${idx}`}
+                    x1={seg.x1}
+                    y1={seg.y1}
+                    x2={seg.x2}
+                    y2={seg.y2}
+                    stroke={lit ? ringHr : trackStroke}
+                    strokeWidth={is24Hour ? 3.8 : 6.4}
+                    strokeLinecap="round"
+                    strokeOpacity={lit ? (isHead ? 1 : 0.85) : 0.9}
+                    style={lit ? { filter: `drop-shadow(0 0 ${isHead ? 6 : 3}px ${ringHr})` } : undefined}
+                  />
+                );
+              });
+            })()}
+
+            {/* Middle Minutes Matrix Bars */}
+            {(() => {
+              const activeMinIdx = Math.min(59, Math.floor(minProgress * 60));
+              return RADIAL_LED_60_MIN.map((seg, idx) => {
+                const lit = idx <= activeMinIdx;
+                const isHead = idx === activeMinIdx;
+                return (
+                  <line
+                    key={`min-${idx}`}
+                    x1={seg.x1}
+                    y1={seg.y1}
+                    x2={seg.x2}
+                    y2={seg.y2}
+                    stroke={lit ? ringMin : trackStroke}
+                    strokeWidth="2.8"
+                    strokeLinecap="round"
+                    strokeOpacity={lit ? (isHead ? 1 : 0.84) : 0.85}
+                    style={lit ? { filter: `drop-shadow(0 0 ${isHead ? 5 : 2.5}px ${ringMin})` } : undefined}
+                  />
+                );
+              });
+            })()}
+
+            {/* Inner Seconds Phosphor Matrix Bars with Smooth Decay Tail */}
+            {showSeconds &&
+              (() => {
+                const liveSecVal = isSweeping ? secFloat : activeSnapshot.seconds;
+                const activeSecIdx = Math.min(59, Math.max(0, Math.floor(liveSecVal)));
+                return RADIAL_LED_60_SEC.map((seg, idx) => {
+                  const lit = idx <= activeSecIdx;
+                  const distFromHead = activeSecIdx - idx;
+                  const isLead = idx === activeSecIdx;
+                  const inTail = distFromHead > 0 && distFromHead <= 4;
+                  const op = isLead ? 1 : inTail ? 0.94 - distFromHead * 0.08 : lit ? 0.56 : 0.78;
+                  return (
+                    <line
+                      key={`sec-${idx}`}
+                      x1={seg.x1}
+                      y1={seg.y1}
+                      x2={seg.x2}
+                      y2={seg.y2}
+                      stroke={lit ? (isLead ? '#ffffff' : ringSec) : trackStroke}
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeOpacity={op}
+                      style={
+                        lit && (isLead || inTail) ? { filter: `drop-shadow(0 0 ${isLead ? 6 : 3.5}px ${ringSec})` } : undefined
+                      }
+                    />
+                  );
+                });
+              })()}
+          </g>
+        ) : styleId === 'waveform' && waveHr && waveMin ? (
+          /* STYLE 9: SONIC CYMATIC HARMONIC WAVE RINGS */
+          <g>
+            {/* Reference Harmonic Wave Tracks */}
+            <path d={waveGhostHr} fill="none" stroke={trackStroke} strokeWidth="2.6" />
+            <path d={waveGhostMin} fill="none" stroke={trackStroke} strokeWidth="2.4" />
+            {showSeconds && waveGhostSec && <path d={waveGhostSec} fill="none" stroke={trackStroke} strokeWidth="2.2" />}
+
+            {/* Active Harmonic Waves */}
+            <path
+              d={waveHr.d}
+              fill="none"
+              stroke={ringHr}
+              strokeWidth="4.6"
+              strokeLinecap="round"
+              style={{ filter: `drop-shadow(0 0 5px ${ringHr})` }}
+            />
+            <path d={waveHr.d} fill="none" stroke="#ffffff" strokeWidth="1.2" strokeOpacity="0.65" strokeLinecap="round" />
+            <circle cx={waveHr.tipX} cy={waveHr.tipY} r="5.5" fill="none" stroke={ringHr} strokeWidth="1.1" strokeOpacity="0.48" />
+            <circle cx={waveHr.tipX} cy={waveHr.tipY} r="3.4" fill="#ffffff" stroke={ringHr} strokeWidth="1.7" />
+
+            <path
+              d={waveMin.d}
+              fill="none"
+              stroke={ringMin}
+              strokeWidth="4.2"
+              strokeLinecap="round"
+              style={{ filter: `drop-shadow(0 0 5px ${ringMin})` }}
+            />
+            <path d={waveMin.d} fill="none" stroke="#ffffff" strokeWidth="1.1" strokeOpacity="0.6" strokeLinecap="round" />
+            <circle cx={waveMin.tipX} cy={waveMin.tipY} r="5.2" fill="none" stroke={ringMin} strokeWidth="1.1" strokeOpacity="0.48" />
+            <circle cx={waveMin.tipX} cy={waveMin.tipY} r="3.2" fill="#ffffff" stroke={ringMin} strokeWidth="1.6" />
+
+            {showSeconds && waveSec && (
+              <>
+                <path
+                  d={waveSec.d}
+                  fill="none"
+                  stroke={ringSec}
+                  strokeWidth="3.8"
+                  strokeLinecap="round"
+                  style={{ filter: `drop-shadow(0 0 5px ${ringSec})` }}
+                />
+                <circle cx={waveSec.tipX} cy={waveSec.tipY} r="5.6" fill="none" stroke={ringSec} strokeWidth="1.2" strokeOpacity="0.55" />
+                <circle cx={waveSec.tipX} cy={waveSec.tipY} r="3.0" fill="#ffffff" stroke={ringSec} strokeWidth="1.5" />
+              </>
+            )}
+          </g>
+        ) : styleId === 'dna_helix' && helixData ? (
+          /* STYLE 10: BIO-LUMINESCENT TOROIDAL DOUBLE HELIX */
+          <g>
+            {/* Outer Hours Genome Rail & Inner Seconds Tracer Rail */}
+            <circle cx={cx} cy={cy} r={r1Radius} fill="none" stroke={trackStroke} strokeWidth={RADIAL_GAUGE_CONFIG.hoursStrokeWidth} />
+            {showSeconds && (
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r3Radius}
+                fill="none"
+                stroke={trackStroke}
+                strokeWidth={RADIAL_GAUGE_CONFIG.secondsStrokeWidth}
+              />
+            )}
+
+            {/* 48 Double-Helix Base-Pair Rungs Coiled Along the Middle Annulus */}
+            {helixData.rungs.map((rung, idx) => {
+              const lit = rung.frac <= minProgress;
+              return (
+                <line
+                  key={idx}
+                  x1={rung.x1}
+                  y1={rung.y1}
+                  x2={rung.x2}
+                  y2={rung.y2}
+                  stroke={lit ? (idx % 2 === 0 ? ringSec : ringMin) : trackStroke}
+                  strokeWidth={lit ? 1.85 : 1.0}
+                  strokeOpacity={lit ? 0.9 : 0.45}
+                  strokeLinecap="round"
+                />
+              );
+            })}
+
+            {/* Twin Coiled Helix Ribbon Strands */}
+            <path
+              d={helixData.strandA}
+              fill="none"
+              stroke={ringMin}
+              strokeWidth="2.3"
+              strokeOpacity="0.86"
+              style={{ filter: `drop-shadow(0 0 3px ${ringMin})` }}
+            />
+            <path
+              d={helixData.strandB}
+              fill="none"
+              stroke={ringSec}
+              strokeWidth="2.3"
+              strokeOpacity="0.82"
+              style={{ filter: `drop-shadow(0 0 3px ${ringSec})` }}
+            />
+
+            {/* Outer Hours Arc + Tip Node */}
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r1Radius}
+              fill="none"
+              stroke={ringHr}
+              strokeWidth={RADIAL_GAUGE_CONFIG.hoursStrokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={r1Circ}
+              strokeDashoffset={r1Offset}
+              transform={`rotate(-90 ${cx} ${cy})`}
+              style={{ filter: `drop-shadow(0 0 5px ${ringHr})` }}
+            />
+            <circle cx={r1TipX} cy={r1TipY} r="3.9" fill="#ffffff" stroke={ringHr} strokeWidth="1.8" />
+            <circle cx={r2TipX} cy={r2TipY} r="4.2" fill="#ffffff" stroke={ringMin} strokeWidth="2.0" />
+
+            {showSeconds && (
+              <>
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={r3Radius}
+                  fill="none"
+                  stroke={ringSec}
+                  strokeWidth={RADIAL_GAUGE_CONFIG.secondsStrokeWidth}
+                  strokeLinecap="round"
+                  strokeDasharray={r3Circ}
+                  strokeDashoffset={r3Offset}
+                  transform={`rotate(-90 ${cx} ${cy})`}
+                  style={{ filter: `drop-shadow(0 0 5px ${ringSec})` }}
+                />
+                <circle cx={r3TipX} cy={r3TipY} r="3.3" fill="#ffffff" stroke={ringSec} strokeWidth="1.6" />
+              </>
+            )}
+          </g>
+        ) : (
+          /* STANDARD + COSMIC + TECHNICAL + SYNTHWAVE PRECISION RADIAL ARCS */
+          <g>
+            {/* Background Guide Tracks */}
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r1Radius}
+              fill="none"
+              stroke={trackStroke}
+              strokeWidth={RADIAL_GAUGE_CONFIG.hoursStrokeWidth}
+              strokeDasharray={styleId === 'cyber_hud' ? '8 3' : undefined}
+            />
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r2Radius}
+              fill="none"
+              stroke={trackStroke}
+              strokeWidth={RADIAL_GAUGE_CONFIG.minutesStrokeWidth}
+              strokeDasharray={styleId === 'cyber_hud' ? '3 3' : undefined}
+            />
+            {showSeconds && (
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r3Radius}
+                fill="none"
+                stroke={trackStroke}
+                strokeWidth={RADIAL_GAUGE_CONFIG.secondsStrokeWidth}
+              />
+            )}
+
+            {/* HOURS ARC + SPECULAR FILAMENT */}
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r1Radius}
+              fill="none"
+              stroke={styleId === 'synth_prism' ? `url(#${rUid}-synth-spectrum)` : ringHr}
+              strokeWidth={RADIAL_GAUGE_CONFIG.hoursStrokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={r1Circ}
+              strokeDashoffset={r1Offset}
+              transform={`rotate(-90 ${cx} ${cy})`}
+              style={{ filter: `drop-shadow(0 0 6px ${ringHr})` }}
+            />
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r1Radius}
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.25"
+              strokeOpacity="0.48"
+              strokeLinecap="round"
+              strokeDasharray={r1Circ}
+              strokeDashoffset={r1Offset}
+              transform={`rotate(-90 ${cx} ${cy})`}
+            />
+
+            {/* MINUTES ARC + SPECULAR FILAMENT */}
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r2Radius}
+              fill="none"
+              stroke={styleId === 'synth_prism' ? `url(#${rUid}-synth-spectrum)` : ringMin}
+              strokeWidth={RADIAL_GAUGE_CONFIG.minutesStrokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={r2Circ}
+              strokeDashoffset={r2Offset}
+              transform={`rotate(-90 ${cx} ${cy})`}
+              style={{ filter: `drop-shadow(0 0 5px ${ringMin})` }}
+            />
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r2Radius}
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.1"
+              strokeOpacity="0.42"
+              strokeLinecap="round"
+              strokeDasharray={r2Circ}
+              strokeDashoffset={r2Offset}
+              transform={`rotate(-90 ${cx} ${cy})`}
+            />
+
+            {/* SECONDS ARC */}
+            {showSeconds && (
+              <>
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={r3Radius}
+                  fill="none"
+                  stroke={ringSec}
+                  strokeWidth={RADIAL_GAUGE_CONFIG.secondsStrokeWidth}
+                  strokeLinecap="round"
+                  strokeDasharray={r3Circ}
+                  strokeDashoffset={r3Offset}
+                  transform={`rotate(-90 ${cx} ${cy})`}
+                  style={{ filter: `drop-shadow(0 0 6px ${ringSec})` }}
+                />
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={r3Radius}
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth="1.0"
+                  strokeOpacity="0.45"
+                  strokeLinecap="round"
+                  strokeDasharray={r3Circ}
+                  strokeDashoffset={r3Offset}
+                  transform={`rotate(-90 ${cx} ${cy})`}
+                />
+              </>
+            )}
+
+            {/* ================= CUSTOM MOVING TIP NODES BY STYLE ================= */}
+            {styleId === 'solar_orbit' ? (
+              <>
+                {/* Hours Tip: Ringed Gas Giant Saturn */}
+                <g transform={`translate(${r1TipX} ${r1TipY}) rotate(-24)`}>
+                  <ellipse cx="0" cy="0" rx="8.6" ry="3.1" fill="none" stroke="#fde68a" strokeWidth="1.4" strokeOpacity="0.9" />
+                  <circle cx="0" cy="0" r="4.4" fill="#fbbf24" stroke="#78350f" strokeWidth="0.7" />
+                  <path d="M -8.6 0 A 8.6 3.1 0 0 0 8.6 0" fill="none" stroke="#fef3c7" strokeWidth="1.3" />
+                </g>
+                {/* Minutes Tip: Earth + Live Orbiting Moon */}
+                <g transform={`translate(${r2TipX} ${r2TipY})`}>
+                  <circle cx="0" cy="0" r="6.8" fill="none" stroke="rgba(56,189,248,0.4)" strokeWidth="0.7" strokeDasharray="1.5 1.5" />
+                  <circle cx="0" cy="0" r="4.1" fill="#0284c7" stroke="#bae6fd" strokeWidth="0.9" />
+                  <circle cx="-1" cy="-0.8" r="1.4" fill="#4ade80" fillOpacity="0.85" />
+                  <g transform={`rotate(${earthMoonDeg})`}>
+                    <circle cx="6.8" cy="0" r="1.45" fill="#f8fafc" />
+                  </g>
+                </g>
+                {/* Seconds Tip: Blazing Ice Comet + Plasma Tail */}
+                {showSeconds && (
+                  <g transform={`rotate(${r3Deg} ${cx} ${cy})`}>
+                    <path
+                      d="M 122.92 45.87 A 120 120 0 0 1 160 40"
+                      fill="none"
+                      stroke="#7dd3fc"
+                      strokeWidth="2.8"
+                      strokeOpacity="0.52"
+                      strokeLinecap="round"
+                    />
+                    <circle cx={cx} cy={cy - r3Radius} r="5.5" fill="#38bdf8" fillOpacity="0.38" />
+                    <circle cx={cx} cy={cy - r3Radius} r="2.8" fill="#ffffff" />
+                  </g>
+                )}
+              </>
+            ) : styleId === 'cyber_hud' ? (
+              <>
+                <g transform={`translate(${r1TipX} ${r1TipY}) rotate(${r1Deg})`}>
+                  <polygon points="0,-5.5 5.2,0 0,5.5 -5.2,0" fill="#020617" stroke={ringHr} strokeWidth="1.8" />
+                  <circle cx="0" cy="0" r="1.5" fill="#ffffff" />
+                </g>
+                <g transform={`translate(${r2TipX} ${r2TipY}) rotate(${r2Deg})`}>
+                  <polygon points="0,-5 4.8,0 0,5 -4.8,0" fill="#020617" stroke={ringMin} strokeWidth="1.7" />
+                  <circle cx="0" cy="0" r="1.4" fill="#ffffff" />
+                </g>
+                {showSeconds && (
+                  <g transform={`translate(${r3TipX} ${r3TipY}) rotate(${r3Deg})`}>
+                    <polygon points="4.5,0 -3.5,-3.8 -3.5,3.8" fill="#ffffff" stroke={ringSec} strokeWidth="1.4" />
+                  </g>
+                )}
+              </>
+            ) : styleId === 'supernova' || styleId === 'galaxy_vortex' ? (
+              <>
+                {[
+                  { x: r1TipX, y: r1TipY, c: ringHr, s: 5.5 },
+                  { x: r2TipX, y: r2TipY, c: ringMin, s: 5.0 },
+                  ...(showSeconds ? [{ x: r3TipX, y: r3TipY, c: ringSec, s: 4.5 }] : []),
+                ].map((pt, idx) => (
+                  <g key={idx} transform={`translate(${pt.x} ${pt.y})`}>
+                    <circle cx="0" cy="0" r={pt.s} fill={pt.c} fillOpacity="0.32" />
+                    <path
+                      d={`M 0 ${-pt.s * 1.15} Q 0.8 -0.8 ${pt.s * 1.15} 0 Q 0.8 0.8 0 ${pt.s * 1.15} Q -0.8 0.8 ${-pt.s * 1.15} 0 Q -0.8 -0.8 0 ${-pt.s * 1.15} Z`}
+                      fill="#ffffff"
+                      stroke={pt.c}
+                      strokeWidth="0.7"
+                    />
+                  </g>
+                ))}
+              </>
+            ) : styleId === 'synth_prism' ? (
+              <>
+                <polygon
+                  points={`${r1TipX},${r1TipY - 4.8} ${r1TipX + 4.4},${r1TipY + 3.4} ${r1TipX - 4.4},${r1TipY + 3.4}`}
+                  fill="#090218"
+                  stroke="#fde047"
+                  strokeWidth="1.7"
+                />
+                <polygon
+                  points={`${r2TipX},${r2TipY - 4.5} ${r2TipX + 4.1},${r2TipY + 3.1} ${r2TipX - 4.1},${r2TipY + 3.1}`}
+                  fill="#090218"
+                  stroke="#f472b6"
+                  strokeWidth="1.6"
+                />
+                {showSeconds && <circle cx={r3TipX} cy={r3TipY} r="3.4" fill="#ffffff" stroke="#22d3ee" strokeWidth="1.6" />}
+              </>
+            ) : (
+              <>
+                <circle cx={r1TipX} cy={r1TipY} r="3.9" fill="#ffffff" stroke={ringHr} strokeWidth="1.8" />
+                <circle cx={r2TipX} cy={r2TipY} r="3.6" fill="#ffffff" stroke={ringMin} strokeWidth="1.65" />
+                {showSeconds && <circle cx={r3TipX} cy={r3TipY} r="3.3" fill="#ffffff" stroke={ringSec} strokeWidth="1.55" />}
+              </>
+            )}
+          </g>
+        )}
+      </svg>
+
+      {/* Center Digital Display Strictly Bounded Inside Inner Circle */}
+      <div
+        style={{ inset: `${RADIAL_GAUGE_CONFIG.centerSafeInsetPercent}%` }}
+        className="absolute rounded-full flex flex-col items-center justify-center pointer-events-none select-none px-2"
+      >
+        <div
+          className={`leading-none whitespace-nowrap ${fontClassName} ${clockTextClass} ${animationTextClass} ${
+            isFullscreen
+              ? isWideFont
+                ? 'text-[calc(var(--radial-d)*0.088)]'
+                : 'text-[calc(var(--radial-d)*0.106)]'
+              : isWideFont
+                ? 'text-xl sm:text-2xl md:text-[1.75rem]'
+                : 'text-2xl sm:text-3xl md:text-4xl'
+          }`}
+        >
+          {hoursStr}:{minutesStr}
+        </div>
+        <div className={`flex items-center justify-center gap-1.5 ${isFullscreen ? 'mt-2 sm:mt-2.5' : 'mt-1.5'}`}>
+          {showSeconds && (
+            <span
+              className={`font-mono font-bold leading-none ${accentTextClass} ${
+                isFullscreen ? 'text-[calc(var(--radial-d)*0.036)]' : 'text-xs sm:text-sm'
+              }`}
+            >
+              :{secondsStr}
+            </span>
+          )}
+          {!is24Hour && (
+            <span
+              className={`font-extrabold uppercase tracking-wider rounded-md border leading-none ${badgeClass} ${
+                isFullscreen
+                  ? 'px-2 py-0.5 text-[calc(var(--radial-d)*0.025)]'
+                  : 'px-1.5 py-0.5 text-[10px] sm:text-xs'
+              }`}
+            >
+              {localAmpm}
+            </span>
+          )}
+        </div>
+        <div
+          className={`font-mono font-semibold uppercase tracking-widest opacity-75 leading-none ${subTextClass} ${
+            isFullscreen ? 'text-[calc(var(--radial-d)*0.023)] mt-1.5 sm:mt-2' : 'text-[10px] mt-1'
+          }`}
+        >
+          DAY {liveDayProgress}%
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const DigitalClock: React.FC = () => {
   const [mode, setMode] = useState<Mode>(() => {
     return (localStorage.getItem('vortexero_clock_mode') as Mode) || 'digital';
@@ -6557,6 +8281,17 @@ export const DigitalClock: React.FC = () => {
   });
   const [showAnalogSubDigital, setShowAnalogSubDigital] = useState<boolean>(() => {
     return localStorage.getItem('vortexero_clock_analog_subdigital') !== 'false';
+  });
+  const [radialStyle, setRadialStyle] = useState<RadialStyle>(() => {
+    const saved = localStorage.getItem('vortexero_clock_radial_style') as RadialStyle | null;
+    return saved && RADIAL_STYLES.some((s) => s.id === saved) ? saved : 'chronograph';
+  });
+  const [radialMotion, setRadialMotion] = useState<AnalogMotion>(() => {
+    const saved = localStorage.getItem('vortexero_clock_radial_motion');
+    return saved === 'tick' ? 'tick' : 'sweep';
+  });
+  const [showRadialTelemetry, setShowRadialTelemetry] = useState<boolean>(() => {
+    return localStorage.getItem('vortexero_clock_radial_telemetry') !== 'false';
   });
   const [wakeLockActive, setWakeLockActive] = useState<boolean>(false);
   const wakeLockSentinelRef = useRef<any>(null);
@@ -6649,6 +8384,18 @@ export const DigitalClock: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('vortexero_clock_analog_subdigital', String(showAnalogSubDigital));
   }, [showAnalogSubDigital]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_radial_style', radialStyle);
+  }, [radialStyle]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_radial_motion', radialMotion);
+  }, [radialMotion]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_radial_telemetry', String(showRadialTelemetry));
+  }, [showRadialTelemetry]);
 
   // Screen Wake Lock API implementation with graceful fallback
   const requestWakeLock = async () => {
@@ -6845,7 +8592,7 @@ export const DigitalClock: React.FC = () => {
       const msUntilNextSecond = 1000 - (Date.now() % 1000) + 8;
       timeoutId = setTimeout(() => {
         setCurrentTime(new Date());
-        if (soundEnabled && mode === 'analog') {
+        if (soundEnabled && (mode === 'analog' || (mode === 'radial' && radialMotion === 'tick'))) {
           playTickSound();
         }
         scheduleNextTick();
@@ -6853,7 +8600,7 @@ export const DigitalClock: React.FC = () => {
     };
     scheduleNextTick();
     return () => clearTimeout(timeoutId);
-  }, [soundEnabled, mode]);
+  }, [soundEnabled, mode, radialMotion]);
 
   // Pomodoro Ticker
   useEffect(() => {
@@ -7066,6 +8813,27 @@ export const DigitalClock: React.FC = () => {
     }
   };
 
+  const activeRadialMeta =
+    RADIAL_STYLES.find((s) => s.id === radialStyle) || RADIAL_STYLES[0];
+
+  const handleRadialDailyMix = () => {
+    const otherStyles = RADIAL_STYLES.filter((s) => s.id !== radialStyle);
+    const otherThemes = themes.filter((t) => t.id !== theme);
+    const otherBgs = CLOCK_BG_FX_OPTIONS.filter((b) => b.id !== 'none' && b.id !== bgFx);
+    if (otherStyles.length > 0) {
+      const nextStyle = otherStyles[Math.floor(Math.random() * otherStyles.length)];
+      setRadialStyle(nextStyle.id);
+    }
+    if (otherThemes.length > 0) {
+      const nextTheme = otherThemes[Math.floor(Math.random() * otherThemes.length)];
+      setTheme(nextTheme.id);
+    }
+    if (bgFx !== 'none' && otherBgs.length > 0) {
+      const nextBg = otherBgs[Math.floor(Math.random() * otherBgs.length)];
+      setBgFx(nextBg.id);
+    }
+  };
+
   const filteredThemes = themeCategory === 'all'
     ? themes
     : themes.filter(t => t.category === themeCategory);
@@ -7179,31 +8947,6 @@ export const DigitalClock: React.FC = () => {
   const secProgress = (secValue + 1) / 60;
   const dayProgress = Math.round(((displayTime.getHours() * 3600 + minValue * 60 + secValue) / 86400) * 100);
   const isWideFont = fontStyle === 'digital' || fontStyle === 'minimal';
-
-  // Arc circumferences for radii: r1=148 (Hours), r2=134 (Minutes), r3=120 (Seconds)
-  const r1Radius = RADIAL_GAUGE_CONFIG.hoursRadius;
-  const r2Radius = RADIAL_GAUGE_CONFIG.minutesRadius;
-  const r3Radius = RADIAL_GAUGE_CONFIG.secondsRadius;
-
-  const r1Circumference = 2 * Math.PI * r1Radius;
-  const r2Circumference = 2 * Math.PI * r2Radius;
-  const r3Circumference = 2 * Math.PI * r3Radius;
-
-  const r1Offset = r1Circumference * (1 - Math.min(1, Math.max(0, hrProgress)));
-  const r2Offset = r2Circumference * (1 - Math.min(1, Math.max(0, minProgress)));
-  const r3Offset = r3Circumference * (1 - Math.min(1, Math.max(0, secProgress)));
-
-  const r1TipAngle = ((hrProgress * 360 - 90) * Math.PI) / 180;
-  const r1TipX = RADIAL_GAUGE_CONFIG.center + r1Radius * Math.cos(r1TipAngle);
-  const r1TipY = RADIAL_GAUGE_CONFIG.center + r1Radius * Math.sin(r1TipAngle);
-
-  const r2TipAngle = ((minProgress * 360 - 90) * Math.PI) / 180;
-  const r2TipX = RADIAL_GAUGE_CONFIG.center + r2Radius * Math.cos(r2TipAngle);
-  const r2TipY = RADIAL_GAUGE_CONFIG.center + r2Radius * Math.sin(r2TipAngle);
-
-  const r3TipAngle = ((secProgress * 360 - 90) * Math.PI) / 180;
-  const r3TipX = RADIAL_GAUGE_CONFIG.center + r3Radius * Math.cos(r3TipAngle);
-  const r3TipY = RADIAL_GAUGE_CONFIG.center + r3Radius * Math.sin(r3TipAngle);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -7607,6 +9350,124 @@ export const DigitalClock: React.FC = () => {
           </button>
         </div>
       ) : null}
+
+      {/* Radial Gauge Studio Bar (shown only when mode === 'radial') */}
+      {mode === 'radial' && (
+        <div
+          data-testid="radial-style-bar"
+          className="p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl shadow-xs flex flex-col gap-2.5"
+        >
+          {/* Header Row: Title & Active Radial Style Tagline + Sweep/Tick, Ring Stats & Mix Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
+                <Compass size={13} className="text-brand-500" />
+                Radial Style
+              </span>
+              <span className="hidden md:inline-block text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate border-l border-slate-200 dark:border-slate-700 pl-2">
+                {activeRadialMeta.tagline}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 shrink-0 ml-auto">
+              <div
+                className="flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-bold"
+                title="Ring & kinetic motion: smooth 60fps fluid sweep or 1Hz quartz tick"
+              >
+                <button
+                  onClick={() => setRadialMotion('sweep')}
+                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                    radialMotion === 'sweep'
+                      ? 'bg-white dark:bg-slate-700 shadow-xs text-brand-600 dark:text-brand-300'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                  }`}
+                >
+                  Sweep
+                </button>
+                <button
+                  onClick={() => setRadialMotion('tick')}
+                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                    radialMotion === 'tick'
+                      ? 'bg-white dark:bg-slate-700 shadow-xs text-brand-600 dark:text-brand-300'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                  }`}
+                >
+                  Tick
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowRadialTelemetry(!showRadialTelemetry)}
+                className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-bold transition-colors cursor-pointer whitespace-nowrap ${
+                  showRadialTelemetry
+                    ? 'bg-brand-50 dark:bg-brand-950/60 border-brand-500 text-brand-600 dark:text-brand-300'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+                }`}
+                title="Show or hide Hour/Min/Sec ring progress telemetry badges below the gauge"
+              >
+                Ring Stats
+              </button>
+
+              <button
+                onClick={handleRadialDailyMix}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 whitespace-nowrap shadow-xs"
+                title="Shuffle a fresh radial style, color theme, and animated background combo"
+              >
+                <Shuffle size={12} />
+                <span>Daily Mix</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 12 Selectable Radial Gauge Styles */}
+          <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
+            {RADIAL_STYLES.map((st) => {
+              const isActive = radialStyle === st.id;
+              return (
+                <button
+                  key={st.id}
+                  onClick={() => setRadialStyle(st.id)}
+                  title={`${st.label} - ${st.tagline}`}
+                  data-radial-style={st.id}
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                    isActive
+                      ? 'bg-brand-600 text-white border-brand-500 shadow-sm shadow-brand-500/25'
+                      : 'bg-slate-100/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <RadialStyleGlyph styleId={st.id} />
+                  <span>{st.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Animated Canvas Background Presets */}
+          <div className="flex items-center gap-1.5 pt-2 border-t border-slate-200/70 dark:border-slate-800/70 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mr-1 shrink-0">
+              Animated Bg
+            </span>
+            {CLOCK_BG_FX_OPTIONS.map((bg) => {
+              const isActive = bgFx === bg.id;
+              return (
+                <button
+                  key={bg.id}
+                  onClick={() => setBgFx(bg.id)}
+                  title={bg.tagline}
+                  data-bg-fx={bg.id}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                    isActive
+                      ? 'bg-brand-600 text-white border-brand-500 shadow-xs'
+                      : 'bg-slate-100/80 dark:bg-slate-800/80 border-slate-200/70 dark:border-slate-700/70 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {bg.shortLabel}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Analog Dial Style Studio Bar (shown only when mode === 'analog') */}
       {mode === 'analog' && (
@@ -8023,185 +9884,56 @@ export const DigitalClock: React.FC = () => {
           </div>
         )}
 
-        {/* Mode: Chronograph Radial Gauge */}
+        {/* Mode: 12-Style Radial Gauge Studio */}
         {mode === 'radial' && (
           <div className="relative z-10 flex flex-col items-center space-y-2.5 sm:space-y-3.5 my-auto max-w-full">
-            <div
-              style={
-                isFullscreen
-                  ? ({ '--radial-d': 'clamp(14.5rem, min(58vh, 72vw), 36rem)' } as React.CSSProperties)
-                  : undefined
-              }
-              className={`relative flex items-center justify-center ${
-                isFullscreen
-                  ? 'w-[var(--radial-d)] h-[var(--radial-d)]'
-                  : 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96'
-              }`}
-            >
-              <svg
-                viewBox={`0 0 ${RADIAL_GAUGE_CONFIG.viewBoxSize} ${RADIAL_GAUGE_CONFIG.viewBoxSize}`}
-                className="w-full h-full drop-shadow-2xl select-none"
-              >
-                {/* Inner Chronometer Chamber Backdrop */}
-                <circle
-                  cx={RADIAL_GAUGE_CONFIG.center}
-                  cy={RADIAL_GAUGE_CONFIG.center}
-                  r={RADIAL_GAUGE_CONFIG.innerChamberRadius}
-                  fill={themeConfig.dialBg}
-                  fillOpacity={themeConfig.isLight ? '0.65' : '0.45'}
-                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'}
-                  strokeWidth="1"
-                />
+            <RadialClockGauge
+              styleId={radialStyle}
+              motionMode={radialMotion}
+              timezone={selectedTimezone}
+              baseTime={displayTime}
+              is24Hour={is24Hour}
+              showSeconds={showSeconds}
+              showDate={showDate}
+              fontStyle={fontStyle}
+              fontClassName={getFontFamilyClass(true)}
+              animationTextClass={getAnimationTextClass()}
+              themeConfig={themeConfig}
+              isFullscreen={isFullscreen}
+            />
 
-                {/* Background Track Rings (r1=148, r2=134, r3=120) */}
-                <circle
-                  cx={RADIAL_GAUGE_CONFIG.center}
-                  cy={RADIAL_GAUGE_CONFIG.center}
-                  r={r1Radius}
-                  fill="none"
-                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                  strokeWidth={RADIAL_GAUGE_CONFIG.hoursStrokeWidth}
-                />
-                <circle
-                  cx={RADIAL_GAUGE_CONFIG.center}
-                  cy={RADIAL_GAUGE_CONFIG.center}
-                  r={r2Radius}
-                  fill="none"
-                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                  strokeWidth={RADIAL_GAUGE_CONFIG.minutesStrokeWidth}
-                />
-                <circle
-                  cx={RADIAL_GAUGE_CONFIG.center}
-                  cy={RADIAL_GAUGE_CONFIG.center}
-                  r={r3Radius}
-                  fill="none"
-                  stroke={themeConfig.isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                  strokeWidth={RADIAL_GAUGE_CONFIG.secondsStrokeWidth}
-                />
-
-                {/* Progress Arcs */}
-                {/* Hours Ring */}
-                <circle
-                  cx={RADIAL_GAUGE_CONFIG.center}
-                  cy={RADIAL_GAUGE_CONFIG.center}
-                  r={r1Radius}
-                  fill="none"
-                  stroke={themeConfig.handHr}
-                  strokeWidth={RADIAL_GAUGE_CONFIG.hoursStrokeWidth}
-                  strokeLinecap="round"
-                  strokeDasharray={r1Circumference}
-                  strokeDashoffset={r1Offset}
-                  transform={`rotate(-90 ${RADIAL_GAUGE_CONFIG.center} ${RADIAL_GAUGE_CONFIG.center})`}
-                  className="transition-all duration-300"
-                  style={{ filter: `drop-shadow(0 0 5px ${themeConfig.handHr})` }}
-                />
-                <circle cx={r1TipX} cy={r1TipY} r="3.75" fill="#ffffff" stroke={themeConfig.handHr} strokeWidth="1.75" />
-
-                {/* Minutes Ring */}
-                <circle
-                  cx={RADIAL_GAUGE_CONFIG.center}
-                  cy={RADIAL_GAUGE_CONFIG.center}
-                  r={r2Radius}
-                  fill="none"
-                  stroke={themeConfig.handMin}
-                  strokeWidth={RADIAL_GAUGE_CONFIG.minutesStrokeWidth}
-                  strokeLinecap="round"
-                  strokeDasharray={r2Circumference}
-                  strokeDashoffset={r2Offset}
-                  transform={`rotate(-90 ${RADIAL_GAUGE_CONFIG.center} ${RADIAL_GAUGE_CONFIG.center})`}
-                  className="transition-all duration-300"
-                  style={{ filter: `drop-shadow(0 0 5px ${themeConfig.handMin})` }}
-                />
-                <circle cx={r2TipX} cy={r2TipY} r="3.5" fill="#ffffff" stroke={themeConfig.handMin} strokeWidth="1.6" />
-
-                {/* Seconds Ring */}
-                {showSeconds && (
-                  <>
-                    <circle
-                      cx={RADIAL_GAUGE_CONFIG.center}
-                      cy={RADIAL_GAUGE_CONFIG.center}
-                      r={r3Radius}
-                      fill="none"
-                      stroke={themeConfig.handSec}
-                      strokeWidth={RADIAL_GAUGE_CONFIG.secondsStrokeWidth}
-                      strokeLinecap="round"
-                      strokeDasharray={r3Circumference}
-                      strokeDashoffset={r3Offset}
-                      transform={`rotate(-90 ${RADIAL_GAUGE_CONFIG.center} ${RADIAL_GAUGE_CONFIG.center})`}
-                      className="transition-all duration-300"
-                      style={{ filter: `drop-shadow(0 0 5px ${themeConfig.handSec})` }}
-                    />
-                    <circle cx={r3TipX} cy={r3TipY} r="3.25" fill="#ffffff" stroke={themeConfig.handSec} strokeWidth="1.5" />
-                  </>
-                )}
-              </svg>
-
-              {/* Center Digital Display Strictly Bounded Inside Inner Circle */}
-              <div
-                style={{ inset: `${RADIAL_GAUGE_CONFIG.centerSafeInsetPercent}%` }}
-                className="absolute rounded-full flex flex-col items-center justify-center pointer-events-none select-none px-2"
-              >
-                <div className={`leading-none whitespace-nowrap ${getFontFamilyClass(true)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
-                  isFullscreen
-                    ? isWideFont
-                      ? 'text-[calc(var(--radial-d)*0.088)]'
-                      : 'text-[calc(var(--radial-d)*0.106)]'
-                    : isWideFont
-                      ? 'text-xl sm:text-2xl md:text-[1.75rem]'
-                      : 'text-2xl sm:text-3xl md:text-4xl'
-                }`}>
-                  {hoursStr}:{minutesStr}
-                </div>
-                <div className={`flex items-center justify-center gap-1.5 ${isFullscreen ? 'mt-2 sm:mt-2.5' : 'mt-1.5'}`}>
-                  {showSeconds && (
-                    <span className={`font-mono font-bold leading-none ${themeConfig.accent} ${
-                      isFullscreen ? 'text-[calc(var(--radial-d)*0.036)]' : 'text-xs sm:text-sm'
-                    }`}>
-                      :{secondsStr}
-                    </span>
-                  )}
-                  {!is24Hour && (
-                    <span className={`font-extrabold uppercase tracking-wider rounded-md border leading-none ${themeConfig.badgeBg} ${
-                      isFullscreen
-                        ? 'px-2 py-0.5 text-[calc(var(--radial-d)*0.025)]'
-                        : 'px-1.5 py-0.5 text-[10px] sm:text-xs'
-                    }`}>
-                      {ampm}
-                    </span>
-                  )}
-                </div>
-                <div className={`font-mono font-semibold uppercase tracking-widest opacity-75 leading-none ${themeConfig.subText || 'text-slate-400'} ${
-                  isFullscreen ? 'text-[calc(var(--radial-d)*0.023)] mt-1.5 sm:mt-2' : 'text-[10px] mt-1'
-                }`}>
-                  DAY {dayProgress}%
-                </div>
+            {/* Radial Legend Badges (toggleable in standard view; hidden in fullscreen to showcase only the big gauge) */}
+            {!isFullscreen && showRadialTelemetry && (
+              <div className="flex flex-wrap items-center justify-center font-semibold text-xs gap-3 pt-0.5">
+                {(() => {
+                  const syncCosmicDots = !themeConfig.isLight;
+                  const dotHr = syncCosmicDots ? ensureBrightHex(themeConfig.handHr, '#fbbf24') : themeConfig.handHr;
+                  const dotMin = syncCosmicDots ? ensureBrightHex(themeConfig.handMin, '#38bdf8') : themeConfig.handMin;
+                  const dotSec = syncCosmicDots ? ensureBrightHex(themeConfig.handSec, '#f43f5e') : themeConfig.handSec;
+                  return (
+                    <>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dotHr }} />
+                        <span className={themeConfig.subText || 'text-slate-400'}>Hour ({Math.round(hrProgress * 100)}%)</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dotMin }} />
+                        <span className={themeConfig.subText || 'text-slate-400'}>Min ({Math.round(minProgress * 100)}%)</span>
+                      </span>
+                      {showSeconds && (
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dotSec }} />
+                          <span className={themeConfig.subText || 'text-slate-400'}>Sec ({Math.round(secProgress * 100)}%)</span>
+                        </span>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
-            </div>
+            )}
 
-            {/* Radial Legend Badges */}
-            <div className={`flex flex-wrap items-center justify-center font-semibold ${
-              isFullscreen ? 'text-xs sm:text-sm md:text-base gap-4 sm:gap-6 pt-1' : 'text-xs gap-3'
-            }`}>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeConfig.handHr }} />
-                <span className={themeConfig.subText || 'text-slate-400'}>Hour ({Math.round(hrProgress * 100)}%)</span>
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeConfig.handMin }} />
-                <span className={themeConfig.subText || 'text-slate-400'}>Min ({Math.round(minProgress * 100)}%)</span>
-              </span>
-              {showSeconds && (
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeConfig.handSec }} />
-                  <span className={themeConfig.subText || 'text-slate-400'}>Sec ({Math.round(secProgress * 100)}%)</span>
-                </span>
-              )}
-            </div>
-
-            {showDate && (
-              <p className={`font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'} ${
-                isFullscreen ? 'text-sm sm:text-base pt-0.5' : 'text-xs sm:text-sm'
-              }`}>
+            {!isFullscreen && showDate && (
+              <p className={`font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'} text-xs sm:text-sm`}>
                 {dateStr}
               </p>
             )}
