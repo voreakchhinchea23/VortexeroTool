@@ -848,6 +848,83 @@
   will-change: transform, opacity;
 }
 
+@keyframes clock-bg-solar-pulse {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scale(1.07);
+    opacity: 0.98;
+  }
+}
+
+@keyframes clock-bg-warp-streak {
+  0% {
+    transform: rotate(var(--warp-angle, 0deg)) translate3d(28px, 0, 0) scaleX(0.18);
+    opacity: 0;
+  }
+  16% {
+    opacity: 0.92;
+  }
+  78% {
+    opacity: 0.72;
+  }
+  100% {
+    transform: rotate(var(--warp-angle, 0deg)) translate3d(58vmax, 0, 0) scaleX(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes clock-bg-wave-drift {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-bg-orbit-origin {
+  transform-box: view-box;
+  transform-origin: 400px 300px;
+  animation: clock-bg-spin-cw 36s linear infinite;
+}
+
+.animate-bg-solar-pulse {
+  transform-box: view-box;
+  transform-origin: 400px 300px;
+  animation: clock-bg-solar-pulse 6s ease-in-out infinite;
+}
+
+.animate-bg-galaxy-spin {
+  transform-box: view-box;
+  transform-origin: 400px 300px;
+  animation: clock-bg-spin-cw 95s linear infinite;
+}
+
+.animate-bg-galaxy-counter {
+  transform-box: view-box;
+  transform-origin: 400px 300px;
+  animation: clock-bg-spin-ccw 145s linear infinite;
+}
+
+.animate-bg-warp-streak {
+  transform-origin: 0% 50%;
+  animation: clock-bg-warp-streak 3.2s cubic-bezier(0.35, 0.05, 0.9, 0.55) infinite;
+  will-change: transform, opacity;
+}
+
+.animate-bg-wave-drift {
+  animation: clock-bg-wave-drift 18s linear infinite;
+  will-change: transform;
+}
+
+.animate-bg-wave-drift-rev {
+  animation: clock-bg-wave-drift 24s linear infinite reverse;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-bg-aurora-a,
   .animate-bg-aurora-b,
@@ -860,7 +937,14 @@
   .animate-bg-grid-scroll,
   .animate-bg-scanline,
   .animate-bg-bokeh-float,
-  .animate-bg-ripple {
+  .animate-bg-ripple,
+  .animate-bg-orbit-origin,
+  .animate-bg-solar-pulse,
+  .animate-bg-galaxy-spin,
+  .animate-bg-galaxy-counter,
+  .animate-bg-warp-streak,
+  .animate-bg-wave-drift,
+  .animate-bg-wave-drift-rev {
     animation: none !important;
   }
 }

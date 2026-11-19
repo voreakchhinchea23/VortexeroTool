@@ -88,13 +88,23 @@ export type AnalogStyle =
   | 'chronograph'
   | 'artdeco'
   | 'orbital'
-  | 'kintsugi';
+  | 'kintsugi'
+  | 'orrery'
+  | 'galaxy'
+  | 'astrolabe'
+  | 'blackhole'
+  | 'gears'
+  | 'cyberwave';
 export type AnalogMotion = 'sweep' | 'tick';
 
 export type BackgroundFx =
   | 'aurora'
+  | 'solar'
+  | 'galaxy'
+  | 'warp'
   | 'orbital'
   | 'starfield'
+  | 'waves'
   | 'grid'
   | 'bokeh'
   | 'ripple'
@@ -232,6 +242,42 @@ export const ANALOG_STYLES: AnalogStyleMeta[] = [
     tagline: 'Wabi-sabi ceramic horizon ripple rings and katana blade hands',
     category: 'Modern',
   },
+  {
+    id: 'orrery',
+    label: 'Solar System',
+    tagline: 'Heliocentric live planetarium with real J2000 planetary orbits and comet',
+    category: 'Technical',
+  },
+  {
+    id: 'galaxy',
+    label: 'Spiral Galaxy',
+    tagline: 'Rotating barred spiral nebula with star-forming arms and cosmic dust',
+    category: 'Modern',
+  },
+  {
+    id: 'astrolabe',
+    label: 'Astrolabe',
+    tagline: 'Planispheric stereographic horizon plate with rotating golden zodiac rete',
+    category: 'Classic',
+  },
+  {
+    id: 'blackhole',
+    label: 'Singularity',
+    tagline: 'Relativistic event horizon with gravitationally lensed accretion plasma',
+    category: 'Technical',
+  },
+  {
+    id: 'gears',
+    label: 'Automaton',
+    tagline: 'Openworked 5-wheel meshing mechanical caliber and 4Hz balance wheel',
+    category: 'Technical',
+  },
+  {
+    id: 'cyberwave',
+    label: 'Synthwave',
+    tagline: 'Retrofuturistic sliced neon sunset with scrolling 3D laser horizon grid',
+    category: 'Modern',
+  },
 ];
 
 export const CLOCK_BG_FX_OPTIONS: {
@@ -241,8 +287,12 @@ export const CLOCK_BG_FX_OPTIONS: {
   tagline: string;
 }[] = [
   { id: 'aurora', label: 'Bg: Aurora Ribbons', shortLabel: 'Aurora', tagline: 'Drifting cosmic silk aurora curtains' },
+  { id: 'solar', label: 'Bg: Solar System', shortLabel: 'Solar', tagline: 'Orbiting planets, Saturn rings, live Earth moon and comet' },
+  { id: 'galaxy', label: 'Bg: Spiral Galaxy', shortLabel: 'Galaxy', tagline: 'Perspective-tilted rotating multi-arm cosmic spiral nebula' },
+  { id: 'warp', label: 'Bg: Hyperspace Warp', shortLabel: 'Warp', tagline: 'Radial starlight warp streaks accelerating into hyperspace' },
   { id: 'orbital', label: 'Bg: Orbital Halo', shortLabel: 'Orbital', tagline: 'Slowly rotating horological astrolabe rings' },
   { id: 'starfield', label: 'Bg: Starfield Drift', shortLabel: 'Starfield', tagline: 'Twinkling cosmic starlight and meteors' },
+  { id: 'waves', label: 'Bg: Plasma Waves', shortLabel: 'Waves', tagline: 'Undulating multi-layer luminous plasma aurora sine ribbons' },
   { id: 'grid', label: 'Bg: Kinetic Grid', shortLabel: 'Grid', tagline: 'Scrolling technical lattice and scanner beam' },
   { id: 'bokeh', label: 'Bg: Ambient Bokeh', shortLabel: 'Bokeh', tagline: 'Floating luminous out-of-focus orbs' },
   { id: 'ripple', label: 'Bg: Sonar Ripple', shortLabel: 'Ripple', tagline: 'Expanding concentric pulse waves' },
@@ -1348,6 +1398,7 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
 };
 
 interface AnalogTimeSnapshot {
+  nowMs: number;
   hours24: number;
   minutes: number;
   seconds: number;
@@ -1386,6 +1437,7 @@ const getTimezoneSnapshot = (nowMs: number, timezone: string): AnalogTimeSnapsho
         }
       }
       return {
+        nowMs,
         hours24: Number(map.hour ?? 0) % 24,
         minutes: Number(map.minute ?? 0) % 60,
         seconds: Number(map.second ?? 0) % 60,
@@ -1401,6 +1453,7 @@ const getTimezoneSnapshot = (nowMs: number, timezone: string): AnalogTimeSnapsho
 
   const d = new Date(nowMs);
   return {
+    nowMs,
     hours24: d.getHours(),
     minutes: d.getMinutes(),
     seconds: d.getSeconds(),
@@ -1501,10 +1554,310 @@ const BG_BOKEH_ORBS: { x: number; y: number; size: number; delay: string; dur: s
   { x: 52, y: 86, size: 130, delay: '-4s', dur: '14.5s', tone: 'hr' },
 ];
 
+// Deterministic PRNG for procedural cosmic starfields and spiral nebula arms (zero Math.random in render)
+const makeSeededRng = (seed: number) => {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+};
+
+// Involute-inspired gear path builder centered at (cx, cy) with tooth 0 peak pointing at 0 deg (+X)
+const buildGearPath = (cx: number, cy: number, teeth: number, outerR: number, rootR: number): string => {
+  const step = (Math.PI * 2) / teeth;
+  const pts: string[] = [];
+  for (let i = 0; i < teeth; i++) {
+    const base = i * step;
+    const a0 = base - step * 0.42;
+    const a1 = base - step * 0.22;
+    const a2 = base + step * 0.22;
+    const a3 = base + step * 0.42;
+    const p0x = cx + rootR * Math.cos(a0);
+    const p0y = cy + rootR * Math.sin(a0);
+    const p1x = cx + outerR * Math.cos(a1);
+    const p1y = cy + outerR * Math.sin(a1);
+    const p2x = cx + outerR * Math.cos(a2);
+    const p2y = cy + outerR * Math.sin(a2);
+    const p3x = cx + rootR * Math.cos(a3);
+    const p3y = cy + rootR * Math.sin(a3);
+    pts.push(
+      `${i === 0 ? 'M' : 'L'} ${p0x.toFixed(2)} ${p0y.toFixed(2)} L ${p1x.toFixed(2)} ${p1y.toFixed(2)} L ${p2x.toFixed(2)} ${p2y.toFixed(2)} L ${p3x.toFixed(2)} ${p3y.toFixed(2)}`
+    );
+  }
+  return `${pts.join(' ')} Z`;
+};
+
+const buildSpiralPath = (
+  cx: number,
+  cy: number,
+  startDeg: number,
+  sweepDeg: number,
+  rStart: number,
+  rEnd: number,
+  steps = 36
+): string => {
+  const cmds: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const angle = ((startDeg + sweepDeg * t) * Math.PI) / 180;
+    const r = rStart + (rEnd - rStart) * Math.pow(t, 1.15);
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    cmds.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`);
+  }
+  return cmds.join(' ');
+};
+
+// J2000.0 mean heliocentric longitudes (degrees) for real-time Orrery planetary positions
+const J2000_EPOCH_MS = Date.UTC(2000, 0, 1, 12, 0, 0);
+const normDeg = (deg: number) => ((deg % 360) + 360) % 360;
+
+const computeSolarSystemLongitudes = (nowMs: number) => {
+  const d = (nowMs - J2000_EPOCH_MS) / 86400000;
+  return {
+    mercury: normDeg(252.25 + 4.09233445 * d),
+    venus: normDeg(181.98 + 1.60213034 * d),
+    earth: normDeg(100.46 + 0.98560912 * d),
+    mars: normDeg(355.45 + 0.52403295 * d),
+    jupiter: normDeg(34.4 + 0.08309121 * d),
+    saturn: normDeg(49.94 + 0.03345965 * d),
+  };
+};
+
+// Precomputed mathematically meshing 5-wheel Automaton gear train (module m = 2.6, zero overlap)
+interface AutomatonGearSpec {
+  id: string;
+  cx: number;
+  cy: number;
+  teeth: number;
+  rp: number;
+  innerR: number;
+  hubR: number;
+  spokes: number;
+  speedDegPerSec: number;
+  phaseOffset: number;
+  tone: 'gold' | 'steel' | 'bronze' | 'accent' | 'silver';
+  path: string;
+}
+
+const AUTOMATON_GEARS: AutomatonGearSpec[] = (() => {
+  const m = 2.6;
+  const halfM = m * 0.5;
+  const calcPhase = (parentPhase: number, parentTeeth: number, childTeeth: number, thetaDeg: number) => {
+    const u1 = ((thetaDeg - parentPhase) * parentTeeth) / 360;
+    return thetaDeg + 180 - (0.5 - u1) * (360 / childTeeth);
+  };
+
+  const aCx = 150;
+  const aCy = 150;
+  const aN = 24;
+  const aRp = halfM * aN; // 31.2
+  const aPhase = 0;
+
+  const bN = 30;
+  const bRp = halfM * bN; // 39.0
+  const bTheta = -135;
+  const bRad = (bTheta * Math.PI) / 180;
+  const bCx = aCx + (aRp + bRp) * Math.cos(bRad);
+  const bCy = aCy + (aRp + bRp) * Math.sin(bRad);
+  const bPhase = calcPhase(aPhase, aN, bN, bTheta);
+
+  const cN = 18;
+  const cRp = halfM * cN; // 23.4
+  const cTheta = -32;
+  const cRad = (cTheta * Math.PI) / 180;
+  const cCx = aCx + (aRp + cRp) * Math.cos(cRad);
+  const cCy = aCy + (aRp + cRp) * Math.sin(cRad);
+  const cPhase = calcPhase(aPhase, aN, cN, cTheta);
+
+  const dN = 15;
+  const dRp = halfM * dN; // 19.5
+  const dTheta = 64;
+  const dRad = (dTheta * Math.PI) / 180;
+  const dCx = cCx + (cRp + dRp) * Math.cos(dRad);
+  const dCy = cCy + (cRp + dRp) * Math.sin(dRad);
+  const dPhase = calcPhase(cPhase, cN, dN, dTheta);
+
+  const eN = 16;
+  const eRp = halfM * eN; // 20.8
+  const eTheta = 122;
+  const eRad = (eTheta * Math.PI) / 180;
+  const eCx = aCx + (aRp + eRp) * Math.cos(eRad);
+  const eCy = aCy + (aRp + eRp) * Math.sin(eRad);
+  const ePhase = calcPhase(aPhase, aN, eN, eTheta);
+
+  const defs: Omit<AutomatonGearSpec, 'path'>[] = [
+    { id: 'barrel', cx: bCx, cy: bCy, teeth: bN, rp: bRp, innerR: 29.5, hubR: 8.5, spokes: 6, speedDegPerSec: -4.8, phaseOffset: bPhase, tone: 'steel' },
+    { id: 'third', cx: cCx, cy: cCy, teeth: cN, rp: cRp, innerR: 16.5, hubR: 6, spokes: 4, speedDegPerSec: -8.0, phaseOffset: cPhase, tone: 'bronze' },
+    { id: 'escape', cx: dCx, cy: dCy, teeth: dN, rp: dRp, innerR: 13.5, hubR: 5, spokes: 5, speedDegPerSec: 9.6, phaseOffset: dPhase, tone: 'accent' },
+    { id: 'winding', cx: eCx, cy: eCy, teeth: eN, rp: eRp, innerR: 14.5, hubR: 5.4, spokes: 4, speedDegPerSec: -9.0, phaseOffset: ePhase, tone: 'silver' },
+    { id: 'center', cx: aCx, cy: aCy, teeth: aN, rp: aRp, innerR: 23, hubR: 7.4, spokes: 5, speedDegPerSec: 6.0, phaseOffset: aPhase, tone: 'gold' },
+  ];
+
+  return defs.map((g) => ({
+    ...g,
+    path: buildGearPath(g.cx, g.cy, g.teeth, g.rp + 1.85, g.rp - 2.15),
+  }));
+})();
+
+const BALANCE_HAIRSPRING_PATH = buildSpiralPath(168, 204, 0, 1260, 3.2, 15.2, 64);
+
+// Precomputed Spiral Galaxy dial arms & star clusters (300x300 viewBox)
+const DIAL_GALAXY_ARMS = [
+  { main: buildSpiralPath(150, 150, 10, 295, 9, 122, 40), sub: buildSpiralPath(150, 150, 22, 265, 14, 114, 34), tone: 'c1' as const },
+  { main: buildSpiralPath(150, 150, 190, 295, 9, 122, 40), sub: buildSpiralPath(150, 150, 202, 265, 14, 114, 34), tone: 'c2' as const },
+  { main: buildSpiralPath(150, 150, 100, 250, 14, 108, 34), sub: buildSpiralPath(150, 150, 112, 225, 18, 98, 28), tone: 'c3' as const },
+  { main: buildSpiralPath(150, 150, 280, 250, 14, 108, 34), sub: buildSpiralPath(150, 150, 292, 225, 18, 98, 28), tone: 'c1' as const },
+];
+
+const DIAL_GALAXY_STARS: { x: number; y: number; r: number; op: number; hue: 'white' | 'gold' | 'c1' | 'c2' | 'pink' }[] = (() => {
+  const rng = makeSeededRng(42071);
+  const out: { x: number; y: number; r: number; op: number; hue: 'white' | 'gold' | 'c1' | 'c2' | 'pink' }[] = [];
+  const armStarts = [10, 190, 100, 280];
+  const hues: ('white' | 'gold' | 'c1' | 'c2' | 'pink')[] = ['white', 'white', 'c1', 'c2', 'gold', 'pink'];
+  for (let i = 0; i < 84; i++) {
+    const arm = armStarts[i % 4];
+    const t = Math.pow(rng(), 0.78);
+    const sweep = i % 4 < 2 ? 290 : 245;
+    const spread = (rng() - 0.5) * (16 + t * 28);
+    const angleRad = ((arm + sweep * t + spread) * Math.PI) / 180;
+    const rad = 11 + t * 108 + (rng() - 0.5) * 9;
+    const x = 150 + rad * Math.cos(angleRad);
+    const y = 150 + rad * Math.sin(angleRad);
+    out.push({
+      x: Number(x.toFixed(2)),
+      y: Number(y.toFixed(2)),
+      r: Number((0.55 + rng() * 1.35).toFixed(2)),
+      op: Number((0.35 + rng() * 0.62).toFixed(2)),
+      hue: hues[Math.floor(rng() * hues.length)],
+    });
+  }
+  return out;
+})();
+
+const DIAL_DEEP_STARS: { x: number; y: number; r: number; op: number }[] = (() => {
+  const rng = makeSeededRng(91827);
+  const stars: { x: number; y: number; r: number; op: number }[] = [];
+  for (let i = 0; i < 56; i++) {
+    const a = rng() * Math.PI * 2;
+    const rad = 18 + Math.sqrt(rng()) * 112;
+    stars.push({
+      x: Number((150 + rad * Math.cos(a)).toFixed(2)),
+      y: Number((150 + rad * Math.sin(a)).toFixed(2)),
+      r: Number((0.45 + rng() * 0.95).toFixed(2)),
+      op: Number((0.25 + rng() * 0.65).toFixed(2)),
+    });
+  }
+  return stars;
+})();
+
+// Precomputed Background Canvas geometry (800x600 viewBox)
+const BG_SOLAR_PLANETS: {
+  name: string;
+  orbitR: number;
+  size: number;
+  period: string;
+  delay: string;
+  color: string;
+  glow: string;
+  hasRings?: boolean;
+  hasMoon?: boolean;
+  hasBands?: boolean;
+}[] = [
+  { name: 'mercury', orbitR: 92, size: 3.4, period: '16s', delay: '-3s', color: '#cbd5e1', glow: '#94a3b8' },
+  { name: 'venus', orbitR: 128, size: 5.2, period: '26s', delay: '-14s', color: '#fde68a', glow: '#f59e0b' },
+  { name: 'earth', orbitR: 168, size: 6.0, period: '38s', delay: '-8s', color: '#38bdf8', glow: '#0ea5e9', hasMoon: true },
+  { name: 'mars', orbitR: 212, size: 4.5, period: '56s', delay: '-39s', color: '#fb7185', glow: '#e11d48' },
+  { name: 'jupiter', orbitR: 268, size: 9.2, period: '86s', delay: '-22s', color: '#fdba74', glow: '#ea580c', hasBands: true },
+  { name: 'saturn', orbitR: 326, size: 7.4, period: '124s', delay: '-76s', color: '#fef08a', glow: '#eab308', hasRings: true },
+];
+
+const BG_SOLAR_STARS: { x: number; y: number; r: number; op: number }[] = (() => {
+  const rng = makeSeededRng(30319);
+  const arr: { x: number; y: number; r: number; op: number }[] = [];
+  for (let i = 0; i < 42; i++) {
+    arr.push({
+      x: Number((rng() * 800).toFixed(1)),
+      y: Number((rng() * 600).toFixed(1)),
+      r: Number((0.7 + rng() * 1.4).toFixed(2)),
+      op: Number((0.25 + rng() * 0.6).toFixed(2)),
+    });
+  }
+  return arr;
+})();
+
+const BG_GALAXY_ARMS = [
+  { path: buildSpiralPath(400, 300, 0, 320, 18, 360, 44), tone: 'c1' as const, width: 34 },
+  { path: buildSpiralPath(400, 300, 180, 320, 18, 360, 44), tone: 'c2' as const, width: 34 },
+  { path: buildSpiralPath(400, 300, 90, 275, 24, 315, 38), tone: 'c3' as const, width: 24 },
+  { path: buildSpiralPath(400, 300, 270, 275, 24, 315, 38), tone: 'c1' as const, width: 24 },
+];
+
+const BG_GALAXY_STARS: { x: number; y: number; r: number; op: number; tone: 'white' | 'c1' | 'c2' | 'c3' }[] = (() => {
+  const rng = makeSeededRng(77123);
+  const out: { x: number; y: number; r: number; op: number; tone: 'white' | 'c1' | 'c2' | 'c3' }[] = [];
+  const arms = [0, 180, 90, 270];
+  const tones: ('white' | 'c1' | 'c2' | 'c3')[] = ['white', 'white', 'c1', 'c2', 'c3'];
+  for (let i = 0; i < 96; i++) {
+    const arm = arms[i % 4];
+    const t = Math.pow(rng(), 0.75);
+    const sweep = i % 4 < 2 ? 320 : 275;
+    const jitter = (rng() - 0.5) * (20 + t * 34);
+    const rad = 20 + t * 338 + (rng() - 0.5) * 26;
+    const a = ((arm + sweep * t + jitter) * Math.PI) / 180;
+    out.push({
+      x: Number((400 + rad * Math.cos(a)).toFixed(1)),
+      y: Number((300 + rad * Math.sin(a)).toFixed(1)),
+      r: Number((0.9 + rng() * 2.2).toFixed(2)),
+      op: Number((0.3 + rng() * 0.65).toFixed(2)),
+      tone: tones[Math.floor(rng() * tones.length)],
+    });
+  }
+  return out;
+})();
+
+const BG_GALAXY_HALO: { x: number; y: number; r: number; op: number }[] = (() => {
+  const rng = makeSeededRng(55821);
+  const out: { x: number; y: number; r: number; op: number }[] = [];
+  for (let i = 0; i < 36; i++) {
+    const a = rng() * Math.PI * 2;
+    const rad = 110 + rng() * 270;
+    out.push({
+      x: Number((400 + rad * Math.cos(a)).toFixed(1)),
+      y: Number((300 + rad * Math.sin(a)).toFixed(1)),
+      r: Number((0.8 + rng() * 1.6).toFixed(2)),
+      op: Number((0.22 + rng() * 0.55).toFixed(2)),
+    });
+  }
+  return out;
+})();
+
+const BG_WARP_STREAKS: { angle: number; length: number; thickness: number; dur: string; delay: string; tone: 'sec' | 'min' | 'hr' }[] = (() => {
+  const rng = makeSeededRng(61429);
+  const tones: ('sec' | 'min' | 'hr')[] = ['sec', 'min', 'hr'];
+  const arr: { angle: number; length: number; thickness: number; dur: string; delay: string; tone: 'sec' | 'min' | 'hr' }[] = [];
+  for (let i = 0; i < 40; i++) {
+    const angle = Number(((i * 9 + (rng() - 0.5) * 6 + 360) % 360).toFixed(1));
+    const durVal = 2.1 + rng() * 2.6;
+    const delayVal = -(rng() * durVal);
+    arr.push({
+      angle,
+      length: Math.round(52 + rng() * 76),
+      thickness: Number((1.1 + rng() * 1.6).toFixed(1)),
+      dur: `${durVal.toFixed(2)}s`,
+      delay: `${delayVal.toFixed(2)}s`,
+      tone: tones[i % 3],
+    });
+  }
+  return arr;
+})();
+
 export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: ThemeStyles }> = React.memo(({
   bgFx,
   themeConfig,
 }) => {
+  const bgUid = useId().replace(/:/g, '');
   if (bgFx === 'none') return null;
 
   const isLight = Boolean(themeConfig.isLight);
@@ -1548,17 +1901,259 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
         </>
       )}
 
-      {/* 2. ORBITAL HALO */}
+      {/* 2. SOLAR SYSTEM ORRERY CANVAS */}
+      {bgFx === 'solar' && (
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <defs>
+            <radialGradient id={`${bgUid}-solar-corona`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#fef08a" stopOpacity={isLight ? '0.42' : '0.45'} />
+              <stop offset="28%" stopColor="#f59e0b" stopOpacity={isLight ? '0.2' : '0.24'} />
+              <stop offset="58%" stopColor={c1} stopOpacity={isLight ? '0.08' : '0.11'} />
+              <stop offset="100%" stopColor={c1} stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id={`${bgUid}-comet-tail`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#7dd3fc" stopOpacity="0" />
+              <stop offset="65%" stopColor="#bae6fd" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.95" />
+            </linearGradient>
+          </defs>
+
+          {/* Distant Deep-Space Star Flecks */}
+          {BG_SOLAR_STARS.map((s, idx) => (
+            <circle
+              key={idx}
+              cx={s.x}
+              cy={s.y}
+              r={s.r}
+              fill={isLight ? c3 : '#ffffff'}
+              fillOpacity={isLight ? s.op * 0.45 : s.op * 0.72}
+            />
+          ))}
+
+          {/* Pulsing Central Solar Corona Bloom Behind the Clock */}
+          <circle cx="400" cy="300" r="210" fill={`url(#${bgUid}-solar-corona)`} className="animate-bg-solar-pulse" />
+
+          {/* Concentric Planetary Orbit Tracks + Main Asteroid Belt */}
+          {BG_SOLAR_PLANETS.map((p) => (
+            <circle
+              key={p.name}
+              cx="400"
+              cy="300"
+              r={p.orbitR}
+              fill="none"
+              stroke={isLight ? c3 : '#ffffff'}
+              strokeOpacity={isLight ? '0.16' : '0.14'}
+              strokeWidth="1"
+              strokeDasharray={p.name === 'saturn' ? '6 8' : undefined}
+            />
+          ))}
+          <circle
+            cx="400"
+            cy="300"
+            r="240"
+            fill="none"
+            stroke={c2}
+            strokeOpacity={isLight ? '0.24' : '0.22'}
+            strokeWidth="2.4"
+            strokeDasharray="1.5 9.5"
+            className="animate-bg-orbit-origin"
+            style={{ animationDuration: '140s' }}
+          />
+
+          {/* Independently Orbiting Planets (view-box origin 400,300 prevents wobble) */}
+          {BG_SOLAR_PLANETS.map((p) => {
+            const px = 400 + p.orbitR;
+            const py = 300;
+            return (
+              <g
+                key={p.name}
+                className="animate-bg-orbit-origin"
+                style={{ animationDuration: p.period, animationDelay: p.delay }}
+              >
+                <circle cx={px} cy={py} r={p.size * 2.1} fill={p.glow} fillOpacity={isLight ? '0.18' : '0.26'} />
+                {p.hasRings && (
+                  <ellipse
+                    cx={px}
+                    cy={py}
+                    rx={p.size * 2.35}
+                    ry={p.size * 0.78}
+                    transform={`rotate(-22 ${px} ${py})`}
+                    fill="none"
+                    stroke="#fde68a"
+                    strokeWidth="2.2"
+                    strokeOpacity="0.82"
+                  />
+                )}
+                <circle cx={px} cy={py} r={p.size} fill={p.color} stroke="#ffffff" strokeOpacity="0.45" strokeWidth="0.7" />
+                {p.hasBands && (
+                  <>
+                    <line x1={px - p.size * 0.85} y1={py - 2.4} x2={px + p.size * 0.85} y2={py - 2.4} stroke="#c2410c" strokeWidth="1.4" strokeOpacity="0.6" />
+                    <line x1={px - p.size * 0.9} y1={py + 2.1} x2={px + p.size * 0.9} y2={py + 2.1} stroke="#9a3412" strokeWidth="1.2" strokeOpacity="0.55" />
+                  </>
+                )}
+                {p.hasMoon && (
+                  <g
+                    className="animate-bg-orbit-origin"
+                    style={{
+                      transformBox: 'view-box',
+                      transformOrigin: `${px}px ${py}px`,
+                      animationDuration: '6s',
+                    }}
+                  >
+                    <circle cx={px} cy={py} r={14} fill="none" stroke="#ffffff" strokeOpacity="0.18" strokeWidth="0.6" />
+                    <circle cx={px + 14} cy={py} r={2.1} fill="#e2e8f0" />
+                  </g>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Sweeping Outer Icy Comet */}
+          <g className="animate-bg-orbit-origin" style={{ animationDuration: '24s', animationDelay: '-9s' }}>
+            <path
+              d="M 655 152 A 295 295 0 0 1 695 300"
+              fill="none"
+              stroke={`url(#${bgUid}-comet-tail)`}
+              strokeWidth="2.8"
+              strokeLinecap="round"
+            />
+            <circle cx="695" cy="300" r="3.4" fill="#ffffff" />
+            <circle cx="695" cy="300" r="7.5" fill="#7dd3fc" fillOpacity="0.35" />
+          </g>
+        </svg>
+      )}
+
+      {/* 3. SPIRAL GALAXY CANVAS */}
+      {bgFx === 'galaxy' && (
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <defs>
+            <radialGradient id={`${bgUid}-gal-core`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#fffbeb" stopOpacity={isLight ? '0.5' : '0.72'} />
+              <stop offset="18%" stopColor={c1} stopOpacity={isLight ? '0.32' : '0.46'} />
+              <stop offset="48%" stopColor={c2} stopOpacity={isLight ? '0.16' : '0.26'} />
+              <stop offset="78%" stopColor={c3} stopOpacity={isLight ? '0.07' : '0.11'} />
+              <stop offset="100%" stopColor={c3} stopOpacity="0" />
+            </radialGradient>
+            <filter id={`${bgUid}-nebula-blur`} x="-35%" y="-35%" width="170%" height="170%">
+              <feGaussianBlur stdDeviation="13" />
+            </filter>
+          </defs>
+
+          {/* Perspective-Tilted Galactic Disk */}
+          <g transform="translate(400 300) scale(1 0.68) rotate(-14) translate(-400 -300)">
+            <circle cx="400" cy="300" r="350" fill={`url(#${bgUid}-gal-core)`} />
+
+            {/* Rotating 4-Arm Logarithmic Spiral Nebula & Arm Star Clusters */}
+            <g className="animate-bg-galaxy-spin">
+              {/* Soft Feathered Gaseous Nebula Arms */}
+              <g filter={`url(#${bgUid}-nebula-blur)`}>
+                {BG_GALAXY_ARMS.map((arm, idx) => {
+                  const armCol = arm.tone === 'c1' ? c1 : arm.tone === 'c2' ? c2 : c3;
+                  return (
+                    <g key={idx}>
+                      <path
+                        d={arm.path}
+                        fill="none"
+                        stroke={armCol}
+                        strokeWidth={arm.width * 1.45}
+                        strokeOpacity={isLight ? '0.22' : '0.26'}
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d={arm.path}
+                        fill="none"
+                        stroke="#f472b6"
+                        strokeWidth={arm.width * 0.52}
+                        strokeOpacity={isLight ? '0.14' : '0.18'}
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d={arm.path}
+                        fill="none"
+                        stroke="#fffbeb"
+                        strokeWidth={arm.width * 0.24}
+                        strokeOpacity={isLight ? '0.18' : '0.26'}
+                        strokeLinecap="round"
+                      />
+                    </g>
+                  );
+                })}
+              </g>
+
+              {BG_GALAXY_STARS.map((st, idx) => (
+                <circle
+                  key={idx}
+                  cx={st.x}
+                  cy={st.y}
+                  r={st.r}
+                  fill={st.tone === 'white' ? (isLight ? c3 : '#ffffff') : st.tone === 'c1' ? c1 : st.tone === 'c2' ? c2 : c3}
+                  fillOpacity={isLight ? st.op * 0.55 : st.op * 0.85}
+                />
+              ))}
+            </g>
+
+            {/* Counter-Rotating Outer Star Halo for Multi-Layer Depth */}
+            <g className="animate-bg-galaxy-counter">
+              {BG_GALAXY_HALO.map((st, idx) => (
+                <circle
+                  key={idx}
+                  cx={st.x}
+                  cy={st.y}
+                  r={st.r}
+                  fill={isLight ? c2 : '#e0f2fe'}
+                  fillOpacity={isLight ? st.op * 0.45 : st.op * 0.65}
+                />
+              ))}
+            </g>
+          </g>
+        </svg>
+      )}
+
+      {/* 4. HYPERSPACE WARP CANVAS */}
+      {bgFx === 'warp' && (
+        <div className="absolute inset-0">
+          <div
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[52%] h-[52%] rounded-full blur-3xl"
+            style={{
+              background: `radial-gradient(circle, ${c1} 0%, ${c2} 45%, transparent 74%)`,
+              opacity: isLight ? 0.16 : 0.22,
+            }}
+          />
+          {BG_WARP_STREAKS.map((st, idx) => {
+            const col = pickTone(st.tone);
+            return (
+              <span
+                key={idx}
+                className="animate-bg-warp-streak absolute left-1/2 top-1/2 rounded-full"
+                style={
+                  {
+                    '--warp-angle': `${st.angle}deg`,
+                    width: `${st.length}px`,
+                    height: `${st.thickness}px`,
+                    marginTop: `-${st.thickness / 2}px`,
+                    background: `linear-gradient(90deg, transparent 0%, ${col} 55%, ${isLight ? col : '#ffffff'} 100%)`,
+                    opacity: isLight ? 0.62 : 0.9,
+                    animationDuration: st.dur,
+                    animationDelay: st.delay,
+                  } as React.CSSProperties
+                }
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* 5. ORBITAL HALO */}
       {bgFx === 'orbital' && (
         <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
           <defs>
-            <radialGradient id="bg-orbital-core" cx="50%" cy="50%" r="50%">
+            <radialGradient id={`${bgUid}-orbital-core`} cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor={c1} stopOpacity={isLight ? '0.16' : '0.18'} />
               <stop offset="55%" stopColor={c3} stopOpacity={isLight ? '0.05' : '0.07'} />
               <stop offset="100%" stopColor={c1} stopOpacity="0" />
             </radialGradient>
           </defs>
-          <circle cx="400" cy="300" r="320" fill="url(#bg-orbital-core)" />
+          <circle cx="400" cy="300" r="320" fill={`url(#${bgUid}-orbital-core)`} />
           <g className="animate-bg-spin-cw">
             <circle
               cx="400"
@@ -1603,7 +2198,7 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
         </svg>
       )}
 
-      {/* 3. STARFIELD DRIFT */}
+      {/* 6. STARFIELD DRIFT */}
       {bgFx === 'starfield' && (
         <>
           <div className="animate-bg-drift-layer absolute inset-0">
@@ -1640,7 +2235,78 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
         </>
       )}
 
-      {/* 4. KINETIC GRID */}
+      {/* 7. PLASMA WAVES */}
+      {bgFx === 'waves' && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="animate-bg-wave-drift absolute bottom-0 left-0 w-[200%] h-[58%]" style={{ animationDuration: '24s' }}>
+            <svg viewBox="0 0 1600 320" preserveAspectRatio="none" className="w-full h-full">
+              <defs>
+                <linearGradient id={`${bgUid}-wave-a`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={c3} stopOpacity={isLight ? '0.24' : '0.32'} />
+                  <stop offset="100%" stopColor={c3} stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0,120 C200,40 400,200 600,120 C700,80 750,120 800,120 C1000,40 1200,200 1400,120 C1500,80 1550,120 1600,120 L1600,320 L0,320 Z"
+                fill={`url(#${bgUid}-wave-a)`}
+              />
+              <path
+                d="M0,120 C200,40 400,200 600,120 C700,80 750,120 800,120 C1000,40 1200,200 1400,120 C1500,80 1550,120 1600,120"
+                fill="none"
+                stroke={c3}
+                strokeWidth="2"
+                strokeOpacity={isLight ? '0.38' : '0.45'}
+              />
+            </svg>
+          </div>
+
+          <div className="animate-bg-wave-drift-rev absolute bottom-0 left-0 w-[200%] h-[46%]" style={{ animationDuration: '18s' }}>
+            <svg viewBox="0 0 1600 320" preserveAspectRatio="none" className="w-full h-full">
+              <defs>
+                <linearGradient id={`${bgUid}-wave-b`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={c2} stopOpacity={isLight ? '0.26' : '0.34'} />
+                  <stop offset="100%" stopColor={c2} stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0,145 C200,225 400,65 600,145 C700,185 750,145 800,145 C1000,225 1200,65 1400,145 C1500,185 1550,145 1600,145 L1600,320 L0,320 Z"
+                fill={`url(#${bgUid}-wave-b)`}
+              />
+              <path
+                d="M0,145 C200,225 400,65 600,145 C700,185 750,145 800,145 C1000,225 1200,65 1400,145 C1500,185 1550,145 1600,145"
+                fill="none"
+                stroke={c2}
+                strokeWidth="2.2"
+                strokeOpacity={isLight ? '0.42' : '0.52'}
+              />
+            </svg>
+          </div>
+
+          <div className="animate-bg-wave-drift absolute bottom-0 left-0 w-[200%] h-[34%]" style={{ animationDuration: '13s' }}>
+            <svg viewBox="0 0 1600 320" preserveAspectRatio="none" className="w-full h-full">
+              <defs>
+                <linearGradient id={`${bgUid}-wave-c`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={c1} stopOpacity={isLight ? '0.3' : '0.38'} />
+                  <stop offset="100%" stopColor={c1} stopOpacity="0.02" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0,150 C200,75 400,225 600,150 C700,112 750,150 800,150 C1000,75 1200,225 1400,150 C1500,112 1550,150 1600,150 L1600,320 L0,320 Z"
+                fill={`url(#${bgUid}-wave-c)`}
+              />
+              <path
+                d="M0,150 C200,75 400,225 600,150 C700,112 750,150 800,150 C1000,75 1200,225 1400,150 C1500,112 1550,150 1600,150"
+                fill="none"
+                stroke={c1}
+                strokeWidth="2.4"
+                strokeOpacity={isLight ? '0.5' : '0.62'}
+              />
+            </svg>
+          </div>
+        </div>
+      )}
+
+      {/* 8. KINETIC GRID */}
       {bgFx === 'grid' && (
         <>
           <div
@@ -1666,7 +2332,7 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
         </>
       )}
 
-      {/* 5. AMBIENT BOKEH */}
+      {/* 9. AMBIENT BOKEH */}
       {bgFx === 'bokeh' && (
         <>
           {BG_BOKEH_ORBS.map((orb, idx) => (
@@ -1690,7 +2356,7 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
         </>
       )}
 
-      {/* 6. SONAR RIPPLE */}
+      {/* 10. SONAR RIPPLE */}
       {bgFx === 'ripple' && (
         <div className="absolute inset-0 flex items-center justify-center">
           {[0, 1.5, 3, 4.5].map((delaySec, idx) => (
@@ -1812,6 +2478,48 @@ export const AnalogStyleGlyph: React.FC<{ styleId: AnalogStyle }> = ({ styleId }
           <path d="M3,12.5 Q9,10.5 17,12" fill="none" stroke="currentColor" strokeWidth="1.1" />
           <line x1="10" y1="10" x2="13.6" y2="6.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
           <line x1="10" y1="10" x2="7.2" y2="8.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'orrery' && (
+        <>
+          <circle cx="10" cy="10" r="2.2" fill="currentColor" />
+          <circle cx="10" cy="10" r="4.8" fill="none" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.65" />
+          <circle cx="14.8" cy="10" r="1.2" fill="currentColor" />
+          <circle cx="7.4" cy="5.8" r="1" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'galaxy' && (
+        <>
+          <circle cx="10" cy="10" r="1.6" fill="currentColor" />
+          <path d="M10,10 C12.5,7 15.2,8.5 14.4,12.2" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+          <path d="M10,10 C7.5,13 4.8,11.5 5.6,7.8" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'astrolabe' && (
+        <>
+          <circle cx="10" cy="8.8" r="4.6" fill="none" stroke="currentColor" strokeWidth="1" />
+          <line x1="10" y1="3" x2="10" y2="17" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.55" />
+          <line x1="4" y1="10" x2="16" y2="10" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.55" />
+        </>
+      )}
+      {styleId === 'blackhole' && (
+        <>
+          <circle cx="10" cy="10" r="3" fill="currentColor" />
+          <ellipse cx="10" cy="10" rx="6.8" ry="2.2" transform="rotate(-18 10 10)" fill="none" stroke="currentColor" strokeWidth="1.25" />
+        </>
+      )}
+      {styleId === 'gears' && (
+        <>
+          <circle cx="8.2" cy="8.5" r="2.9" fill="none" stroke="currentColor" strokeWidth="1.2" strokeDasharray="1.6 1" />
+          <circle cx="12.8" cy="12.2" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.2" strokeDasharray="1.5 0.9" />
+          <circle cx="8.2" cy="8.5" r="0.9" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'cyberwave' && (
+        <>
+          <path d="M5.5,10.5 A4.5,4.5 0 0 1 14.5,10.5 Z" fill="currentColor" />
+          <line x1="3.4" y1="12.2" x2="16.6" y2="12.2" stroke="currentColor" strokeWidth="1" />
+          <line x1="5" y1="14.4" x2="15" y2="14.4" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.7" />
         </>
       )}
     </svg>
@@ -3655,6 +4363,618 @@ const AnalogDialFace: React.FC<AnalogDialFaceProps> = React.memo(({
           </g>
         </g>
       )}
+
+      {/* STYLE 15: SOLAR SYSTEM ORRERY (Real-Time Heliocentric Planetarium) */}
+      {styleId === 'orrery' && (
+        <g>
+          {/* Deep Midnight Sapphire Space Dome */}
+          <circle cx="150" cy="150" r="141" fill={`url(#${uid}-space-dome)`} stroke={borderAccent} strokeWidth="2.4" strokeOpacity="0.65" />
+          <circle cx="150" cy="150" r="130" fill="none" stroke="rgba(253,230,138,0.28)" strokeWidth="1" />
+          <circle cx="150" cy="150" r="139" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="0.7" />
+
+          {/* Outer Astronomical Degree & Ecliptic Bezel */}
+          {[...Array(60)].map((_, i) => {
+            const isHour = i % 5 === 0;
+            const isQuad = i % 15 === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1={isQuad ? '10.5' : isHour ? '12' : '14'}
+                x2="150"
+                y2="19.5"
+                stroke={isQuad ? '#fde68a' : isHour ? '#f8fafc' : 'rgba(226,232,240,0.34)'}
+                strokeWidth={isQuad ? '2.2' : isHour ? '1.4' : '0.75'}
+                strokeLinecap="round"
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+
+          {/* 12 Faceted Gold Ecliptic Hour Diamonds */}
+          {[...Array(12)].map((_, idx) => {
+            const a = ((idx * 30 - 90) * Math.PI) / 180;
+            const x = 150 + 134.5 * Math.cos(a);
+            const y = 150 + 134.5 * Math.sin(a);
+            const isCard = idx % 3 === 0;
+            return isCard ? (
+              <polygon
+                key={idx}
+                points={`${x},${y - 3.6} ${x + 2.8},${y} ${x},${y + 3.6} ${x - 2.8},${y}`}
+                fill="#fde68a"
+                stroke="#b45309"
+                strokeWidth="0.5"
+              />
+            ) : (
+              <circle key={idx} cx={x} cy={y} r="1.4" fill="rgba(248,250,252,0.75)" />
+            );
+          })}
+
+          {/* Deep-Field Starry Background */}
+          {DIAL_DEEP_STARS.map((s, idx) => (
+            <circle key={idx} cx={s.x} cy={s.y} r={s.r} fill="#e0f2fe" fillOpacity={s.op * 0.85} />
+          ))}
+
+          {/* 6 Concentric Planetary Orbits + Main Asteroid Belt */}
+          {[33, 47, 64, 80, 100, 118].map((r, idx) => (
+            <circle
+              key={r}
+              cx="150"
+              cy="150"
+              r={r}
+              fill="none"
+              stroke={idx === 2 ? '#38bdf8' : '#fde68a'}
+              strokeOpacity={idx === 2 ? '0.32' : '0.2'}
+              strokeWidth={idx === 2 ? '0.95' : '0.75'}
+              strokeDasharray={idx >= 4 ? '4 5' : undefined}
+            />
+          ))}
+          <circle
+            cx="150"
+            cy="150"
+            r="90"
+            fill="none"
+            stroke="rgba(226,232,240,0.34)"
+            strokeWidth="2.2"
+            strokeDasharray="1 5.5"
+          />
+
+          {/* Subtle Meridian Crosshairs */}
+          <line x1="28" y1="150" x2="272" y2="150" stroke="rgba(255,255,255,0.06)" strokeWidth="0.7" />
+          <line x1="150" y1="28" x2="150" y2="272" stroke="rgba(255,255,255,0.06)" strokeWidth="0.7" />
+
+          {/* Micro Horology Signatures */}
+          <text
+            x="150"
+            y="26.5"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#fde68a"
+            fillOpacity="0.82"
+            fontSize="5.4"
+            fontWeight="700"
+            letterSpacing="2.2"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            SOLARIS ORRERY
+          </text>
+          {showDate && (
+            <text
+              x="150"
+              y="273.5"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#cbd5e1"
+              fillOpacity="0.85"
+              fontSize="5.8"
+              fontWeight="700"
+              letterSpacing="1.6"
+              fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            >
+              {monthShort} {dayStr} • J2000
+            </text>
+          )}
+        </g>
+      )}
+
+      {/* STYLE 16: SPIRAL GALAXY (Barred Spiral Nebula & Compass Star Indices) */}
+      {styleId === 'galaxy' && (
+        <g>
+          <circle cx="150" cy="150" r="141" fill={`url(#${uid}-space-dome)`} stroke={borderAccent} strokeWidth="2.2" strokeOpacity="0.65" />
+          <circle cx="150" cy="150" r="130" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="0.9" />
+          <circle cx="150" cy="150" r="138" fill="none" stroke={secColor} strokeOpacity="0.22" strokeWidth="0.8" strokeDasharray="3 6" />
+
+          {/* 60 Fine Stardust Minute Ticks */}
+          {[...Array(60)].map((_, i) => {
+            const isHour = i % 5 === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1={isHour ? '11.5' : '14.5'}
+                x2="150"
+                y2="19.5"
+                stroke={isHour ? '#ffffff' : 'rgba(226,232,240,0.34)'}
+                strokeWidth={isHour ? '1.5' : '0.7'}
+                strokeLinecap="round"
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+
+          {/* 4-Point Cardinal Compass Stars at 12, 3, 6, 9 */}
+          {[0, 90, 180, 270].map((deg) => {
+            const rad = ((deg - 90) * Math.PI) / 180;
+            const cx = 150 + 134 * Math.cos(rad);
+            const cy = 150 + 134 * Math.sin(rad);
+            const s = deg === 0 ? 5.2 : 4.1;
+            return (
+              <polygon
+                key={deg}
+                points={`${cx},${cy - s} ${cx + s * 0.28},${cy - s * 0.28} ${cx + s},${cy} ${cx + s * 0.28},${cy + s * 0.28} ${cx},${cy + s} ${cx - s * 0.28},${cy + s * 0.28} ${cx - s},${cy} ${cx - s * 0.28},${cy - s * 0.28}`}
+                fill={deg === 0 ? secColor : '#f8fafc'}
+              />
+            );
+          })}
+
+          <text
+            x="150"
+            y="268"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#e2e8f0"
+            fillOpacity="0.72"
+            fontSize="5.4"
+            fontWeight="700"
+            letterSpacing="2.4"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            {showDate ? `NGC-72 • ${monthShort} ${dayStr}` : 'SPIRAL GALAXY'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 17: ASTROLABE (Planispheric Stereographic Projection Plate) */}
+      {styleId === 'astrolabe' && (
+        <g>
+          {/* Outer Engraved Brass/Silver Mater Limb */}
+          <circle
+            cx="150"
+            cy="150"
+            r="141"
+            fill={isLight ? '#f5efe0' : '#0b1020'}
+            stroke={isLight ? '#92400e' : '#d4af37'}
+            strokeWidth="2.8"
+            strokeOpacity="0.72"
+          />
+          <circle cx="150" cy="150" r="137.5" fill="none" stroke={isLight ? 'rgba(146,64,14,0.35)' : 'rgba(212,175,55,0.4)'} strokeWidth="0.9" />
+          <circle cx="150" cy="150" r="118.5" fill="none" stroke={isLight ? '#92400e' : '#d4af37'} strokeWidth="1.6" strokeOpacity="0.7" />
+          <circle
+            cx="150"
+            cy="150"
+            r="116.5"
+            fill={isLight ? '#ebe1c8' : '#0f172a'}
+            stroke={isLight ? 'rgba(146,64,14,0.28)' : 'rgba(212,175,55,0.28)'}
+            strokeWidth="0.8"
+          />
+
+          {/* 72 Five-Degree Limb Graduations */}
+          {[...Array(72)].map((_, i) => {
+            const isMajor = i % 6 === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1="10.5"
+                x2="150"
+                y2={isMajor ? '17.5' : '14.5'}
+                stroke={isLight ? '#78350f' : '#e2c275'}
+                strokeOpacity={isMajor ? '0.88' : '0.4'}
+                strokeWidth={isMajor ? '1.3' : '0.7'}
+                transform={`rotate(${i * 5} 150 150)`}
+              />
+            );
+          })}
+
+          {/* 12 Classical Roman Numerals on the Mater Limb */}
+          {['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'].map((rom, idx) => {
+            const deg = idx * 30;
+            const rad = ((deg - 90) * Math.PI) / 180;
+            const x = 150 + 128 * Math.cos(rad);
+            const y = 150 + 128 * Math.sin(rad);
+            return (
+              <text
+                key={rom}
+                x={x}
+                y={y}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={isLight ? '#451a03' : '#f3d997'}
+                fontSize={idx % 3 === 0 ? '9.8' : '8.2'}
+                fontWeight="700"
+                fontFamily="Georgia, 'Times New Roman', serif"
+              >
+                {rom}
+              </text>
+            );
+          })}
+
+          {/* Stereographic Tympan (Climate Plate: Tropics, Almucantars, Azimuths) */}
+          <g clipPath={`url(#${uid}-astrolabe-clip)`}>
+            {/* Capricorn, Equator & Cancer Circles */}
+            <circle cx="150" cy="150" r="106" fill="none" stroke={isLight ? 'rgba(120,53,15,0.34)' : 'rgba(212,175,55,0.3)'} strokeWidth="0.9" />
+            <circle cx="150" cy="150" r="76" fill="none" stroke={isLight ? 'rgba(120,53,15,0.48)' : 'rgba(212,175,55,0.45)'} strokeWidth="1.05" strokeDasharray="3 3" />
+            <circle cx="150" cy="150" r="46" fill="none" stroke={isLight ? 'rgba(120,53,15,0.34)' : 'rgba(212,175,55,0.3)'} strokeWidth="0.85" />
+
+            {/* Stereographic Almucantar Altitude Circles Centered Toward Zenith */}
+            {[
+              { cy: 108, r: 22 },
+              { cy: 102, r: 40 },
+              { cy: 94, r: 60 },
+              { cy: 84, r: 82 },
+              { cy: 70, r: 108 },
+            ].map((alm, idx) => (
+              <circle
+                key={idx}
+                cx="150"
+                cy={alm.cy}
+                r={alm.r}
+                fill="none"
+                stroke={isLight ? 'rgba(120,53,15,0.24)' : 'rgba(148,163,184,0.28)'}
+                strokeWidth={idx === 4 ? '1.15' : '0.75'}
+              />
+            ))}
+
+            {/* Curved Azimuth Meridian Arcs Converging at Zenith (150, 108) */}
+            {[-95, -52, -24, 24, 52, 95].map((offset, idx) => (
+              <path
+                key={idx}
+                d={`M 150 108 Q ${150 + offset} 175 ${150 + offset * 1.45} 266`}
+                fill="none"
+                stroke={isLight ? 'rgba(120,53,15,0.2)' : 'rgba(148,163,184,0.22)'}
+                strokeWidth="0.7"
+              />
+            ))}
+
+            {/* Prime Meridian & East-West Celestial Axes */}
+            <line x1="150" y1="34" x2="150" y2="266" stroke={isLight ? 'rgba(120,53,15,0.34)' : 'rgba(212,175,55,0.32)'} strokeWidth="0.85" />
+            <line x1="34" y1="150" x2="266" y2="150" stroke={isLight ? 'rgba(120,53,15,0.34)' : 'rgba(212,175,55,0.32)'} strokeWidth="0.85" />
+          </g>
+
+          {showDate && (
+            <g>
+              <rect
+                x="122"
+                y="224"
+                width="56"
+                height="15"
+                rx="7.5"
+                fill={isLight ? '#f5efe0' : '#0b1020'}
+                stroke={isLight ? '#92400e' : '#d4af37'}
+                strokeWidth="0.9"
+                strokeOpacity="0.75"
+              />
+              <text
+                x="150"
+                y="231.5"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={isLight ? '#78350f' : '#f3d997'}
+                fontSize="6.4"
+                fontWeight="700"
+                letterSpacing="1"
+                fontFamily="Georgia, 'Times New Roman', serif"
+              >
+                {monthShort} {dayStr}
+              </text>
+            </g>
+          )}
+        </g>
+      )}
+
+      {/* STYLE 18: SINGULARITY (Relativistic Black Hole & Gravitational Lensing) */}
+      {styleId === 'blackhole' && (
+        <g>
+          <circle cx="150" cy="150" r="141" fill="#020308" stroke={borderAccent} strokeWidth="2.2" strokeOpacity="0.6" />
+          <circle cx="150" cy="150" r="131" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" />
+
+          {/* Faint Background Gravitational-Well Coordinate Mesh */}
+          {[70, 92, 114].map((r) => (
+            <circle key={r} cx="150" cy="150" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.65" strokeDasharray="2 7" />
+          ))}
+          {DIAL_DEEP_STARS.slice(0, 34).map((s, idx) => (
+            <circle key={idx} cx={s.x} cy={s.y} r={s.r * 0.85} fill="#e2e8f0" fillOpacity={s.op * 0.55} />
+          ))}
+
+          {/* Precision Telemetry Outer Chapter Ticks */}
+          {[...Array(60)].map((_, i) => {
+            const isHour = i % 5 === 0;
+            const isQuad = i % 15 === 0;
+            if (isQuad) return null;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1={isHour ? '11.5' : '14.5'}
+                x2="150"
+                y2="19.5"
+                stroke={isHour ? '#fde68a' : 'rgba(248,250,252,0.28)'}
+                strokeWidth={isHour ? '1.6' : '0.7'}
+                strokeLinecap="round"
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+
+          {/* Bold Telemetry Cardinal Markers 00 / 03 / 06 / 09 */}
+          {[
+            { label: '12', x: 150, y: 18 },
+            { label: '03', x: 282, y: 150 },
+            { label: '06', x: 150, y: 282 },
+            { label: '09', x: 18, y: 150 },
+          ].map((m) => (
+            <text
+              key={m.label}
+              x={m.x}
+              y={m.y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#fffbeb"
+              fontSize="9.5"
+              fontWeight="800"
+              letterSpacing="0.8"
+              fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            >
+              {m.label}
+            </text>
+          ))}
+
+          <text
+            x="150"
+            y="264"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#fb923c"
+            fillOpacity="0.78"
+            fontSize="5.4"
+            fontWeight="700"
+            letterSpacing="2.2"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            {showDate ? `SINGULARITY • ${monthShort} ${dayStr}` : 'EVENT HORIZON'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 19: AUTOMATON (Openworked Skeleton Mechanical Caliber) */}
+      {styleId === 'gears' && (
+        <g>
+          {/* Outer Satin Metallic Chapter Bezel */}
+          <circle
+            cx="150"
+            cy="150"
+            r="141"
+            fill={isLight ? '#e2e8f0' : '#0f172a'}
+            stroke={borderAccent}
+            strokeWidth="2.8"
+            strokeOpacity="0.7"
+          />
+          <circle cx="150" cy="150" r="137" fill="none" stroke={hairline} strokeWidth="0.9" />
+
+          {/* Recessed Dark Openworked Movement Cavity */}
+          <circle
+            cx="150"
+            cy="150"
+            r="116"
+            fill={isLight ? '#141c2c' : '#070b14'}
+            stroke={borderAccent}
+            strokeWidth="1.6"
+            strokeOpacity="0.6"
+          />
+
+          {/* Subtle Geneva Stripes on the Deep Mainplate */}
+          <g clipPath={`url(#${uid}-gears-clip)`} opacity="0.24">
+            {[...Array(11)].map((_, idx) => (
+              <rect
+                key={idx}
+                x={36 + idx * 21}
+                y="32"
+                width="10"
+                height="236"
+                fill="rgba(255,255,255,0.12)"
+              />
+            ))}
+          </g>
+
+          {/* Engraved Caliber Signature */}
+          <text
+            x="150"
+            y="53"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="rgba(226,232,240,0.45)"
+            fontSize="5.3"
+            fontWeight="700"
+            letterSpacing="2"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            CAL. VX-05 • 24 JEWELS
+          </text>
+
+          {/* 60 Precision Chapter Ring Ticks */}
+          {[...Array(60)].map((_, i) => {
+            const isHour = i % 5 === 0;
+            const isQuad = i % 15 === 0;
+            if (isQuad) return null;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1={isHour ? '14' : '16.5'}
+                x2="150"
+                y2={isHour ? '27' : '22.5'}
+                stroke={isHour ? majorTick : minorTick}
+                strokeWidth={isHour ? '2.4' : '0.85'}
+                strokeLinecap="round"
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+
+          {/* Crisp Metallic Cardinal Numerals 60 / 15 / 30 / 45 */}
+          {[
+            { txt: '60', x: 150, y: 21 },
+            { txt: '15', x: 279, y: 150 },
+            { txt: '30', x: 150, y: 279 },
+            { txt: '45', x: 21, y: 150 },
+          ].map((c) => (
+            <text
+              key={c.txt}
+              x={c.x}
+              y={c.y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill={c.txt === '60' ? secColor : numColor}
+              fontSize="10.2"
+              fontWeight="800"
+              fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            >
+              {c.txt}
+            </text>
+          ))}
+
+          {/* Four Chamfered Bezel Screws */}
+          {[45, 135, 225, 315].map((deg) => {
+            const rad = (deg * Math.PI) / 180;
+            const sx = 150 + 128 * Math.cos(rad);
+            const sy = 150 + 128 * Math.sin(rad);
+            return (
+              <g key={deg}>
+                <circle cx={sx} cy={sy} r="2.7" fill="#38bdf8" fillOpacity="0.85" stroke="#0f172a" strokeWidth="0.6" />
+                <line x1={sx - 2} y1={sy - 1} x2={sx + 2} y2={sy + 1} stroke="#0f172a" strokeWidth="0.7" />
+              </g>
+            );
+          })}
+
+          {showDate && (
+            <g>
+              <rect x="64" y="142" width="32" height="16" rx="3" fill="rgba(2,6,23,0.88)" stroke="#d4af37" strokeWidth="0.9" />
+              <text
+                x="80"
+                y="150"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="#fef08a"
+                fontSize="8.2"
+                fontWeight="800"
+                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+              >
+                {dayStr}
+              </text>
+            </g>
+          )}
+        </g>
+      )}
+
+      {/* STYLE 20: SYNTHWAVE (Retrofuturistic Sliced Sunset & 3D Laser Grid) */}
+      {styleId === 'cyberwave' && (
+        <g>
+          {/* Outer Neon-Chrome Bezel */}
+          <circle cx="150" cy="150" r="141" fill="#090418" stroke="#f472b6" strokeWidth="2.6" strokeOpacity="0.82" />
+          <circle cx="150" cy="150" r="131" fill="none" stroke="#22d3ee" strokeWidth="1.2" strokeOpacity="0.75" />
+
+          {/* Clipped Synthwave Panorama Inside r=130 */}
+          <g clipPath={`url(#${uid}-dome-clip)`}>
+            {/* Twilight Outrun Sky */}
+            <rect x="18" y="18" width="264" height="146" fill={`url(#${uid}-synth-sky)`} />
+            {/* Deep Neon Grid Floor */}
+            <rect x="18" y="164" width="264" height="120" fill="#12052b" />
+
+            {/* Retro Sky Stars */}
+            {DIAL_DEEP_STARS.filter((s) => s.y < 146).map((s, idx) => (
+              <circle key={idx} cx={s.x} cy={s.y} r={s.r} fill={idx % 3 === 0 ? '#67e8f9' : '#ffffff'} fillOpacity={s.op * 0.85} />
+            ))}
+
+            {/* Iconic Sliced Outrun Sunset */}
+            <g clipPath={`url(#${uid}-synth-sun-clip)`}>
+              <circle cx="150" cy="130" r="52" fill={`url(#${uid}-synth-sun)`} />
+              {/* Horizontal Retrowave Scan Cutouts */}
+              <rect x="94" y="132" width="112" height="2.4" fill="#2b0b52" />
+              <rect x="94" y="139" width="112" height="3.2" fill="#3a0d63" />
+              <rect x="94" y="147" width="112" height="4.2" fill="#4c1073" />
+              <rect x="94" y="156" width="112" height="5.4" fill="#5e137e" />
+            </g>
+
+            {/* Twin Silhouetted Neon Wireframe Mountain Peaks Along Horizon */}
+            <polygon
+              points="18,164 52,130 78,148 106,120 132,164"
+              fill="#0d0420"
+              stroke="#22d3ee"
+              strokeWidth="1.35"
+              strokeLinejoin="round"
+            />
+            <polyline points="52,130 62,164 78,148 94,164 106,120 112,164" fill="none" stroke="#22d3ee" strokeOpacity="0.38" strokeWidth="0.8" />
+
+            <polygon
+              points="168,164 198,124 224,146 250,128 282,164"
+              fill="#0d0420"
+              stroke="#f472b6"
+              strokeWidth="1.35"
+              strokeLinejoin="round"
+            />
+            <polyline points="198,124 206,164 224,146 238,164 250,128 256,164" fill="none" stroke="#f472b6" strokeOpacity="0.4" strokeWidth="0.8" />
+
+            {/* Neon Horizon Laser Line */}
+            <line x1="18" y1="164" x2="282" y2="164" stroke="#f472b6" strokeWidth="2.2" />
+            <line x1="18" y1="164" x2="282" y2="164" stroke="#ffffff" strokeWidth="0.8" strokeOpacity="0.8" />
+
+            {/* 3D Perspective Vanishing Rays Across Ground Plane */}
+            {[-210, -145, -95, -55, -24, 0, 24, 55, 95, 145, 210].map((dx, idx) => (
+              <line
+                key={idx}
+                x1="150"
+                y1="164"
+                x2={150 + dx}
+                y2="286"
+                stroke={idx % 2 === 0 ? '#ec4899' : '#22d3ee'}
+                strokeOpacity="0.58"
+                strokeWidth="0.95"
+              />
+            ))}
+          </g>
+
+          {/* Outer Bezel Retro Neon Markers */}
+          {[...Array(12)].map((_, idx) => {
+            const isCard = idx % 3 === 0;
+            return (
+              <rect
+                key={idx}
+                x={isCard ? '148.2' : '149'}
+                y="10.5"
+                width={isCard ? '3.6' : '2'}
+                height={isCard ? '8.5' : '6'}
+                rx="1"
+                fill={idx === 0 ? '#fde047' : isCard ? '#22d3ee' : '#f472b6'}
+                transform={`rotate(${idx * 30} 150 150)`}
+              />
+            );
+          })}
+
+          <text
+            x="150"
+            y="262"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#67e8f9"
+            fontSize="6"
+            fontWeight="800"
+            letterSpacing="2.4"
+            fontFamily="'Orbitron', 'JetBrains Mono', monospace"
+          >
+            {showDate ? `OUTRUN • ${weekdayShort} ${dayStr}` : 'SYNTHWAVE 84'}
+          </text>
+        </g>
+      )}
     </g>
   );
 });
@@ -3717,6 +5037,7 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
   const activeSnapshot: AnalogTimeSnapshot = useMemo(() => {
     if (isSweeping) return liveSnapshot;
     return {
+      nowMs: baseTime.getTime(),
       hours24: baseTime.getHours(),
       minutes: baseTime.getMinutes(),
       seconds: baseTime.getSeconds(),
@@ -3728,6 +5049,7 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
   }, [isSweeping, liveSnapshot, baseTime]);
 
   const secFloat = activeSnapshot.seconds + (isSweeping ? activeSnapshot.milliseconds / 1000 : 0);
+  const continuousSec = activeSnapshot.nowMs / 1000;
   const secAngle = secFloat * 6;
   const minAngle = activeSnapshot.minutes * 6 + secFloat * 0.1;
   const hrAngle = (activeSnapshot.hours24 % 12) * 30 + activeSnapshot.minutes * 0.5 + secFloat * (0.5 / 60);
@@ -3738,6 +5060,9 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
   const secColor = themeConfig.handSec;
   const minColor = themeConfig.handMin;
   const hrColor = themeConfig.handHr;
+  const darkCavityHr = isLight ? '#fde68a' : hrColor;
+  const darkCavityMin = isLight ? '#f8fafc' : minColor;
+  const darkCavitySec = isLight ? '#38bdf8' : secColor;
   const bevelEdge = isLight ? 'rgba(15,23,42,0.2)' : 'rgba(255,255,255,0.22)';
   const shadowColor = isLight ? 'rgba(15,23,42,0.18)' : 'rgba(0,0,0,0.6)';
   const handShadowStyle = { filter: `drop-shadow(0 2px 4px ${shadowColor})` };
@@ -3755,7 +5080,7 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
   const minuteBucket = Math.floor(baseTime.getTime() / 60000);
   const lunarPhase = useMemo(() => computeLunarPhaseFraction(minuteBucket * 60000), [minuteBucket]);
 
-  // Live complication angles for Tourbillon cage, Chronograph sub-dials, and Orbital nodes
+  // Live complication angles for Tourbillon cage, Chronograph sub-dials, Orbital nodes & 6 Showcase Dials
   const tourbillonCageAngle = (secFloat * 60) % 360;
   const chrono24Angle = ((activeSnapshot.hours24 + activeSnapshot.minutes / 60) / 24) * 360;
 
@@ -3765,6 +5090,17 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
   const orbHrCirc = 2 * Math.PI * 64;
   const orbMinCirc = 2 * Math.PI * 94;
   const orbSecCirc = 2 * Math.PI * 124;
+
+  // Real-time J2000 planetary longitudes (Solar System Orrery) & continuous motion angles
+  const solarLongitudes = styleId === 'orrery' ? computeSolarSystemLongitudes(activeSnapshot.nowMs) : null;
+  const solarCoronaAngle = (continuousSec * 8) % 360;
+  const earthMoonAngle = (continuousSec * 42) % 360;
+  const galaxySpinAngle = (continuousSec * 5.5) % 360;
+  const galaxyCounterAngle = (-continuousSec * 1.6) % 360;
+  const astrolabeReteAngle = (continuousSec * 4.5) % 360;
+  const blackholePlasmaAngle = (continuousSec * 38) % 360;
+  const blackholeRingAngle = (-continuousSec * 26) % 360;
+  const balanceWheelAngle = prefersReducedMotion ? 0 : Math.sin(continuousSec * Math.PI * 8) * 26;
 
   return (
     <svg viewBox="0 0 300 300" className="w-full h-full drop-shadow-2xl select-none">
@@ -3786,6 +5122,70 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
           <stop offset="60%" stopColor="#fde68a" stopOpacity="0.96" />
           <stop offset="100%" stopColor="#d97706" stopOpacity="0.92" />
         </radialGradient>
+
+        <radialGradient id={`${uid}-space-dome`} cx="50%" cy="48%" r="54%">
+          <stop offset="0%" stopColor="#0f1b3d" stopOpacity="1" />
+          <stop offset="52%" stopColor="#070c1e" stopOpacity="1" />
+          <stop offset="100%" stopColor="#02040a" stopOpacity="1" />
+        </radialGradient>
+
+        <radialGradient id={`${uid}-sun-core`} cx="45%" cy="42%" r="55%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+          <stop offset="36%" stopColor="#fef08a" stopOpacity="1" />
+          <stop offset="72%" stopColor="#f59e0b" stopOpacity="0.96" />
+          <stop offset="100%" stopColor="#ea580c" stopOpacity="0.85" />
+        </radialGradient>
+
+        <radialGradient id={`${uid}-galaxy-core`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.98" />
+          <stop offset="22%" stopColor="#fef08a" stopOpacity="0.85" />
+          <stop offset="50%" stopColor={darkCavitySec} stopOpacity="0.42" />
+          <stop offset="78%" stopColor="#7c3aed" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="#02040a" stopOpacity="0" />
+        </radialGradient>
+
+        <linearGradient id={`${uid}-orrery-comet`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0" />
+          <stop offset="60%" stopColor="#bae6fd" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.98" />
+        </linearGradient>
+
+        <radialGradient id={`${uid}-bh-halo`} cx="50%" cy="50%" r="50%">
+          <stop offset="28%" stopColor="#000000" stopOpacity="0" />
+          <stop offset="46%" stopColor="#fb923c" stopOpacity="0.58" />
+          <stop offset="64%" stopColor="#f59e0b" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+        </radialGradient>
+
+        <linearGradient id={`${uid}-bh-disk`} x1="0%" y1="50%" x2="100%" y2="50%">
+          <stop offset="0%" stopColor="#9a3412" stopOpacity="0.12" />
+          <stop offset="20%" stopColor="#f97316" stopOpacity="0.88" />
+          <stop offset="42%" stopColor="#fef08a" stopOpacity="0.98" />
+          <stop offset="52%" stopColor="#ffffff" stopOpacity="1" />
+          <stop offset="65%" stopColor="#fbbf24" stopOpacity="0.95" />
+          <stop offset="84%" stopColor="#ea580c" stopOpacity="0.72" />
+          <stop offset="100%" stopColor="#7c2d12" stopOpacity="0.1" />
+        </linearGradient>
+
+        <radialGradient id={`${uid}-ruby-jewel`} cx="35%" cy="32%" r="65%">
+          <stop offset="0%" stopColor="#fda4af" stopOpacity="1" />
+          <stop offset="45%" stopColor="#e11d48" stopOpacity="1" />
+          <stop offset="100%" stopColor="#881337" stopOpacity="1" />
+        </radialGradient>
+
+        <linearGradient id={`${uid}-synth-sky`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#060214" />
+          <stop offset="48%" stopColor="#1e0742" />
+          <stop offset="82%" stopColor="#581c87" />
+          <stop offset="100%" stopColor="#db2777" />
+        </linearGradient>
+
+        <linearGradient id={`${uid}-synth-sun`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="38%" stopColor="#fb923c" />
+          <stop offset="72%" stopColor="#f43f5e" />
+          <stop offset="100%" stopColor="#c026d3" />
+        </linearGradient>
 
         <linearGradient id={`${uid}-radar-grad`} x1="15%" y1="65%" x2="95%" y2="5%">
           <stop offset="0%" stopColor={secColor} stopOpacity="0" />
@@ -3810,6 +5210,30 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
         <clipPath id={`${uid}-moon-clip`}>
           <path d="M 110 202 A 40 40 0 0 1 190 202 Q 170 191 160 198 A 10.5 10.5 0 0 1 140 198 Q 130 191 110 202 Z" />
         </clipPath>
+
+        <clipPath id={`${uid}-dome-clip`}>
+          <circle cx="150" cy="150" r="130" />
+        </clipPath>
+
+        <clipPath id={`${uid}-astrolabe-clip`}>
+          <circle cx="150" cy="150" r="116" />
+        </clipPath>
+
+        <clipPath id={`${uid}-gears-clip`}>
+          <circle cx="150" cy="150" r="115" />
+        </clipPath>
+
+        <clipPath id={`${uid}-synth-sun-clip`}>
+          <circle cx="150" cy="130" r="52" />
+        </clipPath>
+
+        <filter id={`${uid}-nebula-blur`} x="-35%" y="-35%" width="170%" height="170%">
+          <feGaussianBlur stdDeviation="5.2" />
+        </filter>
+
+        <filter id={`${uid}-bh-glow`} x="-35%" y="-35%" width="170%" height="170%">
+          <feGaussianBlur stdDeviation="3.0" />
+        </filter>
       </defs>
 
       {/* Memoized Static Watch Dial Layers */}
@@ -3963,6 +5387,496 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
         </g>
       )}
 
+      {/* STYLE 15 DYNAMIC: SOLAR SYSTEM ORRERY LIVE PLANETS, MOON & COMET */}
+      {styleId === 'orrery' && solarLongitudes && (
+        <g pointerEvents="none">
+          {/* Central Radiant Sun with Slowly Rotating Solar Corona */}
+          <circle cx="150" cy="150" r="24" fill="#f59e0b" fillOpacity="0.2" />
+          <g transform={`rotate(${solarCoronaAngle} 150 150)`} opacity="0.65">
+            {[...Array(12)].map((_, idx) => (
+              <line
+                key={idx}
+                x1="150"
+                y1="131.5"
+                x2="150"
+                y2="136.5"
+                stroke="#fde68a"
+                strokeWidth={idx % 2 === 0 ? '1.6' : '1'}
+                strokeLinecap="round"
+                transform={`rotate(${idx * 30} 150 150)`}
+              />
+            ))}
+          </g>
+          <circle
+            cx="150"
+            cy="150"
+            r="13.5"
+            fill={`url(#${uid}-sun-core)`}
+            style={{ filter: 'drop-shadow(0 0 10px rgba(251,191,36,0.8))' }}
+          />
+
+          {/* 6 Real-Time J2000 Heliocentric Planets */}
+          {(() => {
+            const pos = (deg: number, r: number) => {
+              const rad = ((deg - 90) * Math.PI) / 180;
+              return { x: 150 + r * Math.cos(rad), y: 150 + r * Math.sin(rad) };
+            };
+            const merc = pos(solarLongitudes.mercury, 33);
+            const venus = pos(solarLongitudes.venus, 47);
+            const earth = pos(solarLongitudes.earth, 64);
+            const mars = pos(solarLongitudes.mars, 80);
+            const jup = pos(solarLongitudes.jupiter, 100);
+            const sat = pos(solarLongitudes.saturn, 118);
+            const moonRad = ((earthMoonAngle - 90) * Math.PI) / 180;
+            const moonX = earth.x + 9.4 * Math.cos(moonRad);
+            const moonY = earth.y + 9.4 * Math.sin(moonRad);
+
+            return (
+              <>
+                {/* Mercury */}
+                <circle cx={merc.x} cy={merc.y} r="2.8" fill="#cbd5e1" stroke="#475569" strokeWidth="0.6" />
+
+                {/* Venus */}
+                <circle cx={venus.x} cy={venus.y} r="5.6" fill="#fde68a" fillOpacity="0.2" />
+                <circle cx={venus.x} cy={venus.y} r="4.0" fill="#fde68a" stroke="#d97706" strokeWidth="0.6" />
+
+                {/* Earth + Live Orbiting Moon */}
+                <circle cx={earth.x} cy={earth.y} r="9.4" fill="none" stroke="rgba(186,230,253,0.34)" strokeWidth="0.6" />
+                <circle cx={earth.x} cy={earth.y} r="6.8" fill="#38bdf8" fillOpacity="0.22" />
+                <circle cx={earth.x} cy={earth.y} r="4.6" fill="#0284c7" stroke="#bae6fd" strokeWidth="0.7" />
+                <path
+                  d={`M ${earth.x - 2.4} ${earth.y - 1.2} Q ${earth.x} ${earth.y - 2.6} ${earth.x + 2.2} ${earth.y + 0.4} Q ${earth.x} ${earth.y + 2.2} ${earth.x - 1.8} ${earth.y + 1.2} Z`}
+                  fill="#22c55e"
+                  fillOpacity="0.88"
+                />
+                <circle cx={moonX} cy={moonY} r="1.75" fill="#f1f5f9" stroke="#64748b" strokeWidth="0.4" />
+
+                {/* Mars */}
+                <circle cx={mars.x} cy={mars.y} r="5.2" fill="#f97316" fillOpacity="0.2" />
+                <circle cx={mars.x} cy={mars.y} r="3.6" fill="#ea580c" stroke="#fdba74" strokeWidth="0.55" />
+                <circle cx={mars.x - 0.8} cy={mars.y - 1.6} r="0.8" fill="#fff7ed" fillOpacity="0.8" />
+
+                {/* Jupiter with Cloud Bands & Great Red Spot */}
+                <circle cx={jup.x} cy={jup.y} r="9.8" fill="#fdba74" fillOpacity="0.18" />
+                <circle cx={jup.x} cy={jup.y} r="6.9" fill="#fed7aa" stroke="#b45309" strokeWidth="0.7" />
+                <line x1={jup.x - 6.1} y1={jup.y - 2.1} x2={jup.x + 6.1} y2={jup.y - 2.1} stroke="#c2410c" strokeWidth="1.4" strokeOpacity="0.7" />
+                <line x1={jup.x - 6.4} y1={jup.y + 1.2} x2={jup.x + 6.4} y2={jup.y + 1.2} stroke="#9a3412" strokeWidth="1.2" strokeOpacity="0.65" />
+                <ellipse cx={jup.x + 2.1} cy={jup.y + 2.2} rx="1.6" ry="1.05" fill="#dc2626" />
+
+                {/* Saturn with Authentic Back/Front Tilted Double Rings */}
+                <g transform={`rotate(-24 ${sat.x} ${sat.y})`}>
+                  <path
+                    d={`M ${sat.x - 12.6} ${sat.y} A 12.6 4.1 0 0 1 ${sat.x + 12.6} ${sat.y}`}
+                    fill="none"
+                    stroke="#fde68a"
+                    strokeWidth="2.4"
+                    strokeOpacity="0.75"
+                  />
+                  <circle cx={sat.x} cy={sat.y} r="5.5" fill="#fef08a" stroke="#b45309" strokeWidth="0.65" />
+                  <path
+                    d={`M ${sat.x - 12.6} ${sat.y} A 12.6 4.1 0 0 0 ${sat.x + 12.6} ${sat.y}`}
+                    fill="none"
+                    stroke="#fef3c7"
+                    strokeWidth="2.5"
+                    strokeOpacity="0.92"
+                  />
+                  <path
+                    d={`M ${sat.x - 9.8} ${sat.y} A 9.8 3.1 0 0 0 ${sat.x + 9.8} ${sat.y}`}
+                    fill="none"
+                    stroke="#d97706"
+                    strokeWidth="0.9"
+                    strokeOpacity="0.65"
+                  />
+                </g>
+              </>
+            );
+          })()}
+
+          {/* Live Sweeping Comet Synced to Seconds Hand */}
+          {showSeconds && (
+            <g transform={`rotate(${secAngle} 150 150)`}>
+              <path
+                d="M 88 41 A 126.5 126.5 0 0 1 150 23.5"
+                fill="none"
+                stroke={`url(#${uid}-orrery-comet)`}
+                strokeWidth="2.6"
+                strokeLinecap="round"
+              />
+              <circle cx="150" cy="23.5" r="5.5" fill="#38bdf8" fillOpacity="0.35" />
+              <circle cx="150" cy="23.5" r="2.3" fill="#ffffff" />
+            </g>
+          )}
+        </g>
+      )}
+
+      {/* STYLE 16 DYNAMIC: SPIRAL GALAXY ROTATING NEBULA & STAR CLUSTERS */}
+      {styleId === 'galaxy' && (
+        <g clipPath={`url(#${uid}-dome-clip)`} pointerEvents="none">
+          {/* Counter-Drifting Deep Background Starfield */}
+          <g transform={`rotate(${galaxyCounterAngle} 150 150)`}>
+            {DIAL_DEEP_STARS.map((s, idx) => (
+              <circle key={idx} cx={s.x} cy={s.y} r={s.r} fill="#cbd5e1" fillOpacity={s.op * 0.65} />
+            ))}
+          </g>
+
+          {/* Rotating 4-Arm Barred Spiral Galaxy */}
+          <g transform={`rotate(${galaxySpinAngle} 150 150)`}>
+            <circle cx="150" cy="150" r="95" fill={`url(#${uid}-galaxy-core)`} />
+            <g filter={`url(#${uid}-nebula-blur)`}>
+              {DIAL_GALAXY_ARMS.map((arm, idx) => {
+                const armCol = arm.tone === 'c1' ? darkCavitySec : arm.tone === 'c2' ? '#a855f7' : '#38bdf8';
+                return (
+                  <g key={idx}>
+                    <path d={arm.main} fill="none" stroke={armCol} strokeWidth="18" strokeOpacity="0.34" strokeLinecap="round" />
+                    <path d={arm.main} fill="none" stroke={armCol} strokeWidth="8.5" strokeOpacity="0.46" strokeLinecap="round" />
+                    <path d={arm.sub} fill="none" stroke="#f472b6" strokeWidth="6.5" strokeOpacity="0.32" strokeLinecap="round" />
+                    <path d={arm.main} fill="none" stroke="#e0f2fe" strokeWidth="2.4" strokeOpacity="0.38" strokeLinecap="round" />
+                  </g>
+                );
+              })}
+              {/* Soft Diffused Galactic Bar Aura */}
+              <ellipse cx="150" cy="150" rx="28" ry="11" transform="rotate(14 150 150)" fill="#fef08a" fillOpacity="0.58" />
+            </g>
+
+            {/* Glowing Tilted Galactic Core Bar */}
+            <ellipse cx="150" cy="150" rx="18" ry="6.8" transform="rotate(14 150 150)" fill="#fef08a" fillOpacity="0.52" />
+            <ellipse cx="150" cy="150" rx="11" ry="4.4" transform="rotate(14 150 150)" fill="#ffffff" fillOpacity="0.92" />
+
+            {/* Spiral Arm Star Clusters & H-II Regions */}
+            {DIAL_GALAXY_STARS.map((st, idx) => {
+              const col =
+                st.hue === 'white'
+                  ? '#ffffff'
+                  : st.hue === 'gold'
+                    ? '#fde68a'
+                    : st.hue === 'pink'
+                      ? '#f472b6'
+                      : st.hue === 'c1'
+                        ? darkCavitySec
+                        : '#7dd3fc';
+              return <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill={col} fillOpacity={st.op} />;
+            })}
+          </g>
+        </g>
+      )}
+
+      {/* STYLE 17 DYNAMIC: ASTROLABE ROTATING GOLDEN ZODIAC RETE & STAR POINTERS */}
+      {styleId === 'astrolabe' && (
+        <g clipPath={`url(#${uid}-astrolabe-clip)`} pointerEvents="none">
+          <g transform={`rotate(${astrolabeReteAngle} 150 150)`}>
+            {/* Pierced Equatorial Support Arcs */}
+            <circle
+              cx="150"
+              cy="150"
+              r="105"
+              fill="none"
+              stroke={isLight ? '#92400e' : '#d4af37'}
+              strokeWidth="2.4"
+              strokeOpacity="0.62"
+              strokeDasharray="68 24"
+            />
+            <line
+              x1="46"
+              y1="150"
+              x2="254"
+              y2="150"
+              stroke={isLight ? '#92400e' : '#d4af37'}
+              strokeWidth="1.6"
+              strokeOpacity="0.55"
+            />
+            <line
+              x1="150"
+              y1="46"
+              x2="150"
+              y2="254"
+              stroke={isLight ? '#92400e' : '#d4af37'}
+              strokeWidth="1.6"
+              strokeOpacity="0.55"
+            />
+
+            {/* Authentic Off-Center Ecliptic Zodiac Ring */}
+            <circle
+              cx="150"
+              cy="126"
+              r="76"
+              fill="none"
+              stroke={isLight ? '#78350f' : '#f5d08a'}
+              strokeWidth="6.2"
+              strokeOpacity="0.82"
+            />
+            <circle
+              cx="150"
+              cy="126"
+              r="76"
+              fill="none"
+              stroke={isLight ? '#fef3c7' : '#0f172a'}
+              strokeWidth="1.1"
+              strokeDasharray="1.6 38.2"
+            />
+            <circle
+              cx="150"
+              cy="126"
+              r="79.2"
+              fill="none"
+              stroke={isLight ? '#b45309' : '#fde68a'}
+              strokeWidth="0.9"
+            />
+            <circle
+              cx="150"
+              cy="126"
+              r="72.8"
+              fill="none"
+              stroke={isLight ? '#b45309' : '#fde68a'}
+              strokeWidth="0.9"
+            />
+
+            {/* 6 Ornate Flame-Curved Astrolabe Star Pointers */}
+            {[
+              { x1: 150, y1: 50, qx: 162, qy: 72, x2: 156, y2: 88 },
+              { x1: 222, y1: 126, qx: 204, qy: 112, x2: 188, y2: 118 },
+              { x1: 78, y1: 126, qx: 96, qy: 112, x2: 112, y2: 118 },
+              { x1: 204, y1: 180, qx: 184, qy: 174, x2: 176, y2: 160 },
+              { x1: 96, y1: 180, qx: 116, qy: 174, x2: 124, y2: 160 },
+              { x1: 150, y1: 202, qx: 140, qy: 186, x2: 148, y2: 174 },
+            ].map((sp, idx) => (
+              <g key={idx}>
+                <path
+                  d={`M ${sp.x1} ${sp.y1} Q ${sp.qx} ${sp.qy} ${sp.x2} ${sp.y2}`}
+                  fill="none"
+                  stroke={isLight ? '#78350f' : '#fde68a'}
+                  strokeWidth="2.1"
+                  strokeLinecap="round"
+                />
+                <circle cx={sp.x2} cy={sp.y2} r="2.1" fill={isLight ? '#d97706' : '#ffffff'} />
+              </g>
+            ))}
+          </g>
+        </g>
+      )}
+
+      {/* STYLE 18 DYNAMIC: SINGULARITY (Gargantua Gravitational Lensing & Relativistic Accretion) */}
+      {styleId === 'blackhole' && (
+        <g clipPath={`url(#${uid}-dome-clip)`} pointerEvents="none">
+          {/* Gravitational Lensing Corona Halo */}
+          <circle cx="150" cy="150" r="88" fill={`url(#${uid}-bh-halo)`} />
+
+          {/* Tilted Relativistic Accretion Plane (-16 deg) */}
+          <g transform="rotate(-16 150 150)">
+            {/* Seamless Gravitationally Lensed Upper & Lower Light Envelope (Blurred Relativistic Bloom) */}
+            <g filter={`url(#${uid}-bh-glow)`}>
+              <ellipse cx="150" cy="146" rx="58" ry="52" fill="none" stroke="#f97316" strokeWidth="11" strokeOpacity="0.34" />
+              <ellipse cx="150" cy="147" rx="51" ry="45" fill="none" stroke="#fde68a" strokeWidth="4.8" strokeOpacity="0.62" />
+              <ellipse cx="150" cy="153" rx="46" ry="39" fill="none" stroke="#ea580c" strokeWidth="7.5" strokeOpacity="0.28" />
+              <path
+                d="M 30 150 A 120 27 0 0 1 270 150"
+                fill="none"
+                stroke={`url(#${uid}-bh-disk)`}
+                strokeWidth="13"
+                strokeOpacity="0.54"
+                strokeLinecap="round"
+              />
+            </g>
+
+            {/* Fine Continuous Relativistic Lensing Caustics */}
+            <ellipse cx="150" cy="148" rx="46" ry="41" fill="none" stroke="#fffbeb" strokeWidth="1.25" strokeOpacity="0.55" />
+            <ellipse cx="150" cy="152" rx="43" ry="37" fill="none" stroke="#fbbf24" strokeWidth="1.2" strokeOpacity="0.4" />
+
+            {/* Back-Half Equatorial Accretion Disk */}
+            <path
+              d="M 32 150 A 118 27 0 0 1 268 150"
+              fill="none"
+              stroke={`url(#${uid}-bh-disk)`}
+              strokeWidth="8.5"
+              strokeOpacity="0.62"
+              strokeLinecap="round"
+            />
+
+            {/* Event Horizon Pure Obsidian Shadow Sphere + Incandescent Photon Ring */}
+            <circle cx="150" cy="150" r="35.5" fill="#000000" />
+            <circle cx="150" cy="150" r="36.2" fill="none" stroke="#fb923c" strokeWidth="2.4" strokeOpacity="0.88" />
+            <circle cx="150" cy="150" r="35.2" fill="none" stroke="#fffbeb" strokeWidth="1.15" strokeOpacity="0.95" />
+
+            {/* Shimmering Einstein Photon Ring Arc */}
+            <g transform={`rotate(${blackholeRingAngle} 150 150)`}>
+              <circle
+                cx="150"
+                cy="150"
+                r="38.2"
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="1.4"
+                strokeDasharray="24 44 12 68"
+                strokeLinecap="round"
+                strokeOpacity="0.85"
+              />
+            </g>
+
+            {/* Front-Half Sweeping Relativistic Accretion Disk Crossing In Front of the Shadow */}
+            <path
+              d="M 28 150 A 122 28 0 0 0 272 150"
+              fill="none"
+              stroke="#ea580c"
+              strokeWidth="15"
+              strokeOpacity="0.38"
+              strokeLinecap="round"
+              filter={`url(#${uid}-bh-glow)`}
+            />
+            <path d="M 34 150 A 116 25 0 0 0 266 150" fill="none" stroke={`url(#${uid}-bh-disk)`} strokeWidth="7.5" strokeLinecap="round" />
+            <path d="M 48 150 A 102 20 0 0 0 252 150" fill="none" stroke="#fffbeb" strokeWidth="2.2" strokeOpacity="0.92" strokeLinecap="round" />
+
+            {/* Live Orbiting Doppler-Beamed Relativistic Plasma Filaments */}
+            {[0, 120, 240].map((offset, idx) => {
+              const deg = (blackholePlasmaAngle + offset) % 360;
+              const rad = (deg * Math.PI) / 180;
+              const rx = idx === 0 ? 104 : idx === 1 ? 84 : 64;
+              const ry = rx * 0.21;
+              const px = 150 + rx * Math.cos(rad);
+              const py = 150 + ry * Math.sin(rad);
+              // Hide plasma particles passing behind the event horizon shadow (upper half inside r=36)
+              const behindHole = Math.sin(rad) < 0 && Math.abs(px - 150) < 37;
+              if (behindHole) return null;
+              return (
+                <g key={idx}>
+                  <ellipse cx={px} cy={py} rx={5.5 - idx * 0.8} ry="1.8" fill="#fef08a" fillOpacity="0.88" />
+                  <circle cx={px} cy={py} r="1.4" fill="#ffffff" />
+                </g>
+              );
+            })}
+          </g>
+        </g>
+      )}
+
+      {/* STYLE 19 DYNAMIC: AUTOMATON 5-WHEEL MESHING GEAR TRAIN & 4HZ BALANCE WHEEL */}
+      {styleId === 'gears' && (
+        <g clipPath={`url(#${uid}-gears-clip)`} pointerEvents="none">
+          {/* 5 Mathematically Meshing Counter-Rotating Toothed Wheels */}
+          {AUTOMATON_GEARS.map((g) => {
+            const angle = (g.phaseOffset + continuousSec * g.speedDegPerSec) % 360;
+            const fillCol =
+              g.tone === 'gold'
+                ? '#d4af37'
+                : g.tone === 'steel'
+                  ? '#94a3b8'
+                  : g.tone === 'bronze'
+                    ? '#c27849'
+                    : g.tone === 'accent'
+                      ? darkCavitySec
+                      : '#cbd5e1';
+            const strokeCol =
+              g.tone === 'gold'
+                ? '#fef08a'
+                : g.tone === 'bronze'
+                  ? '#fdba74'
+                  : g.tone === 'accent'
+                    ? '#ffffff'
+                    : '#e2e8f0';
+
+            return (
+              <g key={g.id}>
+                <g transform={`rotate(${angle} ${g.cx} ${g.cy})`}>
+                  {/* Outer Toothed Gear Rim */}
+                  <path d={g.path} fill={fillCol} fillOpacity="0.88" stroke={strokeCol} strokeWidth="0.65" strokeOpacity="0.7" />
+                  {/* Openworked Cavity Cutout */}
+                  <circle cx={g.cx} cy={g.cy} r={g.innerR} fill="#090e1a" stroke={fillCol} strokeWidth="1.2" />
+                  {/* Sculpted Spokes */}
+                  {[...Array(g.spokes)].map((_, spIdx) => (
+                    <line
+                      key={spIdx}
+                      x1={g.cx}
+                      y1={g.cy - g.innerR}
+                      x2={g.cx}
+                      y2={g.cy}
+                      stroke={fillCol}
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      transform={`rotate(${(spIdx * 360) / g.spokes} ${g.cx} ${g.cy})`}
+                    />
+                  ))}
+                  {/* Central Collet Hub */}
+                  <circle cx={g.cx} cy={g.cy} r={g.hubR} fill={fillCol} stroke={strokeCol} strokeWidth="0.65" />
+                </g>
+                {/* Synthetic Ruby Pivot Bearing */}
+                <circle cx={g.cx} cy={g.cy} r={g.id === 'barrel' ? 3.2 : 2.5} fill={`url(#${uid}-ruby-jewel)`} stroke="#fde68a" strokeWidth="0.7" />
+              </g>
+            );
+          })}
+
+          {/* Openworked Architectural Movement Bridges */}
+          <path
+            d="M 52 106 Q 100 76 150 150"
+            fill="none"
+            stroke="#475569"
+            strokeWidth="5.2"
+            strokeLinecap="round"
+            strokeOpacity="0.62"
+          />
+          <path
+            d="M 52 106 Q 100 76 150 150"
+            fill="none"
+            stroke="#e2e8f0"
+            strokeWidth="0.8"
+            strokeOpacity="0.45"
+          />
+          <path
+            d="M 150 150 Q 198 104 238 148"
+            fill="none"
+            stroke="#475569"
+            strokeWidth="4.6"
+            strokeLinecap="round"
+            strokeOpacity="0.58"
+          />
+
+          {/* Live 4Hz Oscillating Swiss Balance Wheel & Spiral Hairspring at (168, 204) */}
+          <g>
+            {/* Stationary Blued-Steel Balance Cock */}
+            <path d="M 168 204 L 216 230" stroke="#38bdf8" strokeWidth="3.2" strokeLinecap="round" strokeOpacity="0.75" />
+            {/* Coiled Spiral Hairspring */}
+            <path d={BALANCE_HAIRSPRING_PATH} fill="none" stroke="#38bdf8" strokeWidth="0.9" strokeOpacity="0.88" />
+            {/* Oscillating Balance Rim + Poise Screws */}
+            <g transform={`rotate(${balanceWheelAngle} 168 204)`}>
+              <circle cx="168" cy="204" r="20" fill="none" stroke="#f5d08a" strokeWidth="2.8" />
+              <line x1="148" y1="204" x2="188" y2="204" stroke="#f5d08a" strokeWidth="2" />
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
+                const rad = (deg * Math.PI) / 180;
+                return (
+                  <circle
+                    key={deg}
+                    cx={168 + 21.5 * Math.cos(rad)}
+                    cy={204 + 21.5 * Math.sin(rad)}
+                    r="1.15"
+                    fill="#fde68a"
+                  />
+                );
+              })}
+            </g>
+            {/* Incabloc Ruby Shock Jewel */}
+            <circle cx="168" cy="204" r="3.4" fill={`url(#${uid}-ruby-jewel)`} stroke="#fde68a" strokeWidth="0.95" />
+          </g>
+        </g>
+      )}
+
+      {/* STYLE 20 DYNAMIC: SYNTHWAVE SCROLLING 3D LASER PERSPECTIVE GRID */}
+      {styleId === 'cyberwave' && (
+        <g clipPath={`url(#${uid}-dome-clip)`} pointerEvents="none">
+          {[0, 1, 2, 3, 4, 5, 6].map((idx) => {
+            const phase = ((idx / 7) + (prefersReducedMotion ? 0 : continuousSec * 0.3)) % 1;
+            const y = 164 + Math.pow(phase, 2.2) * 120;
+            return (
+              <line
+                key={idx}
+                x1="18"
+                y1={y}
+                x2="282"
+                y2={y}
+                stroke={idx % 2 === 0 ? '#f472b6' : '#22d3ee'}
+                strokeWidth={0.65 + phase * 1.45}
+                strokeOpacity={0.28 + phase * 0.7}
+              />
+            );
+          })}
+        </g>
+      )}
+
       {/* ================= HOUR HAND BY STYLE ================= */}
       <g transform={`rotate(${hrAngle} 150 150)`} style={handShadowStyle}>
         {styleId === 'chronometer' && (
@@ -4105,6 +6019,84 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             <line x1="150" y1="142" x2="150" y2="75" stroke={borderAccent} strokeWidth="0.7" strokeOpacity="0.5" />
           </>
         )}
+
+        {styleId === 'orrery' && (
+          <>
+            <polygon
+              points="148.2,158 147.4,96 150,72 152.6,96 151.8,158"
+              fill="#fde68a"
+              stroke="#78350f"
+              strokeWidth="0.8"
+            />
+            <polygon points="150,79 152,88 150,95 148,88" fill="#ffffff" />
+          </>
+        )}
+
+        {styleId === 'galaxy' && (
+          <>
+            <polygon
+              points="150,164 146.4,144 148,80 150,69 152,80 153.6,144"
+              fill={darkCavityHr}
+              stroke="#ffffff"
+              strokeWidth="0.8"
+            />
+            <line x1="150" y1="138" x2="150" y2="78" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'astrolabe' && (
+          <>
+            <polygon
+              points="148,162 148.4,98 151.6,98 152,162"
+              fill={isLight ? '#78350f' : '#f5d08a'}
+              stroke={isLight ? '#451a03' : '#78350f'}
+              strokeWidth="0.6"
+            />
+            <circle cx="150" cy="90" r="6.2" fill="none" stroke={isLight ? '#78350f' : '#f5d08a'} strokeWidth="2.2" />
+            <circle cx="150" cy="90" r="2.2" fill={isLight ? '#d97706' : '#fffbeb'} />
+            <polygon points="148.4,84 150,69 151.6,84" fill={isLight ? '#78350f' : '#f5d08a'} />
+          </>
+        )}
+
+        {styleId === 'blackhole' && (
+          <>
+            <polygon
+              points="150,162 145.8,142 147.6,84 150,70 152.4,84 154.2,142"
+              fill="#020617"
+              stroke="#fde68a"
+              strokeWidth="1.9"
+              strokeLinejoin="round"
+            />
+            <polygon points="148.2,90 150,72 151.8,90" fill="#fffbeb" />
+          </>
+        )}
+
+        {styleId === 'gears' && (
+          <>
+            <polygon
+              points="150,162 145.2,142 146.6,86 150,70 153.4,86 154.8,142"
+              fill="rgba(2,6,23,0.45)"
+              stroke={darkCavityHr}
+              strokeWidth="2.2"
+              strokeLinejoin="round"
+            />
+            <polygon points="148,92 150,71 152,92" fill="#ffffff" />
+          </>
+        )}
+
+        {styleId === 'cyberwave' && (
+          <>
+            <polygon
+              points="150,162 146,144 147.8,82 150,69 152.2,82 154,144"
+              fill="#090418"
+              stroke="#22d3ee"
+              strokeWidth="2"
+              strokeLinejoin="round"
+              style={{ filter: 'drop-shadow(0 0 6px #22d3ee)' }}
+            />
+            <line x1="150" y1="138" x2="150" y2="78" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
       </g>
 
       {/* ================= MINUTE HAND BY STYLE ================= */}
@@ -4233,6 +6225,83 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             <line x1="150" y1="142" x2="150" y2="38" stroke={borderAccent} strokeWidth="0.6" strokeOpacity="0.5" />
           </>
         )}
+
+        {styleId === 'orrery' && (
+          <>
+            <polygon
+              points="148.8,162 148.4,50 150,32 151.6,50 151.2,162"
+              fill="#f8fafc"
+              stroke="#0f172a"
+              strokeWidth="0.7"
+            />
+            <circle cx="150" cy="48" r="2.2" fill="#fde68a" />
+          </>
+        )}
+
+        {styleId === 'galaxy' && (
+          <>
+            <polygon
+              points="150,166 147.4,145 148.7,42 150,31 151.3,42 152.6,145"
+              fill={darkCavityMin}
+              stroke="#ffffff"
+              strokeWidth="0.65"
+            />
+            <line x1="150" y1="138" x2="150" y2="40" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'astrolabe' && (
+          <>
+            <polygon
+              points="148.6,164 149,54 150,32 151,54 151.4,164"
+              fill={isLight ? '#451a03' : '#fffbeb'}
+            />
+            <path
+              d="M 146.5,58 A 4.4,4.4 0 1,1 153.5,58 A 3.4,3.4 0 1,0 146.5,58 Z"
+              fill={isLight ? '#92400e' : '#fde68a'}
+            />
+          </>
+        )}
+
+        {styleId === 'blackhole' && (
+          <>
+            <polygon
+              points="150,166 147,145 148.4,48 150,32 151.6,48 153,145"
+              fill="#020617"
+              stroke="#ffffff"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
+            <polygon points="148.8,52 150,33 151.2,52" fill="#fde68a" />
+          </>
+        )}
+
+        {styleId === 'gears' && (
+          <>
+            <polygon
+              points="150,166 146.6,145 148,50 150,32 152,50 153.4,145"
+              fill="rgba(2,6,23,0.45)"
+              stroke={darkCavityMin}
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+            <polygon points="148.6,54 150,33 151.4,54" fill="#ffffff" />
+          </>
+        )}
+
+        {styleId === 'cyberwave' && (
+          <>
+            <polygon
+              points="150,166 147.2,145 148.6,44 150,31 151.4,44 152.8,145"
+              fill="#090418"
+              stroke="#f472b6"
+              strokeWidth="1.9"
+              strokeLinejoin="round"
+              style={{ filter: 'drop-shadow(0 0 6px #f472b6)' }}
+            />
+            <line x1="150" y1="138" x2="150" y2="40" stroke="#ffffff" strokeWidth="1.15" strokeLinecap="round" />
+          </>
+        )}
       </g>
 
       {/* ================= SECOND HAND BY STYLE ================= */}
@@ -4310,6 +6379,72 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
               <line x1="150" y1="172" x2="150" y2="28" stroke={secColor} strokeWidth="1.4" strokeLinecap="round" />
               <polygon points="150,165 152.5,174 150,183 147.5,174" fill="none" stroke={secColor} strokeWidth="1.2" />
             </>
+          ) : styleId === 'orrery' ? (
+            <>
+              <line x1="150" y1="168" x2="150" y2="26" stroke="#7dd3fc" strokeWidth="1.2" strokeOpacity="0.72" strokeLinecap="round" />
+              <circle cx="150" cy="172" r="2.8" fill="none" stroke="#fde68a" strokeWidth="1.1" />
+            </>
+          ) : styleId === 'galaxy' ? (
+            <>
+              <line
+                x1="150"
+                y1="172"
+                x2="150"
+                y2="28"
+                stroke={darkCavitySec}
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                style={{ filter: `drop-shadow(0 0 5px ${darkCavitySec})` }}
+              />
+              <polygon points="150,168 153,174 150,180 147,174" fill="#ffffff" />
+            </>
+          ) : styleId === 'astrolabe' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="30" stroke={isLight ? '#b45309' : '#f59e0b'} strokeWidth="1.35" strokeLinecap="round" />
+              <circle cx="150" cy="178" r="3.4" fill="none" stroke={isLight ? '#b45309' : '#f59e0b'} strokeWidth="1.2" />
+            </>
+          ) : styleId === 'blackhole' ? (
+            <>
+              <line
+                x1="150"
+                y1="172"
+                x2="150"
+                y2="28"
+                stroke="#fb923c"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                style={{ filter: 'drop-shadow(0 0 6px #fb923c)' }}
+              />
+              <circle cx="150" cy="30" r="2.4" fill="#ffffff" />
+            </>
+          ) : styleId === 'gears' ? (
+            <>
+              <line
+                x1="150"
+                y1="176"
+                x2="150"
+                y2="27"
+                stroke={darkCavitySec}
+                strokeWidth="1.55"
+                strokeLinecap="round"
+                style={{ filter: `drop-shadow(0 0 5px ${darkCavitySec})` }}
+              />
+              <circle cx="150" cy="174" r="3.2" fill="none" stroke={darkCavitySec} strokeWidth="1.4" />
+            </>
+          ) : styleId === 'cyberwave' ? (
+            <>
+              <line
+                x1="150"
+                y1="174"
+                x2="150"
+                y2="26"
+                stroke="#fde047"
+                strokeWidth="1.55"
+                strokeLinecap="round"
+                style={{ filter: 'drop-shadow(0 0 6px #fde047)' }}
+              />
+              <circle cx="150" cy="31" r="2.4" fill="#ffffff" />
+            </>
           ) : (
             <>
               <line x1="150" y1="150" x2="150" y2="177" stroke={secColor} strokeWidth="2.6" strokeLinecap="round" />
@@ -4333,12 +6468,27 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
       <circle
         cx="150"
         cy="150"
-        r={styleId === 'atelier' ? '5.2' : '6.8'}
-        fill={secColor}
-        stroke={isLight ? '#ffffff' : '#020617'}
+        r={styleId === 'atelier' || styleId === 'orrery' || styleId === 'blackhole' ? '4.8' : '6.8'}
+        fill={
+          styleId === 'orrery'
+            ? '#fde68a'
+            : styleId === 'blackhole'
+              ? '#000000'
+              : styleId === 'cyberwave'
+                ? '#22d3ee'
+                : styleId === 'gears'
+                  ? `url(#${uid}-ruby-jewel)`
+                  : secColor
+        }
+        stroke={styleId === 'blackhole' ? '#fb923c' : isLight ? '#ffffff' : '#020617'}
         strokeWidth="1.8"
       />
-      <circle cx="150" cy="150" r="2.2" fill={isLight ? '#0f172a' : '#ffffff'} />
+      <circle
+        cx="150"
+        cy="150"
+        r="2.0"
+        fill={styleId === 'blackhole' ? '#fffbeb' : isLight ? '#0f172a' : '#ffffff'}
+      />
 
       {/* Subtle Curved Sapphire Crystal Specular Sheen */}
       <circle cx="150" cy="150" r="141" fill={`url(#${uid}-glass-sheen)`} pointerEvents="none" />
@@ -5527,7 +7677,7 @@ export const DigitalClock: React.FC = () => {
             </div>
           </div>
 
-          {/* 14 Selectable Analog Watch Faces */}
+          {/* 20 Selectable Analog Watch Faces */}
           <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
             {ANALOG_STYLES.map((st) => {
               const isActive = analogStyle === st.id;

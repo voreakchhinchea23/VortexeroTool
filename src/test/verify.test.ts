@@ -633,8 +633,8 @@ import {
   ClockBackgroundLayer,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 14) {
-  console.error(`Expected 14 Analog watch styles, found ${ANALOG_STYLES?.length}`);
+if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 20) {
+  console.error(`Expected 20 Analog watch styles, found ${ANALOG_STYLES?.length}`);
   process.exit(1);
 }
 
@@ -654,6 +654,12 @@ const expectedAnalogIds = [
   'artdeco',
   'orbital',
   'kintsugi',
+  'orrery',
+  'galaxy',
+  'astrolabe',
+  'blackhole',
+  'gears',
+  'cyberwave',
 ];
 
 for (const st of ANALOG_STYLES) {
@@ -686,13 +692,25 @@ if (typeof AnalogClockDial !== 'function' || typeof AnalogStyleGlyph !== 'functi
   process.exit(1);
 }
 
-if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 7) {
-  console.error(`Expected 7 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
+if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 11) {
+  console.error(`Expected 11 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
   process.exit(1);
 }
 
 const bgIds = new Set<string>();
-const expectedBgIds = ['aurora', 'orbital', 'starfield', 'grid', 'bokeh', 'ripple', 'none'];
+const expectedBgIds = [
+  'aurora',
+  'solar',
+  'galaxy',
+  'warp',
+  'orbital',
+  'starfield',
+  'waves',
+  'grid',
+  'bokeh',
+  'ripple',
+  'none',
+];
 for (const bg of CLOCK_BG_FX_OPTIONS) {
   if (bgIds.has(bg.id)) {
     console.error(`Duplicate background FX ID: ${bg.id}`);
@@ -751,6 +769,13 @@ const requiredBgCssTokens = [
   '.animate-bg-grid-scroll',
   '.animate-bg-bokeh-float',
   '.animate-bg-ripple',
+  '.animate-bg-orbit-origin',
+  '.animate-bg-solar-pulse',
+  '.animate-bg-galaxy-spin',
+  '.animate-bg-galaxy-counter',
+  '.animate-bg-warp-streak',
+  '.animate-bg-wave-drift',
+  '.animate-bg-wave-drift-rev',
 ];
 
 for (const cssToken of requiredBgCssTokens) {
