@@ -10039,6 +10039,14 @@ export const DigitalClock: React.FC = () => {
     }
   };
 
+  const handleEditionOff = () => {
+    // Clear the background scene only if it was auto-applied by the active edition
+    if (clockEdition !== 'classic' && bgFx === activeEditionMeta.recommendedBg) {
+      setBgFx('none');
+    }
+    setClockEdition('classic');
+  };
+
   const effectiveAnimation: AnimationFx =
     animationFx === 'auto'
       ? (themeConfig.defaultAnimation || 'auto')
