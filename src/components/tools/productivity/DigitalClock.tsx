@@ -24,6 +24,7 @@ import {
   Shuffle,
   Compass,
   Film,
+  Power,
 } from 'lucide-react';
 import {
   CLOCK_EDITIONS,
@@ -10664,9 +10665,24 @@ export const DigitalClock: React.FC = () => {
           </div>
         </div>
 
-        {/* 9 Selectable Movie & Anime Editions */}
+        {/* OFF + 8 Selectable Movie & Anime Editions */}
         <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
-          {CLOCK_EDITIONS.map((ed) => {
+          <button
+            onClick={handleEditionOff}
+            title="Turn off Cinema & Anime Edition and return to your plain color theme"
+            data-testid="cinema-edition-off"
+            aria-pressed={clockEdition === 'classic'}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+              clockEdition === 'classic'
+                ? 'bg-rose-600 text-white border-rose-500 shadow-sm shadow-rose-500/25'
+                : 'bg-slate-100/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700/80 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:border-rose-400/60'
+            }`}
+          >
+            <Power size={13} />
+            <span>Off</span>
+          </button>
+          <span className="w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0 mx-0.5" />
+          {CLOCK_EDITIONS.filter((ed) => ed.id !== 'classic').map((ed) => {
             const isActive = clockEdition === ed.id;
             return (
               <button
