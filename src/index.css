@@ -925,6 +925,158 @@
   will-change: transform;
 }
 
+/* =========================================================
+   Cinema & Anime Editions: Animated Backdrops & Typography FX
+   ========================================================= */
+@keyframes clock-bg-cyber-rain {
+  0% {
+    transform: translate3d(0, -18%, 0);
+    opacity: 0;
+  }
+  15%, 80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(0, 120%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes clock-bg-sand-drift {
+  0% {
+    transform: translate3d(-12%, 6%, 0);
+    opacity: 0;
+  }
+  20%, 75% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(115%, -14%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes clock-bg-hex-pulse {
+  0%, 100% {
+    transform: scale(0.96);
+    opacity: 0.24;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.62;
+  }
+}
+
+@keyframes clock-bg-comic-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.34;
+  }
+  50% {
+    transform: scale(1.04) rotate(2.5deg);
+    opacity: 0.56;
+  }
+}
+
+@keyframes clock-cyber-glitch {
+  0%, 92%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  94% {
+    transform: translate3d(-1.5px, 0.5px, 0);
+  }
+  96% {
+    transform: translate3d(1.5px, -0.5px, 0);
+  }
+  98% {
+    transform: translate3d(-0.8px, 0, 0);
+  }
+}
+
+.animate-bg-cyber-rain {
+  animation: clock-bg-cyber-rain 4.2s linear infinite;
+  will-change: transform, opacity;
+}
+
+.animate-bg-sand-drift {
+  animation: clock-bg-sand-drift 9s linear infinite;
+  will-change: transform, opacity;
+}
+
+.animate-bg-hex-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: clock-bg-hex-pulse 5.4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-bg-comic-pulse {
+  transform-box: view-box;
+  transform-origin: 400px 300px;
+  animation: clock-bg-comic-pulse 7s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-cyber-glitch {
+  animation: clock-cyber-glitch 6.5s steps(2, end) infinite;
+}
+
+.edition-invincible-text {
+  color: #ffe600;
+  -webkit-text-stroke: 2px #020617;
+  paint-order: stroke fill;
+  text-shadow: 4px 5px 0 #020617, 7px 9px 0 rgba(2, 6, 23, 0.45);
+}
+
+.edition-spiderverse-text {
+  color: #ffffff;
+  text-shadow: -3px -2px 0 #00f5ff, 3px 2px 0 #ff2a85, 0 0 24px rgba(255, 42, 133, 0.45);
+}
+
+.edition-cyberpunk-text {
+  color: #fcee0a;
+  text-shadow: -2px 0 0 rgba(0, 240, 255, 0.85), 2px 0 0 rgba(255, 0, 60, 0.85), 0 0 28px rgba(252, 238, 10, 0.55);
+}
+
+.edition-chamfer {
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+.edition-halftone-dark {
+  background-image: radial-gradient(rgba(2, 6, 23, 0.32) 1.5px, transparent 1.5px);
+  background-size: 10px 10px;
+}
+
+.edition-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.04) 0px,
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.edition-hazard-stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(250, 204, 21, 0.72) 0px,
+    rgba(250, 204, 21, 0.72) 8px,
+    rgba(10, 10, 14, 0.9) 8px,
+    rgba(10, 10, 14, 0.9) 16px
+  );
+}
+
+.edition-doomsday-stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(239, 68, 68, 0.78) 0px,
+    rgba(239, 68, 68, 0.78) 9px,
+    rgba(12, 14, 18, 0.92) 9px,
+    rgba(12, 14, 18, 0.92) 18px
+  );
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-bg-aurora-a,
   .animate-bg-aurora-b,
@@ -944,7 +1096,12 @@
   .animate-bg-galaxy-counter,
   .animate-bg-warp-streak,
   .animate-bg-wave-drift,
-  .animate-bg-wave-drift-rev {
+  .animate-bg-wave-drift-rev,
+  .animate-bg-cyber-rain,
+  .animate-bg-sand-drift,
+  .animate-bg-hex-pulse,
+  .animate-bg-comic-pulse,
+  .animate-cyber-glitch {
     animation: none !important;
   }
 }

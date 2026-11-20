@@ -23,7 +23,27 @@ import {
   Watch,
   Shuffle,
   Compass,
+  Film,
 } from 'lucide-react';
+import {
+  CLOCK_EDITIONS,
+  ClockEdition,
+  ClockEditionMeta,
+  CinemaEditionGlyph,
+  ClockEditionOverlay,
+  ClockEditionPowerMeter,
+  getEditionThemeStyles,
+  getEditionDigitFrameClass,
+} from './clockEditions';
+export {
+  CLOCK_EDITIONS,
+  CinemaEditionGlyph,
+  ClockEditionOverlay,
+  ClockEditionPowerMeter,
+  getEditionThemeStyles,
+  getEditionDigitFrameClass,
+};
+export type { ClockEdition, ClockEditionMeta };
 
 export type ClockTheme =
   | 'night_city'
@@ -95,7 +115,13 @@ export type AnalogStyle =
   | 'astrolabe'
   | 'blackhole'
   | 'gears'
-  | 'cyberwave';
+  | 'cyberwave'
+  | 'invincible'
+  | 'dune'
+  | 'doomsday'
+  | 'spider_web'
+  | 'evangelion'
+  | 'tron_disc';
 export type RadialStyle =
   | 'chronograph'
   | 'solar_orbit'
@@ -108,7 +134,13 @@ export type RadialStyle =
   | 'waveform'
   | 'dna_helix'
   | 'synth_prism'
-  | 'fractal_mandala';
+  | 'fractal_mandala'
+  | 'invincible_arc'
+  | 'dune_eclipse'
+  | 'doomsday_core'
+  | 'spider_web'
+  | 'nerv_hex'
+  | 'tron_disc';
 export type AnalogMotion = 'sweep' | 'tick';
 
 export type BackgroundFx =
@@ -122,6 +154,10 @@ export type BackgroundFx =
   | 'grid'
   | 'bokeh'
   | 'ripple'
+  | 'comic_burst'
+  | 'sandstorm'
+  | 'cyber_rain'
+  | 'hex_field'
   | 'none';
 
 export interface AnalogStyleMeta {
@@ -299,6 +335,42 @@ export const ANALOG_STYLES: AnalogStyleMeta[] = [
     tagline: 'Retrofuturistic sliced neon sunset with scrolling 3D laser horizon grid',
     category: 'Modern',
   },
+  {
+    id: 'invincible',
+    label: 'Invincible',
+    tagline: 'Viltrumite blue-and-yellow emblem face with bold graphic-novel comic ink indices',
+    category: 'Sport',
+  },
+  {
+    id: 'dune',
+    label: 'Dune Arrakis',
+    tagline: 'Eclipsing Arrakis desert sun, twin orbiting moons and Fremen spice-blue hands',
+    category: 'Classic',
+  },
+  {
+    id: 'doomsday',
+    label: 'Doomsday',
+    tagline: 'Riveted iron bunker bezel with crimson Minutes-to-Midnight danger quadrant',
+    category: 'Technical',
+  },
+  {
+    id: 'spider_web',
+    label: 'Spider-Verse',
+    tagline: 'Brooklyn midnight multiverse portal web with cyan-magenta chromatic offset indices',
+    category: 'Modern',
+  },
+  {
+    id: 'evangelion',
+    label: 'NERV MAGI',
+    tagline: 'Tactical cockpit octagonal AT-Field lattice with amber degree ticks and lance second hand',
+    category: 'Technical',
+  },
+  {
+    id: 'tron_disc',
+    label: 'Tron Disc',
+    tagline: 'Obsidian Identity Disc with glowing dual cyan energy circuits and orange blade hand',
+    category: 'Modern',
+  },
 ];
 
 export const RADIAL_STYLES: RadialStyleMeta[] = [
@@ -374,6 +446,42 @@ export const RADIAL_STYLES: RadialStyleMeta[] = [
     tagline: 'Counter-rotating celestial brass lotus filigree and geometric astrolabe crown',
     category: 'Classic',
   },
+  {
+    id: 'invincible_arc',
+    label: 'Invincible',
+    tagline: 'Viltrumite blue-yellow kinetic hero shield with comic speed-lines and emblem nodes',
+    category: 'Modern',
+  },
+  {
+    id: 'dune_eclipse',
+    label: 'Dune Arrakis',
+    tagline: 'Golden desert solar eclipse corona, twin Arrakis moons and Fremen spice-blue horizon',
+    category: 'Cosmic',
+  },
+  {
+    id: 'doomsday_core',
+    label: 'Doomsday',
+    tagline: 'Armored nuclear vault bezel, crimson Minutes-to-Midnight danger arc and reactor shutter',
+    category: 'Technical',
+  },
+  {
+    id: 'spider_web',
+    label: 'Spider-Verse',
+    tagline: 'Multiverse dimensional spider-web spokes with CMYK cyan-magenta glitch aura',
+    category: 'Modern',
+  },
+  {
+    id: 'nerv_hex',
+    label: 'NERV AT-Field',
+    tagline: 'Rotating octagonal AT-Field barrier geometry with NERV amber and Eva-01 sync arcs',
+    category: 'Technical',
+  },
+  {
+    id: 'tron_disc',
+    label: 'Tron Disc',
+    tagline: 'Glowing Identity Disc dual light-circuit channels with rotating cyan-orange blades',
+    category: 'Modern',
+  },
 ];
 
 export const RADIAL_DARK_CHAMBER_STYLES: ReadonlySet<RadialStyle> = new Set([
@@ -382,6 +490,12 @@ export const RADIAL_DARK_CHAMBER_STYLES: ReadonlySet<RadialStyle> = new Set([
   'supernova',
   'blackhole_lens',
   'synth_prism',
+  'invincible_arc',
+  'dune_eclipse',
+  'doomsday_core',
+  'spider_web',
+  'nerv_hex',
+  'tron_disc',
 ]);
 
 export const CLOCK_BG_FX_OPTIONS: {
@@ -400,6 +514,10 @@ export const CLOCK_BG_FX_OPTIONS: {
   { id: 'grid', label: 'Bg: Kinetic Grid', shortLabel: 'Grid', tagline: 'Scrolling technical lattice and scanner beam' },
   { id: 'bokeh', label: 'Bg: Ambient Bokeh', shortLabel: 'Bokeh', tagline: 'Floating luminous out-of-focus orbs' },
   { id: 'ripple', label: 'Bg: Sonar Ripple', shortLabel: 'Ripple', tagline: 'Expanding concentric pulse waves' },
+  { id: 'comic_burst', label: 'Bg: Comic Speed', shortLabel: 'Comic', tagline: 'Rotating graphic-novel radial action lines and halftone burst' },
+  { id: 'sandstorm', label: 'Bg: Arrakis Sand', shortLabel: 'Arrakis', tagline: 'Drifting golden desert spice dust and eclipsing twin-sun haze' },
+  { id: 'cyber_rain', label: 'Bg: Neon Rain', shortLabel: 'Neon Rain', tagline: 'Cascading Night City vertical neon rain streaks and horizon glow' },
+  { id: 'hex_field', label: 'Bg: AT-Field Hex', shortLabel: 'AT-Field', tagline: 'Pulsing concentric octagonal tactical AT-Field honeycomb lattice' },
   { id: 'none', label: 'Bg: Static (Off)', shortLabel: 'Off', tagline: 'Clean static theme canvas' },
 ];
 
@@ -1267,6 +1385,7 @@ export interface FlipClockCardProps {
   themeConfig: ThemeStyles;
   fontClassName: string;
   animationTextClass: string;
+  edition?: ClockEdition;
 }
 
 export const FlipClockCard: React.FC<FlipClockCardProps> = ({
@@ -1278,6 +1397,7 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
   themeConfig,
   fontClassName,
   animationTextClass,
+  edition = 'classic',
 }) => {
   const [flipState, setFlipState] = useState({
     current: value,
@@ -1327,13 +1447,18 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
       ? 'w-[clamp(4.2rem,min(17vw,22vh),17rem)] h-[clamp(5.8rem,min(24vw,30vh),24rem)]'
       : 'w-20 sm:w-36 md:w-44 h-28 sm:h-44 md:h-52';
 
-  const radiusClass = isSecondary
-    ? isFullscreen
-      ? 'rounded-2xl sm:rounded-[2rem]'
-      : 'rounded-2xl sm:rounded-3xl'
-    : isFullscreen
-      ? 'rounded-3xl sm:rounded-[2.5rem]'
-      : 'rounded-2xl sm:rounded-3xl';
+  const radiusClass =
+    edition === 'evangelion' || edition === 'doomsday'
+      ? 'rounded-lg sm:rounded-xl'
+      : edition === 'cyberpunk'
+        ? 'rounded-md sm:rounded-xl'
+        : isSecondary
+          ? isFullscreen
+            ? 'rounded-2xl sm:rounded-[2rem]'
+            : 'rounded-2xl sm:rounded-3xl'
+          : isFullscreen
+            ? 'rounded-3xl sm:rounded-[2.5rem]'
+            : 'rounded-2xl sm:rounded-3xl';
 
   const textSizeClass = isSecondary
     ? isFullscreen
@@ -1351,7 +1476,60 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
         ? 'text-3xl sm:text-5xl md:text-6xl'
         : 'text-4xl sm:text-7xl md:text-8xl';
 
-  const digitClass = `leading-none tabular-nums ${fontClassName} ${textSizeClass}`;
+  const editionDigitFx =
+    edition === 'invincible'
+      ? 'italic drop-shadow-[3px_3px_0_#000000]'
+      : edition === 'spiderverse'
+        ? 'edition-spiderverse-text'
+        : edition === 'cyberpunk'
+          ? 'edition-cyberpunk-text'
+          : edition === 'tron'
+            ? 'drop-shadow-[0_0_16px_rgba(0,242,255,0.8)]'
+            : edition === 'evangelion'
+              ? 'drop-shadow-[0_0_14px_rgba(255,106,0,0.85)]'
+              : edition === 'akira'
+                ? 'drop-shadow-[0_0_14px_rgba(251,191,36,0.75)]'
+                : '';
+
+  const editionCardAura =
+    edition === 'invincible'
+      ? 'ring-2 ring-[#020617] shadow-[6px_7px_0_#020617] -skew-x-3'
+      : edition === 'cyberpunk'
+        ? 'ring-1 ring-[#00f0ff]/60 shadow-[0_0_24px_rgba(0,240,255,0.22)]'
+        : edition === 'dune'
+          ? 'ring-1 ring-amber-400/45 shadow-[0_14px_34px_rgba(0,0,0,0.65)]'
+          : edition === 'doomsday'
+            ? 'ring-2 ring-red-600/60 shadow-[0_0_28px_rgba(220,38,38,0.25)]'
+            : edition === 'spiderverse'
+              ? 'ring-2 ring-[#00f5ff] shadow-[5px_5px_0_#ff2a85,-3px_-3px_0_#00f5ff]'
+              : edition === 'evangelion'
+                ? 'ring-2 ring-[#ff6a00]/80 shadow-[0_0_24px_rgba(255,106,0,0.28)]'
+                : edition === 'tron'
+                  ? 'ring-1 ring-[#00f2ff]/85 shadow-[0_0_26px_rgba(0,242,255,0.3)]'
+                  : edition === 'akira'
+                    ? 'ring-2 ring-[#ef233c]/75 shadow-[0_0_26px_rgba(239,35,60,0.3)]'
+                    : '';
+
+  const editionSeamClass =
+    edition === 'cyberpunk'
+      ? 'bg-[#00f0ff]/85 shadow-[0_0_10px_#00f0ff]'
+      : edition === 'dune'
+        ? 'bg-[#38bdf8]/80 shadow-[0_0_8px_#38bdf8]'
+        : edition === 'doomsday'
+          ? 'bg-[#ff2a00]/90 shadow-[0_0_10px_#ff2a00]'
+          : edition === 'invincible'
+            ? 'bg-[#ffe600] shadow-[0_1px_0_#020617]'
+            : edition === 'spiderverse'
+              ? 'bg-gradient-to-r from-[#00f5ff] via-[#ff2a85] to-[#00f5ff]'
+              : edition === 'evangelion'
+                ? 'bg-[#ff6a00]/90 shadow-[0_0_8px_#ff6a00]'
+                : edition === 'tron'
+                  ? 'bg-[#ff6b00]/95 shadow-[0_0_10px_#ff6b00]'
+                  : edition === 'akira'
+                    ? 'bg-[#ef233c]/95 shadow-[0_0_10px_#ef233c]'
+                    : '';
+
+  const digitClass = `leading-none tabular-nums ${fontClassName} ${textSizeClass} ${editionDigitFx}`;
   const isLight = !!themeConfig.isLight;
   const topSheenClass = isLight
     ? 'bg-gradient-to-b from-white/70 to-slate-900/[0.02]'
@@ -1369,7 +1547,7 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
   return (
     <div className="flex flex-col items-center">
       <div
-        className={`relative select-none ${sizeClass} ${radiusClass} ${isSecondary ? 'opacity-90' : ''} ${animationTextClass}`}
+        className={`relative select-none ${sizeClass} ${radiusClass} ${editionCardAura} ${isSecondary ? 'opacity-90' : ''} ${animationTextClass}`}
         aria-label={`${label}: ${flipState.current}`}
       >
         <div className={`flip-clock-stage relative w-full h-full ${radiusClass}`}>
@@ -1468,9 +1646,10 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
           {/* Mechanical Center Split Seam & Side Hinge Brackets */}
           <div
             className={`absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] z-20 pointer-events-none ${
-              isLight
+              editionSeamClass ||
+              (isLight
                 ? 'bg-slate-900/20 shadow-[0_1px_0_rgba(255,255,255,0.8)]'
-                : 'bg-black/60 shadow-[0_1px_0_rgba(255,255,255,0.06)]'
+                : 'bg-black/60 shadow-[0_1px_0_rgba(255,255,255,0.06)]')
             }`}
           />
           <div
@@ -1491,7 +1670,7 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
       </div>
 
       <span
-        className={`uppercase font-extrabold ${themeConfig.subText || 'text-slate-500'} ${
+        className={`uppercase font-extrabold tracking-widest ${themeConfig.subText || 'text-slate-500'} ${
           isFullscreen ? 'text-xs sm:text-base mt-2 sm:mt-3' : 'text-[10px] sm:text-xs mt-2'
         }`}
       >
@@ -2199,6 +2378,66 @@ const BG_WARP_STREAKS: { angle: number; length: number; thickness: number; dur: 
   return arr;
 })();
 
+const BG_COMIC_RAYS: { deg: number; width: number; innerR: number; tone: 'sec' | 'min' | 'hr' }[] = (() => {
+  const rng = makeSeededRng(84211);
+  const tones: ('sec' | 'min' | 'hr')[] = ['min', 'hr', 'sec'];
+  const arr: { deg: number; width: number; innerR: number; tone: 'sec' | 'min' | 'hr' }[] = [];
+  for (let i = 0; i < 48; i++) {
+    arr.push({
+      deg: Number(((i * 7.5 + (rng() - 0.5) * 2.5 + 360) % 360).toFixed(1)),
+      width: Number((1.2 + rng() * 3.4).toFixed(1)),
+      innerR: Math.round(145 + rng() * 95),
+      tone: tones[i % 3],
+    });
+  }
+  return arr;
+})();
+
+const BG_SAND_MOTES: { top: number; size: number; dur: string; delay: string; isSpice: boolean }[] = (() => {
+  const rng = makeSeededRng(41907);
+  const arr: { top: number; size: number; dur: string; delay: string; isSpice: boolean }[] = [];
+  for (let i = 0; i < 36; i++) {
+    const durVal = 6.5 + rng() * 7.5;
+    const delayVal = -(rng() * durVal);
+    arr.push({
+      top: Math.round(8 + rng() * 86),
+      size: Number((2 + rng() * 4.5).toFixed(1)),
+      dur: `${durVal.toFixed(2)}s`,
+      delay: `${delayVal.toFixed(2)}s`,
+      isSpice: i % 5 === 0,
+    });
+  }
+  return arr;
+})();
+
+const BG_CYBER_RAIN_DROPS: { left: number; height: number; width: number; dur: string; delay: string; tone: 'sec' | 'min' | 'hr' }[] = (() => {
+  const rng = makeSeededRng(92077);
+  const tones: ('sec' | 'min' | 'hr')[] = ['min', 'hr', 'sec'];
+  const arr: { left: number; height: number; width: number; dur: string; delay: string; tone: 'sec' | 'min' | 'hr' }[] = [];
+  for (let i = 0; i < 38; i++) {
+    const durVal = 2.6 + rng() * 3.8;
+    const delayVal = -(rng() * durVal);
+    arr.push({
+      left: Number((2 + i * 2.55 + (rng() - 0.5) * 1.4).toFixed(1)),
+      height: Math.round(48 + rng() * 94),
+      width: Number((1.2 + rng() * 1.4).toFixed(1)),
+      dur: `${durVal.toFixed(2)}s`,
+      delay: `${delayVal.toFixed(2)}s`,
+      tone: tones[i % 3],
+    });
+  }
+  return arr;
+})();
+
+const buildPolygonPoints = (cx: number, cy: number, sides: number, radius: number, rotDeg = 0): string => {
+  const pts: string[] = [];
+  for (let i = 0; i < sides; i++) {
+    const rad = (((i * 360) / sides + rotDeg) * Math.PI) / 180;
+    pts.push(`${(cx + radius * Math.cos(rad)).toFixed(1)},${(cy + radius * Math.sin(rad)).toFixed(1)}`);
+  }
+  return pts.join(' ');
+};
+
 export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: ThemeStyles }> = React.memo(({
   bgFx,
   themeConfig,
@@ -2717,6 +2956,151 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
           ))}
         </div>
       )}
+
+      {/* 11. COMIC SPEED BURST (INVINCIBLE / SPIDER-VERSE) */}
+      {bgFx === 'comic_burst' && (
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <defs>
+            <radialGradient id={`${bgUid}-comic-glow`} cx="50%" cy="50%" r="55%">
+              <stop offset="0%" stopColor={c2} stopOpacity={isLight ? '0.16' : '0.22'} />
+              <stop offset="62%" stopColor={c3} stopOpacity="0.06" />
+              <stop offset="100%" stopColor="#000000" stopOpacity={isLight ? '0.06' : '0.32'} />
+            </radialGradient>
+          </defs>
+          <rect width="800" height="600" fill={`url(#${bgUid}-comic-glow)`} />
+          <g className="animate-bg-comic-pulse">
+            {BG_COMIC_RAYS.map((ray, idx) => {
+              const rad = (ray.deg * Math.PI) / 180;
+              const x1 = 400 + ray.innerR * Math.cos(rad);
+              const y1 = 300 + ray.innerR * Math.sin(rad);
+              const x2 = 400 + 520 * Math.cos(rad);
+              const y2 = 300 + 520 * Math.sin(rad);
+              const strokeCol = idx % 3 === 0 ? '#020617' : pickTone(ray.tone);
+              return (
+                <line
+                  key={idx}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={strokeCol}
+                  strokeWidth={ray.width}
+                  strokeOpacity={idx % 3 === 0 ? (isLight ? 0.14 : 0.34) : isLight ? 0.24 : 0.28}
+                  strokeLinecap="round"
+                />
+              );
+            })}
+          </g>
+        </svg>
+      )}
+
+      {/* 12. ARRAKIS SANDSTORM & TWIN-SUN ECLIPSE (DUNE) */}
+      {bgFx === 'sandstorm' && (
+        <div className="absolute inset-0 overflow-hidden">
+          <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+            <defs>
+              <radialGradient id={`${bgUid}-dune-sun`} cx="50%" cy="68%" r="48%">
+                <stop offset="0%" stopColor="#fef3c7" stopOpacity={isLight ? '0.32' : '0.42'} />
+                <stop offset="32%" stopColor="#f59e0b" stopOpacity={isLight ? '0.18' : '0.26'} />
+                <stop offset="68%" stopColor="#92400e" stopOpacity="0.1" />
+                <stop offset="100%" stopColor="#92400e" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            <circle cx="400" cy="405" r="270" fill={`url(#${bgUid}-dune-sun)`} className="animate-bg-solar-pulse" />
+            {/* Monumental Desert Dune Ridges */}
+            <path
+              d="M0,455 Q210,385 430,435 T800,415 L800,600 L0,600 Z"
+              fill={isLight ? '#d97706' : '#451a03'}
+              fillOpacity={isLight ? '0.14' : '0.46'}
+            />
+            <path
+              d="M0,495 Q280,445 520,485 T800,468 L800,600 L0,600 Z"
+              fill={isLight ? '#b45309' : '#1c0e06'}
+              fillOpacity={isLight ? '0.18' : '0.72'}
+            />
+          </svg>
+          {/* Drifting Golden Sand & Fremen Blue Spice Motes */}
+          {BG_SAND_MOTES.map((m, idx) => (
+            <span
+              key={idx}
+              className="animate-bg-sand-drift absolute left-0 rounded-full"
+              style={{
+                top: `${m.top}%`,
+                width: `${m.size * (m.isSpice ? 1.2 : 3.2)}px`,
+                height: `${m.size * 0.55}px`,
+                background: m.isSpice
+                  ? 'linear-gradient(90deg, transparent, #38bdf8, #bae6fd)'
+                  : `linear-gradient(90deg, transparent, ${c2}, #fde68a)`,
+                boxShadow: m.isSpice ? '0 0 8px #38bdf8' : undefined,
+                opacity: m.isSpice ? 0.85 : 0.48,
+                animationDuration: m.dur,
+                animationDelay: m.delay,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 13. NEON CYBER RAIN (CYBERPUNK / AKIRA) */}
+      {bgFx === 'cyber_rain' && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="absolute inset-x-0 bottom-0 h-1/3"
+            style={{
+              background: `linear-gradient(to top, ${c1}26, ${c2}12, transparent)`,
+            }}
+          />
+          {BG_CYBER_RAIN_DROPS.map((drop, idx) => {
+            const col = pickTone(drop.tone);
+            return (
+              <span
+                key={idx}
+                className="animate-bg-cyber-rain absolute top-0 rounded-full"
+                style={{
+                  left: `${drop.left}%`,
+                  width: `${drop.width}px`,
+                  height: `${drop.height}px`,
+                  background: `linear-gradient(to bottom, transparent 0%, ${col} 75%, ${isLight ? col : '#ffffff'} 100%)`,
+                  boxShadow: `0 0 8px ${col}`,
+                  opacity: isLight ? 0.52 : 0.72,
+                  animationDuration: drop.dur,
+                  animationDelay: drop.delay,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* 14. AT-FIELD OCTAGONAL HEX LATTICE (EVANGELION / TRON) */}
+      {bgFx === 'hex_field' && (
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <defs>
+            <pattern id={`${bgUid}-hex-pat`} width="48" height="42" patternUnits="userSpaceOnUse">
+              <polygon
+                points="24,1 46,12 46,30 24,41 2,30 2,12"
+                fill="none"
+                stroke={c2}
+                strokeWidth="0.8"
+                strokeOpacity={isLight ? '0.16' : '0.18'}
+              />
+            </pattern>
+          </defs>
+          <rect width="800" height="600" fill={`url(#${bgUid}-hex-pat)`} />
+          {[118, 178, 242, 306].map((r, idx) => (
+            <polygon
+              key={r}
+              points={buildPolygonPoints(400, 300, 8, r, 22.5)}
+              fill="none"
+              stroke={idx % 2 === 0 ? c2 : c1}
+              strokeWidth={idx === 1 ? '2.2' : '1.4'}
+              strokeOpacity={isLight ? '0.32' : '0.45'}
+              className="animate-bg-hex-pulse"
+              style={{ animationDelay: `${-idx * 1.1}s` }}
+            />
+          ))}
+        </svg>
+      )}
     </div>
   );
 });
@@ -2866,6 +3250,46 @@ export const AnalogStyleGlyph: React.FC<{ styleId: AnalogStyle }> = ({ styleId }
           <path d="M5.5,10.5 A4.5,4.5 0 0 1 14.5,10.5 Z" fill="currentColor" />
           <line x1="3.4" y1="12.2" x2="16.6" y2="12.2" stroke="currentColor" strokeWidth="1" />
           <line x1="5" y1="14.4" x2="15" y2="14.4" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.7" />
+        </>
+      )}
+      {styleId === 'invincible' && (
+        <>
+          <path d="M5,6.8 H15 L13.4,9.8 H6.6 Z" fill="currentColor" />
+          <rect x="8.6" y="10.4" width="2.8" height="4.8" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'dune' && (
+        <>
+          <circle cx="10" cy="9.2" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.15" />
+          <circle cx="10" cy="9.2" r="1.3" fill="currentColor" />
+          <path d="M4.2,13.6 Q10,10.8 15.8,13.6" fill="none" stroke="currentColor" strokeWidth="1.2" />
+        </>
+      )}
+      {styleId === 'doomsday' && (
+        <>
+          <path d="M10,2.2 A7.8,7.8 0 0 0 4.6,4.6 L10,10 Z" fill="currentColor" fillOpacity="0.55" />
+          <line x1="10" y1="10" x2="8" y2="4.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'spider_web' && (
+        <>
+          <circle cx="10" cy="10" r="4.2" fill="none" stroke="currentColor" strokeWidth="0.9" />
+          <line x1="10" y1="2.2" x2="10" y2="17.8" stroke="currentColor" strokeWidth="0.85" />
+          <line x1="2.2" y1="10" x2="17.8" y2="10" stroke="currentColor" strokeWidth="0.85" />
+          <line x1="4.6" y1="4.6" x2="15.4" y2="15.4" stroke="currentColor" strokeWidth="0.75" />
+          <line x1="15.4" y1="4.6" x2="4.6" y2="15.4" stroke="currentColor" strokeWidth="0.75" />
+        </>
+      )}
+      {styleId === 'evangelion' && (
+        <>
+          <polygon points="10,4 15.2,7 15.2,13 10,16 4.8,13 4.8,7" fill="none" stroke="currentColor" strokeWidth="1.15" />
+          <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'tron_disc' && (
+        <>
+          <circle cx="10" cy="10" r="5" fill="none" stroke="currentColor" strokeWidth="1.25" strokeDasharray="6 3" />
+          <circle cx="10" cy="10" r="1.6" fill="currentColor" />
         </>
       )}
     </svg>
@@ -5321,6 +5745,384 @@ const AnalogDialFace: React.FC<AnalogDialFaceProps> = React.memo(({
           </text>
         </g>
       )}
+
+      {/* STYLE 21: INVINCIBLE HERO EMBLEM */}
+      {styleId === 'invincible' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0066eb" stroke="#020617" strokeWidth="4.5" />
+          <circle cx="150" cy="150" r="134" fill="none" stroke="#ffe600" strokeWidth="3.2" />
+          {/* Iconic Geometric Hero Chest Chevron Emblem */}
+          <path d="M 68 96 H 232 L 204 134 H 96 Z" fill="#ffe600" fillOpacity="0.92" stroke="#020617" strokeWidth="2.8" strokeLinejoin="round" />
+          <path d="M 126 144 H 174 L 168 232 H 132 Z" fill="#ffe600" fillOpacity="0.92" stroke="#020617" strokeWidth="2.8" strokeLinejoin="round" />
+          {/* Subtle Stylized Comic Crimson Action Flecks */}
+          <circle cx="222" cy="84" r="4.2" fill="#ef4444" stroke="#020617" strokeWidth="0.9" />
+          <circle cx="233" cy="96" r="2.2" fill="#ef4444" />
+          <circle cx="82" cy="218" r="3.4" fill="#ef4444" stroke="#020617" strokeWidth="0.8" />
+          {/* Heavy Graphic-Novel Hour Indices */}
+          {[...Array(12)].map((_, idx) => {
+            const isCard = idx % 3 === 0;
+            return (
+              <rect
+                key={idx}
+                x={isCard ? '146.5' : '148'}
+                y="19"
+                width={isCard ? '7' : '4'}
+                height={isCard ? '18' : '12'}
+                rx="1.2"
+                fill={isCard ? '#ffe600' : '#ffffff'}
+                stroke="#020617"
+                strokeWidth="1.6"
+                transform={`rotate(${idx * 30} 150 150)`}
+              />
+            );
+          })}
+          <text
+            x="150"
+            y="72"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ffffff"
+            stroke="#020617"
+            strokeWidth="0.8"
+            paintOrder="stroke"
+            fontSize="8.5"
+            fontWeight="900"
+            letterSpacing="2.2"
+            fontFamily="system-ui, sans-serif"
+          >
+            INVINCIBLE
+          </text>
+          {showDate && (
+            <text
+              x="150"
+              y="252"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#ffe600"
+              stroke="#020617"
+              strokeWidth="0.7"
+              paintOrder="stroke"
+              fontSize="7.5"
+              fontWeight="900"
+              letterSpacing="1.6"
+              fontFamily="'JetBrains Mono', monospace"
+            >
+              {weekdayShort} {dayStr}
+            </text>
+          )}
+        </g>
+      )}
+
+      {/* STYLE 22: DUNE ARRAKIS DESERT ECLIPSE */}
+      {styleId === 'dune' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#170d06" stroke="#d97706" strokeWidth="2.8" />
+          <circle cx="150" cy="150" r="134" fill="none" stroke="#f59e0b" strokeOpacity="0.28" strokeWidth="1" />
+          {/* Eclipsing Golden Arrakis Sun & Spice-Blue Corona */}
+          <circle cx="150" cy="150" r="76" fill="#f59e0b" fillOpacity="0.13" />
+          <circle cx="150" cy="150" r="62" fill="#0d0703" stroke="#fbbf24" strokeWidth="1.8" strokeOpacity="0.82" />
+          <circle cx="150" cy="150" r="66" fill="none" stroke="#38bdf8" strokeWidth="0.9" strokeOpacity="0.55" strokeDasharray="3 6" />
+          {/* Twin Moons of Arrakis */}
+          <circle cx="102" cy="96" r="10.5" fill="#fde68a" fillOpacity="0.22" stroke="#fbbf24" strokeWidth="0.9" />
+          <circle cx="204" cy="196" r="6.5" fill="#38bdf8" fillOpacity="0.24" stroke="#38bdf8" strokeWidth="0.9" />
+          {/* Desert Dune Ridge Curve */}
+          <path d="M 30 218 Q 105 182 162 206 T 270 198" fill="none" stroke="#d97706" strokeWidth="1.4" strokeOpacity="0.62" />
+          {/* Minimalist Imperial Sand-Gold Batons */}
+          {[...Array(12)].map((_, idx) => {
+            const isCard = idx % 3 === 0;
+            return (
+              <line
+                key={idx}
+                x1="150"
+                y1="18"
+                x2="150"
+                y2={isCard ? '34' : '26'}
+                stroke={isCard ? '#38bdf8' : '#fde68a'}
+                strokeWidth={isCard ? '2.4' : '1.2'}
+                strokeLinecap="round"
+                transform={`rotate(${idx * 30} 150 150)`}
+              />
+            );
+          })}
+          <text
+            x="150"
+            y="64"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#fde68a"
+            fontSize="8.5"
+            fontWeight="400"
+            letterSpacing="6.5"
+            fontFamily="Georgia, serif"
+          >
+            ARRAKIS
+          </text>
+          <text
+            x="150"
+            y="240"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#38bdf8"
+            fontSize="6.4"
+            fontWeight="700"
+            letterSpacing="2.8"
+            fontFamily="'JetBrains Mono', monospace"
+          >
+            {showDate ? `CYCLE ${monthShort} ${dayStr}` : 'SPICE MELANGE'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 23: DOOMSDAY MINUTES-TO-MIDNIGHT VAULT */}
+      {styleId === 'doomsday' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0d0f13" stroke="#52525b" strokeWidth="4" />
+          <circle cx="150" cy="150" r="133" fill="none" stroke="#ef4444" strokeOpacity="0.45" strokeWidth="1.2" />
+          {/* Iconic 11:45 - 12:00 Crimson Minutes-to-Midnight Danger Quadrant */}
+          <path d="M 150 150 L 30 150 A 120 120 0 0 1 150 30 Z" fill="#dc2626" fillOpacity="0.22" />
+          <path d="M 30 150 A 120 120 0 0 1 150 30" fill="none" stroke="#ff2a00" strokeWidth="5.5" strokeOpacity="0.88" />
+          {/* Riveted Steel Bunker Bolts */}
+          {[...Array(12)].map((_, idx) => {
+            const rad = ((idx * 30 - 90) * Math.PI) / 180;
+            return (
+              <circle
+                key={idx}
+                cx={150 + 137.5 * Math.cos(rad)}
+                cy={150 + 137.5 * Math.sin(rad)}
+                r="2.2"
+                fill="#71717a"
+                stroke="#09090b"
+                strokeWidth="0.7"
+              />
+            );
+          })}
+          {/* Tactical Countdown Ticks (Minutes 45..60 Highlighted Red/Amber) */}
+          {[...Array(60)].map((_, i) => {
+            const isDanger = i >= 45 || i === 0;
+            const isHour = i % 5 === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1="23"
+                x2="150"
+                y2={isHour ? '36' : '29'}
+                stroke={isDanger ? (isHour ? '#ff2a00' : '#f59e0b') : isHour ? '#f8fafc' : 'rgba(248,250,252,0.28)'}
+                strokeWidth={isHour ? '2.4' : '1'}
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+          <circle cx="150" cy="150" r="84" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.9" strokeDasharray="4 4" />
+          <text
+            x="150"
+            y="84"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ff3b1f"
+            fontSize="7.4"
+            fontWeight="900"
+            letterSpacing="2.4"
+            fontFamily="'JetBrains Mono', monospace"
+          >
+            DOOMSDAY
+          </text>
+          <text
+            x="150"
+            y="218"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#f59e0b"
+            fontSize="6.4"
+            fontWeight="800"
+            letterSpacing="2"
+            fontFamily="'JetBrains Mono', monospace"
+          >
+            {showDate ? `VAULT • ${weekdayShort} ${dayStr}` : 'TO MIDNIGHT'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 24: SPIDER-VERSE MULTIVERSE WEB */}
+      {styleId === 'spider_web' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0d0524" stroke="#ff2a85" strokeWidth="3.2" />
+          <circle cx="148.5" cy="148.5" r="136" fill="none" stroke="#00f5ff" strokeWidth="1.6" strokeOpacity="0.82" />
+          {/* Geometric Multiverse Spider-Web Spokes & Concentric Rings */}
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg, idx) => (
+            <line
+              key={deg}
+              x1="150"
+              y1="150"
+              x2="150"
+              y2="16"
+              stroke={idx % 2 === 0 ? '#00f5ff' : '#ff2a85'}
+              strokeWidth="0.95"
+              strokeOpacity="0.42"
+              transform={`rotate(${deg} 150 150)`}
+            />
+          ))}
+          {[36, 68, 98, 126].map((r, idx) => (
+            <polygon
+              key={r}
+              points={buildPolygonPoints(150, 150, 12, r, 0)}
+              fill="none"
+              stroke={idx % 2 === 0 ? '#ff2a85' : '#00f5ff'}
+              strokeWidth={idx === 3 ? '1.4' : '0.95'}
+              strokeOpacity="0.48"
+            />
+          ))}
+          {/* Chromatic Cyan + Magenta Offset Hour Indices */}
+          {[...Array(12)].map((_, idx) => {
+            const isCard = idx % 3 === 0;
+            return (
+              <g key={idx} transform={`rotate(${idx * 30} 150 150)`}>
+                <rect x={isCard ? '146.5' : '148'} y="17.5" width={isCard ? '5' : '3'} height={isCard ? '14' : '9'} fill="#00f5ff" />
+                <rect x={isCard ? '148.5' : '149'} y="18.5" width={isCard ? '5' : '3'} height={isCard ? '14' : '9'} fill="#ff2a85" />
+                <rect x={isCard ? '147.5' : '148.5'} y="18" width={isCard ? '5' : '3'} height={isCard ? '14' : '9'} fill="#ffffff" />
+              </g>
+            );
+          })}
+          <text
+            x="150"
+            y="84"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00f5ff"
+            fontSize="6.6"
+            fontWeight="900"
+            letterSpacing="2.4"
+            fontFamily="'JetBrains Mono', monospace"
+          >
+            EARTH-1610
+          </text>
+          <text
+            x="150"
+            y="222"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ff2a85"
+            fontSize="6.6"
+            fontWeight="900"
+            letterSpacing="2"
+            fontFamily="'JetBrains Mono', monospace"
+          >
+            {showDate ? `${weekdayShort} • ${monthShort} ${dayStr}` : 'SPIDER-VERSE'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 25: EVANGELION NERV MAGI AT-FIELD */}
+      {styleId === 'evangelion' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#060302" stroke="#ff6a00" strokeWidth="3.2" />
+          {/* Layered Octagonal AT-Field Barrier Geometry */}
+          {[126, 98, 68, 40].map((r, idx) => (
+            <polygon
+              key={r}
+              points={buildPolygonPoints(150, 150, 8, r, 22.5)}
+              fill="none"
+              stroke={idx === 1 ? '#ff1e27' : idx === 3 ? '#39ff14' : '#ff6a00'}
+              strokeWidth={idx === 0 ? '2' : '1.25'}
+              strokeOpacity={idx === 0 ? '0.8' : '0.52'}
+            />
+          ))}
+          {[...Array(60)].map((_, i) => {
+            const isHour = i % 5 === 0;
+            return (
+              <line
+                key={i}
+                x1="150"
+                y1="14"
+                x2="150"
+                y2={isHour ? '27' : '20'}
+                stroke={i % 15 === 0 ? '#39ff14' : isHour ? '#ff7b00' : 'rgba(255,106,0,0.34)'}
+                strokeWidth={isHour ? '2.2' : '0.9'}
+                transform={`rotate(${i * 6} 150 150)`}
+              />
+            );
+          })}
+          <text
+            x="150"
+            y="78"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ff7b00"
+            fontSize="7"
+            fontWeight="800"
+            letterSpacing="2.4"
+            fontFamily="'JetBrains Mono', monospace"
+          >
+            NERV // MAGI-01
+          </text>
+          <text
+            x="150"
+            y="224"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#39ff14"
+            fontSize="6.4"
+            fontWeight="800"
+            letterSpacing="2"
+            fontFamily="'JetBrains Mono', monospace"
+          >
+            {showDate ? `AT-FIELD • ${weekdayShort} ${dayStr}` : 'INTERNAL ACTIVE'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 26: TRON LEGACY IDENTITY DISC */}
+      {styleId === 'tron_disc' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#020812" stroke="#00f2ff" strokeWidth="3.5" />
+          <circle cx="150" cy="150" r="131" fill="none" stroke="#00f2ff" strokeWidth="5.5" strokeOpacity="0.22" />
+          <circle cx="150" cy="150" r="126" fill="none" stroke="#00f2ff" strokeWidth="1.8" strokeOpacity="0.88" strokeDasharray="56 14" />
+          <circle cx="150" cy="150" r="96" fill="none" stroke="#00f2ff" strokeWidth="1.2" strokeOpacity="0.48" strokeDasharray="24 12" />
+          <circle cx="150" cy="150" r="62" fill="none" stroke="#ff6b00" strokeWidth="1.6" strokeOpacity="0.72" strokeDasharray="18 16" />
+          {[...Array(12)].map((_, idx) => {
+            const isCard = idx % 3 === 0;
+            return (
+              <line
+                key={idx}
+                x1="150"
+                y1="26"
+                x2="150"
+                y2={isCard ? '44' : '35'}
+                stroke={isCard ? '#00f2ff' : '#38bdf8'}
+                strokeWidth={isCard ? '3' : '1.4'}
+                strokeLinecap="round"
+                transform={`rotate(${idx * 30} 150 150)`}
+              />
+            );
+          })}
+          <text
+            x="150"
+            y="74"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#67f8ff"
+            fontSize="6.8"
+            fontWeight="800"
+            letterSpacing="3.4"
+            fontFamily="'Orbitron', 'JetBrains Mono', monospace"
+          >
+            THE GRID
+          </text>
+          <text
+            x="150"
+            y="228"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ff7b1a"
+            fontSize="6.2"
+            fontWeight="800"
+            letterSpacing="2.4"
+            fontFamily="'Orbitron', 'JetBrains Mono', monospace"
+          >
+            {showDate ? `DISC • ${weekdayShort} ${dayStr}` : 'IDENTITY DISC'}
+          </text>
+        </g>
+      )}
     </g>
   );
 });
@@ -6443,6 +7245,59 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             <line x1="150" y1="138" x2="150" y2="78" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
           </>
         )}
+
+        {styleId === 'invincible' && (
+          <polygon
+            points="150,162 144.5,144 146.4,80 150,68 153.6,80 155.5,144"
+            fill="#ffffff"
+            stroke="#020617"
+            strokeWidth="2.4"
+            strokeLinejoin="round"
+          />
+        )}
+
+        {styleId === 'dune' && (
+          <>
+            <polygon points="150,162 146.5,144 148.2,80 150,69 151.8,80 153.5,144" fill="#fde68a" stroke="#78350f" strokeWidth="0.9" />
+            <line x1="150" y1="136" x2="150" y2="82" stroke="#38bdf8" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'doomsday' && (
+          <>
+            <polygon points="146.5,162 146.5,82 150,68 153.5,82 153.5,162" fill="#e4e4e7" stroke="#09090b" strokeWidth="1.4" />
+            <polygon points="148.2,92 150,73 151.8,92" fill="#ff2a00" />
+          </>
+        )}
+
+        {styleId === 'spider_web' && (
+          <>
+            <polygon points="148.5,162 144.5,144 146.8,80 150,68 153.2,80 155.5,144" fill="#00f5ff" fillOpacity="0.85" transform="translate(-1.5 -1)" />
+            <polygon points="148.5,162 144.5,144 146.8,80 150,68 153.2,80 155.5,144" fill="#ff2a85" fillOpacity="0.85" transform="translate(1.5 1)" />
+            <polygon points="150,162 146,144 147.8,82 150,69 152.2,82 154,144" fill="#ffffff" />
+          </>
+        )}
+
+        {styleId === 'evangelion' && (
+          <>
+            <polygon points="150,162 145.6,144 147.4,82 150,69 152.6,82 154.4,144" fill="#090503" stroke="#ff7b00" strokeWidth="2.1" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="80" stroke="#39ff14" strokeWidth="1.5" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'tron_disc' && (
+          <>
+            <polygon
+              points="150,162 146,144 147.8,82 150,69 152.2,82 154,144"
+              fill="#020812"
+              stroke="#00f2ff"
+              strokeWidth="2.1"
+              strokeLinejoin="round"
+              style={{ filter: 'drop-shadow(0 0 6px #00f2ff)' }}
+            />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#ffffff" strokeWidth="1.25" strokeLinecap="round" />
+          </>
+        )}
       </g>
 
       {/* ================= MINUTE HAND BY STYLE ================= */}
@@ -6648,6 +7503,59 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             <line x1="150" y1="138" x2="150" y2="40" stroke="#ffffff" strokeWidth="1.15" strokeLinecap="round" />
           </>
         )}
+
+        {styleId === 'invincible' && (
+          <polygon
+            points="150,166 146.2,146 147.8,44 150,32 152.2,44 153.8,146"
+            fill="#ffe600"
+            stroke="#020617"
+            strokeWidth="2.2"
+            strokeLinejoin="round"
+          />
+        )}
+
+        {styleId === 'dune' && (
+          <>
+            <polygon points="150,165 147.2,146 148.6,44 150,31 151.4,44 152.8,146" fill="#f59e0b" stroke="#451a03" strokeWidth="0.8" />
+            <line x1="150" y1="138" x2="150" y2="44" stroke="#38bdf8" strokeWidth="1.35" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'doomsday' && (
+          <>
+            <polygon points="147.4,166 147.4,42 150,31 152.6,42 152.6,166" fill="#f8fafc" stroke="#09090b" strokeWidth="1.2" />
+            <polygon points="148.4,54 150,35 151.6,54" fill="#f59e0b" />
+          </>
+        )}
+
+        {styleId === 'spider_web' && (
+          <>
+            <polygon points="150,166 146.8,146 148.2,44 150,32 151.8,44 153.2,146" fill="#00f5ff" fillOpacity="0.85" transform="translate(-1.5 -1)" />
+            <polygon points="150,166 146.8,146 148.2,44 150,32 151.8,44 153.2,146" fill="#ff2a85" fillOpacity="0.85" transform="translate(1.5 1)" />
+            <polygon points="150,166 147.2,146 148.5,44 150,33 151.5,44 152.8,146" fill="#ffffff" />
+          </>
+        )}
+
+        {styleId === 'evangelion' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#090503" stroke="#ff7b00" strokeWidth="2" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ff9433" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'tron_disc' && (
+          <>
+            <polygon
+              points="150,166 147,145 148.5,44 150,31 151.5,44 153,145"
+              fill="#020812"
+              stroke="#00f2ff"
+              strokeWidth="1.9"
+              strokeLinejoin="round"
+              style={{ filter: 'drop-shadow(0 0 6px #00f2ff)' }}
+            />
+            <line x1="150" y1="138" x2="150" y2="41" stroke="#ffffff" strokeWidth="1.15" strokeLinecap="round" />
+          </>
+        )}
       </g>
 
       {/* ================= SECOND HAND BY STYLE ================= */}
@@ -6791,6 +7699,81 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
               />
               <circle cx="150" cy="31" r="2.4" fill="#ffffff" />
             </>
+          ) : styleId === 'invincible' ? (
+            <>
+              <line x1="150" y1="176" x2="150" y2="27" stroke="#ef4444" strokeWidth="2.4" strokeLinecap="round" />
+              <polygon points="150,24 146.2,37 153.8,37" fill="#ef4444" stroke="#020617" strokeWidth="1" />
+            </>
+          ) : styleId === 'dune' ? (
+            <>
+              <line
+                x1="150"
+                y1="174"
+                x2="150"
+                y2="26"
+                stroke="#38bdf8"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                style={{ filter: 'drop-shadow(0 0 6px #38bdf8)' }}
+              />
+              <circle cx="150" cy="32" r="2.6" fill="#bae6fd" />
+            </>
+          ) : styleId === 'doomsday' ? (
+            <>
+              <line
+                x1="150"
+                y1="176"
+                x2="150"
+                y2="25"
+                stroke="#ff2a00"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                style={{ filter: 'drop-shadow(0 0 6px #ff2a00)' }}
+              />
+              <polygon points="150,25 146.5,38 153.5,38" fill="#ff2a00" />
+            </>
+          ) : styleId === 'spider_web' ? (
+            <>
+              <line
+                x1="150"
+                y1="174"
+                x2="150"
+                y2="26"
+                stroke="#ff2a85"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                style={{ filter: 'drop-shadow(0 0 6px #ff2a85)' }}
+              />
+              <circle cx="150" cy="32" r="2.8" fill="#00f5ff" stroke="#ffffff" strokeWidth="0.9" />
+            </>
+          ) : styleId === 'evangelion' ? (
+            <>
+              <line
+                x1="150"
+                y1="176"
+                x2="150"
+                y2="34"
+                stroke="#ff1e27"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                style={{ filter: 'drop-shadow(0 0 6px #ff1e27)' }}
+              />
+              <path d="M 147.2 38 L 150 24 L 152.8 38" fill="none" stroke="#ff1e27" strokeWidth="1.7" strokeLinecap="round" />
+            </>
+          ) : styleId === 'tron_disc' ? (
+            <>
+              <line
+                x1="150"
+                y1="174"
+                x2="150"
+                y2="26"
+                stroke="#ff6b00"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                style={{ filter: 'drop-shadow(0 0 6px #ff6b00)' }}
+              />
+              <circle cx="150" cy="30" r="2.6" fill="#ffffff" stroke="#ff6b00" strokeWidth="1" />
+            </>
           ) : (
             <>
               <line x1="150" y1="150" x2="150" y2="177" stroke={secColor} strokeWidth="2.6" strokeLinecap="round" />
@@ -6820,13 +7803,21 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             ? '#fde68a'
             : styleId === 'blackhole'
               ? '#000000'
-              : styleId === 'cyberwave'
-                ? '#22d3ee'
-                : styleId === 'gears'
-                  ? `url(#${uid}-ruby-jewel)`
-                  : secColor
+              : styleId === 'cyberwave' || styleId === 'tron_disc'
+                ? '#00f2ff'
+                : styleId === 'invincible'
+                  ? '#ffe600'
+                  : styleId === 'dune'
+                    ? '#38bdf8'
+                    : styleId === 'doomsday' || styleId === 'evangelion'
+                      ? '#ff2a00'
+                      : styleId === 'spider_web'
+                        ? '#ff2a85'
+                        : styleId === 'gears'
+                          ? `url(#${uid}-ruby-jewel)`
+                          : secColor
         }
-        stroke={styleId === 'blackhole' ? '#fb923c' : isLight ? '#ffffff' : '#020617'}
+        stroke={styleId === 'blackhole' ? '#fb923c' : styleId === 'invincible' ? '#020617' : isLight ? '#ffffff' : '#020617'}
         strokeWidth="1.8"
       />
       <circle
@@ -6973,6 +7964,55 @@ export const RadialStyleGlyph: React.FC<{ styleId: RadialStyle; className?: stri
           <line x1="4" y1="11.5" x2="16" y2="11.5" stroke="#fde047" strokeWidth="1.3" />
           <line x1="5" y1="14" x2="15" y2="14" stroke="#22d3ee" strokeWidth="1.3" />
           <polygon points="10,4.5 13.5,10 6.5,10" stroke="#fde047" strokeWidth="1.2" fill="none" />
+        </svg>
+      );
+    case 'invincible_arc':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="8" fill="#0066eb" stroke="#020617" strokeWidth="1.2" />
+          <path d="M 5 7 H 15 L 13.5 9.8 H 6.5 Z" fill="#ffe600" />
+          <rect x="8.6" y="10.4" width="2.8" height="4.8" fill="#ffe600" />
+        </svg>
+      );
+    case 'dune_eclipse':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.5" stroke="#f59e0b" strokeOpacity="0.6" strokeWidth="1.5" />
+          <circle cx="10" cy="10" r="4.5" stroke="#38bdf8" strokeWidth="1.3" strokeDasharray="3 2" />
+          <circle cx="15.2" cy="5.5" r="1.4" fill="#fde68a" />
+        </svg>
+      );
+    case 'doomsday_core':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.8" stroke="#ef4444" strokeWidth="1.5" />
+          <path d="M 10 2.2 A 7.8 7.8 0 0 0 2.2 10 L 10 10 Z" fill="#ef4444" fillOpacity="0.55" />
+          <circle cx="10" cy="10" r="2.2" fill="#f59e0b" />
+        </svg>
+      );
+    case 'spider_web':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#00f5ff" strokeWidth="1.2" />
+          <circle cx="10" cy="10" r="4.4" stroke="#ff2a85" strokeWidth="1.1" />
+          <line x1="10" y1="2.4" x2="10" y2="17.6" stroke="#ff2a85" strokeWidth="0.9" />
+          <line x1="2.4" y1="10" x2="17.6" y2="10" stroke="#00f5ff" strokeWidth="0.9" />
+        </svg>
+      );
+    case 'nerv_hex':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <polygon points="10,2 17,6 17,14 10,18 3,14 3,6" stroke="#ff6a00" strokeWidth="1.4" />
+          <polygon points="10,5.2 14.2,7.6 14.2,12.4 10,14.8 5.8,12.4 5.8,7.6" stroke="#ff1e27" strokeWidth="1.1" />
+          <circle cx="10" cy="10" r="1.5" fill="#39ff14" />
+        </svg>
+      );
+    case 'tron_disc':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.8" stroke="#00f2ff" strokeWidth="1.6" />
+          <circle cx="10" cy="10" r="4.6" stroke="#00f2ff" strokeOpacity="0.7" strokeWidth="1.2" strokeDasharray="6 3" />
+          <circle cx="10" cy="10" r="1.8" fill="#ff6b00" />
         </svg>
       );
     case 'fractal_mandala':
@@ -7629,6 +8669,159 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
               })}
             </g>
           )}
+
+          {/* STYLE 13: INVINCIBLE HERO SHIELD */}
+          {styleId === 'invincible_arc' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#005ae0" fillOpacity="0.88" />
+              <g transform={`rotate(${hudVernierDeg} ${cx} ${cy})`} opacity="0.52">
+                {Array.from({ length: 24 }).map((_, idx) => (
+                  <line
+                    key={idx}
+                    x1={cx}
+                    y1="52"
+                    x2={cx}
+                    y2="6"
+                    transform={`rotate(${idx * 15} ${cx} ${cy})`}
+                    stroke={idx % 2 === 0 ? '#ffe600' : '#020617'}
+                    strokeWidth={idx % 4 === 0 ? '2.4' : '1.1'}
+                  />
+                ))}
+              </g>
+              <circle cx={cx} cy={cy} r="154" fill="none" stroke="#020617" strokeWidth="3.5" />
+              <circle cx={cx} cy={cy} r="151" fill="none" stroke="#ffe600" strokeWidth="1.5" strokeOpacity="0.72" />
+              {/* Stylized Graphic Crimson Flecks */}
+              <circle cx="242" cy="48" r="3.4" fill="#ef4444" stroke="#020617" strokeWidth="0.8" />
+              <circle cx="252" cy="59" r="1.8" fill="#ef4444" />
+              <circle cx="62" cy="262" r="3" fill="#ef4444" stroke="#020617" strokeWidth="0.7" />
+            </g>
+          )}
+
+          {/* STYLE 14: DUNE ARRAKIS DESERT ECLIPSE */}
+          {styleId === 'dune_eclipse' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#180d06" />
+              <circle cx={cx} cy={cy} r="153" fill={`url(#${rUid}-solar-corona)`} />
+              <circle cx={cx} cy={cy} r="141" fill="none" stroke="#f59e0b" strokeWidth="0.9" strokeOpacity="0.34" strokeDasharray="4 6" />
+              <circle cx={cx} cy={cy} r="113" fill="none" stroke="#38bdf8" strokeWidth="0.95" strokeOpacity="0.42" strokeDasharray="2 5" />
+              {/* Twin Orbiting Arrakis Moons */}
+              <g transform={`rotate(${galaxySpinDeg} ${cx} ${cy})`}>
+                <circle cx={cx + 141} cy={cy} r="4.6" fill="#fde68a" stroke="#b45309" strokeWidth="0.8" />
+                <circle cx={cx - 127} cy={cy} r="3.4" fill="#38bdf8" stroke="#bae6fd" strokeWidth="0.7" />
+              </g>
+              {Array.from({ length: 12 }).map((_, idx) => {
+                const rad = (idx * 30 * Math.PI) / 180;
+                return (
+                  <line
+                    key={idx}
+                    x1={cx + 150 * Math.cos(rad)}
+                    y1={cy + 150 * Math.sin(rad)}
+                    x2={cx + 155 * Math.cos(rad)}
+                    y2={cy + 155 * Math.sin(rad)}
+                    stroke={idx % 3 === 0 ? '#38bdf8' : '#fde68a'}
+                    strokeWidth={idx % 3 === 0 ? '2' : '1.1'}
+                  />
+                );
+              })}
+            </g>
+          )}
+
+          {/* STYLE 15: DOOMSDAY MIDNIGHT VAULT CORE */}
+          {styleId === 'doomsday_core' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#0c0e12" />
+              {/* Blazing 11:45 - 12:00 Crimson Minutes-to-Midnight Danger Sector */}
+              <path d="M 160 160 L 6 160 A 154 154 0 0 1 160 6 Z" fill="#dc2626" fillOpacity="0.24" />
+              <path d="M 8 160 A 152 152 0 0 1 160 8" fill="none" stroke="#ff2a00" strokeWidth="4.2" strokeOpacity="0.86" />
+              <g transform={`rotate(${turbineStatorDeg} ${cx} ${cy})`}>
+                {Array.from({ length: 12 }).map((_, idx) => (
+                  <line
+                    key={idx}
+                    x1={cx}
+                    y1="52"
+                    x2={cx}
+                    y2="8"
+                    transform={`rotate(${idx * 30} ${cx} ${cy})`}
+                    stroke="#f59e0b"
+                    strokeOpacity="0.22"
+                    strokeWidth="1.2"
+                  />
+                ))}
+              </g>
+              {Array.from({ length: 12 }).map((_, idx) => {
+                const rad = (idx * 30 * Math.PI) / 180;
+                return (
+                  <circle
+                    key={idx}
+                    cx={cx + 153.5 * Math.cos(rad)}
+                    cy={cy + 153.5 * Math.sin(rad)}
+                    r="2"
+                    fill="#71717a"
+                    stroke="#09090b"
+                    strokeWidth="0.6"
+                  />
+                );
+              })}
+            </g>
+          )}
+
+          {/* STYLE 16: SPIDER-VERSE MULTIVERSE PORTAL WEB */}
+          {styleId === 'spider_web' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#0d0524" />
+              {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg, idx) => (
+                <line
+                  key={deg}
+                  x1={cx}
+                  y1="52"
+                  x2={cx}
+                  y2="5"
+                  transform={`rotate(${deg} ${cx} ${cy})`}
+                  stroke={idx % 2 === 0 ? '#00f5ff' : '#ff2a85'}
+                  strokeOpacity="0.45"
+                  strokeWidth="1.15"
+                />
+              ))}
+              {[116, 134, 151].map((r, idx) => (
+                <polygon
+                  key={r}
+                  points={buildPolygonPoints(cx, cy, 12, r, 0)}
+                  fill="none"
+                  stroke={idx % 2 === 0 ? '#ff2a85' : '#00f5ff'}
+                  strokeWidth="1.1"
+                  strokeOpacity="0.52"
+                />
+              ))}
+            </g>
+          )}
+
+          {/* STYLE 17: EVANGELION NERV OCTAGONAL AT-FIELD */}
+          {styleId === 'nerv_hex' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#060302" />
+              <g transform={`rotate(${mandalaOuterDeg} ${cx} ${cy})`}>
+                <polygon points={buildPolygonPoints(cx, cy, 8, 152, 22.5)} fill="none" stroke="#ff6a00" strokeWidth="2" strokeOpacity="0.72" />
+                <polygon points={buildPolygonPoints(cx, cy, 8, 134, 22.5)} fill="none" stroke="#ff1e27" strokeWidth="1.4" strokeOpacity="0.6" />
+              </g>
+              <g transform={`rotate(${mandalaInnerDeg} ${cx} ${cy})`}>
+                <polygon points={buildPolygonPoints(cx, cy, 8, 118, 0)} fill="none" stroke="#39ff14" strokeWidth="1.2" strokeOpacity="0.55" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 18: TRON LEGACY IDENTITY DISC */}
+          {styleId === 'tron_disc' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#020812" />
+              <g transform={`rotate(${turbineSpinDeg * 0.4} ${cx} ${cy})`}>
+                <circle cx={cx} cy={cy} r="153" fill="none" stroke="#00f2ff" strokeWidth="2.8" strokeOpacity="0.75" strokeDasharray="58 18" />
+                <circle cx={cx} cy={cy} r="141" fill="none" stroke="#00f2ff" strokeWidth="1.1" strokeOpacity="0.42" strokeDasharray="24 14" />
+              </g>
+              <g transform={`rotate(${turbineStatorDeg} ${cx} ${cy})`}>
+                <circle cx={cx} cy={cy} r="113" fill="none" stroke="#ff6b00" strokeWidth="1.6" strokeOpacity="0.62" strokeDasharray="20 18" />
+              </g>
+            </g>
+          )}
         </g>
 
         {/* ================= INNER CHRONOMETER CHAMBER BACKDROP (ALWAYS QUIET & CRISP) ================= */}
@@ -7636,23 +8829,57 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
           cx={cx}
           cy={cy}
           r={innerR}
-          fill={isDarkChamber ? (styleId === 'blackhole_lens' ? '#000000' : '#050918') : themeConfig.dialBg}
-          fillOpacity={isDarkChamber ? (styleId === 'galaxy_vortex' ? 0.78 : 0.88) : isLight ? 0.68 : 0.5}
+          fill={
+            isDarkChamber
+              ? styleId === 'blackhole_lens'
+                ? '#000000'
+                : styleId === 'invincible_arc'
+                  ? '#003e9e'
+                  : styleId === 'dune_eclipse'
+                    ? '#120a04'
+                    : styleId === 'doomsday_core'
+                      ? '#0a0b0e'
+                      : styleId === 'nerv_hex'
+                        ? '#070302'
+                        : styleId === 'tron_disc'
+                          ? '#020710'
+                          : '#050918'
+              : themeConfig.dialBg
+          }
+          fillOpacity={isDarkChamber ? (styleId === 'galaxy_vortex' ? 0.78 : 0.9) : isLight ? 0.68 : 0.5}
           stroke={
             styleId === 'blackhole_lens'
               ? '#fb923c'
-              : styleId === 'solar_orbit'
-                ? '#fbbf24'
-                : styleId === 'cyber_hud'
-                  ? ringSec
-                  : isDarkChamber
-                    ? 'rgba(255,255,255,0.22)'
-                    : isLight
-                      ? 'rgba(15,23,42,0.1)'
-                      : 'rgba(255,255,255,0.1)'
+              : styleId === 'solar_orbit' || styleId === 'invincible_arc'
+                ? '#ffe600'
+                : styleId === 'dune_eclipse'
+                  ? '#f59e0b'
+                  : styleId === 'doomsday_core'
+                    ? '#ef4444'
+                    : styleId === 'spider_web'
+                      ? '#ff2a85'
+                      : styleId === 'nerv_hex'
+                        ? '#ff6a00'
+                        : styleId === 'tron_disc'
+                          ? '#00f2ff'
+                          : styleId === 'cyber_hud'
+                            ? ringSec
+                            : isDarkChamber
+                              ? 'rgba(255,255,255,0.22)'
+                              : isLight
+                                ? 'rgba(15,23,42,0.1)'
+                                : 'rgba(255,255,255,0.1)'
           }
-          strokeOpacity={styleId === 'blackhole_lens' || styleId === 'solar_orbit' ? 0.85 : 0.45}
-          strokeWidth={styleId === 'blackhole_lens' || styleId === 'solar_orbit' ? 1.8 : 1.1}
+          strokeOpacity={
+            ['blackhole_lens', 'solar_orbit', 'invincible_arc', 'dune_eclipse', 'doomsday_core', 'spider_web', 'nerv_hex', 'tron_disc'].includes(styleId)
+              ? 0.85
+              : 0.45
+          }
+          strokeWidth={
+            ['blackhole_lens', 'solar_orbit', 'invincible_arc', 'doomsday_core', 'tron_disc'].includes(styleId)
+              ? 1.8
+              : 1.1
+          }
         />
 
         {/* Subtle Inner Chamfer Ring & Optional Curved Bottom Date Engraving */}
@@ -7692,7 +8919,7 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
           fontWeight="700"
           letterSpacing="1.8"
           fill={isDarkChamber || !isLight ? '#e2e8f0' : '#334155'}
-          fillOpacity="0.52"
+          fillOpacity="0.58"
           style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}
         >
           {styleId === 'solar_orbit'
@@ -7715,9 +8942,21 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
                             ? 'GENOME HELIX'
                             : styleId === 'synth_prism'
                               ? 'OUTRUN HORIZON'
-                              : styleId === 'fractal_mandala'
-                                ? 'ASTROLABE ROSETTE'
-                                : 'CHRONOGRAPH'}
+                              : styleId === 'invincible_arc'
+                                ? 'VILTRUM // HERO'
+                                : styleId === 'dune_eclipse'
+                                  ? 'ARRAKIS // 10191'
+                                  : styleId === 'doomsday_core'
+                                    ? 'MINUTES TO MIDNIGHT'
+                                    : styleId === 'spider_web'
+                                      ? 'EARTH-1610 // WEB'
+                                      : styleId === 'nerv_hex'
+                                        ? 'NERV // AT-FIELD'
+                                        : styleId === 'tron_disc'
+                                          ? 'ENCOM // IDENTITY DISC'
+                                          : styleId === 'fractal_mandala'
+                                            ? 'ASTROLABE ROSETTE'
+                                            : 'CHRONOGRAPH'}
         </text>
 
         {isFullscreen && showDate && (
@@ -8293,6 +9532,10 @@ export const DigitalClock: React.FC = () => {
   const [showRadialTelemetry, setShowRadialTelemetry] = useState<boolean>(() => {
     return localStorage.getItem('vortexero_clock_radial_telemetry') !== 'false';
   });
+  const [clockEdition, setClockEdition] = useState<ClockEdition>(() => {
+    const saved = localStorage.getItem('vortexero_clock_edition') as ClockEdition | null;
+    return saved && CLOCK_EDITIONS.some((e) => e.id === saved) ? saved : 'classic';
+  });
   const [wakeLockActive, setWakeLockActive] = useState<boolean>(false);
   const wakeLockSentinelRef = useRef<any>(null);
   const fallbackVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -8396,6 +9639,10 @@ export const DigitalClock: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('vortexero_clock_radial_telemetry', String(showRadialTelemetry));
   }, [showRadialTelemetry]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_edition', clockEdition);
+  }, [clockEdition]);
 
   // Screen Wake Lock API implementation with graceful fallback
   const requestWakeLock = async () => {
@@ -8756,7 +10003,40 @@ export const DigitalClock: React.FC = () => {
     }
   };
 
-  const themeConfig = getClockThemeStyles(theme);
+  const baseThemeConfig = getClockThemeStyles(theme);
+  const themeConfig: ThemeStyles =
+    clockEdition === 'classic'
+      ? baseThemeConfig
+      : {
+          ...baseThemeConfig,
+          ...getEditionThemeStyles(clockEdition),
+        };
+
+  const activeEditionMeta =
+    CLOCK_EDITIONS.find((e) => e.id === clockEdition) || CLOCK_EDITIONS[0];
+
+  const handleSelectEdition = (edId: ClockEdition) => {
+    setClockEdition(edId);
+    const meta = CLOCK_EDITIONS.find((e) => e.id === edId);
+    if (!meta || edId === 'classic') return;
+    if (meta.recommendedBg && CLOCK_BG_FX_OPTIONS.some((b) => b.id === meta.recommendedBg)) {
+      setBgFx(meta.recommendedBg as BackgroundFx);
+    }
+    if (meta.recommendedAnalog && ANALOG_STYLES.some((s) => s.id === meta.recommendedAnalog)) {
+      setAnalogStyle(meta.recommendedAnalog as AnalogStyle);
+    }
+    if (meta.recommendedRadial && RADIAL_STYLES.some((s) => s.id === meta.recommendedRadial)) {
+      setRadialStyle(meta.recommendedRadial as RadialStyle);
+    }
+  };
+
+  const handleEditionDailyMix = () => {
+    const pool = CLOCK_EDITIONS.filter((e) => e.id !== 'classic' && e.id !== clockEdition);
+    if (pool.length > 0) {
+      const next = pool[Math.floor(Math.random() * pool.length)];
+      handleSelectEdition(next.id);
+    }
+  };
 
   const effectiveAnimation: AnimationFx =
     animationFx === 'auto'
@@ -9351,6 +10631,90 @@ export const DigitalClock: React.FC = () => {
         </div>
       ) : null}
 
+      {/* Cinema & Anime Edition Studio Bar (Available across ALL 9 clock modes) */}
+      <div
+        data-testid="cinema-edition-bar"
+        className="p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl shadow-xs flex flex-col gap-2.5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
+              <Film size={13} className="text-brand-500" />
+              Cinema &amp; Anime Edition
+            </span>
+            <span className="hidden md:inline-block text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate border-l border-slate-200 dark:border-slate-700 pl-2">
+              {activeEditionMeta.tagline}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
+            {clockEdition !== 'classic' && (
+              <span className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-extrabold uppercase tracking-wider bg-brand-500/15 text-brand-600 dark:text-brand-300 border border-brand-500/30">
+                {activeEditionMeta.shortTag}
+              </span>
+            )}
+            <button
+              onClick={handleEditionDailyMix}
+              className="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 whitespace-nowrap shadow-xs"
+              title="Shuffle a movie or anime edition across all 9 clock modes"
+            >
+              <Shuffle size={12} />
+              <span>Cinema Mix</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 9 Selectable Movie & Anime Editions */}
+        <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
+          {CLOCK_EDITIONS.map((ed) => {
+            const isActive = clockEdition === ed.id;
+            return (
+              <button
+                key={ed.id}
+                onClick={() => handleSelectEdition(ed.id)}
+                title={`${ed.label} - ${ed.tagline}`}
+                data-clock-edition={ed.id}
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                  isActive
+                    ? 'bg-brand-600 text-white border-brand-500 shadow-sm shadow-brand-500/25'
+                    : 'bg-slate-100/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700'
+                }`}
+              >
+                <CinemaEditionGlyph edition={ed.id} />
+                <span>{ed.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Quick Animated Background Strip for Digital, Stacked, Word, Desk, Flip, Pomodoro & Stopwatch modes */}
+        {mode !== 'analog' && mode !== 'radial' && (
+          <div className="flex items-center gap-1.5 pt-2 border-t border-slate-200/70 dark:border-slate-800/70 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mr-1 shrink-0">
+              Animated Bg
+            </span>
+            {CLOCK_BG_FX_OPTIONS.map((bg) => {
+              const isActive = bgFx === bg.id;
+              return (
+                <button
+                  key={bg.id}
+                  onClick={() => setBgFx(bg.id)}
+                  title={bg.tagline}
+                  data-bg-fx={bg.id}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                    isActive
+                      ? 'bg-brand-600 text-white border-brand-500 shadow-xs'
+                      : 'bg-slate-100/80 dark:bg-slate-800/80 border-slate-200/70 dark:border-slate-700/70 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {bg.shortLabel}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Radial Gauge Studio Bar (shown only when mode === 'radial') */}
       {mode === 'radial' && (
         <div
@@ -9713,6 +11077,9 @@ export const DigitalClock: React.FC = () => {
         {/* Animated Ambient Background Layer */}
         <ClockBackgroundLayer bgFx={bgFx} themeConfig={themeConfig} />
 
+        {/* Cinema & Anime Edition Stage Frame Overlay */}
+        <ClockEditionOverlay edition={clockEdition} isFullscreen={isFullscreen} />
+
         {/* Live 60-Second Animated Progress Bar */}
         {showProgressBar && (
           <div className="absolute top-0 inset-x-0 h-1.5 bg-black/15 dark:bg-white/5 overflow-hidden z-20">
@@ -9729,6 +11096,12 @@ export const DigitalClock: React.FC = () => {
             <span className={`px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border backdrop-blur-md ${themeConfig.badgeBg}`}>
               {customTag}
             </span>
+            {clockEdition !== 'classic' && (
+              <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-extrabold uppercase tracking-widest border backdrop-blur-md ${themeConfig.badgeBg}`}>
+                <CinemaEditionGlyph edition={clockEdition} className="w-3 h-3" />
+                <span>{activeEditionMeta.shortTag}</span>
+              </span>
+            )}
             {keepScreenOn && (
               <span className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30 backdrop-blur-md" title="Display sleep prevented">
                 <Sun size={11} className="animate-pulse text-amber-400" />
@@ -9773,10 +11146,17 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 1: Digital Display Mode (Horizontal) */}
         {mode === 'digital' && (
-          <div className={`relative z-10 my-auto max-w-full px-2 ${isFullscreen ? 'space-y-6 sm:space-y-8' : 'space-y-4'}`}>
-            <div className="flex flex-wrap items-baseline justify-center gap-1 sm:gap-3 max-w-full">
+          <div className={`relative z-10 my-auto max-w-full px-2 flex flex-col items-center ${isFullscreen ? 'space-y-6 sm:space-y-8' : 'space-y-4'}`}>
+            {clockEdition !== 'classic' && activeEditionMeta.digitalEyebrow && (
+              <span className={`px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-extrabold uppercase tracking-[0.22em] border ${themeConfig.badgeBg}`}>
+                {activeEditionMeta.digitalEyebrow}
+              </span>
+            )}
+            <div className={`flex flex-wrap items-baseline justify-center gap-1 sm:gap-3 max-w-full ${getEditionDigitFrameClass(clockEdition, isFullscreen)}`}>
               <span
                 className={`leading-none ${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                  clockEdition === 'invincible' ? 'italic' : ''
+                } ${
                   isFullscreen
                     ? showSeconds
                       ? isWideFont
@@ -9822,9 +11202,13 @@ export const DigitalClock: React.FC = () => {
               )}
             </div>
 
+            {clockEdition !== 'classic' && (
+              <ClockEditionPowerMeter edition={clockEdition} progress={secProgress} isFullscreen={isFullscreen} />
+            )}
+
             {showDate && (
               <p className={`font-medium tracking-wide ${themeConfig.subText || 'text-slate-400'} ${
-                isFullscreen ? 'text-[clamp(1rem,min(2.5vw,3.8vh),2.25rem)] pt-3' : 'text-base sm:text-xl'
+                isFullscreen ? 'text-[clamp(1rem,min(2.5vw,3.8vh),2.25rem)] pt-2' : 'text-base sm:text-xl'
               }`}>
                 {dateStr}
               </p>
@@ -9834,10 +11218,17 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 2: Modern StandBy Stacked Mode (Vertical Large Digits) */}
         {mode === 'stacked' && (
-          <div className={`relative z-10 flex flex-col items-center justify-center my-auto max-w-full ${isFullscreen ? 'space-y-3 py-2 sm:py-4' : 'space-y-2 py-4'}`}>
-            <div className="flex flex-col items-center select-none">
+          <div className={`relative z-10 flex flex-col items-center justify-center my-auto max-w-full ${isFullscreen ? 'space-y-3 py-2 sm:py-4' : 'space-y-2.5 py-4'}`}>
+            {clockEdition !== 'classic' && activeEditionMeta.stackedEyebrow && (
+              <span className={`px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-extrabold uppercase tracking-[0.22em] border ${themeConfig.badgeBg}`}>
+                {activeEditionMeta.stackedEyebrow}
+              </span>
+            )}
+            <div className={`flex flex-col items-center select-none ${getEditionDigitFrameClass(clockEdition, isFullscreen)}`}>
               <span
                 className={`${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                  clockEdition === 'invincible' ? 'italic' : ''
+                } ${
                   isFullscreen
                     ? 'text-[clamp(3.8rem,min(24vw,29vh),19rem)] leading-[0.82]'
                     : 'text-7xl sm:text-9xl md:text-[10rem] lg:text-[11rem] leading-[0.85]'
@@ -9847,6 +11238,8 @@ export const DigitalClock: React.FC = () => {
               </span>
               <span
                 className={`${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                  clockEdition === 'invincible' ? 'italic' : ''
+                } ${
                   isFullscreen
                     ? 'text-[clamp(3.8rem,min(24vw,29vh),19rem)] leading-[0.82]'
                     : 'text-7xl sm:text-9xl md:text-[10rem] lg:text-[11rem] leading-[0.85]'
@@ -9884,7 +11277,7 @@ export const DigitalClock: React.FC = () => {
           </div>
         )}
 
-        {/* Mode: 12-Style Radial Gauge Studio */}
+        {/* Mode: 18-Style Radial Gauge Studio */}
         {mode === 'radial' && (
           <div className="relative z-10 flex flex-col items-center space-y-2.5 sm:space-y-3.5 my-auto max-w-full">
             <RadialClockGauge
@@ -9948,7 +11341,7 @@ export const DigitalClock: React.FC = () => {
             <span className={`font-bold uppercase tracking-widest border ${themeConfig.badgeBg} ${
               isFullscreen ? 'px-5 py-2 text-sm sm:text-base rounded-full' : 'px-3 py-1 text-xs rounded-full'
             }`}>
-              It Is
+              {activeEditionMeta.wordEyebrow || 'It Is'}
             </span>
 
             {/* Conversational Phrase */}
@@ -9959,24 +11352,28 @@ export const DigitalClock: React.FC = () => {
             </h3>
 
             {/* Hero Target Hour */}
-            <h1
-              className={`leading-none flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 max-w-full ${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
-                isFullscreen
-                  ? isWideFont
-                    ? 'text-[clamp(2.5rem,min(8.5vw,14vh),8.5rem)]'
-                    : 'text-[clamp(3.2rem,min(11vw,16vh),10.5rem)]'
-                  : isWideFont
-                    ? 'text-4xl sm:text-6xl md:text-7xl'
-                    : 'text-5xl sm:text-7xl md:text-8xl'
-              }`}
-            >
-              <span>{wordClockData.targetHour}</span>
-              {wordClockData.isOclock && (
-                <span className={`opacity-80 ${isFullscreen ? 'text-[clamp(1.8rem,min(5.5vw,9vh),5.5rem)]' : 'text-2xl sm:text-4xl md:text-5xl'}`}>
-                  O&apos;CLOCK
-                </span>
-              )}
-            </h1>
+            <div className={getEditionDigitFrameClass(clockEdition, isFullscreen)}>
+              <h1
+                className={`leading-none flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 max-w-full ${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                  clockEdition === 'invincible' ? 'italic' : ''
+                } ${
+                  isFullscreen
+                    ? isWideFont
+                      ? 'text-[clamp(2.5rem,min(8.5vw,14vh),8.5rem)]'
+                      : 'text-[clamp(3.2rem,min(11vw,16vh),10.5rem)]'
+                    : isWideFont
+                      ? 'text-4xl sm:text-6xl md:text-7xl'
+                      : 'text-5xl sm:text-7xl md:text-8xl'
+                }`}
+              >
+                <span>{wordClockData.targetHour}</span>
+                {wordClockData.isOclock && (
+                  <span className={`opacity-80 ${isFullscreen ? 'text-[clamp(1.8rem,min(5.5vw,9vh),5.5rem)]' : 'text-2xl sm:text-4xl md:text-5xl'}`}>
+                    O&apos;CLOCK
+                  </span>
+                )}
+              </h1>
+            </div>
 
             {/* Natural Period */}
             <p className={`font-bold uppercase tracking-widest ${themeConfig.subText || 'text-slate-400'} ${
@@ -10010,8 +11407,15 @@ export const DigitalClock: React.FC = () => {
           }`}>
             {/* Left / Main Section: Big Time & Day Focus */}
             <div className="lg:col-span-7 min-w-0 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
-              <div className="flex flex-wrap items-baseline justify-center lg:justify-start gap-x-2 gap-y-1 max-w-full">
+              {clockEdition !== 'classic' && (
+                <span className={`px-3 py-0.5 rounded-full text-[10px] font-mono font-extrabold uppercase tracking-[0.22em] border ${themeConfig.badgeBg}`}>
+                  {activeEditionMeta.deskHeader}
+                </span>
+              )}
+              <div className={`flex flex-wrap items-baseline justify-center lg:justify-start gap-x-2 gap-y-1 max-w-full ${getEditionDigitFrameClass(clockEdition, false)}`}>
                 <span className={`leading-none ${getFontFamilyClass(true)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                  clockEdition === 'invincible' ? 'italic' : ''
+                } ${
                   isFullscreen
                     ? isWideFont
                       ? 'text-[clamp(2.4rem,min(5.2vw,10vh),4.75rem)]'
@@ -10080,9 +11484,13 @@ export const DigitalClock: React.FC = () => {
             <div className={`lg:col-span-5 min-w-0 w-full max-w-sm lg:max-w-none mx-auto border backdrop-blur-xl ${
               isFullscreen ? 'p-5 sm:p-7 rounded-[2.25rem]' : 'p-5 rounded-3xl'
             } ${
-              themeConfig.isLight
-                ? 'bg-white/90 border-slate-300 shadow-lg text-slate-800'
-                : 'bg-black/40 border-white/10 shadow-2xl text-slate-200'
+              clockEdition === 'invincible'
+                ? 'bg-[#020617]/85 border-2 border-[#ffe600] shadow-[6px_6px_0_#020617] text-white'
+                : clockEdition === 'spiderverse'
+                  ? 'bg-[#12072b]/85 border-2 border-[#00f5ff] shadow-[5px_5px_0_#ff2a85] text-white'
+                  : themeConfig.isLight
+                    ? 'bg-white/90 border-slate-300 shadow-lg text-slate-800'
+                    : 'bg-black/40 border-white/10 shadow-2xl text-slate-200'
             }`}>
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
                 <span className={`font-extrabold uppercase tracking-wider flex items-center gap-1.5 ${
@@ -10144,6 +11552,7 @@ export const DigitalClock: React.FC = () => {
                 themeConfig={themeConfig}
                 fontClassName={getFontFamilyClass(true)}
                 animationTextClass={getAnimationTextClass()}
+                edition={clockEdition}
               />
 
               <div className={`font-black animate-pulse ${themeConfig.accent} ${
@@ -10160,6 +11569,7 @@ export const DigitalClock: React.FC = () => {
                 themeConfig={themeConfig}
                 fontClassName={getFontFamilyClass(true)}
                 animationTextClass={getAnimationTextClass()}
+                edition={clockEdition}
               />
 
               {showSeconds && (
@@ -10177,6 +11587,7 @@ export const DigitalClock: React.FC = () => {
                     themeConfig={themeConfig}
                     fontClassName={getFontFamilyClass(true)}
                     animationTextClass={getAnimationTextClass()}
+                    edition={clockEdition}
                   />
                 </>
               )}
@@ -10249,38 +11660,50 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 5: Pomodoro Focus Timer Mode */}
         {mode === 'pomodoro' && (
-          <div className="relative z-10 space-y-6 my-auto max-w-full px-2">
+          <div className="relative z-10 space-y-6 my-auto max-w-full px-2 flex flex-col items-center">
             <span className={`rounded-full font-bold uppercase tracking-widest border backdrop-blur-md ${themeConfig.badgeBg} ${
               isFullscreen ? 'px-6 py-2 text-sm sm:text-base' : 'px-4 py-1.5 text-xs'
             }`}>
-              {pomoMode === 'work' ? 'Focus Session' : 'Short Break'}
+              {pomoMode === 'work' ? activeEditionMeta.pomoWorkLabel : activeEditionMeta.pomoBreakLabel}
             </span>
 
-            <div className={`leading-none ${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
-              isFullscreen
-                ? isWideFont
-                  ? 'text-[clamp(3.2rem,min(14vw,26vh),15rem)]'
-                  : 'text-[clamp(4.2rem,min(18vw,30vh),20rem)]'
-                : isWideFont
-                  ? 'text-5xl sm:text-7xl md:text-8xl'
-                  : 'text-7xl sm:text-9xl'
-            }`}>
-              {pomoMinutes}:{pomoSeconds}
+            <div className={getEditionDigitFrameClass(clockEdition, isFullscreen)}>
+              <div className={`leading-none ${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                clockEdition === 'invincible' ? 'italic' : ''
+              } ${
+                isFullscreen
+                  ? isWideFont
+                    ? 'text-[clamp(3.2rem,min(14vw,26vh),15rem)]'
+                    : 'text-[clamp(4.2rem,min(18vw,30vh),20rem)]'
+                  : isWideFont
+                    ? 'text-5xl sm:text-7xl md:text-8xl'
+                    : 'text-7xl sm:text-9xl'
+              }`}>
+                {pomoMinutes}:{pomoSeconds}
+              </div>
             </div>
 
-            <div className={`flex items-center justify-center ${isFullscreen ? 'gap-5 pt-4' : 'gap-3 pt-2'}`}>
+            <ClockEditionPowerMeter
+              edition={clockEdition}
+              progress={pomoTargetDuration > 0 ? pomoTimeLeft / pomoTargetDuration : 1}
+              isFullscreen={isFullscreen}
+            />
+
+            <div className={`flex items-center justify-center ${isFullscreen ? 'gap-5 pt-2' : 'gap-3 pt-1'}`}>
               <button
                 onClick={() => setPomoIsRunning(!pomoIsRunning)}
                 className={`rounded-2xl ${
-                  themeConfig.isLight
-                    ? 'bg-slate-900 text-white hover:bg-slate-800'
-                    : 'bg-white/20 hover:bg-white/30 text-white'
+                  clockEdition === 'invincible'
+                    ? 'bg-[#ffe600] text-[#020617] border-2 border-[#020617] shadow-[4px_4px_0_#020617]'
+                    : themeConfig.isLight
+                      ? 'bg-slate-900 text-white hover:bg-slate-800'
+                      : 'bg-white/20 hover:bg-white/30 text-white'
                 } font-extrabold flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg ${
                   isFullscreen ? 'px-10 py-5 text-lg' : 'px-7 py-3.5 text-sm'
                 }`}
               >
                 {pomoIsRunning ? <Pause size={isFullscreen ? 24 : 18} /> : <Play size={isFullscreen ? 24 : 18} />}
-                <span>{pomoIsRunning ? 'Pause Session' : 'Start Focus'}</span>
+                <span>{pomoIsRunning ? 'Pause Session' : activeEditionMeta.pomoStartLabel}</span>
               </button>
 
               <button
@@ -10303,37 +11726,54 @@ export const DigitalClock: React.FC = () => {
 
         {/* Mode 6: Stopwatch & Lap Counter Mode */}
         {mode === 'stopwatch' && (
-          <div className={`relative z-10 space-y-6 my-auto w-full px-2 ${isFullscreen ? 'max-w-6xl' : 'max-w-3xl'}`}>
-            <div className={`leading-none ${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
-              isFullscreen
-                ? isWideFont
-                  ? 'text-[clamp(2.8rem,min(11vw,22vh),12rem)]'
-                  : 'text-[clamp(3.5rem,min(14.5vw,25vh),16rem)]'
-                : isWideFont
-                  ? 'text-4xl sm:text-6xl md:text-7xl'
-                  : 'text-5xl sm:text-7xl md:text-8xl'
-            }`}>
-              {swMinutes}:{swSeconds}
-              <span className={`opacity-80 ${
+          <div className={`relative z-10 space-y-6 my-auto w-full px-2 flex flex-col items-center ${isFullscreen ? 'max-w-6xl' : 'max-w-3xl'}`}>
+            {clockEdition !== 'classic' && activeEditionMeta.stopwatchEyebrow && (
+              <span className={`px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-extrabold uppercase tracking-[0.22em] border ${themeConfig.badgeBg}`}>
+                {activeEditionMeta.stopwatchEyebrow}
+              </span>
+            )}
+            <div className={getEditionDigitFrameClass(clockEdition, isFullscreen)}>
+              <div className={`leading-none ${getFontFamilyClass(false)} ${themeConfig.clockText} ${getAnimationTextClass()} ${
+                clockEdition === 'invincible' ? 'italic' : ''
+              } ${
                 isFullscreen
                   ? isWideFont
-                    ? 'text-[clamp(1.6rem,min(6.5vw,13vh),7rem)]'
-                    : 'text-[clamp(2rem,min(8.5vw,15vh),9.5rem)]'
+                    ? 'text-[clamp(2.8rem,min(11vw,22vh),12rem)]'
+                    : 'text-[clamp(3.5rem,min(14.5vw,25vh),16rem)]'
                   : isWideFont
-                    ? 'text-2xl sm:text-3xl md:text-4xl'
-                    : 'text-3xl sm:text-4xl md:text-5xl'
+                    ? 'text-4xl sm:text-6xl md:text-7xl'
+                    : 'text-5xl sm:text-7xl md:text-8xl'
               }`}>
-                .{swMs}
-              </span>
+                {swMinutes}:{swSeconds}
+                <span className={`opacity-80 ${
+                  isFullscreen
+                    ? isWideFont
+                      ? 'text-[clamp(1.6rem,min(6.5vw,13vh),7rem)]'
+                      : 'text-[clamp(2rem,min(8.5vw,15vh),9.5rem)]'
+                    : isWideFont
+                      ? 'text-2xl sm:text-3xl md:text-4xl'
+                      : 'text-3xl sm:text-4xl md:text-5xl'
+                }`}>
+                  .{swMs}
+                </span>
+              </div>
             </div>
+
+            <ClockEditionPowerMeter
+              edition={clockEdition}
+              progress={((swTime % 10000) / 10000) || 0.25}
+              isFullscreen={isFullscreen}
+            />
 
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => setSwIsRunning(!swIsRunning)}
                 className={`rounded-2xl ${
-                  themeConfig.isLight
-                    ? 'bg-slate-900 text-white hover:bg-slate-800'
-                    : 'bg-white/20 hover:bg-white/30 text-white'
+                  clockEdition === 'invincible'
+                    ? 'bg-[#ffe600] text-[#020617] border-2 border-[#020617] shadow-[4px_4px_0_#020617]'
+                    : themeConfig.isLight
+                      ? 'bg-slate-900 text-white hover:bg-slate-800'
+                      : 'bg-white/20 hover:bg-white/30 text-white'
                 } font-extrabold flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg ${
                   isFullscreen ? 'px-8 py-4 text-base' : 'px-6 py-3 text-sm'
                 }`}

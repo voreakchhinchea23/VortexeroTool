@@ -633,8 +633,8 @@ import {
   ClockBackgroundLayer,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 20) {
-  console.error(`Expected 20 Analog watch styles, found ${ANALOG_STYLES?.length}`);
+if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 26) {
+  console.error(`Expected 26 Analog watch styles, found ${ANALOG_STYLES?.length}`);
   process.exit(1);
 }
 
@@ -660,6 +660,12 @@ const expectedAnalogIds = [
   'blackhole',
   'gears',
   'cyberwave',
+  'invincible',
+  'dune',
+  'doomsday',
+  'spider_web',
+  'evangelion',
+  'tron_disc',
 ];
 
 for (const st of ANALOG_STYLES) {
@@ -692,8 +698,8 @@ if (typeof AnalogClockDial !== 'function' || typeof AnalogStyleGlyph !== 'functi
   process.exit(1);
 }
 
-if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 11) {
-  console.error(`Expected 11 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
+if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 15) {
+  console.error(`Expected 15 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
   process.exit(1);
 }
 
@@ -709,6 +715,10 @@ const expectedBgIds = [
   'grid',
   'bokeh',
   'ripple',
+  'comic_burst',
+  'sandstorm',
+  'cyber_rain',
+  'hex_field',
   'none',
 ];
 for (const bg of CLOCK_BG_FX_OPTIONS) {
@@ -776,6 +786,10 @@ const requiredBgCssTokens = [
   '.animate-bg-warp-streak',
   '.animate-bg-wave-drift',
   '.animate-bg-wave-drift-rev',
+  '.animate-bg-cyber-rain',
+  '.animate-bg-sand-drift',
+  '.animate-bg-hex-pulse',
+  '.animate-bg-comic-pulse',
 ];
 
 for (const cssToken of requiredBgCssTokens) {
@@ -787,7 +801,7 @@ for (const cssToken of requiredBgCssTokens) {
 
 console.log(`✓ Test 12: Analog Horology Studio (${ANALOG_STYLES.length} dial styles, ${CLOCK_BG_FX_OPTIONS.length} animated background scenes, sweep/tick motion) verified.`);
 
-// Test 13: Radial Gauge Studio (12 scenic/kinetic styles, Sweep/Tick motion, cosmic contrast protection)
+// Test 13: Radial Gauge Studio (18 scenic/kinetic/cinema styles, Sweep/Tick motion, cosmic contrast protection)
 import {
   RADIAL_STYLES,
   RADIAL_DARK_CHAMBER_STYLES,
@@ -795,8 +809,8 @@ import {
   RadialStyleGlyph,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(RADIAL_STYLES) || RADIAL_STYLES.length !== 12) {
-  console.error(`Expected 12 Radial Gauge styles, found ${RADIAL_STYLES?.length}`);
+if (!Array.isArray(RADIAL_STYLES) || RADIAL_STYLES.length !== 18) {
+  console.error(`Expected 18 Radial Gauge styles, found ${RADIAL_STYLES?.length}`);
   process.exit(1);
 }
 
@@ -814,6 +828,12 @@ const expectedRadialIds = [
   'dna_helix',
   'synth_prism',
   'fractal_mandala',
+  'invincible_arc',
+  'dune_eclipse',
+  'doomsday_core',
+  'spider_web',
+  'nerv_hex',
+  'tron_disc',
 ];
 
 for (const st of RADIAL_STYLES) {
@@ -843,14 +863,20 @@ for (const reqRadialId of expectedRadialIds) {
 
 if (
   !(RADIAL_DARK_CHAMBER_STYLES instanceof Set) ||
-  RADIAL_DARK_CHAMBER_STYLES.size !== 5 ||
+  RADIAL_DARK_CHAMBER_STYLES.size !== 11 ||
   !RADIAL_DARK_CHAMBER_STYLES.has('solar_orbit') ||
   !RADIAL_DARK_CHAMBER_STYLES.has('galaxy_vortex') ||
   !RADIAL_DARK_CHAMBER_STYLES.has('supernova') ||
   !RADIAL_DARK_CHAMBER_STYLES.has('blackhole_lens') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('synth_prism')
+  !RADIAL_DARK_CHAMBER_STYLES.has('synth_prism') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('invincible_arc') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('dune_eclipse') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('doomsday_core') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('spider_web') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('nerv_hex') ||
+  !RADIAL_DARK_CHAMBER_STYLES.has('tron_disc')
 ) {
-  console.error('RADIAL_DARK_CHAMBER_STYLES must be exported and list the 5 dark cosmic/outrun radial chambers');
+  console.error('RADIAL_DARK_CHAMBER_STYLES must be exported and list the 11 dark cosmic/cinema radial chambers');
   process.exit(1);
 }
 
@@ -875,6 +901,124 @@ for (const token of requiredRadialTokens) {
   }
 }
 
-console.log(`✓ Test 13: Radial Gauge Studio (${RADIAL_STYLES.length} cosmic/kinetic styles, Sweep/Tick motion, dark chamber protection) verified.`);
+console.log(`✓ Test 13: Radial Gauge Studio (${RADIAL_STYLES.length} cosmic/kinetic/cinema styles, Sweep/Tick motion, dark chamber protection) verified.`);
+
+// Test 14: Cinema & Anime Clock Editions across all 9 clock modes
+import {
+  CLOCK_EDITIONS,
+  CinemaEditionGlyph,
+  ClockEditionOverlay,
+  ClockEditionPowerMeter,
+  getEditionThemeStyles,
+  getEditionDigitFrameClass,
+} from '../components/tools/productivity/DigitalClock';
+
+if (!Array.isArray(CLOCK_EDITIONS) || CLOCK_EDITIONS.length !== 9) {
+  console.error(`Expected 9 Cinema & Anime Clock Editions, found ${CLOCK_EDITIONS?.length}`);
+  process.exit(1);
+}
+
+const expectedEditionIds = [
+  'classic',
+  'invincible',
+  'cyberpunk',
+  'dune',
+  'doomsday',
+  'spiderverse',
+  'evangelion',
+  'tron',
+  'akira',
+];
+
+const editionIds = new Set<string>();
+for (const ed of CLOCK_EDITIONS) {
+  if (editionIds.has(ed.id)) {
+    console.error(`Duplicate clock edition ID: ${ed.id}`);
+    process.exit(1);
+  }
+  editionIds.add(ed.id);
+
+  if (
+    !ed.label ||
+    !ed.shortTag ||
+    !ed.tagline ||
+    !ed.recommendedBg ||
+    !ed.wordEyebrow ||
+    !ed.deskHeader ||
+    !ed.pomoWorkLabel ||
+    (ed.id !== 'classic' &&
+      (!ed.recommendedAnalog ||
+        !ed.recommendedRadial ||
+        !ed.digitalEyebrow ||
+        !ed.stackedEyebrow ||
+        !ed.stopwatchEyebrow))
+  ) {
+    console.error(`Incomplete metadata for clock edition: ${ed.id}`);
+    process.exit(1);
+  }
+
+  if (
+    emojiRegex.test(ed.label) ||
+    emojiRegex.test(ed.shortTag) ||
+    emojiRegex.test(ed.tagline) ||
+    emojiRegex.test(ed.digitalEyebrow) ||
+    emojiRegex.test(ed.deskHeader)
+  ) {
+    console.error(`Clock edition ${ed.id} contains prohibited emoji characters`);
+    process.exit(1);
+  }
+
+  const digitClass = getEditionDigitFrameClass(ed.id, false);
+  if (typeof digitClass !== 'string') {
+    console.error(`getEditionDigitFrameClass returned non-string for ${ed.id}`);
+    process.exit(1);
+  }
+}
+
+for (const reqEdId of expectedEditionIds) {
+  if (!editionIds.has(reqEdId)) {
+    console.error(`Missing required Cinema & Anime Clock Edition: ${reqEdId}`);
+    process.exit(1);
+  }
+}
+
+const clockEditionsSource = fs.readFileSync(
+  path.join(process.cwd(), 'src/components/tools/productivity/clockEditions.tsx'),
+  'utf-8'
+);
+
+if (emojiRegex.test(clockEditionsSource)) {
+  console.error('clockEditions.tsx contains prohibited emoji characters');
+  process.exit(1);
+}
+
+if (
+  !CinemaEditionGlyph ||
+  !ClockEditionOverlay ||
+  !ClockEditionPowerMeter ||
+  typeof getEditionThemeStyles !== 'function'
+) {
+  console.error('CinemaEditionGlyph, ClockEditionOverlay, ClockEditionPowerMeter, and getEditionThemeStyles must be exported');
+  process.exit(1);
+}
+
+const requiredEditionTokens = [
+  'vortexero_clock_edition',
+  'cinema-edition-bar',
+  'data-clock-edition',
+  '<ClockEditionOverlay',
+  '<ClockEditionPowerMeter',
+  '<CinemaEditionGlyph',
+  'getEditionDigitFrameClass',
+];
+
+for (const token of requiredEditionTokens) {
+  if (!digitalClockSource.includes(token)) {
+    console.error(`DigitalClock.tsx missing required Cinema Edition token: ${token}`);
+    process.exit(1);
+  }
+}
+
+console.log(`✓ Test 14: Cinema & Anime Clock Editions (${CLOCK_EDITIONS.length} universal editions across all 9 clock modes) verified.`);
 
 console.log('All automated verification checks PASSED successfully!');
