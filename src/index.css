@@ -993,6 +993,42 @@
   }
 }
 
+@keyframes clock-bg-ember-rise {
+  0% {
+    transform: translate3d(0, 12%, 0) scale(0.8);
+    opacity: 0;
+  }
+  20%, 75% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(-18px, -115%, 0) scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes clock-bg-cursed-swirl {
+  0%, 100% {
+    transform: scale(0.95) rotate(0deg);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1.08) rotate(180deg);
+    opacity: 0.95;
+  }
+}
+
+@keyframes clock-bg-omnitrix-pulse {
+  0%, 100% {
+    transform: scale(0.92);
+    opacity: 0.42;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.85;
+  }
+}
+
 .animate-bg-cyber-rain {
   animation: clock-bg-cyber-rain 4.2s linear infinite;
   will-change: transform, opacity;
@@ -1017,6 +1053,25 @@
   will-change: transform, opacity;
 }
 
+.animate-bg-ember-rise {
+  animation: clock-bg-ember-rise 8s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-bg-cursed-swirl {
+  transform-box: view-box;
+  transform-origin: 400px 300px;
+  animation: clock-bg-cursed-swirl 22s linear infinite;
+  will-change: transform, opacity;
+}
+
+.animate-bg-omnitrix-pulse {
+  transform-box: view-box;
+  transform-origin: 400px 300px;
+  animation: clock-bg-omnitrix-pulse 4.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
 .animate-cyber-glitch {
   animation: clock-cyber-glitch 6.5s steps(2, end) infinite;
 }
@@ -1036,6 +1091,30 @@
 .edition-cyberpunk-text {
   color: #fcee0a;
   text-shadow: -2px 0 0 rgba(0, 240, 255, 0.85), 2px 0 0 rgba(255, 0, 60, 0.85), 0 0 28px rgba(252, 238, 10, 0.55);
+}
+
+.edition-ben10-text {
+  color: #65ff00;
+  -webkit-text-stroke: 1.5px #051608;
+  paint-order: stroke fill;
+  text-shadow: 0 0 26px rgba(101, 255, 0, 0.82), 0 4px 0 #031006;
+}
+
+.edition-jjk-text {
+  color: #f8fafc;
+  text-shadow: -3px 0 14px rgba(0, 229, 255, 0.85), 3px 0 14px rgba(255, 42, 85, 0.8), 0 0 34px rgba(168, 85, 247, 0.9);
+}
+
+.edition-stranger-text {
+  color: #160205;
+  -webkit-text-stroke: 2.2px #ff1e2d;
+  paint-order: stroke fill;
+  text-shadow: 0 0 24px rgba(255, 30, 45, 0.9), 0 0 48px rgba(220, 38, 38, 0.55);
+}
+
+.edition-matrix-text {
+  color: #00ff66;
+  text-shadow: 0 0 20px rgba(0, 255, 102, 0.92), 0 0 44px rgba(22, 163, 74, 0.5);
 }
 
 .edition-chamfer {
@@ -1077,6 +1156,16 @@
   );
 }
 
+.edition-haori-checker {
+  background-image:
+    linear-gradient(45deg, rgba(16, 185, 129, 0.48) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(16, 185, 129, 0.48) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(16, 185, 129, 0.48) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(16, 185, 129, 0.48) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-bg-aurora-a,
   .animate-bg-aurora-b,
@@ -1101,6 +1190,9 @@
   .animate-bg-sand-drift,
   .animate-bg-hex-pulse,
   .animate-bg-comic-pulse,
+  .animate-bg-ember-rise,
+  .animate-bg-cursed-swirl,
+  .animate-bg-omnitrix-pulse,
   .animate-cyber-glitch {
     animation: none !important;
   }

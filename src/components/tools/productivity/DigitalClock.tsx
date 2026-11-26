@@ -29,12 +29,16 @@ import {
 import {
   CLOCK_EDITIONS,
   ClockEdition,
+  ClockEditionCategory,
   ClockEditionMeta,
   CinemaEditionGlyph,
   ClockEditionOverlay,
   ClockEditionPowerMeter,
   getEditionThemeStyles,
   getEditionDigitFrameClass,
+  getEditionFlipStyle,
+  getEditionCalendarPanelClass,
+  getEditionPrimaryBtnClass,
 } from './clockEditions';
 export {
   CLOCK_EDITIONS,
@@ -43,8 +47,11 @@ export {
   ClockEditionPowerMeter,
   getEditionThemeStyles,
   getEditionDigitFrameClass,
+  getEditionFlipStyle,
+  getEditionCalendarPanelClass,
+  getEditionPrimaryBtnClass,
 };
-export type { ClockEdition, ClockEditionMeta };
+export type { ClockEdition, ClockEditionCategory, ClockEditionMeta };
 
 export type ClockTheme =
   | 'night_city'
@@ -117,6 +124,22 @@ export type AnalogStyle =
   | 'blackhole'
   | 'gears'
   | 'cyberwave'
+  | 'omnitrix'
+  | 'jjk_void'
+  | 'nichirin'
+  | 'sharingan'
+  | 'dragon_radar'
+  | 'log_pose'
+  | 'scout_wings'
+  | 'pokeball_dex'
+  | 'hawkins_83'
+  | 'hexcore'
+  | 'gallifreyan'
+  | 'pip_boy'
+  | 'arc_reactor'
+  | 'galactic_trench'
+  | 'matrix_code'
+  | 'gotham_signal'
   | 'invincible'
   | 'dune'
   | 'doomsday'
@@ -136,6 +159,22 @@ export type RadialStyle =
   | 'dna_helix'
   | 'synth_prism'
   | 'fractal_mandala'
+  | 'omnitrix_core'
+  | 'jjk_domain'
+  | 'nichirin_flame'
+  | 'chakra_seal'
+  | 'ki_aura'
+  | 'grand_line'
+  | 'odm_telemetry'
+  | 'pokedex_scan'
+  | 'upside_down'
+  | 'hextech_rune'
+  | 'tardis_vortex'
+  | 'vault_pip'
+  | 'jarvis_hud'
+  | 'kyber_core'
+  | 'zion_construct'
+  | 'batcomputer'
   | 'invincible_arc'
   | 'dune_eclipse'
   | 'doomsday_core'
@@ -159,20 +198,25 @@ export type BackgroundFx =
   | 'sandstorm'
   | 'cyber_rain'
   | 'hex_field'
+  | 'omnitrix_pulse'
+  | 'cursed_aura'
+  | 'matrix_rain'
+  | 'ember_spores'
+  | 'arcane_runes'
   | 'none';
 
 export interface AnalogStyleMeta {
   id: AnalogStyle;
   label: string;
   tagline: string;
-  category: 'Classic' | 'Modern' | 'Sport' | 'Technical';
+  category: 'Classic' | 'Modern' | 'Sport' | 'Technical' | 'Cinema';
 }
 
 export interface RadialStyleMeta {
   id: RadialStyle;
   label: string;
   tagline: string;
-  category: 'Classic' | 'Cosmic' | 'Technical' | 'Modern';
+  category: 'Classic' | 'Cosmic' | 'Technical' | 'Modern' | 'Cinema';
 }
 
 export type AnimationFx =
@@ -337,40 +381,136 @@ export const ANALOG_STYLES: AnalogStyleMeta[] = [
     category: 'Modern',
   },
   {
+    id: 'omnitrix',
+    label: 'Omnitrix',
+    tagline: 'Galvan gunmetal bezel with 4 silver lock lugs and glowing green DNA hourglass core',
+    category: 'Cinema',
+  },
+  {
+    id: 'jjk_void',
+    label: 'Unlimited Void',
+    tagline: 'Domain Expansion abyss with converging Blue and Red infinity orbs and Hollow Purple halo',
+    category: 'Cinema',
+  },
+  {
+    id: 'nichirin',
+    label: 'Nichirin Kagura',
+    tagline: 'Katana tsuba collar, emerald Ichimatsu bezel and blazing Hinokami flame ring',
+    category: 'Cinema',
+  },
+  {
+    id: 'sharingan',
+    label: 'Sharingan Seal',
+    tagline: 'Crimson Mangekyou iris with 3 curved tomoe and shinobi kunai hands',
+    category: 'Cinema',
+  },
+  {
+    id: 'dragon_radar',
+    label: 'Dragon Radar',
+    tagline: 'Capsule Corp emerald oscilloscope radar displaying glowing Dragon Ball coordinates',
+    category: 'Cinema',
+  },
+  {
+    id: 'log_pose',
+    label: 'Log Pose',
+    tagline: 'Grand Line nautical brass compass rose dome with New World meridian arcs',
+    category: 'Cinema',
+  },
+  {
+    id: 'scout_wings',
+    label: 'Survey Wings',
+    tagline: 'Regiment steel dial with stylized Wings of Freedom chevrons and ODM blade hands',
+    category: 'Cinema',
+  },
+  {
+    id: 'pokeball_dex',
+    label: 'Poke Chronometer',
+    tagline: 'Crimson-and-pearl split chronometer face with glowing cyan scanner latch',
+    category: 'Cinema',
+  },
+  {
+    id: 'hawkins_83',
+    label: 'Hawkins 1983',
+    tagline: '1980s glowing crimson neon bars over an obsidian Creel House vintage dial',
+    category: 'Cinema',
+  },
+  {
+    id: 'hexcore',
+    label: 'Arcane Hexcore',
+    tagline: 'Piltover golden Art-Deco filigree enclosing a luminous Hextech cyan rune core',
+    category: 'Cinema',
+  },
+  {
+    id: 'gallifreyan',
+    label: 'Gallifreyan',
+    tagline: 'TARDIS cobalt dial inlaid with nested Circular Gallifreyan time-vortex glyphs',
+    category: 'Cinema',
+  },
+  {
+    id: 'pip_boy',
+    label: 'Pip-Boy 3000',
+    tagline: 'RobCo CRT phosphor green oscilloscope dial inside a Vault-Tec gear-tooth bezel',
+    category: 'Cinema',
+  },
+  {
+    id: 'arc_reactor',
+    label: 'Arc Reactor',
+    tagline: 'Stark Mark-85 palladium coil ring surrounding a glowing triangular reactor core',
+    category: 'Cinema',
+  },
+  {
+    id: 'galactic_trench',
+    label: 'Trench Targeting',
+    tagline: 'Starfighter targeting computer grid with Jedi cyan and Sith crimson saber hands',
+    category: 'Cinema',
+  },
+  {
+    id: 'matrix_code',
+    label: 'Matrix Construct',
+    tagline: 'Nebuchadnezzar phosphor emerald digital rain telemetry rings and CRT reticle',
+    category: 'Cinema',
+  },
+  {
+    id: 'gotham_signal',
+    label: 'Gotham Signal',
+    tagline: 'Stealth Kevlar matte dial swept by a warm amber Gotham searchlight beam',
+    category: 'Cinema',
+  },
+  {
     id: 'invincible',
     label: 'Invincible',
     tagline: 'Viltrumite blue-and-yellow emblem face with bold graphic-novel comic ink indices',
-    category: 'Sport',
+    category: 'Cinema',
   },
   {
     id: 'dune',
     label: 'Dune Arrakis',
     tagline: 'Eclipsing Arrakis desert sun, twin orbiting moons and Fremen spice-blue hands',
-    category: 'Classic',
+    category: 'Cinema',
   },
   {
     id: 'doomsday',
     label: 'Doomsday',
     tagline: 'Riveted iron bunker bezel with crimson Minutes-to-Midnight danger quadrant',
-    category: 'Technical',
+    category: 'Cinema',
   },
   {
     id: 'spider_web',
     label: 'Spider-Verse',
     tagline: 'Brooklyn midnight multiverse portal web with cyan-magenta chromatic offset indices',
-    category: 'Modern',
+    category: 'Cinema',
   },
   {
     id: 'evangelion',
     label: 'NERV MAGI',
     tagline: 'Tactical cockpit octagonal AT-Field lattice with amber degree ticks and lance second hand',
-    category: 'Technical',
+    category: 'Cinema',
   },
   {
     id: 'tron_disc',
     label: 'Tron Disc',
     tagline: 'Obsidian Identity Disc with glowing dual cyan energy circuits and orange blade hand',
-    category: 'Modern',
+    category: 'Cinema',
   },
 ];
 
@@ -448,40 +588,136 @@ export const RADIAL_STYLES: RadialStyleMeta[] = [
     category: 'Classic',
   },
   {
+    id: 'omnitrix_core',
+    label: 'Omnitrix Core',
+    tagline: 'Galvan 4-lug dial bezel with luminous green DNA hourglass geometry',
+    category: 'Cinema',
+  },
+  {
+    id: 'jjk_domain',
+    label: 'Infinite Void',
+    tagline: 'Limitless Blue and Reversal Red nodes converging around a Hollow Purple core',
+    category: 'Cinema',
+  },
+  {
+    id: 'nichirin_flame',
+    label: 'Hinokami Arc',
+    tagline: 'Ichimatsu green-black bezel with blazing Sun and Water Breathing ring tracks',
+    category: 'Cinema',
+  },
+  {
+    id: 'chakra_seal',
+    label: 'Sharingan Seal',
+    tagline: 'Eight-Trigrams seal rings with orbiting crimson tomoe and Kurama gold tracks',
+    category: 'Cinema',
+  },
+  {
+    id: 'ki_aura',
+    label: 'Dragon Radar',
+    tagline: 'Capsule Corp radar rings plotting 7 Dragon Ball signatures with golden Ki arcs',
+    category: 'Cinema',
+  },
+  {
+    id: 'grand_line',
+    label: 'New World Pose',
+    tagline: 'Triple-needle Log Pose compass crown with ocean-azure and sun-gold tracks',
+    category: 'Cinema',
+  },
+  {
+    id: 'odm_telemetry',
+    label: 'ODM Pressure',
+    tagline: 'Survey Corps emerald gas-pressure arc gauges with Titan lightning gold rim',
+    category: 'Cinema',
+  },
+  {
+    id: 'pokedex_scan',
+    label: 'Pokedex Scanner',
+    tagline: 'Crimson-and-pearl Poke Ball split bezel with cyan scanner telemetry rings',
+    category: 'Cinema',
+  },
+  {
+    id: 'upside_down',
+    label: 'Upside Down',
+    tagline: 'Hawkins 1983 crimson neon rift horizon with floating Upside Down ash spores',
+    category: 'Cinema',
+  },
+  {
+    id: 'hextech_rune',
+    label: 'Hextech Rune',
+    tagline: 'Piltover brass astrolabe framing glowing Hextech cyan and Zaun shimmer tracks',
+    category: 'Cinema',
+  },
+  {
+    id: 'tardis_vortex',
+    label: 'Gallifrey Vortex',
+    tagline: 'Rotating Circular Gallifreyan glyph rings orbiting a TARDIS cobalt chamber',
+    category: 'Cinema',
+  },
+  {
+    id: 'vault_pip',
+    label: 'Vault-Tec Pip',
+    tagline: 'Gear-cog Vault-33 outer bezel with glowing CRT phosphor S.P.E.C.I.A.L. meters',
+    category: 'Cinema',
+  },
+  {
+    id: 'jarvis_hud',
+    label: 'J.A.R.V.I.S. HUD',
+    tagline: '10-coil Stark Arc Reactor stator with holographic flight telemetry reticles',
+    category: 'Cinema',
+  },
+  {
+    id: 'kyber_core',
+    label: 'Kyber Dual',
+    tagline: 'Hyperspace starfield chamber with X-Wing targeting brackets and dual kyber arcs',
+    category: 'Cinema',
+  },
+  {
+    id: 'zion_construct',
+    label: 'Zion Construct',
+    tagline: 'Matrix emerald code telemetry rings pulsing inside a Nebuchadnezzar terminal',
+    category: 'Cinema',
+  },
+  {
+    id: 'batcomputer',
+    label: 'Batcomputer',
+    tagline: 'Gotham tactical sonar bezel with searchlight halo and Wayne-Tech amber arcs',
+    category: 'Cinema',
+  },
+  {
     id: 'invincible_arc',
     label: 'Invincible',
     tagline: 'Viltrumite blue-yellow kinetic hero shield with comic speed-lines and emblem nodes',
-    category: 'Modern',
+    category: 'Cinema',
   },
   {
     id: 'dune_eclipse',
     label: 'Dune Arrakis',
     tagline: 'Golden desert solar eclipse corona, twin Arrakis moons and Fremen spice-blue horizon',
-    category: 'Cosmic',
+    category: 'Cinema',
   },
   {
     id: 'doomsday_core',
     label: 'Doomsday',
     tagline: 'Armored nuclear vault bezel, crimson Minutes-to-Midnight danger arc and reactor shutter',
-    category: 'Technical',
+    category: 'Cinema',
   },
   {
     id: 'spider_web',
     label: 'Spider-Verse',
     tagline: 'Multiverse dimensional spider-web spokes with CMYK cyan-magenta glitch aura',
-    category: 'Modern',
+    category: 'Cinema',
   },
   {
     id: 'nerv_hex',
     label: 'NERV AT-Field',
     tagline: 'Rotating octagonal AT-Field barrier geometry with NERV amber and Eva-01 sync arcs',
-    category: 'Technical',
+    category: 'Cinema',
   },
   {
     id: 'tron_disc',
     label: 'Tron Disc',
     tagline: 'Glowing Identity Disc dual light-circuit channels with rotating cyan-orange blades',
-    category: 'Modern',
+    category: 'Cinema',
   },
 ];
 
@@ -491,6 +727,22 @@ export const RADIAL_DARK_CHAMBER_STYLES: ReadonlySet<RadialStyle> = new Set([
   'supernova',
   'blackhole_lens',
   'synth_prism',
+  'omnitrix_core',
+  'jjk_domain',
+  'nichirin_flame',
+  'chakra_seal',
+  'ki_aura',
+  'grand_line',
+  'odm_telemetry',
+  'pokedex_scan',
+  'upside_down',
+  'hextech_rune',
+  'tardis_vortex',
+  'vault_pip',
+  'jarvis_hud',
+  'kyber_core',
+  'zion_construct',
+  'batcomputer',
   'invincible_arc',
   'dune_eclipse',
   'doomsday_core',
@@ -519,6 +771,11 @@ export const CLOCK_BG_FX_OPTIONS: {
   { id: 'sandstorm', label: 'Bg: Arrakis Sand', shortLabel: 'Arrakis', tagline: 'Drifting golden desert spice dust and eclipsing twin-sun haze' },
   { id: 'cyber_rain', label: 'Bg: Neon Rain', shortLabel: 'Neon Rain', tagline: 'Cascading Night City vertical neon rain streaks and horizon glow' },
   { id: 'hex_field', label: 'Bg: AT-Field Hex', shortLabel: 'AT-Field', tagline: 'Pulsing concentric octagonal tactical AT-Field honeycomb lattice' },
+  { id: 'omnitrix_pulse', label: 'Bg: Omnitrix Core', shortLabel: 'Omnitrix', tagline: 'Concentric pulsing Galvan green hourglass rings and DNA calibration halo' },
+  { id: 'cursed_aura', label: 'Bg: Cursed Domain', shortLabel: 'Domain', tagline: 'Swirling Limitless Blue and Reversal Red cursed energy convergence' },
+  { id: 'matrix_rain', label: 'Bg: Matrix Rain', shortLabel: 'Matrix', tagline: 'Cascading glowing emerald construct digital rain columns' },
+  { id: 'ember_spores', label: 'Bg: Rift Spores', shortLabel: 'Spores', tagline: 'Rising glowing embers and Upside Down ash spores drifting skyward' },
+  { id: 'arcane_runes', label: 'Bg: Arcane Runes', shortLabel: 'Arcane', tagline: 'Counter-rotating geometric Gallifreyan, Hextech and chakra seal rings' },
   { id: 'none', label: 'Bg: Static (Off)', shortLabel: 'Off', tagline: 'Clean static theme canvas' },
 ];
 
@@ -1448,18 +1705,16 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
       ? 'w-[clamp(4.2rem,min(17vw,22vh),17rem)] h-[clamp(5.8rem,min(24vw,30vh),24rem)]'
       : 'w-20 sm:w-36 md:w-44 h-28 sm:h-44 md:h-52';
 
-  const radiusClass =
-    edition === 'evangelion' || edition === 'doomsday'
-      ? 'rounded-lg sm:rounded-xl'
-      : edition === 'cyberpunk'
-        ? 'rounded-md sm:rounded-xl'
-        : isSecondary
-          ? isFullscreen
-            ? 'rounded-2xl sm:rounded-[2rem]'
-            : 'rounded-2xl sm:rounded-3xl'
-          : isFullscreen
-            ? 'rounded-3xl sm:rounded-[2.5rem]'
-            : 'rounded-2xl sm:rounded-3xl';
+  const flipEdition = getEditionFlipStyle(edition);
+  const radiusClass = flipEdition.sharpRadius
+    ? 'rounded-lg sm:rounded-xl'
+    : isSecondary
+      ? isFullscreen
+        ? 'rounded-2xl sm:rounded-[2rem]'
+        : 'rounded-2xl sm:rounded-3xl'
+      : isFullscreen
+        ? 'rounded-3xl sm:rounded-[2.5rem]'
+        : 'rounded-2xl sm:rounded-3xl';
 
   const textSizeClass = isSecondary
     ? isFullscreen
@@ -1477,58 +1732,9 @@ export const FlipClockCard: React.FC<FlipClockCardProps> = ({
         ? 'text-3xl sm:text-5xl md:text-6xl'
         : 'text-4xl sm:text-7xl md:text-8xl';
 
-  const editionDigitFx =
-    edition === 'invincible'
-      ? 'italic drop-shadow-[3px_3px_0_#000000]'
-      : edition === 'spiderverse'
-        ? 'edition-spiderverse-text'
-        : edition === 'cyberpunk'
-          ? 'edition-cyberpunk-text'
-          : edition === 'tron'
-            ? 'drop-shadow-[0_0_16px_rgba(0,242,255,0.8)]'
-            : edition === 'evangelion'
-              ? 'drop-shadow-[0_0_14px_rgba(255,106,0,0.85)]'
-              : edition === 'akira'
-                ? 'drop-shadow-[0_0_14px_rgba(251,191,36,0.75)]'
-                : '';
-
-  const editionCardAura =
-    edition === 'invincible'
-      ? 'ring-2 ring-[#020617] shadow-[6px_7px_0_#020617] -skew-x-3'
-      : edition === 'cyberpunk'
-        ? 'ring-1 ring-[#00f0ff]/60 shadow-[0_0_24px_rgba(0,240,255,0.22)]'
-        : edition === 'dune'
-          ? 'ring-1 ring-amber-400/45 shadow-[0_14px_34px_rgba(0,0,0,0.65)]'
-          : edition === 'doomsday'
-            ? 'ring-2 ring-red-600/60 shadow-[0_0_28px_rgba(220,38,38,0.25)]'
-            : edition === 'spiderverse'
-              ? 'ring-2 ring-[#00f5ff] shadow-[5px_5px_0_#ff2a85,-3px_-3px_0_#00f5ff]'
-              : edition === 'evangelion'
-                ? 'ring-2 ring-[#ff6a00]/80 shadow-[0_0_24px_rgba(255,106,0,0.28)]'
-                : edition === 'tron'
-                  ? 'ring-1 ring-[#00f2ff]/85 shadow-[0_0_26px_rgba(0,242,255,0.3)]'
-                  : edition === 'akira'
-                    ? 'ring-2 ring-[#ef233c]/75 shadow-[0_0_26px_rgba(239,35,60,0.3)]'
-                    : '';
-
-  const editionSeamClass =
-    edition === 'cyberpunk'
-      ? 'bg-[#00f0ff]/85 shadow-[0_0_10px_#00f0ff]'
-      : edition === 'dune'
-        ? 'bg-[#38bdf8]/80 shadow-[0_0_8px_#38bdf8]'
-        : edition === 'doomsday'
-          ? 'bg-[#ff2a00]/90 shadow-[0_0_10px_#ff2a00]'
-          : edition === 'invincible'
-            ? 'bg-[#ffe600] shadow-[0_1px_0_#020617]'
-            : edition === 'spiderverse'
-              ? 'bg-gradient-to-r from-[#00f5ff] via-[#ff2a85] to-[#00f5ff]'
-              : edition === 'evangelion'
-                ? 'bg-[#ff6a00]/90 shadow-[0_0_8px_#ff6a00]'
-                : edition === 'tron'
-                  ? 'bg-[#ff6b00]/95 shadow-[0_0_10px_#ff6b00]'
-                  : edition === 'akira'
-                    ? 'bg-[#ef233c]/95 shadow-[0_0_10px_#ef233c]'
-                    : '';
+  const editionDigitFx = flipEdition.digitFx;
+  const editionCardAura = flipEdition.cardAura;
+  const editionSeamClass = flipEdition.seamClass;
 
   const digitClass = `leading-none tabular-nums ${fontClassName} ${textSizeClass} ${editionDigitFx}`;
   const isLight = !!themeConfig.isLight;
@@ -2430,6 +2636,43 @@ const BG_CYBER_RAIN_DROPS: { left: number; height: number; width: number; dur: s
   return arr;
 })();
 
+const BG_MATRIX_COLUMNS: { left: number; height: number; width: number; dur: string; delay: string; brightHead: boolean }[] = (() => {
+  const rng = makeSeededRng(19991);
+  const arr: { left: number; height: number; width: number; dur: string; delay: string; brightHead: boolean }[] = [];
+  for (let i = 0; i < 34; i++) {
+    const durVal = 2.8 + rng() * 4.2;
+    const delayVal = -(rng() * durVal);
+    arr.push({
+      left: Number((1.8 + i * 2.85 + (rng() - 0.5) * 1.1).toFixed(1)),
+      height: Math.round(72 + rng() * 120),
+      width: Number((1.6 + rng() * 1.5).toFixed(1)),
+      dur: `${durVal.toFixed(2)}s`,
+      delay: `${delayVal.toFixed(2)}s`,
+      brightHead: i % 2 === 0,
+    });
+  }
+  return arr;
+})();
+
+const BG_EMBER_SPORES: { left: number; bottom: number; size: number; dur: string; delay: string; tone: 'sec' | 'min' | 'hr' }[] = (() => {
+  const rng = makeSeededRng(19831);
+  const tones: ('sec' | 'min' | 'hr')[] = ['sec', 'min', 'hr'];
+  const arr: { left: number; bottom: number; size: number; dur: string; delay: string; tone: 'sec' | 'min' | 'hr' }[] = [];
+  for (let i = 0; i < 38; i++) {
+    const durVal = 5.5 + rng() * 7.5;
+    const delayVal = -(rng() * durVal);
+    arr.push({
+      left: Number((3 + rng() * 94).toFixed(1)),
+      bottom: Math.round(-6 + rng() * 28),
+      size: Number((2.2 + rng() * 4.2).toFixed(1)),
+      dur: `${durVal.toFixed(2)}s`,
+      delay: `${delayVal.toFixed(2)}s`,
+      tone: tones[i % 3],
+    });
+  }
+  return arr;
+})();
+
 const buildPolygonPoints = (cx: number, cy: number, sides: number, radius: number, rotDeg = 0): string => {
   const pts: string[] = [];
   for (let i = 0; i < sides; i++) {
@@ -3102,6 +3345,133 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
           ))}
         </svg>
       )}
+
+      {/* 15. OMNITRIX CORE PULSE (BEN 10) */}
+      {bgFx === 'omnitrix_pulse' && (
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <defs>
+            <radialGradient id={`${bgUid}-omni-glow`} cx="50%" cy="50%" r="52%">
+              <stop offset="0%" stopColor={c1} stopOpacity={isLight ? '0.2' : '0.28'} />
+              <stop offset="52%" stopColor={c1} stopOpacity="0.08" />
+              <stop offset="100%" stopColor={c1} stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle cx="400" cy="300" r="290" fill={`url(#${bgUid}-omni-glow)`} className="animate-bg-omnitrix-pulse" />
+          <g className="animate-bg-omnitrix-pulse" style={{ opacity: isLight ? 0.25 : 0.45 }}>
+            <polygon points="275,90 525,90 400,300" fill="none" stroke={c1} strokeWidth="2.4" />
+            <polygon points="275,510 525,510 400,300" fill="none" stroke={c1} strokeWidth="2.4" />
+          </g>
+          <g className="animate-bg-spin-cw">
+            <circle cx="400" cy="300" r="225" fill="none" stroke={c1} strokeWidth="2" strokeDasharray="36 18" strokeOpacity={isLight ? '0.26' : '0.38'} />
+          </g>
+          <g className="animate-bg-spin-ccw">
+            <circle cx="400" cy="300" r="268" fill="none" stroke={c2} strokeWidth="1.4" strokeDasharray="8 20" strokeOpacity={isLight ? '0.22' : '0.3'} />
+          </g>
+        </svg>
+      )}
+
+      {/* 16. CURSED DOMAIN CONVERGENCE (JUJUTSU KAISEN) */}
+      {bgFx === 'cursed_aura' && (
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <defs>
+            <radialGradient id={`${bgUid}-jjk-blue`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#00e5ff" stopOpacity={isLight ? '0.22' : '0.32'} />
+              <stop offset="100%" stopColor="#00e5ff" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id={`${bgUid}-jjk-red`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ff2a55" stopOpacity={isLight ? '0.2' : '0.3'} />
+              <stop offset="100%" stopColor="#ff2a55" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <g className="animate-bg-cursed-swirl">
+            <circle cx="310" cy="275" r="210" fill={`url(#${bgUid}-jjk-blue)`} />
+            <circle cx="490" cy="325" r="210" fill={`url(#${bgUid}-jjk-red)`} />
+            <circle cx="330" cy="300" r="158" fill="none" stroke="#38bdf8" strokeWidth="1.5" strokeOpacity="0.34" />
+            <circle cx="470" cy="300" r="158" fill="none" stroke="#ff2a55" strokeWidth="1.5" strokeOpacity="0.34" />
+          </g>
+          <g className="animate-bg-spin-ccw">
+            <circle cx="400" cy="300" r="218" fill="none" stroke="#c084fc" strokeWidth="1.8" strokeDasharray="16 12" strokeOpacity="0.42" />
+            <circle cx="400" cy="300" r="275" fill="none" stroke={c1} strokeWidth="1.1" strokeDasharray="4 14" strokeOpacity="0.32" />
+          </g>
+        </svg>
+      )}
+
+      {/* 17. MATRIX DIGITAL RAIN (THE MATRIX / PIP-BOY) */}
+      {bgFx === 'matrix_rain' && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="absolute inset-x-0 bottom-0 h-1/4"
+            style={{
+              background: `linear-gradient(to top, ${c2}22, transparent)`,
+            }}
+          />
+          {BG_MATRIX_COLUMNS.map((col, idx) => (
+            <span
+              key={idx}
+              className="animate-bg-cyber-rain absolute top-0 rounded-full"
+              style={{
+                left: `${col.left}%`,
+                width: `${col.width}px`,
+                height: `${col.height}px`,
+                background: `repeating-linear-gradient(to bottom, transparent 0px, ${c2} 5px, transparent 8px, ${col.brightHead ? '#dcfce7' : c2} 12px)`,
+                boxShadow: col.brightHead ? `0 0 8px ${c2}` : undefined,
+                opacity: isLight ? 0.35 : 0.62,
+                animationDuration: col.dur,
+                animationDelay: col.delay,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 18. RIFT SPORES & EMBERS (STRANGER THINGS / DEMON SLAYER / AOT) */}
+      {bgFx === 'ember_spores' && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="absolute inset-x-0 bottom-0 h-1/3"
+            style={{
+              background: `linear-gradient(to top, ${c1}24, ${c3}10, transparent)`,
+            }}
+          />
+          {BG_EMBER_SPORES.map((sp, idx) => {
+            const col = pickTone(sp.tone);
+            return (
+              <span
+                key={idx}
+                className="animate-bg-ember-rise absolute rounded-full"
+                style={{
+                  left: `${sp.left}%`,
+                  bottom: `${sp.bottom}%`,
+                  width: `${sp.size}px`,
+                  height: `${sp.size}px`,
+                  backgroundColor: col,
+                  boxShadow: `0 0 ${sp.size * 2.5}px ${col}`,
+                  opacity: isLight ? 0.55 : 0.85,
+                  animationDuration: sp.dur,
+                  animationDelay: sp.delay,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* 19. ARCANE RUNES & GALLIFREYAN CIRCLES (ARCANE / DOCTOR WHO / NARUTO / DBZ) */}
+      {bgFx === 'arcane_runes' && (
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <g className="animate-bg-spin-cw">
+            <circle cx="400" cy="300" r="240" fill="none" stroke={c2} strokeWidth="1.5" strokeOpacity={isLight ? '0.26' : '0.35'} strokeDasharray="28 10 6 10" />
+            <circle cx="442" cy="300" r="172" fill="none" stroke={c1} strokeWidth="1.2" strokeOpacity={isLight ? '0.22' : '0.3'} />
+            <circle cx="640" cy="300" r="6" fill={c2} fillOpacity="0.7" />
+            <circle cx="160" cy="300" r="4.5" fill={c1} fillOpacity="0.65" />
+          </g>
+          <g className="animate-bg-spin-ccw">
+            <circle cx="400" cy="300" r="292" fill="none" stroke={c3} strokeWidth="1.4" strokeOpacity={isLight ? '0.2' : '0.28'} strokeDasharray="12 16" />
+            <polygon points={buildPolygonPoints(400, 300, 6, 206, 0)} fill="none" stroke={c2} strokeWidth="1.1" strokeOpacity={isLight ? '0.18' : '0.24'} />
+            <circle cx="400" cy="94" r="5" fill={c3} fillOpacity="0.72" />
+          </g>
+        </svg>
+      )}
     </div>
   );
 });
@@ -3291,6 +3661,110 @@ export const AnalogStyleGlyph: React.FC<{ styleId: AnalogStyle }> = ({ styleId }
         <>
           <circle cx="10" cy="10" r="5" fill="none" stroke="currentColor" strokeWidth="1.25" strokeDasharray="6 3" />
           <circle cx="10" cy="10" r="1.6" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'omnitrix' && (
+        <>
+          <polygon points="5.8,5.6 14.2,5.6 10,10" fill="currentColor" />
+          <polygon points="5.8,14.4 14.2,14.4 10,10" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'jjk_void' && (
+        <>
+          <circle cx="7.8" cy="10" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.1" />
+          <circle cx="12.2" cy="10" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.1" />
+          <circle cx="10" cy="10" r="1.3" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'nichirin' && (
+        <>
+          <rect x="6" y="6" width="4" height="4" fill="currentColor" />
+          <rect x="10" y="10" width="4" height="4" fill="currentColor" />
+          <line x1="4.8" y1="15.2" x2="15.2" y2="4.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'sharingan' && (
+        <>
+          <circle cx="10" cy="10" r="4.5" fill="none" stroke="currentColor" strokeWidth="0.95" />
+          <circle cx="10" cy="10" r="1.4" fill="currentColor" />
+          <circle cx="10" cy="5.5" r="1.05" fill="currentColor" />
+          <circle cx="13.9" cy="12.2" r="1.05" fill="currentColor" />
+          <circle cx="6.1" cy="12.2" r="1.05" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'dragon_radar' && (
+        <>
+          <line x1="10" y1="3" x2="10" y2="17" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.55" />
+          <line x1="3" y1="10" x2="17" y2="10" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.55" />
+          <circle cx="12.5" cy="7.5" r="1.3" fill="currentColor" />
+          <circle cx="7.5" cy="12" r="1.1" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'log_pose' && (
+        <>
+          <polygon points="10,3.8 11.4,10 10,16.2 8.6,10" fill="currentColor" />
+          <polygon points="3.8,10 10,8.6 16.2,10 10,11.4" fill="currentColor" fillOpacity="0.55" />
+        </>
+      )}
+      {styleId === 'scout_wings' && (
+        <>
+          <path d="M 4.5 6.5 L 10 9.5 L 15.5 6.5 L 13 13.5 L 10 11.5 L 7 13.5 Z" fill="currentColor" fillOpacity="0.85" />
+        </>
+      )}
+      {styleId === 'pokeball_dex' && (
+        <>
+          <line x1="2.4" y1="10" x2="17.6" y2="10" stroke="currentColor" strokeWidth="1.4" />
+          <circle cx="10" cy="10" r="2.2" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'hawkins_83' && (
+        <>
+          <line x1="5" y1="6.5" x2="15" y2="6.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <polygon points="10,8 12.2,10 10,12 7.8,10" fill="currentColor" />
+          <line x1="5" y1="13.5" x2="15" y2="13.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'hexcore' && (
+        <>
+          <polygon points="10,4 15.2,7 15.2,13 10,16 4.8,13 4.8,7" fill="none" stroke="currentColor" strokeWidth="1.1" />
+          <circle cx="10" cy="10" r="2.1" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'gallifreyan' && (
+        <>
+          <circle cx="8.4" cy="9" r="3.4" fill="none" stroke="currentColor" strokeWidth="1.05" />
+          <circle cx="12.2" cy="11.2" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.05" />
+          <circle cx="10" cy="10" r="1.1" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'pip_boy' && (
+        <>
+          <circle cx="10" cy="10" r="5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeDasharray="2 1.5" />
+          <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'arc_reactor' && (
+        <>
+          <polygon points="6.2,7.2 13.8,7.2 10,14.5" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
+          <circle cx="10" cy="10" r="1.3" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'galactic_trench' && (
+        <>
+          <line x1="5.5" y1="14.5" x2="14.5" y2="5.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <line x1="5.5" y1="5.5" x2="14.5" y2="14.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'matrix_code' && (
+        <>
+          <line x1="7" y1="5" x2="7" y2="13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <line x1="10" y1="4.5" x2="10" y2="15.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <line x1="13" y1="6.5" x2="13" y2="14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'gotham_signal' && (
+        <>
+          <path d="M 4.5 10 Q 7.2 7.4 9 9 L 10 7.2 L 11 9 Q 12.8 7.4 15.5 10 Q 12.8 11 10 13 Q 7.2 11 4.5 10 Z" fill="currentColor" />
         </>
       )}
     </svg>
@@ -6124,6 +6598,530 @@ const AnalogDialFace: React.FC<AnalogDialFaceProps> = React.memo(({
           </text>
         </g>
       )}
+
+      {/* STYLE 27: BEN 10 OMNITRIX */}
+      {styleId === 'omnitrix' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0b120d" stroke="#94a3b8" strokeWidth="4" />
+          <circle cx="150" cy="150" r="133" fill="none" stroke="#65ff00" strokeOpacity="0.45" strokeWidth="1.5" />
+          {[45, 135, 225, 315].map((deg) => (
+            <rect
+              key={deg}
+              x="140"
+              y="4"
+              width="20"
+              height="14"
+              rx="3"
+              fill="#cbd5e1"
+              stroke="#020617"
+              strokeWidth="1.5"
+              transform={`rotate(${deg} 150 150)`}
+            />
+          ))}
+          {/* Iconic Galvan Omnitrix Hourglass Core */}
+          <path d="M 52 54 H 248 L 150 150 Z" fill="#65ff00" fillOpacity="0.24" stroke="#65ff00" strokeWidth="2.4" strokeLinejoin="round" />
+          <path d="M 52 246 H 248 L 150 150 Z" fill="#65ff00" fillOpacity="0.24" stroke="#65ff00" strokeWidth="2.4" strokeLinejoin="round" />
+          <circle cx="150" cy="150" r="128" fill="none" stroke="#09110b" strokeWidth="6" />
+          {[...Array(12)].map((_, idx) => {
+            const isCard = idx % 3 === 0;
+            return (
+              <rect
+                key={idx}
+                x={isCard ? '147' : '148.5'}
+                y="20"
+                width={isCard ? '6' : '3'}
+                height={isCard ? '14' : '8'}
+                rx="1.2"
+                fill={isCard ? '#65ff00' : '#bbf7d0'}
+                transform={`rotate(${idx * 30} 150 150)`}
+              />
+            );
+          })}
+          <text x="150" y="72" textAnchor="middle" dominantBaseline="central" fill="#ecfccb" fontSize="7.5" fontWeight="900" letterSpacing="2.4" fontFamily="'Orbitron', monospace">
+            OMNITRIX
+          </text>
+          <text x="150" y="232" textAnchor="middle" dominantBaseline="central" fill="#65ff00" fontSize="6.4" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `DNA • ${weekdayShort} ${dayStr}` : 'HERO TIME'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 28: JUJUTSU KAISEN UNLIMITED VOID */}
+      {styleId === 'jjk_void' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#060312" stroke="#a855f7" strokeWidth="3.2" />
+          <circle cx="150" cy="150" r="133" fill="none" stroke="#38bdf8" strokeOpacity="0.35" strokeWidth="1" />
+          {/* Converging Limitless Blue & Reversal Red Spheres */}
+          <circle cx="114" cy="150" r="56" fill="#00e5ff" fillOpacity="0.16" stroke="#38bdf8" strokeWidth="1.5" strokeOpacity="0.65" />
+          <circle cx="186" cy="150" r="56" fill="#ff2a55" fillOpacity="0.16" stroke="#ff2a55" strokeWidth="1.5" strokeOpacity="0.65" />
+          <circle cx="150" cy="150" r="36" fill="#c084fc" fillOpacity="0.22" stroke="#e9d5ff" strokeWidth="1.2" strokeDasharray="4 4" />
+          {[...Array(12)].map((_, idx) => {
+            const isCard = idx % 3 === 0;
+            return (
+              <polygon
+                key={idx}
+                points={isCard ? '150,18 154,28 150,36 146,28' : '150,20 152,27 150,32 148,27'}
+                fill={idx % 2 === 0 ? '#38bdf8' : '#ff2a55'}
+                transform={`rotate(${idx * 30} 150 150)`}
+              />
+            );
+          })}
+          <text x="150" y="74" textAnchor="middle" dominantBaseline="central" fill="#f8fafc" fontSize="7" fontWeight="800" letterSpacing="2.4" fontFamily="'Orbitron', monospace">
+            UNLIMITED VOID
+          </text>
+          <text x="150" y="230" textAnchor="middle" dominantBaseline="central" fill="#c084fc" fontSize="6.4" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `DOMAIN • ${weekdayShort} ${dayStr}` : 'HOLLOW PURPLE'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 29: DEMON SLAYER NICHIRIN KAGURA */}
+      {styleId === 'nichirin' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0b0808" stroke="#f97316" strokeWidth="3" />
+          {/* Ichimatsu Emerald-Obsidian Segmented Bezel */}
+          {[...Array(24)].map((_, idx) => (
+            <path
+              key={idx}
+              d="M 145 11 L 155 11 L 154 20 L 146 20 Z"
+              fill={idx % 2 === 0 ? '#10b981' : '#18181b'}
+              stroke="#09090b"
+              strokeWidth="0.6"
+              transform={`rotate(${idx * 15} 150 150)`}
+            />
+          ))}
+          {/* Katana Tsuba Handguard Inner Collar */}
+          <polygon points={buildPolygonPoints(150, 150, 8, 88, 22.5)} fill="none" stroke="#f97316" strokeWidth="1.6" strokeOpacity="0.65" />
+          <circle cx="150" cy="150" r="64" fill="none" stroke="#38bdf8" strokeWidth="1.2" strokeOpacity="0.45" strokeDasharray="16 8" />
+          {[...Array(12)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="24"
+              x2="150"
+              y2={idx % 3 === 0 ? '36' : '31'}
+              stroke={idx % 3 === 0 ? '#fbbf24' : '#34d399'}
+              strokeWidth={idx % 3 === 0 ? '2.4' : '1.4'}
+              strokeLinecap="round"
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="78" textAnchor="middle" dominantBaseline="central" fill="#fed7aa" fontSize="7" fontWeight="800" letterSpacing="2.2" fontFamily="Georgia, serif">
+            HINOKAMI
+          </text>
+          <text x="150" y="226" textAnchor="middle" dominantBaseline="central" fill="#34d399" fontSize="6.4" fontWeight="800" letterSpacing="1.8" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `CORPS • ${weekdayShort} ${dayStr}` : 'NICHIRIN'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 30: NARUTO SHARINGAN SEAL */}
+      {styleId === 'sharingan' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#180506" stroke="#dc2626" strokeWidth="3.5" />
+          <circle cx="150" cy="150" r="118" fill="#7f1d1d" fillOpacity="0.28" stroke="#ef4444" strokeWidth="1.8" />
+          <circle cx="150" cy="150" r="78" fill="none" stroke="#09090b" strokeWidth="2.5" />
+          <circle cx="150" cy="150" r="78" fill="none" stroke="#ff7a00" strokeOpacity="0.45" strokeWidth="1" />
+          {/* 3 Iconic Curved Tomoe Around Inner Ring */}
+          {[0, 120, 240].map((deg) => (
+            <g key={deg} transform={`rotate(${deg} 150 150)`}>
+              <circle cx="150" cy="72" r="9" fill="#09090b" stroke="#ff7a00" strokeWidth="1.2" />
+              <path d="M 150 63 Q 163 68 158 80" fill="none" stroke="#09090b" strokeWidth="4.2" strokeLinecap="round" />
+            </g>
+          ))}
+          {[...Array(12)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="16"
+              x2="150"
+              y2={idx % 3 === 0 ? '30' : '24'}
+              stroke={idx % 3 === 0 ? '#fde047' : '#ef4444'}
+              strokeWidth={idx % 3 === 0 ? '2.4' : '1.3'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="46" textAnchor="middle" dominantBaseline="central" fill="#fde047" fontSize="6.8" fontWeight="800" letterSpacing="2.4" fontFamily="'JetBrains Mono', monospace">
+            KONOHA // SEAL
+          </text>
+          <text x="150" y="254" textAnchor="middle" dominantBaseline="central" fill="#fca5a5" fontSize="6.4" fontWeight="800" letterSpacing="1.8" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `SAGE • ${weekdayShort} ${dayStr}` : 'CHAKRA LINK'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 31: DRAGON BALL Z RADAR */}
+      {styleId === 'dragon_radar' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#052314" stroke="#facc15" strokeWidth="3.2" />
+          {/* Capsule Corp Green Coordinate Radar Grid */}
+          {[60, 95, 130, 170, 205, 240].map((pos) => (
+            <g key={pos} stroke="#22c55e" strokeOpacity="0.22" strokeWidth="0.9">
+              <line x1={pos} y1="14" x2={pos} y2="286" />
+              <line x1="14" y1={pos} x2="286" y2={pos} />
+            </g>
+          ))}
+          <circle cx="150" cy="150" r="95" fill="none" stroke="#22c55e" strokeOpacity="0.38" strokeWidth="1.1" />
+          <circle cx="150" cy="150" r="52" fill="none" stroke="#22c55e" strokeOpacity="0.35" strokeWidth="1" />
+          {/* Glowing Amber Dragon Ball Blips */}
+          {[
+            { x: 112, y: 98 },
+            { x: 198, y: 116 },
+            { x: 184, y: 196 },
+            { x: 96, y: 188 },
+          ].map((b, idx) => (
+            <g key={idx}>
+              <circle cx={b.x} cy={b.y} r="7.5" fill="#facc15" fillOpacity="0.24" />
+              <circle cx={b.x} cy={b.y} r="4.2" fill="#facc15" stroke="#fef08a" strokeWidth="1" />
+            </g>
+          ))}
+          {[...Array(12)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="14"
+              x2="150"
+              y2={idx % 3 === 0 ? '28' : '22'}
+              stroke={idx % 3 === 0 ? '#facc15' : '#4ade80'}
+              strokeWidth={idx % 3 === 0 ? '2.4' : '1.2'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="42" textAnchor="middle" dominantBaseline="central" fill="#fef08a" fontSize="6.8" fontWeight="800" letterSpacing="2" fontFamily="'Orbitron', monospace">
+            CAPSULE CORP
+          </text>
+          <text x="150" y="256" textAnchor="middle" dominantBaseline="central" fill="#4ade80" fontSize="6.2" fontWeight="800" letterSpacing="1.8" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `RADAR • ${weekdayShort} ${dayStr}` : '7 BALLS LOCKED'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 32: ONE PIECE LOG POSE */}
+      {styleId === 'log_pose' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#06192e" stroke="#fbbf24" strokeWidth="3.5" />
+          <circle cx="150" cy="150" r="126" fill="none" stroke="#38bdf8" strokeOpacity="0.4" strokeWidth="1.2" />
+          {/* 8-Point Grand Line Compass Rose */}
+          <polygon points="150,42 162,138 150,150 138,138" fill="#ef4444" fillOpacity="0.35" stroke="#fbbf24" strokeWidth="1" />
+          <polygon points="150,258 162,162 150,150 138,162" fill="#38bdf8" fillOpacity="0.3" stroke="#fbbf24" strokeWidth="1" />
+          <polygon points="42,150 138,138 150,150 138,162" fill="#38bdf8" fillOpacity="0.25" stroke="#fbbf24" strokeWidth="1" />
+          <polygon points="258,150 162,138 150,150 162,162" fill="#38bdf8" fillOpacity="0.25" stroke="#fbbf24" strokeWidth="1" />
+          {[...Array(12)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="15"
+              x2="150"
+              y2={idx % 3 === 0 ? '30' : '23'}
+              stroke={idx % 3 === 0 ? '#fbbf24' : '#7dd3fc'}
+              strokeWidth={idx % 3 === 0 ? '2.4' : '1.2'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="78" textAnchor="middle" dominantBaseline="central" fill="#fef08a" fontSize="7" fontWeight="800" letterSpacing="2.4" fontFamily="Georgia, serif">
+            GRAND LINE
+          </text>
+          <text x="150" y="226" textAnchor="middle" dominantBaseline="central" fill="#38bdf8" fontSize="6.4" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `POSE • ${weekdayShort} ${dayStr}` : 'NEW WORLD'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 33: ATTACK ON TITAN SURVEY WINGS */}
+      {styleId === 'scout_wings' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0b130e" stroke="#10b981" strokeWidth="3.2" />
+          <circle cx="150" cy="150" r="128" fill="none" stroke="#94a3b8" strokeOpacity="0.3" strokeWidth="1.2" />
+          {/* Stylized Wings of Freedom Emblem */}
+          <path d="M 88 102 L 150 138 L 212 102 L 184 186 L 150 162 L 116 186 Z" fill="#059669" fillOpacity="0.22" stroke="#e2e8f0" strokeWidth="1.6" strokeLinejoin="round" />
+          <path d="M 108 118 L 150 144 L 192 118 L 174 174 L 150 156 L 126 174 Z" fill="#38bdf8" fillOpacity="0.16" />
+          {[...Array(12)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="16"
+              x2="150"
+              y2={idx % 3 === 0 ? '30' : '23'}
+              stroke={idx % 3 === 0 ? '#facc15' : '#e2e8f0'}
+              strokeWidth={idx % 3 === 0 ? '2.4' : '1.2'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="64" textAnchor="middle" dominantBaseline="central" fill="#e2e8f0" fontSize="6.8" fontWeight="800" letterSpacing="2.4" fontFamily="'JetBrains Mono', monospace">
+            SURVEY CORPS
+          </text>
+          <text x="150" y="236" textAnchor="middle" dominantBaseline="central" fill="#10b981" fontSize="6.4" fontWeight="800" letterSpacing="1.8" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `WALL • ${weekdayShort} ${dayStr}` : 'ODM TACTICAL'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 34: POKEMON POKEBALL CHRONOMETER */}
+      {styleId === 'pokeball_dex' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#140a0e" stroke="#ef4444" strokeWidth="3.2" />
+          <path d="M 12 150 A 138 138 0 0 1 288 150 Z" fill="#ef4444" fillOpacity="0.2" />
+          <path d="M 12 150 A 138 138 0 0 0 288 150 Z" fill="#f8fafc" fillOpacity="0.08" />
+          <line x1="12" y1="150" x2="288" y2="150" stroke="#09090b" strokeWidth="10" />
+          <line x1="12" y1="150" x2="288" y2="150" stroke="#38bdf8" strokeOpacity="0.4" strokeWidth="1.4" />
+          <circle cx="150" cy="150" r="30" fill="#0f172a" stroke="#f8fafc" strokeWidth="3.2" />
+          <circle cx="150" cy="150" r="18" fill="#1e293b" stroke="#38bdf8" strokeWidth="1.6" />
+          {[...Array(12)].map((_, idx) => (
+            <circle
+              key={idx}
+              cx="150"
+              cy="22"
+              r={idx % 3 === 0 ? '3.2' : '1.8'}
+              fill={idx % 3 === 0 ? '#facc15' : '#f8fafc'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="72" textAnchor="middle" dominantBaseline="central" fill="#fecaca" fontSize="7" fontWeight="800" letterSpacing="2.4" fontFamily="'Orbitron', monospace">
+            POKEDEX OS
+          </text>
+          <text x="150" y="228" textAnchor="middle" dominantBaseline="central" fill="#38bdf8" fontSize="6.4" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `DEX • ${weekdayShort} ${dayStr}` : 'TRAINER SYNC'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 35: STRANGER THINGS HAWKINS 1983 */}
+      {styleId === 'hawkins_83' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#080204" stroke="#ff1e2d" strokeWidth="3" />
+          <circle cx="150" cy="150" r="126" fill="none" stroke="#dc2626" strokeOpacity="0.35" strokeWidth="1" />
+          <line x1="48" y1="90" x2="252" y2="90" stroke="#ff1e2d" strokeWidth="2.2" strokeOpacity="0.82" />
+          <line x1="48" y1="210" x2="252" y2="210" stroke="#ff1e2d" strokeWidth="2.2" strokeOpacity="0.82" />
+          {[...Array(12)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="16"
+              x2="150"
+              y2={idx % 3 === 0 ? '31' : '24'}
+              stroke={idx % 3 === 0 ? '#ff4d5a' : '#7f1d1d'}
+              strokeWidth={idx % 3 === 0 ? '2.4' : '1.4'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="72" textAnchor="middle" dominantBaseline="central" fill="#ff4d5a" fontSize="8" fontWeight="700" letterSpacing="3" fontFamily="Georgia, serif">
+            HAWKINS 83
+          </text>
+          <text x="150" y="230" textAnchor="middle" dominantBaseline="central" fill="#fca5a5" fontSize="6.2" fontWeight="700" letterSpacing="2.2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `RIFT • ${weekdayShort} ${dayStr}` : 'UPSIDE DOWN'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 36: ARCANE PILTOVER HEXCORE */}
+      {styleId === 'hexcore' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#060d1c" stroke="#fbbf24" strokeWidth="3.2" />
+          <polygon points={buildPolygonPoints(150, 150, 6, 118, 0)} fill="none" stroke="#d97706" strokeWidth="1.6" strokeOpacity="0.72" />
+          <polygon points={buildPolygonPoints(150, 150, 6, 86, 30)} fill="none" stroke="#38bdf8" strokeWidth="1.4" strokeOpacity="0.65" />
+          <circle cx="150" cy="150" r="56" fill="#38bdf8" fillOpacity="0.1" stroke="#ec4899" strokeWidth="1.1" strokeDasharray="5 5" />
+          {[...Array(12)].map((_, idx) => (
+            <polygon
+              key={idx}
+              points="150,16 153,26 150,33 147,26"
+              fill={idx % 3 === 0 ? '#38bdf8' : '#fbbf24'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="70" textAnchor="middle" dominantBaseline="central" fill="#fde68a" fontSize="7" fontWeight="800" letterSpacing="2.6" fontFamily="Georgia, serif">
+            HEXTECH
+          </text>
+          <text x="150" y="232" textAnchor="middle" dominantBaseline="central" fill="#38bdf8" fontSize="6.2" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `PILTOVER • ${weekdayShort} ${dayStr}` : 'HEXCORE'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 37: DOCTOR WHO GALLIFREYAN TARDIS */}
+      {styleId === 'gallifreyan' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#061430" stroke="#3b82f6" strokeWidth="3.4" />
+          <circle cx="150" cy="150" r="126" fill="none" stroke="#fbbf24" strokeWidth="1.6" strokeOpacity="0.75" />
+          {/* Nested Circular Gallifreyan Geometric Glyphs */}
+          <circle cx="116" cy="126" r="46" fill="none" stroke="#fbbf24" strokeWidth="1.2" strokeOpacity="0.55" />
+          <circle cx="184" cy="174" r="42" fill="none" stroke="#93c5fd" strokeWidth="1.2" strokeOpacity="0.55" />
+          <circle cx="176" cy="112" r="24" fill="none" stroke="#fde68a" strokeWidth="1.1" strokeOpacity="0.65" />
+          <circle cx="118" cy="186" r="20" fill="none" stroke="#60a5fa" strokeWidth="1.1" strokeOpacity="0.6" />
+          {[...Array(12)].map((_, idx) => (
+            <circle
+              key={idx}
+              cx="150"
+              cy="20"
+              r={idx % 3 === 0 ? '3.5' : '1.8'}
+              fill={idx % 3 === 0 ? '#fbbf24' : '#93c5fd'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="56" textAnchor="middle" dominantBaseline="central" fill="#fef3c7" fontSize="7" fontWeight="800" letterSpacing="2.4" fontFamily="'Orbitron', monospace">
+            GALLIFREY
+          </text>
+          <text x="150" y="246" textAnchor="middle" dominantBaseline="central" fill="#93c5fd" fontSize="6.2" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `TARDIS • ${weekdayShort} ${dayStr}` : 'TIME VORTEX'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 38: FALLOUT PIP-BOY 3000 */}
+      {styleId === 'pip_boy' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#041407" stroke="#4ade80" strokeWidth="3.2" />
+          <circle cx="150" cy="150" r="134" fill="none" stroke="#facc15" strokeWidth="4.2" strokeDasharray="8 11" strokeOpacity="0.55" />
+          <circle cx="150" cy="150" r="108" fill="none" stroke="#4ade80" strokeWidth="1" strokeOpacity="0.35" />
+          <line x1="22" y1="150" x2="278" y2="150" stroke="#4ade80" strokeOpacity="0.2" strokeWidth="1" />
+          <line x1="150" y1="22" x2="150" y2="278" stroke="#4ade80" strokeOpacity="0.2" strokeWidth="1" />
+          {[...Array(24)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="24"
+              x2="150"
+              y2={idx % 2 === 0 ? '35' : '29'}
+              stroke={idx % 6 === 0 ? '#facc15' : '#4ade80'}
+              strokeWidth={idx % 2 === 0 ? '2' : '1'}
+              transform={`rotate(${idx * 15} 150 150)`}
+            />
+          ))}
+          <text x="150" y="68" textAnchor="middle" dominantBaseline="central" fill="#4ade80" fontSize="7" fontWeight="800" letterSpacing="2.2" fontFamily="'JetBrains Mono', monospace">
+            PIP-BOY 3000
+          </text>
+          <text x="150" y="232" textAnchor="middle" dominantBaseline="central" fill="#facc15" fontSize="6.2" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `VAULT 33 • ${weekdayShort} ${dayStr}` : 'V.A.T.S. READY'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 39: IRON MAN ARC REACTOR */}
+      {styleId === 'arc_reactor' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#060d1a" stroke="#38bdf8" strokeWidth="3.2" />
+          {/* 10 Glowing Palladium Coil Windings */}
+          {[...Array(10)].map((_, idx) => (
+            <rect
+              key={idx}
+              x="141"
+              y="18"
+              width="18"
+              height="16"
+              rx="3"
+              fill="#0c2d48"
+              stroke="#7dd3fc"
+              strokeWidth="1.6"
+              transform={`rotate(${idx * 36} 150 150)`}
+            />
+          ))}
+          <circle cx="150" cy="150" r="98" fill="none" stroke="#fbbf24" strokeWidth="1.4" strokeOpacity="0.6" />
+          {/* Iconic Inverted Triangular Reactor Core */}
+          <polygon points="88,112 212,112 150,218" fill="#38bdf8" fillOpacity="0.16" stroke="#bae6fd" strokeWidth="2.4" strokeLinejoin="round" />
+          <polygon points="104,122 196,122 150,200" fill="none" stroke="#38bdf8" strokeWidth="1.2" strokeOpacity="0.7" />
+          <text x="150" y="74" textAnchor="middle" dominantBaseline="central" fill="#bae6fd" fontSize="7" fontWeight="800" letterSpacing="2.4" fontFamily="'Orbitron', monospace">
+            STARK MK-85
+          </text>
+          <text x="150" y="242" textAnchor="middle" dominantBaseline="central" fill="#fbbf24" fontSize="6.2" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `HUD • ${weekdayShort} ${dayStr}` : 'ARC REACTOR'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 40: STAR WARS TRENCH TARGETING */}
+      {styleId === 'galactic_trench' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#040710" stroke="#facc15" strokeWidth="3" />
+          {DIAL_DEEP_STARS.slice(0, 32).map((s, idx) => (
+            <circle key={idx} cx={s.x} cy={s.y} r={s.r} fill="#ffffff" fillOpacity={s.op * 0.7} />
+          ))}
+          {/* X-Wing Targeting Computer Horizon Box */}
+          <rect x="82" y="92" width="136" height="116" fill="none" stroke="#facc15" strokeWidth="1.1" strokeOpacity="0.45" />
+          <line x1="36" y1="150" x2="264" y2="150" stroke="#facc15" strokeWidth="0.9" strokeOpacity="0.38" />
+          <line x1="150" y1="36" x2="150" y2="264" stroke="#facc15" strokeWidth="0.9" strokeOpacity="0.38" />
+          {[...Array(12)].map((_, idx) => (
+            <rect
+              key={idx}
+              x="148"
+              y="16"
+              width="4"
+              height={idx % 3 === 0 ? '14' : '8'}
+              fill={idx % 2 === 0 ? '#38bdf8' : '#ff1e38'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="66" textAnchor="middle" dominantBaseline="central" fill="#facc15" fontSize="6.8" fontWeight="800" letterSpacing="2.4" fontFamily="'Orbitron', monospace">
+            STAY ON TARGET
+          </text>
+          <text x="150" y="236" textAnchor="middle" dominantBaseline="central" fill="#38bdf8" fontSize="6.2" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `SECTOR • ${weekdayShort} ${dayStr}` : 'HYPERDRIVE'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 41: THE MATRIX CONSTRUCT */}
+      {styleId === 'matrix_code' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#020e06" stroke="#00ff66" strokeWidth="3" />
+          {[32, 62, 92, 120].map((r, idx) => (
+            <circle
+              key={r}
+              cx="150"
+              cy="150"
+              r={r}
+              fill="none"
+              stroke="#00ff66"
+              strokeWidth="1"
+              strokeOpacity={0.22 + idx * 0.08}
+              strokeDasharray="4 6"
+            />
+          ))}
+          {[...Array(24)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="16"
+              x2="150"
+              y2={idx % 2 === 0 ? '30' : '23'}
+              stroke={idx % 6 === 0 ? '#dcfce7' : '#00ff66'}
+              strokeWidth={idx % 2 === 0 ? '2.2' : '1.1'}
+              transform={`rotate(${idx * 15} 150 150)`}
+            />
+          ))}
+          <text x="150" y="72" textAnchor="middle" dominantBaseline="central" fill="#00ff66" fontSize="7" fontWeight="800" letterSpacing="2.6" fontFamily="'JetBrains Mono', monospace">
+            CONSTRUCT 01
+          </text>
+          <text x="150" y="228" textAnchor="middle" dominantBaseline="central" fill="#86efac" fontSize="6.2" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `ZION • ${weekdayShort} ${dayStr}` : 'SYSTEM ANOMALY'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 42: BATMAN GOTHAM SIGNAL */}
+      {styleId === 'gotham_signal' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#080a0e" stroke="#fbbf24" strokeWidth="3" />
+          {/* Warm Amber Gotham Searchlight Halo */}
+          <ellipse cx="150" cy="150" rx="88" ry="62" fill="#fbbf24" fillOpacity="0.14" stroke="#fbbf24" strokeOpacity="0.45" strokeWidth="1.5" />
+          <path d="M 76 150 Q 112 114 134 134 L 150 112 L 166 134 Q 188 114 224 150 Q 188 164 150 192 Q 112 164 76 150 Z" fill="#090b10" stroke="#fbbf24" strokeOpacity="0.48" strokeWidth="1.4" />
+          {[...Array(12)].map((_, idx) => (
+            <rect
+              key={idx}
+              x={idx % 3 === 0 ? '147.5' : '148.5'}
+              y="18"
+              width={idx % 3 === 0 ? '5' : '3'}
+              height={idx % 3 === 0 ? '15' : '9'}
+              fill={idx % 3 === 0 ? '#fbbf24' : '#94a3b8'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="64" textAnchor="middle" dominantBaseline="central" fill="#fbbf24" fontSize="7" fontWeight="800" letterSpacing="2.6" fontFamily="'Orbitron', monospace">
+            WAYNE-OS
+          </text>
+          <text x="150" y="236" textAnchor="middle" dominantBaseline="central" fill="#94a3b8" fontSize="6.2" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `GOTHAM • ${weekdayShort} ${dayStr}` : 'BATCOMPUTER'}
+          </text>
+        </g>
+      )}
     </g>
   );
 });
@@ -7299,6 +8297,118 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             <line x1="150" y1="136" x2="150" y2="79" stroke="#ffffff" strokeWidth="1.25" strokeLinecap="round" />
           </>
         )}
+
+        {styleId === 'omnitrix' && (
+          <>
+            <polygon points="150,162 144.8,144 147,82 150,68 153,82 155.2,144" fill="#0f172a" stroke="#cbd5e1" strokeWidth="1.8" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#65ff00" strokeWidth="2.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'jjk_void' && (
+          <>
+            <polygon points="150,162 145.6,144 147.4,82 150,68 152.6,82 154.4,144" fill="#0a0618" stroke="#ff2a55" strokeWidth="1.8" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#e9d5ff" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'nichirin' && (
+          <>
+            <polygon points="150,162 146.4,144 147.8,82 150,68 152.2,82 153.6,144" fill="#18181b" stroke="#34d399" strokeWidth="1.8" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="78" stroke="#fed7aa" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'sharingan' && (
+          <>
+            <polygon points="150,162 146,144 147.5,88 150,68 152.5,88 154,144" fill="#09090b" stroke="#fde047" strokeWidth="1.6" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="82" stroke="#ef4444" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'dragon_radar' && (
+          <>
+            <polygon points="150,162 145.5,144 147.5,82 150,68 152.5,82 154.5,144" fill="#38bdf8" stroke="#082f49" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#fef08a" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'log_pose' && (
+          <>
+            <polygon points="150,162 145.6,144 147.6,82 150,68 152.4,82 154.4,144" fill="#38bdf8" stroke="#082f49" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="80" stroke="#fef08a" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'scout_wings' && (
+          <>
+            <polygon points="150,162 146.4,144 148,80 150,68 152,80 153.6,144" fill="#10b981" stroke="#022c22" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="78" stroke="#f8fafc" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'pokeball_dex' && (
+          <>
+            <polygon points="150,162 145.8,144 147.6,82 150,68 152.4,82 154.2,144" fill="#ef4444" stroke="#09090b" strokeWidth="1.4" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'hawkins_83' && (
+          <>
+            <polygon points="150,162 145.8,144 147.6,82 150,68 152.4,82 154.2,144" fill="#090204" stroke="#dc2626" strokeWidth="1.8" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="80" stroke="#fca5a5" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'hexcore' && (
+          <>
+            <polygon points="150,162 145.8,144 147.6,82 150,68 152.4,82 154.2,144" fill="#ec4899" stroke="#060d1c" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#fde68a" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'gallifreyan' && (
+          <>
+            <polygon points="150,162 145.8,144 147.6,82 150,68 152.4,82 154.2,144" fill="#fde68a" stroke="#1e3a8a" strokeWidth="1.2" strokeLinejoin="round" />
+            <circle cx="150" cy="94" r="3.5" fill="none" stroke="#1e3a8a" strokeWidth="1.2" />
+          </>
+        )}
+
+        {styleId === 'pip_boy' && (
+          <>
+            <polygon points="146.5,162 146.5,82 150,69 153.5,82 153.5,162" fill="#22c55e" stroke="#041407" strokeWidth="1.3" />
+            <line x1="150" y1="136" x2="150" y2="80" stroke="#dcfce7" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'arc_reactor' && (
+          <>
+            <polygon points="150,162 145.6,144 147.5,82 150,68 152.5,82 154.4,144" fill="#fbbf24" stroke="#060d1a" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#bae6fd" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'galactic_trench' && (
+          <>
+            <polygon points="150,162 146,144 147.8,82 150,68 152.2,82 154,144" fill="#facc15" stroke="#040710" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'matrix_code' && (
+          <>
+            <polygon points="146.8,162 146.8,82 150,69 153.2,82 153.2,162" fill="#020e06" stroke="#16a34a" strokeWidth="1.8" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#00ff66" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'gotham_signal' && (
+          <>
+            <polygon points="150,162 145.6,144 147.5,82 150,68 152.5,82 154.4,144" fill="#1e293b" stroke="#fbbf24" strokeWidth="1.6" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#f8fafc" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
       </g>
 
       {/* ================= MINUTE HAND BY STYLE ================= */}
@@ -7557,6 +8667,118 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             <line x1="150" y1="138" x2="150" y2="41" stroke="#ffffff" strokeWidth="1.15" strokeLinecap="round" />
           </>
         )}
+
+        {styleId === 'omnitrix' && (
+          <>
+            <polygon points="150,166 146.6,145 148.2,44 150,31 151.8,44 153.4,145" fill="#f8fafc" stroke="#09110b" strokeWidth="1.4" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#65ff00" strokeWidth="1.6" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'jjk_void' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#070414" stroke="#38bdf8" strokeWidth="1.8" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#f8fafc" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'nichirin' && (
+          <>
+            <polygon points="150,166 147.2,145 148.5,42 150,30 151.5,42 152.8,145" fill="#0c0909" stroke="#38bdf8" strokeWidth="1.8" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="40" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'sharingan' && (
+          <>
+            <polygon points="150,166 147,145 148.4,48 150,31 151.6,48 153,145" fill="#09090b" stroke="#ff8c00" strokeWidth="1.6" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="45" stroke="#fde047" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'dragon_radar' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#facc15" stroke="#052314" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'log_pose' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#facc15" stroke="#06192e" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'scout_wings' && (
+          <>
+            <polygon points="150,166 147.2,145 148.6,42 150,30 151.4,42 152.8,145" fill="#f8fafc" stroke="#0f172a" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#10b981" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'pokeball_dex' && (
+          <>
+            <polygon points="150,166 146.8,145 148.4,44 150,31 151.6,44 153.2,145" fill="#facc15" stroke="#09090b" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'hawkins_83' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#090204" stroke="#fca5a5" strokeWidth="1.7" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ff1e2d" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'hexcore' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#fbbf24" stroke="#060d1c" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#38bdf8" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'gallifreyan' && (
+          <>
+            <polygon points="150,166 146.8,145 148.4,46 150,31 151.6,46 153.2,145" fill="#93c5fd" stroke="#061430" strokeWidth="1.2" strokeLinejoin="round" />
+            <circle cx="150" cy="54" r="3" fill="none" stroke="#fbbf24" strokeWidth="1.3" />
+          </>
+        )}
+
+        {styleId === 'pip_boy' && (
+          <>
+            <polygon points="147.4,166 147.4,42 150,31 152.6,42 152.6,166" fill="#4ade80" stroke="#041407" strokeWidth="1.2" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#dcfce7" strokeWidth="1.15" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'arc_reactor' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#060d1a" stroke="#7dd3fc" strokeWidth="1.8" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="41" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'galactic_trench' && (
+          <>
+            <polygon points="150,166 147.4,145 148.5,42 150,30 151.5,42 152.6,145" fill="#38bdf8" stroke="#0c4a6e" strokeWidth="1.1" style={{ filter: 'drop-shadow(0 0 6px #38bdf8)' }} />
+            <line x1="150" y1="138" x2="150" y2="38" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'matrix_code' && (
+          <>
+            <polygon points="147.5,166 147.5,42 150,31 152.5,42 152.5,166" fill="#020e06" stroke="#00ff66" strokeWidth="1.8" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#dcfce7" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'gotham_signal' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#e2e8f0" stroke="#080a0e" strokeWidth="1.4" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#fbbf24" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
       </g>
 
       {/* ================= SECOND HAND BY STYLE ================= */}
@@ -7775,6 +8997,86 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
               />
               <circle cx="150" cy="30" r="2.6" fill="#ffffff" stroke="#ff6b00" strokeWidth="1" />
             </>
+          ) : styleId === 'omnitrix' ? (
+            <>
+              <line x1="150" y1="176" x2="150" y2="25" stroke="#65ff00" strokeWidth="2.1" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #65ff00)' }} />
+              <polygon points="150,24 146,35 154,35" fill="#65ff00" />
+            </>
+          ) : styleId === 'jjk_void' ? (
+            <>
+              <line x1="150" y1="176" x2="150" y2="26" stroke="#c084fc" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #a855f7)' }} />
+              <circle cx="150" cy="32" r="3.1" fill="#f8fafc" stroke="#c084fc" strokeWidth="1.4" />
+            </>
+          ) : styleId === 'nichirin' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="25" stroke="#fb923c" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #f97316)' }} />
+              <polygon points="150,24 147,36 153,36" fill="#fbbf24" />
+            </>
+          ) : styleId === 'sharingan' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#ef4444" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #ef4444)' }} />
+              <circle cx="150" cy="32" r="2.8" fill="#fde047" stroke="#dc2626" strokeWidth="1" />
+            </>
+          ) : styleId === 'dragon_radar' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="25" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #22c55e)' }} />
+              <circle cx="150" cy="31" r="2.8" fill="#facc15" stroke="#052314" strokeWidth="0.9" />
+            </>
+          ) : styleId === 'log_pose' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#ef4444" strokeWidth="1.8" strokeLinecap="round" />
+              <polygon points="150,24 146.5,36 153.5,36" fill="#ef4444" />
+            </>
+          ) : styleId === 'scout_wings' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="25" stroke="#facc15" strokeWidth="1.7" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 5px #facc15)' }} />
+              <circle cx="150" cy="32" r="2.4" fill="#ffffff" />
+            </>
+          ) : styleId === 'pokeball_dex' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #38bdf8)' }} />
+              <circle cx="150" cy="31" r="2.6" fill="#ffffff" stroke="#38bdf8" strokeWidth="1.2" />
+            </>
+          ) : styleId === 'hawkins_83' ? (
+            <>
+              <line x1="150" y1="176" x2="150" y2="26" stroke="#ff1e2d" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #ff1e2d)' }} />
+              <circle cx="150" cy="32" r="2.4" fill="#fecaca" />
+            </>
+          ) : styleId === 'hexcore' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #38bdf8)' }} />
+              <polygon points="150,25 153,32 150,39 147,32" fill="#ec4899" stroke="#ffffff" strokeWidth="0.7" />
+            </>
+          ) : styleId === 'gallifreyan' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#fbbf24" strokeWidth="1.7" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #fbbf24)' }} />
+              <circle cx="150" cy="176" r="3.4" fill="none" stroke="#fbbf24" strokeWidth="1.4" />
+            </>
+          ) : styleId === 'pip_boy' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#facc15" strokeWidth="1.8" strokeLinecap="round" />
+              <circle cx="150" cy="31" r="2.4" fill="#4ade80" />
+            </>
+          ) : styleId === 'arc_reactor' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#ef4444" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #ef4444)' }} />
+              <circle cx="150" cy="31" r="2.5" fill="#7dd3fc" />
+            </>
+          ) : styleId === 'galactic_trench' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="24" stroke="#ff1e38" strokeWidth="2.1" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #ff1e38)' }} />
+              <line x1="150" y1="138" x2="150" y2="28" stroke="#ffffff" strokeWidth="0.9" strokeLinecap="round" />
+            </>
+          ) : styleId === 'matrix_code' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#ffffff" strokeWidth="1.7" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #00ff66)' }} />
+              <circle cx="150" cy="31" r="2.4" fill="#00ff66" />
+            </>
+          ) : styleId === 'gotham_signal' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #fbbf24)' }} />
+              <polygon points="150,24 146.8,36 153.2,36" fill="#fbbf24" />
+            </>
           ) : (
             <>
               <line x1="150" y1="150" x2="150" y2="177" stroke={secColor} strokeWidth="2.6" strokeLinecap="round" />
@@ -7808,15 +9110,33 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
                 ? '#00f2ff'
                 : styleId === 'invincible'
                   ? '#ffe600'
-                  : styleId === 'dune'
-                    ? '#38bdf8'
-                    : styleId === 'doomsday' || styleId === 'evangelion'
-                      ? '#ff2a00'
-                      : styleId === 'spider_web'
-                        ? '#ff2a85'
-                        : styleId === 'gears'
-                          ? `url(#${uid}-ruby-jewel)`
-                          : secColor
+                  : styleId === 'omnitrix' || styleId === 'matrix_code'
+                    ? '#65ff00'
+                    : styleId === 'jjk_void'
+                      ? '#c084fc'
+                      : styleId === 'nichirin' || styleId === 'hawkins_83'
+                        ? '#ff4d5a'
+                        : styleId === 'sharingan'
+                          ? '#dc2626'
+                          : styleId === 'dragon_radar' || styleId === 'gallifreyan' || styleId === 'gotham_signal'
+                            ? '#fbbf24'
+                            : styleId === 'log_pose' || styleId === 'hexcore' || styleId === 'arc_reactor' || styleId === 'pokeball_dex'
+                              ? '#38bdf8'
+                              : styleId === 'scout_wings'
+                                ? '#10b981'
+                                : styleId === 'pip_boy'
+                                  ? '#4ade80'
+                                  : styleId === 'galactic_trench'
+                                    ? '#facc15'
+                                    : styleId === 'dune'
+                                      ? '#38bdf8'
+                                      : styleId === 'doomsday' || styleId === 'evangelion'
+                                        ? '#ff2a00'
+                                        : styleId === 'spider_web'
+                                          ? '#ff2a85'
+                                          : styleId === 'gears'
+                                            ? `url(#${uid}-ruby-jewel)`
+                                            : secColor
         }
         stroke={styleId === 'blackhole' ? '#fb923c' : styleId === 'invincible' ? '#020617' : isLight ? '#ffffff' : '#020617'}
         strokeWidth="1.8"
@@ -8014,6 +9334,132 @@ export const RadialStyleGlyph: React.FC<{ styleId: RadialStyle; className?: stri
           <circle cx="10" cy="10" r="7.8" stroke="#00f2ff" strokeWidth="1.6" />
           <circle cx="10" cy="10" r="4.6" stroke="#00f2ff" strokeOpacity="0.7" strokeWidth="1.2" strokeDasharray="6 3" />
           <circle cx="10" cy="10" r="1.8" fill="#ff6b00" />
+        </svg>
+      );
+    case 'omnitrix_core':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.8" stroke="#65ff00" strokeWidth="1.5" />
+          <polygon points="5.5,5.5 14.5,5.5 10,10" fill="#65ff00" />
+          <polygon points="5.5,14.5 14.5,14.5 10,10" fill="#65ff00" />
+        </svg>
+      );
+    case 'jjk_domain':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="7.4" cy="10" r="5" stroke="#00e5ff" strokeWidth="1.2" />
+          <circle cx="12.6" cy="10" r="5" stroke="#ff2a55" strokeWidth="1.2" />
+          <circle cx="10" cy="10" r="2.2" fill="#c084fc" />
+        </svg>
+      );
+    case 'nichirin_flame':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#f97316" strokeWidth="1.4" />
+          <circle cx="10" cy="10" r="4.6" stroke="#10b981" strokeWidth="1.3" strokeDasharray="3 2" />
+          <circle cx="10" cy="10" r="1.6" fill="#38bdf8" />
+        </svg>
+      );
+    case 'chakra_seal':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#ef4444" strokeWidth="1.4" />
+          <circle cx="10" cy="5.5" r="1.2" fill="#fde047" />
+          <circle cx="13.9" cy="12.3" r="1.2" fill="#fde047" />
+          <circle cx="6.1" cy="12.3" r="1.2" fill="#fde047" />
+        </svg>
+      );
+    case 'ki_aura':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#22c55e" strokeWidth="1.4" />
+          <circle cx="10" cy="10" r="4.2" stroke="#22c55e" strokeOpacity="0.6" strokeWidth="1" />
+          <circle cx="12.4" cy="7.4" r="1.5" fill="#facc15" />
+          <circle cx="7.4" cy="12" r="1.3" fill="#facc15" />
+        </svg>
+      );
+    case 'grand_line':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#fbbf24" strokeWidth="1.4" />
+          <polygon points="10,4 11.6,10 10,16 8.4,10" fill="#ef4444" />
+          <polygon points="4,10 10,8.4 16,10 10,11.6" fill="#38bdf8" />
+        </svg>
+      );
+    case 'odm_telemetry':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#10b981" strokeWidth="1.5" />
+          <path d="M 5 7 L 10 9.6 L 15 7 L 12.6 13.8 L 10 11.6 L 7.4 13.8 Z" stroke="#e2e8f0" strokeWidth="1.1" />
+        </svg>
+      );
+    case 'pokedex_scan':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <path d="M 2.4 10 A 7.6 7.6 0 0 1 17.6 10" stroke="#ef4444" strokeWidth="1.6" />
+          <path d="M 2.4 10 A 7.6 7.6 0 0 0 17.6 10" stroke="#f8fafc" strokeWidth="1.6" />
+          <circle cx="10" cy="10" r="2.2" stroke="#38bdf8" strokeWidth="1.3" />
+        </svg>
+      );
+    case 'upside_down':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#ff1e2d" strokeWidth="1.4" />
+          <line x1="4.5" y1="6.5" x2="15.5" y2="6.5" stroke="#ff1e2d" strokeWidth="1.4" strokeLinecap="round" />
+          <line x1="4.5" y1="13.5" x2="15.5" y2="13.5" stroke="#ff1e2d" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      );
+    case 'hextech_rune':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <polygon points="10,2.5 16.5,6.2 16.5,13.8 10,17.5 3.5,13.8 3.5,6.2" stroke="#fbbf24" strokeWidth="1.3" />
+          <circle cx="10" cy="10" r="3.4" stroke="#38bdf8" strokeWidth="1.2" />
+        </svg>
+      );
+    case 'tardis_vortex':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#3b82f6" strokeWidth="1.4" />
+          <circle cx="8" cy="9" r="3.5" stroke="#fbbf24" strokeWidth="1.1" />
+          <circle cx="12.2" cy="11.2" r="2.6" stroke="#93c5fd" strokeWidth="1.1" />
+        </svg>
+      );
+    case 'vault_pip':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7" stroke="#4ade80" strokeWidth="2.2" strokeDasharray="2.4 1.6" />
+          <circle cx="10" cy="10" r="3" stroke="#facc15" strokeWidth="1.2" />
+        </svg>
+      );
+    case 'jarvis_hud':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#38bdf8" strokeWidth="1.4" />
+          <polygon points="6,7.2 14,7.2 10,14.5" stroke="#7dd3fc" strokeWidth="1.2" />
+        </svg>
+      );
+    case 'kyber_core':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#facc15" strokeWidth="1.3" />
+          <line x1="5" y1="15" x2="15" y2="5" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="5" y1="5" x2="15" y2="15" stroke="#ff1e38" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      );
+    case 'zion_construct':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#00ff66" strokeWidth="1.4" />
+          <line x1="7" y1="5.5" x2="7" y2="13.5" stroke="#00ff66" strokeWidth="1.3" strokeLinecap="round" />
+          <line x1="10" y1="4.8" x2="10" y2="15.2" stroke="#bbf7d0" strokeWidth="1.3" strokeLinecap="round" />
+          <line x1="13" y1="6.5" x2="13" y2="14" stroke="#00ff66" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
+      );
+    case 'batcomputer':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <ellipse cx="10" cy="10" rx="7.8" ry="5.8" stroke="#fbbf24" strokeWidth="1.3" />
+          <path d="M 4.5 10 Q 7.5 7.4 9 9 L 10 7.2 L 11 9 Q 12.5 7.4 15.5 10 Q 12.5 11 10 13 Q 7.5 11 4.5 10 Z" fill="#94a3b8" />
         </svg>
       );
     case 'fractal_mandala':
@@ -8823,6 +10269,257 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
               </g>
             </g>
           )}
+
+          {/* STYLE 19: BEN 10 OMNITRIX CORE */}
+          {styleId === 'omnitrix_core' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#08120a" />
+              <path d="M 46 42 H 274 L 160 160 Z" fill="#65ff00" fillOpacity="0.16" stroke="#65ff00" strokeOpacity="0.55" strokeWidth="1.6" />
+              <path d="M 46 278 H 274 L 160 160 Z" fill="#65ff00" fillOpacity="0.16" stroke="#65ff00" strokeOpacity="0.55" strokeWidth="1.6" />
+              {[45, 135, 225, 315].map((deg) => (
+                <rect key={deg} x="150" y="2" width="20" height="10" rx="2.5" fill="#cbd5e1" stroke="#020617" strokeWidth="1" transform={`rotate(${deg} ${cx} ${cy})`} />
+              ))}
+              <g transform={`rotate(${hudVernierDeg} ${cx} ${cy})`}>
+                <circle cx={cx} cy={cy} r="141" fill="none" stroke="#65ff00" strokeWidth="1.4" strokeOpacity="0.48" strokeDasharray="18 10" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 20: JUJUTSU KAISEN INFINITE VOID */}
+          {styleId === 'jjk_domain' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#060312" />
+              <g transform={`rotate(${galaxySpinDeg * 0.6} ${cx} ${cy})`}>
+                <circle cx={cx - 42} cy={cy} r="96" fill="#00e5ff" fillOpacity="0.12" stroke="#38bdf8" strokeWidth="1.4" strokeOpacity="0.55" />
+                <circle cx={cx + 42} cy={cy} r="96" fill="#ff2a55" fillOpacity="0.12" stroke="#ff2a55" strokeWidth="1.4" strokeOpacity="0.55" />
+              </g>
+              <g transform={`rotate(${mandalaInnerDeg} ${cx} ${cy})`}>
+                <circle cx={cx} cy={cy} r="151" fill="none" stroke="#c084fc" strokeWidth="1.5" strokeOpacity="0.58" strokeDasharray="14 8" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 21: DEMON SLAYER HINOKAMI ARC */}
+          {styleId === 'nichirin_flame' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#0b0808" />
+              {Array.from({ length: 24 }).map((_, idx) => (
+                <rect
+                  key={idx}
+                  x="154"
+                  y="3"
+                  width="12"
+                  height="8"
+                  fill={idx % 2 === 0 ? '#10b981' : '#18181b'}
+                  transform={`rotate(${idx * 15} ${cx} ${cy})`}
+                />
+              ))}
+              <g transform={`rotate(${turbineSpinDeg * 0.35} ${cx} ${cy})`}>
+                <polygon points={buildPolygonPoints(cx, cy, 8, 141, 22.5)} fill="none" stroke="#f97316" strokeWidth="1.4" strokeOpacity="0.48" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 22: NARUTO SHARINGAN SEAL */}
+          {styleId === 'chakra_seal' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#170506" />
+              <g transform={`rotate(${galaxySpinDeg} ${cx} ${cy})`}>
+                {[0, 120, 240].map((deg) => (
+                  <g key={deg} transform={`rotate(${deg} ${cx} ${cy})`}>
+                    <circle cx={cx} cy="20" r="6.5" fill="#09090b" stroke="#ff7a00" strokeWidth="1.2" />
+                    <circle cx={cx} cy="20" r="2.5" fill="#fde047" />
+                  </g>
+                ))}
+              </g>
+              <circle cx={cx} cy={cy} r="141" fill="none" stroke="#dc2626" strokeWidth="1.5" strokeOpacity="0.52" strokeDasharray="8 6" />
+            </g>
+          )}
+
+          {/* STYLE 23: DRAGON BALL DRAGON RADAR */}
+          {styleId === 'ki_aura' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#052113" />
+              <line x1="6" y1={cy} x2="314" y2={cy} stroke="#22c55e" strokeOpacity="0.28" strokeWidth="1" />
+              <line x1={cx} y1="6" x2={cx} y2="314" stroke="#22c55e" strokeOpacity="0.28" strokeWidth="1" />
+              <circle cx={cx} cy={cy} r="141" fill="none" stroke="#22c55e" strokeOpacity="0.34" strokeWidth="1" />
+              {[25, 78, 140, 205, 255, 315, 345].map((deg) => {
+                const rad = (deg * Math.PI) / 180;
+                return <circle key={deg} cx={cx + 141 * Math.cos(rad)} cy={cy + 141 * Math.sin(rad)} r="3.4" fill="#facc15" stroke="#fef08a" strokeWidth="0.7" />;
+              })}
+            </g>
+          )}
+
+          {/* STYLE 24: ONE PIECE NEW WORLD LOG POSE */}
+          {styleId === 'grand_line' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#06192e" />
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, idx) => (
+                <polygon
+                  key={deg}
+                  points={`${cx},6 ${cx + 3.5},18 ${cx - 3.5},18`}
+                  fill={idx % 2 === 0 ? '#fbbf24' : '#38bdf8'}
+                  fillOpacity="0.72"
+                  transform={`rotate(${deg} ${cx} ${cy})`}
+                />
+              ))}
+              <circle cx={cx} cy={cy} r="141" fill="none" stroke="#fbbf24" strokeOpacity="0.38" strokeWidth="1.2" />
+            </g>
+          )}
+
+          {/* STYLE 25: ATTACK ON TITAN ODM TELEMETRY */}
+          {styleId === 'odm_telemetry' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#0b130e" />
+              {Array.from({ length: 24 }).map((_, idx) => (
+                <line
+                  key={idx}
+                  x1={cx}
+                  y1="8"
+                  x2={cx}
+                  y2={idx % 2 === 0 ? '20' : '15'}
+                  transform={`rotate(${idx * 15} ${cx} ${cy})`}
+                  stroke={idx % 6 === 0 ? '#facc15' : '#10b981'}
+                  strokeWidth={idx % 2 === 0 ? '2' : '1'}
+                  strokeOpacity="0.6"
+                />
+              ))}
+            </g>
+          )}
+
+          {/* STYLE 26: POKEMON POKEDEX SCANNER */}
+          {styleId === 'pokedex_scan' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#140a0e" />
+              <path d="M 5 160 A 155 155 0 0 1 315 160 Z" fill="#ef4444" fillOpacity="0.22" />
+              <path d="M 5 160 A 155 155 0 0 0 315 160 Z" fill="#f8fafc" fillOpacity="0.08" />
+              <line x1="6" y1="160" x2="314" y2="160" stroke="#09090b" strokeWidth="6" />
+              <circle cx={cx} cy={cy} r="152" fill="none" stroke="#38bdf8" strokeWidth="1.4" strokeOpacity="0.55" />
+            </g>
+          )}
+
+          {/* STYLE 27: STRANGER THINGS UPSIDE DOWN */}
+          {styleId === 'upside_down' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#080204" />
+              <line x1="22" y1="42" x2="298" y2="42" stroke="#ff1e2d" strokeWidth="2.2" strokeOpacity="0.72" />
+              <line x1="22" y1="278" x2="298" y2="278" stroke="#ff1e2d" strokeWidth="2.2" strokeOpacity="0.72" />
+              {RADIAL_COSMIC_STARS.slice(0, 24).map((st, idx) => (
+                <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill="#fca5a5" fillOpacity={st.op * 0.55} />
+              ))}
+            </g>
+          )}
+
+          {/* STYLE 28: ARCANE HEXTECH RUNE */}
+          {styleId === 'hextech_rune' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#060d1c" />
+              <g transform={`rotate(${mandalaOuterDeg} ${cx} ${cy})`}>
+                <polygon points={buildPolygonPoints(cx, cy, 6, 152, 0)} fill="none" stroke="#fbbf24" strokeWidth="1.8" strokeOpacity="0.68" />
+              </g>
+              <g transform={`rotate(${mandalaInnerDeg} ${cx} ${cy})`}>
+                <polygon points={buildPolygonPoints(cx, cy, 6, 136, 30)} fill="none" stroke="#38bdf8" strokeWidth="1.4" strokeOpacity="0.6" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 29: DOCTOR WHO TARDIS VORTEX */}
+          {styleId === 'tardis_vortex' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#061430" />
+              <g transform={`rotate(${galaxySpinDeg} ${cx} ${cy})`}>
+                <circle cx={cx - 16} cy={cy - 12} r="134" fill="none" stroke="#fbbf24" strokeWidth="1.4" strokeOpacity="0.52" />
+                <circle cx={cx + 22} cy={cy + 14} r="126" fill="none" stroke="#93c5fd" strokeWidth="1.2" strokeOpacity="0.48" />
+              </g>
+              <circle cx={cx} cy={cy} r="152" fill="none" stroke="#3b82f6" strokeWidth="2" strokeOpacity="0.7" />
+            </g>
+          )}
+
+          {/* STYLE 30: FALLOUT VAULT-TEC PIP */}
+          {styleId === 'vault_pip' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#041407" />
+              <circle cx={cx} cy={cy} r="152" fill="none" stroke="#facc15" strokeWidth="4.5" strokeDasharray="8 10" strokeOpacity="0.62" />
+              <circle cx={cx} cy={cy} r="141" fill="none" stroke="#4ade80" strokeWidth="1" strokeOpacity="0.35" />
+            </g>
+          )}
+
+          {/* STYLE 31: IRON MAN J.A.R.V.I.S. HUD */}
+          {styleId === 'jarvis_hud' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#050b16" />
+              {Array.from({ length: 10 }).map((_, idx) => (
+                <rect
+                  key={idx}
+                  x="151"
+                  y="4"
+                  width="18"
+                  height="11"
+                  rx="2.5"
+                  fill="#0c2d48"
+                  stroke="#7dd3fc"
+                  strokeWidth="1.3"
+                  transform={`rotate(${idx * 36} ${cx} ${cy})`}
+                />
+              ))}
+              <g transform={`rotate(${hudVernierDeg} ${cx} ${cy})`}>
+                <circle cx={cx} cy={cy} r="141" fill="none" stroke="#fbbf24" strokeWidth="1.2" strokeOpacity="0.45" strokeDasharray="12 10" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 32: STAR WARS KYBER DUAL */}
+          {styleId === 'kyber_core' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#040710" />
+              {RADIAL_COSMIC_STARS.slice(0, 32).map((st, idx) => (
+                <circle key={idx} cx={st.x} cy={st.y} r={st.r} fill="#ffffff" fillOpacity={st.op * 0.72} />
+              ))}
+              {[45, 135, 225, 315].map((deg) => (
+                <path key={deg} d="M 150 6 L 160 4 L 170 6" transform={`rotate(${deg} ${cx} ${cy})`} fill="none" stroke="#facc15" strokeWidth="1.8" strokeOpacity="0.72" />
+              ))}
+            </g>
+          )}
+
+          {/* STYLE 33: THE MATRIX ZION CONSTRUCT */}
+          {styleId === 'zion_construct' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#020e06" />
+              {Array.from({ length: 36 }).map((_, idx) => (
+                <line
+                  key={idx}
+                  x1={cx}
+                  y1="4"
+                  x2={cx}
+                  y2={idx % 3 === 0 ? '16' : '11'}
+                  transform={`rotate(${idx * 10} ${cx} ${cy})`}
+                  stroke={idx % 6 === 0 ? '#dcfce7' : '#00ff66'}
+                  strokeWidth={idx % 3 === 0 ? '1.8' : '1'}
+                  strokeOpacity="0.58"
+                />
+              ))}
+            </g>
+          )}
+
+          {/* STYLE 34: BATMAN BATCOMPUTER */}
+          {styleId === 'batcomputer' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#07090d" />
+              <ellipse cx={cx} cy={cy} rx="146" ry="122" fill="#fbbf24" fillOpacity="0.06" stroke="#fbbf24" strokeOpacity="0.35" strokeWidth="1.2" />
+              {Array.from({ length: 12 }).map((_, idx) => (
+                <line
+                  key={idx}
+                  x1={cx}
+                  y1="6"
+                  x2={cx}
+                  y2={idx % 3 === 0 ? '18' : '12'}
+                  transform={`rotate(${idx * 30} ${cx} ${cy})`}
+                  stroke={idx % 3 === 0 ? '#fbbf24' : '#64748b'}
+                  strokeWidth={idx % 3 === 0 ? '2' : '1.1'}
+                />
+              ))}
+            </g>
+          )}
         </g>
 
         {/* ================= INNER CHRONOMETER CHAMBER BACKDROP (ALWAYS QUIET & CRISP) ================= */}
@@ -8832,52 +10529,74 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
           r={innerR}
           fill={
             isDarkChamber
-              ? styleId === 'blackhole_lens'
-                ? '#000000'
-                : styleId === 'invincible_arc'
-                  ? '#003e9e'
-                  : styleId === 'dune_eclipse'
-                    ? '#120a04'
-                    : styleId === 'doomsday_core'
-                      ? '#0a0b0e'
-                      : styleId === 'nerv_hex'
-                        ? '#070302'
-                        : styleId === 'tron_disc'
-                          ? '#020710'
-                          : '#050918'
+              ? (
+                  {
+                    blackhole_lens: '#000000',
+                    invincible_arc: '#003e9e',
+                    dune_eclipse: '#120a04',
+                    doomsday_core: '#0a0b0e',
+                    nerv_hex: '#070302',
+                    tron_disc: '#020710',
+                    omnitrix_core: '#070e09',
+                    jjk_domain: '#050210',
+                    nichirin_flame: '#0a0707',
+                    chakra_seal: '#130506',
+                    ki_aura: '#04190e',
+                    grand_line: '#051426',
+                    odm_telemetry: '#08100b',
+                    pokedex_scan: '#11080b',
+                    upside_down: '#070203',
+                    hextech_rune: '#050b17',
+                    tardis_vortex: '#051129',
+                    vault_pip: '#031106',
+                    jarvis_hud: '#040914',
+                    kyber_core: '#03050c',
+                    zion_construct: '#020c05',
+                    batcomputer: '#06080b',
+                  } as Partial<Record<RadialStyle, string>>
+                )[styleId] || '#050918'
               : themeConfig.dialBg
           }
           fillOpacity={isDarkChamber ? (styleId === 'galaxy_vortex' ? 0.78 : 0.9) : isLight ? 0.68 : 0.5}
           stroke={
-            styleId === 'blackhole_lens'
-              ? '#fb923c'
-              : styleId === 'solar_orbit' || styleId === 'invincible_arc'
-                ? '#ffe600'
-                : styleId === 'dune_eclipse'
-                  ? '#f59e0b'
-                  : styleId === 'doomsday_core'
-                    ? '#ef4444'
-                    : styleId === 'spider_web'
-                      ? '#ff2a85'
-                      : styleId === 'nerv_hex'
-                        ? '#ff6a00'
-                        : styleId === 'tron_disc'
-                          ? '#00f2ff'
-                          : styleId === 'cyber_hud'
-                            ? ringSec
-                            : isDarkChamber
-                              ? 'rgba(255,255,255,0.22)'
-                              : isLight
-                                ? 'rgba(15,23,42,0.1)'
-                                : 'rgba(255,255,255,0.1)'
+            (
+              {
+                blackhole_lens: '#fb923c',
+                solar_orbit: '#ffe600',
+                invincible_arc: '#ffe600',
+                dune_eclipse: '#f59e0b',
+                doomsday_core: '#ef4444',
+                spider_web: '#ff2a85',
+                nerv_hex: '#ff6a00',
+                tron_disc: '#00f2ff',
+                cyber_hud: ringSec,
+                omnitrix_core: '#65ff00',
+                jjk_domain: '#a855f7',
+                nichirin_flame: '#f97316',
+                chakra_seal: '#ef4444',
+                ki_aura: '#facc15',
+                grand_line: '#fbbf24',
+                odm_telemetry: '#10b981',
+                pokedex_scan: '#38bdf8',
+                upside_down: '#ff1e2d',
+                hextech_rune: '#fbbf24',
+                tardis_vortex: '#3b82f6',
+                vault_pip: '#4ade80',
+                jarvis_hud: '#38bdf8',
+                kyber_core: '#facc15',
+                zion_construct: '#00ff66',
+                batcomputer: '#fbbf24',
+              } as Partial<Record<RadialStyle, string>>
+            )[styleId] ||
+            (isDarkChamber
+              ? 'rgba(255,255,255,0.22)'
+              : isLight
+                ? 'rgba(15,23,42,0.1)'
+                : 'rgba(255,255,255,0.1)')
           }
-          strokeOpacity={
-            ['blackhole_lens', 'solar_orbit', 'invincible_arc', 'dune_eclipse', 'doomsday_core', 'spider_web', 'nerv_hex', 'tron_disc'].includes(styleId)
-              ? 0.85
-              : 0.45
-          }
+          strokeOpacity={isDarkChamber ? 0.85 : 0.45}
           strokeWidth={
-            ['blackhole_lens', 'solar_orbit', 'invincible_arc', 'doomsday_core', 'tron_disc'].includes(styleId)
+            ['blackhole_lens', 'solar_orbit', 'invincible_arc', 'doomsday_core', 'tron_disc', 'omnitrix_core', 'jjk_domain', 'jarvis_hud'].includes(styleId)
               ? 1.8
               : 1.1
           }
@@ -8923,41 +10642,44 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
           fillOpacity="0.58"
           style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}
         >
-          {styleId === 'solar_orbit'
-            ? 'HELIOCENTRIC J2000'
-            : styleId === 'galaxy_vortex'
-              ? 'SPIRAL CORE NGC-72'
-              : styleId === 'supernova'
-                ? 'PULSAR MAGNETAR'
-                : styleId === 'blackhole_lens'
-                  ? 'EVENT HORIZON'
-                  : styleId === 'cyber_hud'
-                    ? 'HUD // OPTICS'
-                    : styleId === 'segmented_led'
-                      ? 'VU SPECTRUM'
-                      : styleId === 'turbine'
-                        ? 'MACH COMPRESSOR'
-                        : styleId === 'waveform'
-                          ? 'CYMATIC HARMONIC'
-                          : styleId === 'dna_helix'
-                            ? 'GENOME HELIX'
-                            : styleId === 'synth_prism'
-                              ? 'OUTRUN HORIZON'
-                              : styleId === 'invincible_arc'
-                                ? 'VILTRUM // HERO'
-                                : styleId === 'dune_eclipse'
-                                  ? 'ARRAKIS // 10191'
-                                  : styleId === 'doomsday_core'
-                                    ? 'MINUTES TO MIDNIGHT'
-                                    : styleId === 'spider_web'
-                                      ? 'EARTH-1610 // WEB'
-                                      : styleId === 'nerv_hex'
-                                        ? 'NERV // AT-FIELD'
-                                        : styleId === 'tron_disc'
-                                          ? 'ENCOM // IDENTITY DISC'
-                                          : styleId === 'fractal_mandala'
-                                            ? 'ASTROLABE ROSETTE'
-                                            : 'CHRONOGRAPH'}
+          {(
+            {
+              solar_orbit: 'HELIOCENTRIC J2000',
+              galaxy_vortex: 'SPIRAL CORE NGC-72',
+              supernova: 'PULSAR MAGNETAR',
+              blackhole_lens: 'EVENT HORIZON',
+              cyber_hud: 'HUD // OPTICS',
+              segmented_led: 'VU SPECTRUM',
+              turbine: 'MACH COMPRESSOR',
+              waveform: 'CYMATIC HARMONIC',
+              dna_helix: 'GENOME HELIX',
+              synth_prism: 'OUTRUN HORIZON',
+              omnitrix_core: 'GALVAN // OMNITRIX',
+              jjk_domain: 'UNLIMITED VOID // JJK',
+              nichirin_flame: 'HINOKAMI // NICHIRIN',
+              chakra_seal: 'KONOHA // SEAL',
+              ki_aura: 'CAPSULE // RADAR',
+              grand_line: 'NEW WORLD // LOG POSE',
+              odm_telemetry: 'SURVEY CORPS // ODM',
+              pokedex_scan: 'POKEDEX // SCANNER',
+              upside_down: 'HAWKINS // 1983',
+              hextech_rune: 'PILTOVER // HEXTECH',
+              tardis_vortex: 'GALLIFREY // TARDIS',
+              vault_pip: 'VAULT-33 // PIP-BOY',
+              jarvis_hud: 'STARK // ARC MK-85',
+              kyber_core: 'GALACTIC // KYBER',
+              zion_construct: 'ZION // CONSTRUCT',
+              batcomputer: 'WAYNE-OS // GOTHAM',
+              invincible_arc: 'VILTRUM // HERO',
+              dune_eclipse: 'ARRAKIS // 10191',
+              doomsday_core: 'MINUTES TO MIDNIGHT',
+              spider_web: 'EARTH-1610 // WEB',
+              nerv_hex: 'NERV // AT-FIELD',
+              tron_disc: 'ENCOM // IDENTITY DISC',
+              fractal_mandala: 'ASTROLABE ROSETTE',
+              chronograph: 'CHRONOGRAPH',
+            } as Record<RadialStyle, string>
+          )[styleId] || 'CHRONOGRAPH'}
         </text>
 
         {isFullscreen && showDate && (
@@ -9537,6 +11259,9 @@ export const DigitalClock: React.FC = () => {
     const saved = localStorage.getItem('vortexero_clock_edition') as ClockEdition | null;
     return saved && CLOCK_EDITIONS.some((e) => e.id === saved) ? saved : 'classic';
   });
+  const [editionCategory, setEditionCategory] = useState<ClockEditionCategory>('all');
+  const [analogCategory, setAnalogCategory] = useState<'all' | AnalogStyleMeta['category']>('all');
+  const [radialCategory, setRadialCategory] = useState<'all' | RadialStyleMeta['category']>('all');
   const [wakeLockActive, setWakeLockActive] = useState<boolean>(false);
   const wakeLockSentinelRef = useRef<any>(null);
   const fallbackVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -10016,6 +11741,12 @@ export const DigitalClock: React.FC = () => {
   const activeEditionMeta =
     CLOCK_EDITIONS.find((e) => e.id === clockEdition) || CLOCK_EDITIONS[0];
 
+  const selectableEditions = CLOCK_EDITIONS.filter((e) => e.id !== 'classic');
+  const filteredEditions =
+    editionCategory === 'all'
+      ? selectableEditions
+      : selectableEditions.filter((e) => e.category === editionCategory);
+
   const handleSelectEdition = (edId: ClockEdition) => {
     setClockEdition(edId);
     const meta = CLOCK_EDITIONS.find((e) => e.id === edId);
@@ -10032,7 +11763,8 @@ export const DigitalClock: React.FC = () => {
   };
 
   const handleEditionDailyMix = () => {
-    const pool = CLOCK_EDITIONS.filter((e) => e.id !== 'classic' && e.id !== clockEdition);
+    const basePool = filteredEditions.length > 1 ? filteredEditions : selectableEditions;
+    const pool = basePool.filter((e) => e.id !== clockEdition);
     if (pool.length > 0) {
       const next = pool[Math.floor(Math.random() * pool.length)];
       handleSelectEdition(next.id);
@@ -10084,8 +11816,14 @@ export const DigitalClock: React.FC = () => {
   const activeAnalogMeta =
     ANALOG_STYLES.find((s) => s.id === analogStyle) || ANALOG_STYLES[0];
 
+  const filteredAnalogStyles =
+    analogCategory === 'all'
+      ? ANALOG_STYLES
+      : ANALOG_STYLES.filter((s) => s.category === analogCategory);
+
   const handleDailyMix = () => {
-    const otherStyles = ANALOG_STYLES.filter((s) => s.id !== analogStyle);
+    const basePool = filteredAnalogStyles.length > 1 ? filteredAnalogStyles : ANALOG_STYLES;
+    const otherStyles = basePool.filter((s) => s.id !== analogStyle);
     const otherThemes = themes.filter((t) => t.id !== theme);
     const otherBgs = CLOCK_BG_FX_OPTIONS.filter((b) => b.id !== 'none' && b.id !== bgFx);
     if (otherStyles.length > 0) {
@@ -10105,8 +11843,14 @@ export const DigitalClock: React.FC = () => {
   const activeRadialMeta =
     RADIAL_STYLES.find((s) => s.id === radialStyle) || RADIAL_STYLES[0];
 
+  const filteredRadialStyles =
+    radialCategory === 'all'
+      ? RADIAL_STYLES
+      : RADIAL_STYLES.filter((s) => s.category === radialCategory);
+
   const handleRadialDailyMix = () => {
-    const otherStyles = RADIAL_STYLES.filter((s) => s.id !== radialStyle);
+    const basePool = filteredRadialStyles.length > 1 ? filteredRadialStyles : RADIAL_STYLES;
+    const otherStyles = basePool.filter((s) => s.id !== radialStyle);
     const otherThemes = themes.filter((t) => t.id !== theme);
     const otherBgs = CLOCK_BG_FX_OPTIONS.filter((b) => b.id !== 'none' && b.id !== bgFx);
     if (otherStyles.length > 0) {
@@ -10640,7 +12384,7 @@ export const DigitalClock: React.FC = () => {
         </div>
       ) : null}
 
-      {/* Cinema & Anime Edition Studio Bar (Available across ALL 9 clock modes) */}
+      {/* Cinema, TV & Anime Edition Studio Bar (Available across ALL 9 clock modes) */}
       <div
         data-testid="cinema-edition-bar"
         className="p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl shadow-xs flex flex-col gap-2.5"
@@ -10649,7 +12393,7 @@ export const DigitalClock: React.FC = () => {
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
               <Film size={13} className="text-brand-500" />
-              Cinema &amp; Anime Edition
+              Cinema, TV &amp; Anime Edition
             </span>
             <span className="hidden md:inline-block text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate border-l border-slate-200 dark:border-slate-700 pl-2">
               {activeEditionMeta.tagline}
@@ -10665,7 +12409,7 @@ export const DigitalClock: React.FC = () => {
             <button
               onClick={handleEditionDailyMix}
               className="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 whitespace-nowrap shadow-xs"
-              title="Shuffle a movie or anime edition across all 9 clock modes"
+              title="Shuffle a TV show, movie, or anime edition across all 9 clock modes"
             >
               <Shuffle size={12} />
               <span>Cinema Mix</span>
@@ -10673,11 +12417,42 @@ export const DigitalClock: React.FC = () => {
           </div>
         </div>
 
-        {/* OFF + 8 Selectable Movie & Anime Editions */}
+        {/* Category Filter Tabs */}
+        <div
+          data-testid="cinema-edition-categories"
+          className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar"
+        >
+          {(
+            [
+              { id: 'all', label: 'All', count: selectableEditions.length },
+              { id: 'anime', label: 'Anime', count: selectableEditions.filter((e) => e.category === 'anime').length },
+              { id: 'tv', label: 'TV & Animation', count: selectableEditions.filter((e) => e.category === 'tv').length },
+              { id: 'movies', label: 'Movies', count: selectableEditions.filter((e) => e.category === 'movies').length },
+            ] as { id: ClockEditionCategory; label: string; count: number }[]
+          ).map((cat) => {
+            const active = editionCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setEditionCategory(cat.id)}
+                data-edition-category={cat.id}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                  active
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs'
+                    : 'bg-slate-100/70 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/70 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700'
+                }`}
+              >
+                {cat.label} ({cat.count})
+              </button>
+            );
+          })}
+        </div>
+
+        {/* OFF + Selectable TV, Movie & Anime Editions */}
         <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
           <button
             onClick={handleEditionOff}
-            title="Turn off Cinema & Anime Edition and return to your plain color theme"
+            title="Turn off Cinema, TV & Anime Edition and return to your plain color theme"
             data-testid="cinema-edition-off"
             aria-pressed={clockEdition === 'classic'}
             className={`px-2.5 py-1.5 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
@@ -10690,7 +12465,7 @@ export const DigitalClock: React.FC = () => {
             <span>Off</span>
           </button>
           <span className="w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0 mx-0.5" />
-          {CLOCK_EDITIONS.filter((ed) => ed.id !== 'classic').map((ed) => {
+          {filteredEditions.map((ed) => {
             const isActive = clockEdition === ed.id;
             return (
               <button
@@ -10807,9 +12582,39 @@ export const DigitalClock: React.FC = () => {
             </div>
           </div>
 
-          {/* 12 Selectable Radial Gauge Styles */}
+          {/* Radial Gauge Category Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar">
+            {(
+              [
+                { id: 'all', label: 'All', count: RADIAL_STYLES.length },
+                { id: 'Cinema', label: 'Cinema & Anime', count: RADIAL_STYLES.filter((s) => s.category === 'Cinema').length },
+                { id: 'Cosmic', label: 'Cosmic', count: RADIAL_STYLES.filter((s) => s.category === 'Cosmic').length },
+                { id: 'Technical', label: 'Technical', count: RADIAL_STYLES.filter((s) => s.category === 'Technical').length },
+                { id: 'Modern', label: 'Modern', count: RADIAL_STYLES.filter((s) => s.category === 'Modern').length },
+                { id: 'Classic', label: 'Classic', count: RADIAL_STYLES.filter((s) => s.category === 'Classic').length },
+              ] as { id: 'all' | RadialStyleMeta['category']; label: string; count: number }[]
+            ).map((cat) => {
+              const active = radialCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setRadialCategory(cat.id)}
+                  data-radial-category={cat.id}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                    active
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs'
+                      : 'bg-slate-100/70 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/70 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {cat.label} ({cat.count})
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Selectable Radial Gauge Styles */}
           <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
-            {RADIAL_STYLES.map((st) => {
+            {filteredRadialStyles.map((st) => {
               const isActive = radialStyle === st.id;
               return (
                 <button
@@ -10926,9 +12731,39 @@ export const DigitalClock: React.FC = () => {
             </div>
           </div>
 
-          {/* 20 Selectable Analog Watch Faces */}
+          {/* Analog Dial Category Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar">
+            {(
+              [
+                { id: 'all', label: 'All', count: ANALOG_STYLES.length },
+                { id: 'Cinema', label: 'Cinema & Anime', count: ANALOG_STYLES.filter((s) => s.category === 'Cinema').length },
+                { id: 'Classic', label: 'Classic', count: ANALOG_STYLES.filter((s) => s.category === 'Classic').length },
+                { id: 'Modern', label: 'Modern', count: ANALOG_STYLES.filter((s) => s.category === 'Modern').length },
+                { id: 'Sport', label: 'Sport', count: ANALOG_STYLES.filter((s) => s.category === 'Sport').length },
+                { id: 'Technical', label: 'Technical', count: ANALOG_STYLES.filter((s) => s.category === 'Technical').length },
+              ] as { id: 'all' | AnalogStyleMeta['category']; label: string; count: number }[]
+            ).map((cat) => {
+              const active = analogCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setAnalogCategory(cat.id)}
+                  data-analog-category={cat.id}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                    active
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs'
+                      : 'bg-slate-100/70 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/70 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {cat.label} ({cat.count})
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Selectable Analog Watch Faces */}
           <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
-            {ANALOG_STYLES.map((st) => {
+            {filteredAnalogStyles.map((st) => {
               const isActive = analogStyle === st.id;
               return (
                 <button
@@ -11507,15 +13342,7 @@ export const DigitalClock: React.FC = () => {
             {/* Right Section: Mini Calendar Matrix */}
             <div className={`lg:col-span-5 min-w-0 w-full max-w-sm lg:max-w-none mx-auto border backdrop-blur-xl ${
               isFullscreen ? 'p-5 sm:p-7 rounded-[2.25rem]' : 'p-5 rounded-3xl'
-            } ${
-              clockEdition === 'invincible'
-                ? 'bg-[#020617]/85 border-2 border-[#ffe600] shadow-[6px_6px_0_#020617] text-white'
-                : clockEdition === 'spiderverse'
-                  ? 'bg-[#12072b]/85 border-2 border-[#00f5ff] shadow-[5px_5px_0_#ff2a85] text-white'
-                  : themeConfig.isLight
-                    ? 'bg-white/90 border-slate-300 shadow-lg text-slate-800'
-                    : 'bg-black/40 border-white/10 shadow-2xl text-slate-200'
-            }`}>
+            } ${getEditionCalendarPanelClass(clockEdition, themeConfig.isLight)}`}>
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
                 <span className={`font-extrabold uppercase tracking-wider flex items-center gap-1.5 ${
                   isFullscreen ? 'text-sm sm:text-base' : 'text-xs'
@@ -11716,13 +13543,7 @@ export const DigitalClock: React.FC = () => {
             <div className={`flex items-center justify-center ${isFullscreen ? 'gap-5 pt-2' : 'gap-3 pt-1'}`}>
               <button
                 onClick={() => setPomoIsRunning(!pomoIsRunning)}
-                className={`rounded-2xl ${
-                  clockEdition === 'invincible'
-                    ? 'bg-[#ffe600] text-[#020617] border-2 border-[#020617] shadow-[4px_4px_0_#020617]'
-                    : themeConfig.isLight
-                      ? 'bg-slate-900 text-white hover:bg-slate-800'
-                      : 'bg-white/20 hover:bg-white/30 text-white'
-                } font-extrabold flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg ${
+                className={`rounded-2xl ${getEditionPrimaryBtnClass(clockEdition, themeConfig.isLight)} font-extrabold flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg ${
                   isFullscreen ? 'px-10 py-5 text-lg' : 'px-7 py-3.5 text-sm'
                 }`}
               >
@@ -11792,13 +13613,7 @@ export const DigitalClock: React.FC = () => {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => setSwIsRunning(!swIsRunning)}
-                className={`rounded-2xl ${
-                  clockEdition === 'invincible'
-                    ? 'bg-[#ffe600] text-[#020617] border-2 border-[#020617] shadow-[4px_4px_0_#020617]'
-                    : themeConfig.isLight
-                      ? 'bg-slate-900 text-white hover:bg-slate-800'
-                      : 'bg-white/20 hover:bg-white/30 text-white'
-                } font-extrabold flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg ${
+                className={`rounded-2xl ${getEditionPrimaryBtnClass(clockEdition, themeConfig.isLight)} font-extrabold flex items-center gap-2 backdrop-blur-xl active:scale-95 transition-all cursor-pointer shadow-lg ${
                   isFullscreen ? 'px-8 py-4 text-base' : 'px-6 py-3 text-sm'
                 }`}
               >

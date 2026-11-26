@@ -114,11 +114,11 @@ const RAW_TOOLS: Tool[] = [
   {
     id: 'digital-clock',
     name: 'Modern Digital Clock Studio',
-    description: 'Fullscreen aesthetic desk clock studio with 36 themes, StandBy stacked mode, Radial Chronometer, Word Clock, Flip Clock, Desk Station Calendar & Pomodoro.',
+    description: 'Fullscreen aesthetic desk clock studio with 45 themes, 25 Cinema, TV & Anime Editions (Ben 10, Jujutsu Kaisen, Demon Slayer, Iron Man & more), 42 Analog watch dials, 34 Radial gauges, Word Clock, Flip Clock, Desk Calendar & Pomodoro.',
     category: 'productivity',
     iconName: 'Clock',
     badge: 'Hot',
-    tags: ['clock', 'time', 'second-monitor', 'pomodoro', 'minimalist', 'fullscreen']
+    tags: ['clock', 'time', 'second-monitor', 'pomodoro', 'minimalist', 'fullscreen', 'anime', 'cinema']
   },
   {
     id: 'typing-test',

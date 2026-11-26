@@ -633,8 +633,8 @@ import {
   ClockBackgroundLayer,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 26) {
-  console.error(`Expected 26 Analog watch styles, found ${ANALOG_STYLES?.length}`);
+if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 42) {
+  console.error(`Expected 42 Analog watch styles, found ${ANALOG_STYLES?.length}`);
   process.exit(1);
 }
 
@@ -660,6 +660,22 @@ const expectedAnalogIds = [
   'blackhole',
   'gears',
   'cyberwave',
+  'omnitrix',
+  'jjk_void',
+  'nichirin',
+  'sharingan',
+  'dragon_radar',
+  'log_pose',
+  'scout_wings',
+  'pokeball_dex',
+  'hawkins_83',
+  'hexcore',
+  'gallifreyan',
+  'pip_boy',
+  'arc_reactor',
+  'galactic_trench',
+  'matrix_code',
+  'gotham_signal',
   'invincible',
   'dune',
   'doomsday',
@@ -698,8 +714,8 @@ if (typeof AnalogClockDial !== 'function' || typeof AnalogStyleGlyph !== 'functi
   process.exit(1);
 }
 
-if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 15) {
-  console.error(`Expected 15 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
+if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 20) {
+  console.error(`Expected 20 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
   process.exit(1);
 }
 
@@ -719,6 +735,11 @@ const expectedBgIds = [
   'sandstorm',
   'cyber_rain',
   'hex_field',
+  'omnitrix_pulse',
+  'cursed_aura',
+  'matrix_rain',
+  'ember_spores',
+  'arcane_runes',
   'none',
 ];
 for (const bg of CLOCK_BG_FX_OPTIONS) {
@@ -790,6 +811,9 @@ const requiredBgCssTokens = [
   '.animate-bg-sand-drift',
   '.animate-bg-hex-pulse',
   '.animate-bg-comic-pulse',
+  '.animate-bg-ember-rise',
+  '.animate-bg-cursed-swirl',
+  '.animate-bg-omnitrix-pulse',
 ];
 
 for (const cssToken of requiredBgCssTokens) {
@@ -801,7 +825,7 @@ for (const cssToken of requiredBgCssTokens) {
 
 console.log(`✓ Test 12: Analog Horology Studio (${ANALOG_STYLES.length} dial styles, ${CLOCK_BG_FX_OPTIONS.length} animated background scenes, sweep/tick motion) verified.`);
 
-// Test 13: Radial Gauge Studio (18 scenic/kinetic/cinema styles, Sweep/Tick motion, cosmic contrast protection)
+// Test 13: Radial Gauge Studio (34 scenic/kinetic/cinema/anime styles, Sweep/Tick motion, cosmic contrast protection)
 import {
   RADIAL_STYLES,
   RADIAL_DARK_CHAMBER_STYLES,
@@ -809,8 +833,8 @@ import {
   RadialStyleGlyph,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(RADIAL_STYLES) || RADIAL_STYLES.length !== 18) {
-  console.error(`Expected 18 Radial Gauge styles, found ${RADIAL_STYLES?.length}`);
+if (!Array.isArray(RADIAL_STYLES) || RADIAL_STYLES.length !== 34) {
+  console.error(`Expected 34 Radial Gauge styles, found ${RADIAL_STYLES?.length}`);
   process.exit(1);
 }
 
@@ -828,6 +852,22 @@ const expectedRadialIds = [
   'dna_helix',
   'synth_prism',
   'fractal_mandala',
+  'omnitrix_core',
+  'jjk_domain',
+  'nichirin_flame',
+  'chakra_seal',
+  'ki_aura',
+  'grand_line',
+  'odm_telemetry',
+  'pokedex_scan',
+  'upside_down',
+  'hextech_rune',
+  'tardis_vortex',
+  'vault_pip',
+  'jarvis_hud',
+  'kyber_core',
+  'zion_construct',
+  'batcomputer',
   'invincible_arc',
   'dune_eclipse',
   'doomsday_core',
@@ -861,22 +901,42 @@ for (const reqRadialId of expectedRadialIds) {
   }
 }
 
+const expectedDarkChamberIds = [
+  'solar_orbit',
+  'galaxy_vortex',
+  'supernova',
+  'blackhole_lens',
+  'synth_prism',
+  'omnitrix_core',
+  'jjk_domain',
+  'nichirin_flame',
+  'chakra_seal',
+  'ki_aura',
+  'grand_line',
+  'odm_telemetry',
+  'pokedex_scan',
+  'upside_down',
+  'hextech_rune',
+  'tardis_vortex',
+  'vault_pip',
+  'jarvis_hud',
+  'kyber_core',
+  'zion_construct',
+  'batcomputer',
+  'invincible_arc',
+  'dune_eclipse',
+  'doomsday_core',
+  'spider_web',
+  'nerv_hex',
+  'tron_disc',
+] as const;
+
 if (
   !(RADIAL_DARK_CHAMBER_STYLES instanceof Set) ||
-  RADIAL_DARK_CHAMBER_STYLES.size !== 11 ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('solar_orbit') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('galaxy_vortex') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('supernova') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('blackhole_lens') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('synth_prism') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('invincible_arc') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('dune_eclipse') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('doomsday_core') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('spider_web') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('nerv_hex') ||
-  !RADIAL_DARK_CHAMBER_STYLES.has('tron_disc')
+  RADIAL_DARK_CHAMBER_STYLES.size !== 27 ||
+  expectedDarkChamberIds.some((id) => !RADIAL_DARK_CHAMBER_STYLES.has(id))
 ) {
-  console.error('RADIAL_DARK_CHAMBER_STYLES must be exported and list the 11 dark cosmic/cinema radial chambers');
+  console.error('RADIAL_DARK_CHAMBER_STYLES must be exported and list all 27 dark cosmic/cinema/anime radial chambers');
   process.exit(1);
 }
 
@@ -892,6 +952,7 @@ const requiredRadialTokens = [
   '<RadialClockGauge',
   'radial-style-bar',
   'data-radial-style',
+  'data-radial-category',
 ];
 
 for (const token of requiredRadialTokens) {
@@ -901,9 +962,9 @@ for (const token of requiredRadialTokens) {
   }
 }
 
-console.log(`✓ Test 13: Radial Gauge Studio (${RADIAL_STYLES.length} cosmic/kinetic/cinema styles, Sweep/Tick motion, dark chamber protection) verified.`);
+console.log(`✓ Test 13: Radial Gauge Studio (${RADIAL_STYLES.length} cosmic/kinetic/cinema/anime styles, Sweep/Tick motion, dark chamber protection) verified.`);
 
-// Test 14: Cinema & Anime Clock Editions across all 9 clock modes
+// Test 14: Cinema, TV & Anime Clock Editions across all 9 clock modes
 import {
   CLOCK_EDITIONS,
   CinemaEditionGlyph,
@@ -911,15 +972,34 @@ import {
   ClockEditionPowerMeter,
   getEditionThemeStyles,
   getEditionDigitFrameClass,
+  getEditionFlipStyle,
+  getEditionCalendarPanelClass,
+  getEditionPrimaryBtnClass,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(CLOCK_EDITIONS) || CLOCK_EDITIONS.length !== 9) {
-  console.error(`Expected 9 Cinema & Anime Clock Editions, found ${CLOCK_EDITIONS?.length}`);
+if (!Array.isArray(CLOCK_EDITIONS) || CLOCK_EDITIONS.length !== 25) {
+  console.error(`Expected 25 Cinema, TV & Anime Clock Editions, found ${CLOCK_EDITIONS?.length}`);
   process.exit(1);
 }
 
 const expectedEditionIds = [
   'classic',
+  'ben10',
+  'jjk',
+  'demonslayer',
+  'naruto',
+  'dragonball',
+  'onepiece',
+  'aot',
+  'pokemon',
+  'strangerthings',
+  'arcane',
+  'doctorwho',
+  'fallout',
+  'ironman',
+  'starwars',
+  'matrix_neo',
+  'batman',
   'invincible',
   'cyberpunk',
   'dune',
@@ -941,13 +1021,15 @@ for (const ed of CLOCK_EDITIONS) {
   if (
     !ed.label ||
     !ed.shortTag ||
+    !ed.category ||
     !ed.tagline ||
     !ed.recommendedBg ||
     !ed.wordEyebrow ||
     !ed.deskHeader ||
     !ed.pomoWorkLabel ||
     (ed.id !== 'classic' &&
-      (!ed.recommendedAnalog ||
+      (ed.category === 'studio' ||
+        !ed.recommendedAnalog ||
         !ed.recommendedRadial ||
         !ed.digitalEyebrow ||
         !ed.stackedEyebrow ||
@@ -969,15 +1051,23 @@ for (const ed of CLOCK_EDITIONS) {
   }
 
   const digitClass = getEditionDigitFrameClass(ed.id, false);
-  if (typeof digitClass !== 'string') {
-    console.error(`getEditionDigitFrameClass returned non-string for ${ed.id}`);
+  const flipStyle = getEditionFlipStyle(ed.id);
+  const calClass = getEditionCalendarPanelClass(ed.id, false);
+  const btnClass = getEditionPrimaryBtnClass(ed.id, false);
+  if (
+    typeof digitClass !== 'string' ||
+    !flipStyle ||
+    typeof calClass !== 'string' ||
+    typeof btnClass !== 'string'
+  ) {
+    console.error(`Invalid helper return value for edition: ${ed.id}`);
     process.exit(1);
   }
 }
 
 for (const reqEdId of expectedEditionIds) {
   if (!editionIds.has(reqEdId)) {
-    console.error(`Missing required Cinema & Anime Clock Edition: ${reqEdId}`);
+    console.error(`Missing required Cinema, TV & Anime Clock Edition: ${reqEdId}`);
     process.exit(1);
   }
 }
@@ -996,20 +1086,28 @@ if (
   !CinemaEditionGlyph ||
   !ClockEditionOverlay ||
   !ClockEditionPowerMeter ||
-  typeof getEditionThemeStyles !== 'function'
+  typeof getEditionThemeStyles !== 'function' ||
+  typeof getEditionFlipStyle !== 'function' ||
+  typeof getEditionCalendarPanelClass !== 'function' ||
+  typeof getEditionPrimaryBtnClass !== 'function'
 ) {
-  console.error('CinemaEditionGlyph, ClockEditionOverlay, ClockEditionPowerMeter, and getEditionThemeStyles must be exported');
+  console.error('All Cinema Edition components and helpers must be exported from DigitalClock.tsx');
   process.exit(1);
 }
 
 const requiredEditionTokens = [
   'vortexero_clock_edition',
   'cinema-edition-bar',
+  'cinema-edition-categories',
+  'data-edition-category',
   'data-clock-edition',
   '<ClockEditionOverlay',
   '<ClockEditionPowerMeter',
   '<CinemaEditionGlyph',
   'getEditionDigitFrameClass',
+  'getEditionFlipStyle',
+  'getEditionCalendarPanelClass',
+  'getEditionPrimaryBtnClass',
 ];
 
 for (const token of requiredEditionTokens) {
@@ -1019,6 +1117,21 @@ for (const token of requiredEditionTokens) {
   }
 }
 
-console.log(`✓ Test 14: Cinema & Anime Clock Editions (${CLOCK_EDITIONS.length} universal editions across all 9 clock modes) verified.`);
+const requiredEditionCssTokens = [
+  '.edition-ben10-text',
+  '.edition-jjk-text',
+  '.edition-stranger-text',
+  '.edition-matrix-text',
+  '.edition-haori-checker',
+];
+
+for (const cssToken of requiredEditionCssTokens) {
+  if (!indexCssSource.includes(cssToken)) {
+    console.error(`src/index.css missing required edition CSS token: ${cssToken}`);
+    process.exit(1);
+  }
+}
+
+console.log(`✓ Test 14: Cinema, TV & Anime Clock Editions (${CLOCK_EDITIONS.length} universal editions across all 9 clock modes) verified.`);
 
 console.log('All automated verification checks PASSED successfully!');
