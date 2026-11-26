@@ -633,8 +633,8 @@ import {
   ClockBackgroundLayer,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 42) {
-  console.error(`Expected 42 Analog watch styles, found ${ANALOG_STYLES?.length}`);
+if (!Array.isArray(ANALOG_STYLES) || ANALOG_STYLES.length !== 50) {
+  console.error(`Expected 50 Analog watch styles, found ${ANALOG_STYLES?.length}`);
   process.exit(1);
 }
 
@@ -660,6 +660,14 @@ const expectedAnalogIds = [
   'blackhole',
   'gears',
   'cyberwave',
+  'vice_palm',
+  'creeper_dial',
+  'phantom_mask',
+  'golden_order',
+  'leviathan_rune',
+  'triforce_slate',
+  'mjolnir_visor',
+  'arcade_maze',
   'omnitrix',
   'jjk_void',
   'nichirin',
@@ -714,8 +722,8 @@ if (typeof AnalogClockDial !== 'function' || typeof AnalogStyleGlyph !== 'functi
   process.exit(1);
 }
 
-if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 20) {
-  console.error(`Expected 20 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
+if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 23) {
+  console.error(`Expected 23 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
   process.exit(1);
 }
 
@@ -740,6 +748,9 @@ const expectedBgIds = [
   'matrix_rain',
   'ember_spores',
   'arcane_runes',
+  'vice_sunset',
+  'erdtree_petals',
+  'pixel_arcade',
   'none',
 ];
 for (const bg of CLOCK_BG_FX_OPTIONS) {
@@ -814,6 +825,8 @@ const requiredBgCssTokens = [
   '.animate-bg-ember-rise',
   '.animate-bg-cursed-swirl',
   '.animate-bg-omnitrix-pulse',
+  '.animate-bg-palm-sway',
+  '.animate-bg-pixel-float',
 ];
 
 for (const cssToken of requiredBgCssTokens) {
@@ -825,7 +838,7 @@ for (const cssToken of requiredBgCssTokens) {
 
 console.log(`✓ Test 12: Analog Horology Studio (${ANALOG_STYLES.length} dial styles, ${CLOCK_BG_FX_OPTIONS.length} animated background scenes, sweep/tick motion) verified.`);
 
-// Test 13: Radial Gauge Studio (34 scenic/kinetic/cinema/anime styles, Sweep/Tick motion, cosmic contrast protection)
+// Test 13: Radial Gauge Studio (42 scenic/kinetic/game/cinema/anime styles, Sweep/Tick motion, cosmic contrast protection)
 import {
   RADIAL_STYLES,
   RADIAL_DARK_CHAMBER_STYLES,
@@ -833,8 +846,8 @@ import {
   RadialStyleGlyph,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(RADIAL_STYLES) || RADIAL_STYLES.length !== 34) {
-  console.error(`Expected 34 Radial Gauge styles, found ${RADIAL_STYLES?.length}`);
+if (!Array.isArray(RADIAL_STYLES) || RADIAL_STYLES.length !== 42) {
+  console.error(`Expected 42 Radial Gauge styles, found ${RADIAL_STYLES?.length}`);
   process.exit(1);
 }
 
@@ -852,6 +865,14 @@ const expectedRadialIds = [
   'dna_helix',
   'synth_prism',
   'fractal_mandala',
+  'vice_city',
+  'emerald_xp',
+  'velvet_rebellion',
+  'erdtree_grace',
+  'omega_frost',
+  'sheikah_orb',
+  'cortana_ring',
+  'maze_chomper',
   'omnitrix_core',
   'jjk_domain',
   'nichirin_flame',
@@ -907,6 +928,14 @@ const expectedDarkChamberIds = [
   'supernova',
   'blackhole_lens',
   'synth_prism',
+  'vice_city',
+  'emerald_xp',
+  'velvet_rebellion',
+  'erdtree_grace',
+  'omega_frost',
+  'sheikah_orb',
+  'cortana_ring',
+  'maze_chomper',
   'omnitrix_core',
   'jjk_domain',
   'nichirin_flame',
@@ -933,10 +962,10 @@ const expectedDarkChamberIds = [
 
 if (
   !(RADIAL_DARK_CHAMBER_STYLES instanceof Set) ||
-  RADIAL_DARK_CHAMBER_STYLES.size !== 27 ||
+  RADIAL_DARK_CHAMBER_STYLES.size !== 35 ||
   expectedDarkChamberIds.some((id) => !RADIAL_DARK_CHAMBER_STYLES.has(id))
 ) {
-  console.error('RADIAL_DARK_CHAMBER_STYLES must be exported and list all 27 dark cosmic/cinema/anime radial chambers');
+  console.error('RADIAL_DARK_CHAMBER_STYLES must be exported and list all 35 dark cosmic/game/cinema/anime radial chambers');
   process.exit(1);
 }
 
@@ -962,9 +991,9 @@ for (const token of requiredRadialTokens) {
   }
 }
 
-console.log(`✓ Test 13: Radial Gauge Studio (${RADIAL_STYLES.length} cosmic/kinetic/cinema/anime styles, Sweep/Tick motion, dark chamber protection) verified.`);
+console.log(`✓ Test 13: Radial Gauge Studio (${RADIAL_STYLES.length} cosmic/kinetic/game/cinema/anime styles, Sweep/Tick motion, dark chamber protection) verified.`);
 
-// Test 14: Cinema, TV & Anime Clock Editions across all 9 clock modes
+// Test 14: Games, Cinema, TV & Anime Clock Editions across all 9 clock modes
 import {
   CLOCK_EDITIONS,
   CinemaEditionGlyph,
@@ -977,13 +1006,21 @@ import {
   getEditionPrimaryBtnClass,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(CLOCK_EDITIONS) || CLOCK_EDITIONS.length !== 25) {
-  console.error(`Expected 25 Cinema, TV & Anime Clock Editions, found ${CLOCK_EDITIONS?.length}`);
+if (!Array.isArray(CLOCK_EDITIONS) || CLOCK_EDITIONS.length !== 33) {
+  console.error(`Expected 33 Games, Cinema, TV & Anime Clock Editions, found ${CLOCK_EDITIONS?.length}`);
   process.exit(1);
 }
 
 const expectedEditionIds = [
   'classic',
+  'gta6',
+  'minecraft',
+  'persona5',
+  'eldenring',
+  'godofwar',
+  'zelda_totk',
+  'halo_unsc',
+  'pacman',
   'ben10',
   'jjk',
   'demonslayer',
@@ -1067,7 +1104,7 @@ for (const ed of CLOCK_EDITIONS) {
 
 for (const reqEdId of expectedEditionIds) {
   if (!editionIds.has(reqEdId)) {
-    console.error(`Missing required Cinema, TV & Anime Clock Edition: ${reqEdId}`);
+    console.error(`Missing required Games, Cinema, TV & Anime Clock Edition: ${reqEdId}`);
     process.exit(1);
   }
 }
@@ -1091,7 +1128,7 @@ if (
   typeof getEditionCalendarPanelClass !== 'function' ||
   typeof getEditionPrimaryBtnClass !== 'function'
 ) {
-  console.error('All Cinema Edition components and helpers must be exported from DigitalClock.tsx');
+  console.error('All Edition components and helpers must be exported from DigitalClock.tsx');
   process.exit(1);
 }
 
@@ -1112,7 +1149,7 @@ const requiredEditionTokens = [
 
 for (const token of requiredEditionTokens) {
   if (!digitalClockSource.includes(token)) {
-    console.error(`DigitalClock.tsx missing required Cinema Edition token: ${token}`);
+    console.error(`DigitalClock.tsx missing required Edition token: ${token}`);
     process.exit(1);
   }
 }
@@ -1123,6 +1160,11 @@ const requiredEditionCssTokens = [
   '.edition-stranger-text',
   '.edition-matrix-text',
   '.edition-haori-checker',
+  '.edition-gta6-text',
+  '.edition-minecraft-text',
+  '.edition-persona5-text',
+  '.edition-eldenring-text',
+  '.edition-grass-top',
 ];
 
 for (const cssToken of requiredEditionCssTokens) {
@@ -1132,6 +1174,6 @@ for (const cssToken of requiredEditionCssTokens) {
   }
 }
 
-console.log(`✓ Test 14: Cinema, TV & Anime Clock Editions (${CLOCK_EDITIONS.length} universal editions across all 9 clock modes) verified.`);
+console.log(`✓ Test 14: Games, Cinema, TV & Anime Clock Editions (${CLOCK_EDITIONS.length} universal editions across all 9 clock modes) verified.`);
 
 console.log('All automated verification checks PASSED successfully!');

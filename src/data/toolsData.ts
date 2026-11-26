@@ -114,11 +114,11 @@ const RAW_TOOLS: Tool[] = [
   {
     id: 'digital-clock',
     name: 'Modern Digital Clock Studio',
-    description: 'Fullscreen aesthetic desk clock studio with 45 themes, 25 Cinema, TV & Anime Editions (Ben 10, Jujutsu Kaisen, Demon Slayer, Iron Man & more), 42 Analog watch dials, 34 Radial gauges, Word Clock, Flip Clock, Desk Calendar & Pomodoro.',
+    description: 'Fullscreen aesthetic desk clock studio with 45 themes, 33 Games, Cinema, TV & Anime Editions (GTA 6 Vice City, Minecraft, Persona 5, Elden Ring, Ben 10, Jujutsu Kaisen & more), 50 Analog dials, 42 Radial gauges, Word Clock, Flip Clock, Desk Calendar & Pomodoro.',
     category: 'productivity',
     iconName: 'Clock',
     badge: 'Hot',
-    tags: ['clock', 'time', 'second-monitor', 'pomodoro', 'minimalist', 'fullscreen', 'anime', 'cinema']
+    tags: ['clock', 'time', 'second-monitor', 'pomodoro', 'minimalist', 'fullscreen', 'games', 'anime', 'cinema']
   },
   {
     id: 'typing-test',

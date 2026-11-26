@@ -2,6 +2,14 @@ import React from 'react';
 
 export type ClockEdition =
   | 'classic'
+  | 'gta6'
+  | 'minecraft'
+  | 'persona5'
+  | 'eldenring'
+  | 'godofwar'
+  | 'zelda_totk'
+  | 'halo_unsc'
+  | 'pacman'
   | 'ben10'
   | 'jjk'
   | 'invincible'
@@ -27,7 +35,7 @@ export type ClockEdition =
   | 'tron'
   | 'akira';
 
-export type ClockEditionCategory = 'all' | 'anime' | 'tv' | 'movies';
+export type ClockEditionCategory = 'all' | 'games' | 'anime' | 'tv' | 'movies';
 
 export interface EditionThemeStyles {
   bg: string;
@@ -54,7 +62,7 @@ export interface ClockEditionMeta {
   id: ClockEdition;
   label: string;
   shortTag: string;
-  category: 'studio' | 'anime' | 'tv' | 'movies';
+  category: 'studio' | 'games' | 'anime' | 'tv' | 'movies';
   tagline: string;
   recommendedBg: string;
   recommendedAnalog?: string;
@@ -88,6 +96,158 @@ export const CLOCK_EDITIONS: ClockEditionMeta[] = [
     pomoBreakLabel: 'Short Break',
     pomoStartLabel: 'Start Focus',
     stopwatchEyebrow: '',
+  },
+  {
+    id: 'gta6',
+    label: 'GTA 6 Vice City',
+    shortTag: 'LEONIDA',
+    category: 'games',
+    tagline: 'Vice City neon twilight, swaying coconut palm trees, Ocean Drive teal and Leonida sunset pink',
+    recommendedBg: 'vice_sunset',
+    recommendedAnalog: 'vice_palm',
+    recommendedRadial: 'vice_city',
+    swatchClass: 'bg-gradient-to-tr from-[#ff2e93] via-[#ff8c42] to-[#00f5d4]',
+    digitalEyebrow: 'VICE CITY // STATE OF LEONIDA // SUNSET',
+    stackedEyebrow: 'OCEAN BEACH // VICE COVE VI',
+    wordEyebrow: 'VICE CITY // VI',
+    deskHeader: 'Leonida Vice Ledger',
+    pomoWorkLabel: 'HEIST PREP // LEONIDA',
+    pomoBreakLabel: 'OCEAN DRIVE CHILL',
+    pomoStartLabel: 'Launch Mission',
+    stopwatchEyebrow: 'MIDNIGHT TURBO HEIST',
+  },
+  {
+    id: 'minecraft',
+    label: 'Minecraft',
+    shortTag: 'OVERWORLD',
+    category: 'games',
+    tagline: 'Voxel grass-block horizon trim, emerald Creeper silhouette, Diamond cyan and XP orb lime',
+    recommendedBg: 'pixel_arcade',
+    recommendedAnalog: 'creeper_dial',
+    recommendedRadial: 'emerald_xp',
+    swatchClass: 'bg-gradient-to-tr from-[#78350f] via-[#22c55e] to-[#22d3ee]',
+    digitalEyebrow: 'OVERWORLD // DAYLIGHT CYCLE // SEED 64',
+    stackedEyebrow: 'DIAMOND TIER // XP LVL 30',
+    wordEyebrow: 'CHUNK LOADED',
+    deskHeader: 'Redstone Daybench',
+    pomoWorkLabel: 'DEEP MINING // Y=-59',
+    pomoBreakLabel: 'CAMPFIRE RESPAWN',
+    pomoStartLabel: 'Craft & Focus',
+    stopwatchEyebrow: 'ELYTRA SPEEDRUN SPLIT',
+  },
+  {
+    id: 'persona5',
+    label: 'Persona 5',
+    shortTag: 'PHANTOM',
+    category: 'games',
+    tagline: 'Razor-sharp Phantom Thieves crimson, ink black and stark white calling-card panels',
+    recommendedBg: 'comic_burst',
+    recommendedAnalog: 'phantom_mask',
+    recommendedRadial: 'velvet_rebellion',
+    swatchClass: 'bg-gradient-to-tr from-[#050505] via-[#dc2626] to-[#ffffff]',
+    digitalEyebrow: 'TAKE YOUR TIME // SHIBUYA CENTRAL',
+    stackedEyebrow: 'ALL-OUT ATTACK // PHANTOM',
+    wordEyebrow: 'SHOWTIME // P5',
+    deskHeader: 'Confidant Schedule',
+    pomoWorkLabel: 'PALACE INFILTRATION',
+    pomoBreakLabel: 'LEBLANC COFFEE BREAK',
+    pomoStartLabel: 'Take Your Heart',
+    stopwatchEyebrow: 'BATON PASS CHAIN SPLIT',
+  },
+  {
+    id: 'eldenring',
+    label: 'Elden Ring',
+    shortTag: 'SHATTERED',
+    category: 'games',
+    tagline: 'Golden Order interlocking Great Runes, Erdtree grace light embers and obsidian shadow',
+    recommendedBg: 'erdtree_petals',
+    recommendedAnalog: 'golden_order',
+    recommendedRadial: 'erdtree_grace',
+    swatchClass: 'bg-gradient-to-tr from-[#0a0704] via-[#d97706] to-[#fef08a]',
+    digitalEyebrow: 'THE LANDS BETWEEN // GRACE DISCOVERED',
+    stackedEyebrow: 'GOLDEN ORDER // ERDTREE',
+    wordEyebrow: 'SITE OF GRACE',
+    deskHeader: 'Roundtable Hold Log',
+    pomoWorkLabel: 'RUNE ASCENSION',
+    pomoBreakLabel: 'REST AT SITE OF GRACE',
+    pomoStartLabel: 'Touch Grace',
+    stopwatchEyebrow: 'TARNISHED SPEEDRUN CHRONO',
+  },
+  {
+    id: 'godofwar',
+    label: 'God of War',
+    shortTag: 'RAGNAROK',
+    category: 'games',
+    tagline: 'Blazing Nordic Omega crest, Midgard frost ice blue and Spartan Rage Leviathan crimson',
+    recommendedBg: 'erdtree_petals',
+    recommendedAnalog: 'leviathan_rune',
+    recommendedRadial: 'omega_frost',
+    swatchClass: 'bg-gradient-to-tr from-[#0f172a] via-[#38bdf8] to-[#ef4444]',
+    digitalEyebrow: 'NINE REALMS // FIMBULWINTER WATCH',
+    stackedEyebrow: 'SPARTAN RAGE // LEVIATHAN FROST',
+    wordEyebrow: 'MIDGARD // OMEGA',
+    deskHeader: 'Tyr Vault Chronicle',
+    pomoWorkLabel: 'BROK FORGE DISCIPLINE',
+    pomoBreakLabel: 'LAKE OF NINE RESPITE',
+    pomoStartLabel: 'Ignite Blades',
+    stopwatchEyebrow: 'VALKYRIE TRIAL CHRONO',
+  },
+  {
+    id: 'zelda_totk',
+    label: 'Zelda Sheikah',
+    shortTag: 'HYRULE',
+    category: 'games',
+    tagline: 'Glowing cyan Sheikah Slate circuit constellation paired with the sacred Golden Triforce',
+    recommendedBg: 'arcane_runes',
+    recommendedAnalog: 'triforce_slate',
+    recommendedRadial: 'sheikah_orb',
+    swatchClass: 'bg-gradient-to-tr from-[#071824] via-[#06b6d4] to-[#facc15]',
+    digitalEyebrow: 'SHEIKAH SLATE // SKYVIEW TOWER LOCKED',
+    stackedEyebrow: 'ZONAI CORE // HYRULE FIELD',
+    wordEyebrow: 'SHEIKAH // SLATE',
+    deskHeader: 'Purah Pad Chronicle',
+    pomoWorkLabel: 'SHRINE TRIAL FOCUS',
+    pomoBreakLabel: 'STABLE REST',
+    pomoStartLabel: 'Activate Rune',
+    stopwatchEyebrow: 'SHIELD-SURF TIME TRIAL',
+  },
+  {
+    id: 'halo_unsc',
+    label: 'Halo Mjolnir',
+    shortTag: 'SPARTAN-117',
+    category: 'games',
+    tagline: 'UNSC Mjolnir gold hex visor frame, energy shield integrity gauge and Cortana blue telemetry',
+    recommendedBg: 'orbital',
+    recommendedAnalog: 'mjolnir_visor',
+    recommendedRadial: 'cortana_ring',
+    swatchClass: 'bg-gradient-to-tr from-[#08121f] via-[#fbbf24] to-[#38bdf8]',
+    digitalEyebrow: 'UNSC // MJOLNIR MK-VI // SHIELDS 100%',
+    stackedEyebrow: 'INSTALLATION 04 // CORTANA LINK',
+    wordEyebrow: 'SPARTAN // HUD',
+    deskHeader: 'Infinity Fleet Deck',
+    pomoWorkLabel: 'SPARTAN COMBAT DRILL',
+    pomoBreakLabel: 'SHIELD RECHARGE',
+    pomoStartLabel: 'Boot Visor HUD',
+    stopwatchEyebrow: 'WARTHOG RUN TIMER',
+  },
+  {
+    id: 'pacman',
+    label: 'Pac-Man Arcade',
+    shortTag: '1980-COIN',
+    category: 'games',
+    tagline: '1980 cabinet neon-blue maze rails, golden chomper arc, glowing pellets and pixel ghosts',
+    recommendedBg: 'pixel_arcade',
+    recommendedAnalog: 'arcade_maze',
+    recommendedRadial: 'maze_chomper',
+    swatchClass: 'bg-gradient-to-tr from-[#1d4ed8] via-[#facc15] to-[#f43f5e]',
+    digitalEyebrow: '1UP READY // HIGH SCORE 999990 // MAZE',
+    stackedEyebrow: 'INSERT COIN // POWER PELLET',
+    wordEyebrow: 'ARCADE // PLAYER 1',
+    deskHeader: 'Namco Cabinet Log',
+    pomoWorkLabel: 'POWER PELLET FRENZY',
+    pomoBreakLabel: 'INTERMISSION STAGE',
+    pomoStartLabel: 'Insert Coin',
+    stopwatchEyebrow: 'CHERRY BONUS SPEEDRUN',
   },
   {
     id: 'ben10',
@@ -549,6 +709,166 @@ export const CLOCK_EDITIONS: ClockEditionMeta[] = [
 
 export const getEditionThemeStyles = (edition: Exclude<ClockEdition, 'classic'>): EditionThemeStyles => {
   switch (edition) {
+    case 'gta6':
+      return {
+        bg: 'bg-gradient-to-br from-[#160423] via-[#2c083a] to-[#0a0820]',
+        clockText: 'edition-gta6-text',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(255,46,147,0.28),rgba(255,140,66,0.14)_48%,rgba(0,245,212,0.08)_75%,transparent_88%)]',
+        accent: 'text-[#00f5d4]',
+        border: 'border-[#ff2e93]/65',
+        badgeBg: 'bg-[#ff2e93]/20 text-[#ffe4f2] border-[#00f5d4]/55',
+        handSec: '#00f5d4',
+        handMin: '#fde047',
+        handHr: '#ff2e93',
+        dialBg: '#1d062d',
+        dialBorder: '#ff2e93',
+        flipCard: 'bg-[#210734] text-[#fff1f9] border-[#ff2e93]/70 shadow-[#ff2e93]/30',
+        progressBar: 'bg-gradient-to-r from-[#ff2e93] via-[#ff8c42] to-[#00f5d4]',
+        subText: 'text-pink-200/85',
+        dialTickMajor: '#00f5d4',
+        dialTickMinor: 'rgba(255,46,147,0.38)',
+        dialNumColor: '#fef08a',
+      };
+    case 'minecraft':
+      return {
+        bg: 'bg-[#09120b]',
+        clockText: 'edition-minecraft-text',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.22),rgba(34,211,238,0.1)_52%,transparent_76%)]',
+        accent: 'text-[#4ade80]',
+        border: 'border-[#22c55e]/65',
+        badgeBg: 'bg-[#14532d]/70 text-[#bbf7d0] border-[#4ade80]/60',
+        handSec: '#22d3ee',
+        handMin: '#4ade80',
+        handHr: '#a3e635',
+        dialBg: '#0d1a0f',
+        dialBorder: '#22c55e',
+        flipCard: 'bg-[#102113] text-[#dcfce7] border-[#22c55e]/70 shadow-[#22c55e]/25',
+        progressBar: 'bg-gradient-to-r from-[#16a34a] via-[#4ade80] to-[#a3e635]',
+        subText: 'text-emerald-200/80',
+        dialTickMajor: '#4ade80',
+        dialTickMinor: 'rgba(74,222,128,0.34)',
+        dialNumColor: '#22d3ee',
+      };
+    case 'persona5':
+      return {
+        bg: 'bg-gradient-to-br from-[#190202] via-[#7f1d1d]/30 to-[#060606]',
+        clockText: 'edition-persona5-text',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.3),rgba(239,68,68,0.08)_55%,transparent_80%)]',
+        accent: 'text-[#f8fafc]',
+        border: 'border-[#dc2626]/80',
+        badgeBg: 'bg-[#dc2626]/90 text-white border-white/80',
+        handSec: '#ffffff',
+        handMin: '#ef4444',
+        handHr: '#f8fafc',
+        dialBg: '#0a0a0a',
+        dialBorder: '#dc2626',
+        flipCard: 'bg-[#09090b] text-white border-[#dc2626]/85 shadow-[#dc2626]/35',
+        progressBar: 'bg-gradient-to-r from-[#dc2626] via-[#ffffff] to-[#dc2626]',
+        subText: 'text-red-200/85',
+        dialTickMajor: '#ffffff',
+        dialTickMinor: 'rgba(220,38,38,0.45)',
+        dialNumColor: '#ffffff',
+      };
+    case 'eldenring':
+      return {
+        bg: 'bg-[#080603]',
+        clockText: 'edition-eldenring-text',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.22),rgba(180,83,9,0.1)_52%,transparent_78%)]',
+        accent: 'text-[#fbbf24]',
+        border: 'border-[#d97706]/60',
+        badgeBg: 'bg-amber-950/70 text-[#fde68a] border-[#fbbf24]/55',
+        handSec: '#fef08a',
+        handMin: '#fbbf24',
+        handHr: '#d97706',
+        dialBg: '#0c0904',
+        dialBorder: '#d97706',
+        flipCard: 'bg-[#120d05] text-[#fef3c7] border-[#fbbf24]/60 shadow-[#fbbf24]/25',
+        progressBar: 'bg-gradient-to-r from-[#b45309] via-[#fbbf24] to-[#fef08a]',
+        subText: 'text-amber-200/80',
+        dialTickMajor: '#fbbf24',
+        dialTickMinor: 'rgba(217,119,6,0.34)',
+        dialNumColor: '#fef3c7',
+      };
+    case 'godofwar':
+      return {
+        bg: 'bg-gradient-to-br from-[#070b14] via-[#0e1726] to-[#190609]',
+        clockText: 'text-[#f8fafc] drop-shadow-[0_0_26px_rgba(56,189,248,0.65)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.18),rgba(239,68,68,0.12)_55%,transparent_80%)]',
+        accent: 'text-[#38bdf8]',
+        border: 'border-[#ef4444]/60',
+        badgeBg: 'bg-[#0c1b2e]/75 text-[#e0f2fe] border-[#ef4444]/60',
+        handSec: '#38bdf8',
+        handMin: '#f8fafc',
+        handHr: '#ef4444',
+        dialBg: '#0b1220',
+        dialBorder: '#ef4444',
+        flipCard: 'bg-[#0f172a] text-[#e0f2fe] border-[#38bdf8]/60 shadow-[#38bdf8]/25',
+        progressBar: 'bg-gradient-to-r from-[#38bdf8] via-[#f8fafc] to-[#ef4444]',
+        subText: 'text-slate-300/85',
+        dialTickMajor: '#ef4444',
+        dialTickMinor: 'rgba(56,189,248,0.35)',
+        dialNumColor: '#e0f2fe',
+      };
+    case 'zelda_totk':
+      return {
+        bg: 'bg-[#051018]',
+        clockText: 'text-[#a5f3fc] drop-shadow-[0_0_28px_rgba(6,182,212,0.8)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.22),rgba(250,204,21,0.08)_54%,transparent_80%)]',
+        accent: 'text-[#facc15]',
+        border: 'border-[#06b6d4]/60',
+        badgeBg: 'bg-[#083344]/75 text-[#cffafe] border-[#facc15]/55',
+        handSec: '#facc15',
+        handMin: '#22d3ee',
+        handHr: '#fbbf24',
+        dialBg: '#071722',
+        dialBorder: '#06b6d4',
+        flipCard: 'bg-[#081d2b] text-[#a5f3fc] border-[#06b6d4]/65 shadow-[#06b6d4]/25',
+        progressBar: 'bg-gradient-to-r from-[#06b6d4] via-[#22d3ee] to-[#facc15]',
+        subText: 'text-cyan-200/80',
+        dialTickMajor: '#facc15',
+        dialTickMinor: 'rgba(6,182,212,0.35)',
+        dialNumColor: '#fef08a',
+      };
+    case 'halo_unsc':
+      return {
+        bg: 'bg-[#070e17]',
+        clockText: 'text-[#fde68a] drop-shadow-[0_0_26px_rgba(251,191,36,0.72)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.2),rgba(56,189,248,0.1)_54%,transparent_78%)]',
+        accent: 'text-[#38bdf8]',
+        border: 'border-[#fbbf24]/60',
+        badgeBg: 'bg-[#172554]/65 text-[#fef3c7] border-[#fbbf24]/55',
+        handSec: '#38bdf8',
+        handMin: '#fbbf24',
+        handHr: '#f59e0b',
+        dialBg: '#0b1523',
+        dialBorder: '#fbbf24',
+        flipCard: 'bg-[#0d1929] text-[#fef3c7] border-[#fbbf24]/65 shadow-[#fbbf24]/25',
+        progressBar: 'bg-gradient-to-r from-[#d97706] via-[#fbbf24] to-[#38bdf8]',
+        subText: 'text-amber-200/80',
+        dialTickMajor: '#fbbf24',
+        dialTickMinor: 'rgba(56,189,248,0.35)',
+        dialNumColor: '#e0f2fe',
+      };
+    case 'pacman':
+      return {
+        bg: 'bg-[#030514]',
+        clockText: 'text-[#fde047] drop-shadow-[0_0_26px_rgba(250,204,21,0.82)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.26),rgba(250,204,21,0.1)_52%,transparent_80%)]',
+        accent: 'text-[#38bdf8]',
+        border: 'border-[#2563eb]/75',
+        badgeBg: 'bg-[#1e3a8a]/65 text-[#fef08a] border-[#2563eb]/75',
+        handSec: '#facc15',
+        handMin: '#38bdf8',
+        handHr: '#f43f5e',
+        dialBg: '#03071d',
+        dialBorder: '#2563eb',
+        flipCard: 'bg-[#050b29] text-[#fde047] border-[#2563eb]/80 shadow-[#2563eb]/30',
+        progressBar: 'bg-gradient-to-r from-[#2563eb] via-[#facc15] to-[#f43f5e]',
+        subText: 'text-sky-200/85',
+        dialTickMajor: '#facc15',
+        dialTickMinor: 'rgba(37,99,235,0.45)',
+        dialNumColor: '#fef08a',
+      };
     case 'ben10':
       return {
         bg: 'bg-[#060c07]',
@@ -1038,6 +1358,77 @@ export const CinemaEditionGlyph: React.FC<{ edition: ClockEdition; className?: s
   className = 'w-4 h-4 shrink-0',
 }) => {
   switch (edition) {
+    case 'gta6':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
+          <circle cx="10" cy="10" r="8" fill="#1d062d" stroke="#ff2e93" strokeWidth="1.3" />
+          <circle cx="10" cy="11.5" r="4.8" fill="#ff8c42" fillOpacity="0.85" />
+          <line x1="5.2" y1="12.5" x2="14.8" y2="12.5" stroke="#1d062d" strokeWidth="1" />
+          {/* Iconic palm trunk + coconut crown silhouette */}
+          <path d="M 10.2 16 Q 11.2 12.2 10.5 8.5" stroke="#00f5d4" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M 10.5 8.5 Q 7 6.8 5 9 M 10.5 8.5 Q 8 5.2 6.5 5.2 M 10.5 8.5 Q 14 6.8 16 9 M 10.5 8.5 Q 13 5.2 14.5 5.4" stroke="#00f5d4" strokeWidth="1.2" strokeLinecap="round" />
+          <circle cx="9.6" cy="9.4" r="0.9" fill="#451a03" stroke="#fde047" strokeWidth="0.4" />
+          <circle cx="11.2" cy="9.4" r="0.9" fill="#451a03" stroke="#fde047" strokeWidth="0.4" />
+        </svg>
+      );
+    case 'minecraft':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
+          <rect x="2.5" y="2.5" width="15" height="15" rx="2" fill="#22c55e" stroke="#052e16" strokeWidth="1.4" />
+          <rect x="5" y="5.5" width="3.5" height="3.5" fill="#052e16" />
+          <rect x="11.5" y="5.5" width="3.5" height="3.5" fill="#052e16" />
+          <rect x="8.2" y="9" width="3.6" height="3.2" fill="#052e16" />
+          <rect x="6.5" y="10.8" width="1.9" height="4.5" fill="#052e16" />
+          <rect x="11.6" y="10.8" width="1.9" height="4.5" fill="#052e16" />
+        </svg>
+      );
+    case 'persona5':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
+          <polygon points="3,5 17,2.8 15,15.5 2,17.2" fill="#dc2626" stroke="#ffffff" strokeWidth="1.2" />
+          <polygon points="10,5.2 11.8,8.8 15.6,9.2 12.6,11.6 13.4,15.2 10,13.2 6.6,15.2 7.4,11.6 4.4,9.2 8.2,8.8" fill="#050505" stroke="#ffffff" strokeWidth="0.8" />
+        </svg>
+      );
+    case 'eldenring':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
+          <circle cx="10" cy="7.5" r="4.2" stroke="#fbbf24" strokeWidth="1.2" />
+          <circle cx="7.4" cy="11.5" r="4" stroke="#f59e0b" strokeWidth="1.15" />
+          <circle cx="12.6" cy="11.5" r="4" stroke="#fef08a" strokeWidth="1.15" />
+          <line x1="10" y1="2.8" x2="10" y2="17.2" stroke="#fef3c7" strokeWidth="1.15" />
+        </svg>
+      );
+    case 'godofwar':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
+          <circle cx="10" cy="10" r="8" fill="#0b1220" stroke="#38bdf8" strokeWidth="1.2" />
+          <path d="M 5.6 14.2 H 8.2 V 12.4 A 4.4 4.4 0 1 1 11.8 12.4 V 14.2 H 14.4" stroke="#ef4444" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case 'zelda_totk':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
+          <polygon points="10,3.2 13.4,9.4 6.6,9.4" fill="#facc15" />
+          <polygon points="6.6,9.4 10,15.6 3.2,15.6" fill="#facc15" />
+          <polygon points="13.4,9.4 16.8,15.6 10,15.6" fill="#facc15" />
+          <circle cx="10" cy="11.6" r="1.4" fill="#06b6d4" />
+        </svg>
+      );
+    case 'halo_unsc':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
+          <polygon points="5.5,3.5 14.5,3.5 17.5,9.5 14.5,16.5 5.5,16.5 2.5,9.5" fill="#0b1523" stroke="#38bdf8" strokeWidth="1.2" />
+          <polygon points="6.5,7 13.5,7 15,10 12.8,13 7.2,13 5,10" fill="#fbbf24" stroke="#fef3c7" strokeWidth="0.9" />
+        </svg>
+      );
+    case 'pacman':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
+          <rect x="2" y="2" width="16" height="16" rx="3" fill="#03071d" stroke="#2563eb" strokeWidth="1.3" />
+          <path d="M 9.8 10 L 14.5 6.8 A 5.6 5.6 0 1 0 14.5 13.2 Z" fill="#facc15" />
+          <circle cx="15.8" cy="10" r="1.3" fill="#ffffff" />
+        </svg>
+      );
     case 'ben10':
       return (
         <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
@@ -1271,6 +1662,259 @@ export const ClockEditionOverlay: React.FC<{ edition: ClockEdition; isFullscreen
       className="absolute inset-0 pointer-events-none select-none z-[1] overflow-hidden"
       aria-hidden="true"
     >
+      {/* GTA 6 VICE CITY: Neon Tropical Twilight Border, Striped Sunset & Swaying Coconut Palm Silhouettes */}
+      {edition === 'gta6' && (
+        <>
+          <div className="absolute inset-3 rounded-2xl border-2 border-[#ff2e93]/55 shadow-[inset_0_0_46px_rgba(255,46,147,0.16)]" />
+          <div className="absolute bottom-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#ff2e93] via-[#ff8c42] to-[#00f5d4] opacity-90" />
+          <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full opacity-75">
+            {/* Warm Vice City Sliced Sunset Orb on Lower Horizon */}
+            <circle cx="400" cy="470" r="145" fill="#ff8c42" fillOpacity="0.18" stroke="#ff2e93" strokeOpacity="0.4" strokeWidth="1.4" />
+            <line x1="255" y1="425" x2="545" y2="425" stroke="#160423" strokeWidth="4" strokeOpacity="0.55" />
+            <line x1="275" y1="448" x2="525" y2="448" stroke="#160423" strokeWidth="5" strokeOpacity="0.6" />
+            <line x1="305" y1="472" x2="495" y2="472" stroke="#160423" strokeWidth="6" strokeOpacity="0.65" />
+
+            {/* Left Foreground Coconut Palm Tree (with Clustered Coconuts!) */}
+            <g fill="#090214" stroke="#ff2e93" strokeOpacity="0.65" strokeWidth="1.2">
+              <path d="M 38 505 Q 52 385 88 265 L 97 268 Q 68 388 62 505 Z" />
+              {/* Coconuts clustered under fronds */}
+              <circle cx="88" cy="272" r="7.2" fill="#2a0a28" stroke="#fde047" strokeWidth="1.1" />
+              <circle cx="99" cy="274" r="6.8" fill="#2a0a28" stroke="#fde047" strokeWidth="1.1" />
+              <circle cx="93" cy="282" r="6.5" fill="#2a0a28" stroke="#ff8c42" strokeWidth="1" />
+              {/* Sweeping Palm Fronds */}
+              <path d="M 92 266 Q 48 228 12 248 Q 52 248 92 266 Z" fill="#140424" />
+              <path d="M 92 266 Q 55 198 22 184 Q 65 212 92 266 Z" fill="#140424" />
+              <path d="M 92 266 Q 94 195 112 162 Q 112 208 92 266 Z" fill="#140424" />
+              <path d="M 92 266 Q 135 206 168 214 Q 134 228 92 266 Z" fill="#140424" />
+              <path d="M 92 266 Q 138 242 165 272 Q 130 264 92 266 Z" fill="#140424" />
+            </g>
+
+            {/* Right Foreground Twin Coconut Palm Trees */}
+            <g fill="#090214" stroke="#00f5d4" strokeOpacity="0.6" strokeWidth="1.2">
+              <path d="M 762 505 Q 748 390 714 252 L 704 256 Q 730 392 736 505 Z" />
+              {/* Coconuts clustered under right crown */}
+              <circle cx="712" cy="260" r="7.2" fill="#0d182b" stroke="#00f5d4" strokeWidth="1.1" />
+              <circle cx="701" cy="263" r="6.8" fill="#0d182b" stroke="#fde047" strokeWidth="1.1" />
+              <circle cx="708" cy="271" r="6.4" fill="#0d182b" stroke="#ff2e93" strokeWidth="1" />
+              {/* Sweeping Palm Fronds */}
+              <path d="M 709 254 Q 752 216 790 236 Q 748 236 709 254 Z" fill="#0b1526" />
+              <path d="M 709 254 Q 746 186 778 172 Q 736 200 709 254 Z" fill="#0b1526" />
+              <path d="M 709 254 Q 706 182 686 150 Q 688 196 709 254 Z" fill="#0b1526" />
+              <path d="M 709 254 Q 664 196 632 204 Q 666 218 709 254 Z" fill="#0b1526" />
+              <path d="M 709 254 Q 662 232 636 262 Q 672 254 709 254 Z" fill="#0b1526" />
+            </g>
+          </svg>
+          {/* Top-Right 5 Wanted Stars Emblem (crisp SVG stars, zero emojis) */}
+          {!isFullscreen && (
+            <div className="hidden sm:flex absolute bottom-4 inset-x-10 items-center justify-between text-[9px] font-mono font-extrabold uppercase tracking-[0.26em] text-[#00f5d4]/85">
+              <span>VICE CITY // LEONIDA VI</span>
+              <span className="flex items-center gap-1 text-[#fde047]">
+                <span>WANTED</span>
+                {Array.from({ length: 5 }).map((_, sIdx) => (
+                  <svg key={sIdx} viewBox="0 0 12 12" className="w-2.5 h-2.5 fill-current">
+                    <polygon points="6,1 7.5,4.2 11,4.6 8.4,7 9.1,10.5 6,8.8 2.9,10.5 3.6,7 1,4.6 4.5,4.2" />
+                  </svg>
+                ))}
+              </span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* MINECRAFT: Pixel Grass Block Horizon Trim, Voxel Corner Creeper Emblems & Diamond Frame */}
+      {edition === 'minecraft' && (
+        <>
+          <div className="edition-grass-top absolute top-0 inset-x-0 h-3.5 opacity-95 border-b-2 border-[#052e16]" />
+          <div className="absolute inset-3.5 border-2 border-[#22c55e]/50 shadow-[inset_0_0_26px_rgba(34,197,94,0.14)]" />
+          <svg viewBox="0 0 800 500" preserveAspectRatio="none" className="absolute inset-0 w-full h-full opacity-40">
+            {/* Top-Left Voxel Creeper Watermark */}
+            <g transform="translate(26,34)">
+              <rect x="0" y="0" width="38" height="38" fill="#14532d" stroke="#4ade80" strokeWidth="1.8" />
+              <rect x="6" y="8" width="9" height="9" fill="#052e16" />
+              <rect x="23" y="8" width="9" height="9" fill="#052e16" />
+              <rect x="14" y="17" width="10" height="8" fill="#052e16" />
+              <rect x="10" y="21" width="5" height="11" fill="#052e16" />
+              <rect x="23" y="21" width="5" height="11" fill="#052e16" />
+            </g>
+            {/* Top-Right Voxel Diamond Pick/Gem Motif */}
+            <g transform="translate(736,34)">
+              <rect x="0" y="0" width="38" height="38" fill="#083344" stroke="#22d3ee" strokeWidth="1.8" />
+              <polygon points="19,6 30,19 19,32 8,19" fill="#22d3ee" fillOpacity="0.65" stroke="#cffafe" strokeWidth="1.4" />
+            </g>
+          </svg>
+          {!isFullscreen && (
+            <div className="hidden sm:flex absolute bottom-4 inset-x-10 items-center justify-between text-[9px] font-mono font-bold uppercase tracking-[0.24em] text-[#4ade80]/80">
+              <span>OVERWORLD // CHUNK X:0 Z:0</span>
+              <span className="text-[#22d3ee]/85">LVL 30 XP CALIBRATED</span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* PERSONA 5: Stark Crimson/Black/White Skewed Comic Cut-In Panels & Phantom Stars */}
+      {edition === 'persona5' && (
+        <>
+          <div className="edition-halftone-dark absolute inset-0 opacity-65" />
+          <svg viewBox="0 0 800 500" preserveAspectRatio="none" className="absolute inset-0 w-full h-full opacity-85">
+            {/* Razor Tilted Corner Cut-Ins */}
+            <polygon points="0,0 165,0 0,92" fill="#dc2626" fillOpacity="0.88" />
+            <polygon points="0,0 132,0 0,68" fill="#050505" />
+            <polygon points="800,500 620,500 800,400" fill="#dc2626" fillOpacity="0.88" />
+            <polygon points="800,500 660,500 800,425" fill="#ffffff" fillOpacity="0.92" />
+            {/* Skewed Frame Borders */}
+            <polygon points="22,22 784,14 776,478 14,486" fill="none" stroke="#ffffff" strokeOpacity="0.55" strokeWidth="2" />
+            <polygon points="28,28 778,20 770,472 20,480" fill="none" stroke="#dc2626" strokeOpacity="0.7" strokeWidth="1.4" />
+            {/* Phantom Thief 5-Pointed Rebel Star */}
+            <polygon points="62,24 68,38 83,38 71,47 76,61 62,53 48,61 53,47 41,38 56,38" fill="#ffffff" stroke="#050505" strokeWidth="1.5" />
+          </svg>
+          {!isFullscreen && (
+            <div className="hidden sm:flex absolute bottom-4 inset-x-10 items-center justify-between text-[9px] font-mono font-black uppercase tracking-[0.26em] text-white/85">
+              <span>SHIBUYA // TAKE YOUR TIME</span>
+              <span className="bg-black px-2 py-0.5 border border-white/70 text-[#ef4444]">PHANTOM THIEVES</span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ELDEN RING: Interlocking Golden Order Great Runes & Erdtree Grace Halo */}
+      {edition === 'eldenring' && (
+        <>
+          <div className="absolute inset-3.5 rounded-2xl border border-[#d97706]/45 shadow-[inset_0_0_48px_rgba(251,191,36,0.12)]" />
+          <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full opacity-45">
+            {/* Interlocking Elden Ring Arcs Centered */}
+            <circle cx="400" cy="185" r="78" fill="none" stroke="#fbbf24" strokeOpacity="0.45" strokeWidth="1.8" />
+            <circle cx="352" cy="252" r="74" fill="none" stroke="#f59e0b" strokeOpacity="0.38" strokeWidth="1.6" />
+            <circle cx="448" cy="252" r="74" fill="none" stroke="#fef08a" strokeOpacity="0.38" strokeWidth="1.6" />
+            <circle cx="400" cy="308" r="66" fill="none" stroke="#d97706" strokeOpacity="0.32" strokeWidth="1.4" />
+            {/* Vertical Elden Rune Spear & Basin Arc */}
+            <line x1="400" y1="68" x2="400" y2="412" stroke="#fef3c7" strokeOpacity="0.52" strokeWidth="2" />
+            <path d="M 305 152 Q 400 220 495 152" fill="none" stroke="#fbbf24" strokeOpacity="0.5" strokeWidth="1.8" />
+            <path d="M 285 338 Q 400 402 515 338" fill="none" stroke="#f59e0b" strokeOpacity="0.42" strokeWidth="1.8" />
+          </svg>
+          {!isFullscreen && (
+            <div className="hidden sm:flex absolute bottom-4 inset-x-10 items-center justify-between text-[9px] font-mono font-bold uppercase tracking-[0.28em] text-[#fbbf24]/80">
+              <span>THE LANDS BETWEEN</span>
+              <span className="text-amber-200/75">GREAT RUNE AWAKENED</span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* GOD OF WAR RAGNAROK: Nordic Omega Seals & Dual Frost/Leviathan Frame */}
+      {edition === 'godofwar' && (
+        <>
+          <div className="absolute inset-3.5 rounded-xl border border-[#38bdf8]/40 shadow-[inset_0_0_40px_rgba(56,189,248,0.14)]" />
+          <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full opacity-55">
+            {/* Nordic Dual Rim Arc */}
+            <circle cx="400" cy="250" r="195" fill="none" stroke="#38bdf8" strokeOpacity="0.24" strokeWidth="1.6" strokeDasharray="16 10" />
+            {/* Left Leviathan Ice Crystals */}
+            <polygon points="0,120 46,155 18,215 0,190" fill="#38bdf8" fillOpacity="0.16" stroke="#7dd3fc" strokeOpacity="0.45" strokeWidth="1.2" />
+            <polygon points="0,380 42,340 24,290 0,310" fill="#38bdf8" fillOpacity="0.16" stroke="#7dd3fc" strokeOpacity="0.45" strokeWidth="1.2" />
+            {/* Right Chaos Spartan Rage Omega Badge */}
+            <path d="M 730 282 H 752 V 268 A 28 28 0 1 1 776 268 V 282 H 796" fill="none" stroke="#ef4444" strokeOpacity="0.55" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 4 282 H 26 V 268 A 28 28 0 1 1 50 268 V 282 H 70" fill="none" stroke="#38bdf8" strokeOpacity="0.55" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {!isFullscreen && (
+            <div className="hidden sm:flex absolute bottom-4 inset-x-10 items-center justify-between text-[9px] font-mono font-bold uppercase tracking-[0.26em] text-[#7dd3fc]/80">
+              <span>NINE REALMS // FIMBULWINTER</span>
+              <span className="text-[#ef4444]/85">SPARTAN OMEGA SEAL</span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ZELDA SHEIKAH: Glowing Cyan Sheikah Eye & Sacred Golden Triforce Pyramids */}
+      {edition === 'zelda_totk' && (
+        <>
+          <div className="absolute inset-3.5 rounded-2xl border border-[#06b6d4]/50 shadow-[inset_0_0_36px_rgba(6,182,212,0.14)]" />
+          <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full opacity-55">
+            {/* Sacred Golden Triforce Pyramids Left & Right */}
+            {[62, 738].map((tx, idx) => (
+              <g key={idx} transform={`translate(${tx - 26}, 220)`} fill="#facc15" fillOpacity="0.28" stroke="#facc15" strokeWidth="1.4">
+                <polygon points="26,0 40,24 12,24" />
+                <polygon points="12,24 26,48 -2,48" />
+                <polygon points="40,24 54,48 26,48" />
+              </g>
+            ))}
+            {/* Sheikah Eye Watermark Contour Top Center */}
+            <path d="M 335 72 Q 400 32 465 72 Q 400 108 335 72 Z" fill="none" stroke="#22d3ee" strokeOpacity="0.45" strokeWidth="1.6" />
+            <circle cx="400" cy="72" r="11" fill="none" stroke="#22d3ee" strokeOpacity="0.5" strokeWidth="1.5" />
+            <circle cx="400" cy="72" r="4" fill="#22d3ee" fillOpacity="0.6" />
+          </svg>
+          {!isFullscreen && (
+            <div className="hidden sm:flex absolute bottom-4 inset-x-10 items-center justify-between text-[9px] font-mono font-bold uppercase tracking-[0.26em] text-[#22d3ee]/80">
+              <span>SHEIKAH SLATE // HYRULE</span>
+              <span className="text-[#facc15]/85">TRIFORCE RESONANCE</span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* HALO MJOLNIR: Spartan Visor Contour Framing & Top Energy Shield Matrix */}
+      {edition === 'halo_unsc' && (
+        <>
+          <div className="edition-scanlines absolute inset-0 opacity-40" />
+          <svg viewBox="0 0 800 500" preserveAspectRatio="none" className="absolute inset-0 w-full h-full opacity-65">
+            {/* Upper Mjolnir Helmet Visor Rim */}
+            <path d="M 28 84 L 96 22 H 704 L 772 84" fill="none" stroke="#fbbf24" strokeOpacity="0.68" strokeWidth="2.4" />
+            <path d="M 28 416 L 96 478 H 704 L 772 416" fill="none" stroke="#38bdf8" strokeOpacity="0.55" strokeWidth="2" />
+            {/* Segmented Top Shield Integrity Bar */}
+            <rect x="290" y="32" width="220" height="8" rx="4" fill="#0c192c" stroke="#38bdf8" strokeWidth="1.3" />
+            <rect x="294" y="34" width="212" height="4" rx="2" fill="#38bdf8" fillOpacity="0.75" />
+            {/* Side Radar Reticle Chevrons */}
+            <polyline points="42,225 28,250 42,275" fill="none" stroke="#fbbf24" strokeWidth="2" strokeOpacity="0.7" />
+            <polyline points="758,225 772,250 758,275" fill="none" stroke="#fbbf24" strokeWidth="2" strokeOpacity="0.7" />
+          </svg>
+          {!isFullscreen && (
+            <div className="hidden sm:flex absolute bottom-4 inset-x-10 items-center justify-between text-[9px] font-mono font-bold uppercase tracking-[0.24em] text-[#fbbf24]/80">
+              <span>UNSC // MJOLNIR MK-VI</span>
+              <span className="text-[#38bdf8]/85">CORTANA NEURAL SYNC</span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* PAC-MAN ARCADE: Double-Line Neon Maze Rails, Glowing Power Pellets, Pac-Man & Blinky Ghost */}
+      {edition === 'pacman' && (
+        <>
+          <svg viewBox="0 0 800 500" preserveAspectRatio="none" className="absolute inset-0 w-full h-full opacity-75">
+            {/* Double-Line Neon Blue Arcade Maze Frame */}
+            <rect x="14" y="14" width="772" height="472" rx="14" fill="none" stroke="#2563eb" strokeWidth="2.8" />
+            <rect x="21" y="21" width="758" height="458" rx="10" fill="none" stroke="#38bdf8" strokeOpacity="0.5" strokeWidth="1.4" />
+            {/* Glowing Corner Power Pellets */}
+            {[
+              [44, 44],
+              [756, 44],
+              [44, 456],
+              [756, 456],
+            ].map(([px, py], idx) => (
+              <circle key={idx} cx={px} cy={py} r="6.5" fill="#fef08a" fillOpacity="0.88" />
+            ))}
+            {/* Pac-Man + Pellet Trail Bottom-Left */}
+            <g transform="translate(88, 442)">
+              <path d="M 14 14 L 27 6 A 15 15 0 1 0 27 22 Z" fill="#facc15" />
+              {[42, 62, 82].map((dx) => (
+                <circle key={dx} cx={dx} cy="14" r="3.2" fill="#ffffff" fillOpacity="0.8" />
+              ))}
+            </g>
+            {/* Blinky Arcade Ghost Silhouette Bottom-Right */}
+            <g transform="translate(682, 438)">
+              <path d="M 0 14 A 13 13 0 0 1 26 14 V 28 L 21 23 L 17 28 L 13 23 L 9 28 L 5 23 L 0 28 Z" fill="#f43f5e" fillOpacity="0.9" />
+              <circle cx="8.5" cy="12" r="3" fill="#ffffff" />
+              <circle cx="17.5" cy="12" r="3" fill="#ffffff" />
+              <circle cx="7.5" cy="12" r="1.4" fill="#1d4ed8" />
+              <circle cx="16.5" cy="12" r="1.4" fill="#1d4ed8" />
+            </g>
+          </svg>
+          {!isFullscreen && (
+            <div className="hidden sm:flex absolute bottom-4 inset-x-28 items-center justify-between text-[9px] font-mono font-extrabold uppercase tracking-[0.24em] text-[#fde047]/85">
+              <span>1UP // SCORE 999990</span>
+              <span className="text-[#38bdf8]/90">CREDIT 01</span>
+            </div>
+          )}
+        </>
+      )}
+
       {/* BEN 10: Galvan Omnitrix Bezel Corner Lugs + DNA Hourglass Silhouette */}
       {edition === 'ben10' && (
         <>
@@ -1690,6 +2334,22 @@ export const ClockEditionOverlay: React.FC<{ edition: ClockEdition; isFullscreen
 export const getEditionDigitFrameClass = (edition: ClockEdition, isFullscreen: boolean): string => {
   const pad = isFullscreen ? 'px-8 py-5 sm:px-14 sm:py-8' : 'px-6 py-4 sm:px-10 sm:py-6';
   switch (edition) {
+    case 'gta6':
+      return `${pad} rounded-2xl bg-[#180527]/82 border-2 border-[#ff2e93]/75 shadow-[0_0_44px_rgba(255,46,147,0.32),-6px_0_24px_rgba(0,245,212,0.2)]`;
+    case 'minecraft':
+      return `${pad} rounded-none bg-[#0c1a0e]/90 border-2 border-[#4ade80]/80 shadow-[6px_6px_0_#052e16,0_0_28px_rgba(34,197,94,0.25)]`;
+    case 'persona5':
+      return `${pad} -skew-x-6 rounded-sm bg-[#060606]/92 border-2 border-[#ffffff] shadow-[7px_7px_0_#dc2626,-4px_-4px_0_#dc2626]`;
+    case 'eldenring':
+      return `${pad} rounded-2xl bg-[#0b0803]/88 border border-[#fbbf24]/65 shadow-[0_0_40px_rgba(251,191,36,0.26)]`;
+    case 'godofwar':
+      return `${pad} rounded-xl bg-[#09121f]/88 border-2 border-[#38bdf8]/70 shadow-[0_0_36px_rgba(56,189,248,0.24),inset_0_0_20px_rgba(239,68,68,0.16)]`;
+    case 'zelda_totk':
+      return `${pad} rounded-2xl bg-[#061520]/86 border-2 border-[#06b6d4]/75 shadow-[0_0_38px_rgba(6,182,212,0.28)]`;
+    case 'halo_unsc':
+      return `${pad} edition-chamfer bg-[#081320]/86 border border-[#fbbf24]/75 shadow-[0_0_36px_rgba(251,191,36,0.24)]`;
+    case 'pacman':
+      return `${pad} rounded-xl bg-[#03061a]/92 border-2 border-[#2563eb] ring-1 ring-[#38bdf8]/45 shadow-[0_0_36px_rgba(37,99,235,0.36)]`;
     case 'ben10':
       return `${pad} edition-chamfer bg-[#08150b]/85 border-2 border-[#65ff00]/75 shadow-[0_0_38px_rgba(101,255,0,0.28)]`;
     case 'jjk':
@@ -1746,6 +2406,62 @@ export const getEditionDigitFrameClass = (edition: ClockEdition, isFullscreen: b
 
 export const getEditionFlipStyle = (edition: ClockEdition) => {
   switch (edition) {
+    case 'gta6':
+      return {
+        sharpRadius: false,
+        digitFx: 'edition-gta6-text',
+        cardAura: 'ring-2 ring-[#ff2e93]/75 shadow-[0_0_28px_rgba(255,46,147,0.34)]',
+        seamClass: 'bg-gradient-to-r from-[#ff2e93] via-[#ff8c42] to-[#00f5d4]',
+      };
+    case 'minecraft':
+      return {
+        sharpRadius: true,
+        digitFx: 'edition-minecraft-text',
+        cardAura: 'ring-2 ring-[#4ade80]/80 shadow-[5px_5px_0_#052e16]',
+        seamClass: 'bg-[#22c55e]/90 shadow-[0_0_8px_#4ade80]',
+      };
+    case 'persona5':
+      return {
+        sharpRadius: true,
+        digitFx: 'edition-persona5-text',
+        cardAura: 'ring-2 ring-[#ffffff] shadow-[6px_6px_0_#dc2626] -skew-x-3',
+        seamClass: 'bg-[#dc2626] shadow-[0_1px_0_#ffffff]',
+      };
+    case 'eldenring':
+      return {
+        sharpRadius: false,
+        digitFx: 'edition-eldenring-text',
+        cardAura: 'ring-1 ring-[#fbbf24]/70 shadow-[0_0_26px_rgba(251,191,36,0.28)]',
+        seamClass: 'bg-[#fbbf24]/85 shadow-[0_0_8px_#fbbf24]',
+      };
+    case 'godofwar':
+      return {
+        sharpRadius: true,
+        digitFx: 'drop-shadow-[0_0_16px_rgba(56,189,248,0.8)]',
+        cardAura: 'ring-2 ring-[#38bdf8]/70 shadow-[0_0_24px_rgba(239,68,68,0.28)]',
+        seamClass: 'bg-gradient-to-r from-[#38bdf8] via-[#ffffff] to-[#ef4444]',
+      };
+    case 'zelda_totk':
+      return {
+        sharpRadius: false,
+        digitFx: 'drop-shadow-[0_0_16px_rgba(6,182,212,0.85)]',
+        cardAura: 'ring-2 ring-[#06b6d4]/75 shadow-[0_0_26px_rgba(6,182,212,0.28)]',
+        seamClass: 'bg-gradient-to-r from-[#06b6d4] via-[#22d3ee] to-[#facc15]',
+      };
+    case 'halo_unsc':
+      return {
+        sharpRadius: true,
+        digitFx: 'drop-shadow-[0_0_16px_rgba(251,191,36,0.8)]',
+        cardAura: 'ring-2 ring-[#fbbf24]/75 shadow-[0_0_26px_rgba(56,189,248,0.26)]',
+        seamClass: 'bg-[#38bdf8]/90 shadow-[0_0_8px_#38bdf8]',
+      };
+    case 'pacman':
+      return {
+        sharpRadius: true,
+        digitFx: 'drop-shadow-[0_0_16px_rgba(250,204,21,0.85)]',
+        cardAura: 'ring-2 ring-[#2563eb] shadow-[0_0_28px_rgba(37,99,235,0.38)]',
+        seamClass: 'bg-[#2563eb] shadow-[0_0_8px_#38bdf8]',
+      };
     case 'ben10':
       return {
         sharpRadius: true,
@@ -1932,7 +2648,10 @@ export const ClockEditionPowerMeter: React.FC<{
 }> = ({ edition, progress, isFullscreen = false }) => {
   if (edition === 'classic') return null;
   const clamped = Math.min(1, Math.max(0, progress));
-  const segments = edition === 'evangelion' || edition === 'akira' || edition === 'ben10' || edition === 'jjk' ? 16 : 12;
+  const segments =
+    edition === 'evangelion' || edition === 'akira' || edition === 'ben10' || edition === 'jjk' || edition === 'gta6' || edition === 'halo_unsc'
+      ? 16
+      : 12;
   const litCount = Math.round(clamped * segments);
 
   return (
@@ -1941,7 +2660,15 @@ export const ClockEditionPowerMeter: React.FC<{
         {Array.from({ length: segments }).map((_, idx) => {
           const lit = idx < litCount;
           let activeColor = 'bg-sky-400';
-          if (edition === 'ben10') activeColor = idx >= segments - 2 ? 'bg-[#bef264]' : 'bg-[#65ff00]';
+          if (edition === 'gta6') activeColor = idx < 5 ? 'bg-[#ff2e93]' : idx >= segments - 4 ? 'bg-[#00f5d4]' : 'bg-[#ff8c42]';
+          else if (edition === 'minecraft') activeColor = idx >= segments - 3 ? 'bg-[#22d3ee]' : 'bg-[#4ade80]';
+          else if (edition === 'persona5') activeColor = idx % 2 === 0 ? 'bg-[#dc2626]' : 'bg-[#ffffff]';
+          else if (edition === 'eldenring') activeColor = idx >= segments - 3 ? 'bg-[#fef08a]' : 'bg-[#fbbf24]';
+          else if (edition === 'godofwar') activeColor = idx < 6 ? 'bg-[#38bdf8]' : 'bg-[#ef4444]';
+          else if (edition === 'zelda_totk') activeColor = idx >= segments - 3 ? 'bg-[#facc15]' : 'bg-[#06b6d4]';
+          else if (edition === 'halo_unsc') activeColor = idx >= segments - 4 ? 'bg-[#fbbf24]' : 'bg-[#38bdf8]';
+          else if (edition === 'pacman') activeColor = idx < 4 ? 'bg-[#2563eb]' : idx >= segments - 3 ? 'bg-[#f43f5e]' : 'bg-[#facc15]';
+          else if (edition === 'ben10') activeColor = idx >= segments - 2 ? 'bg-[#bef264]' : 'bg-[#65ff00]';
           else if (edition === 'jjk') activeColor = idx < 5 ? 'bg-[#00e5ff]' : idx >= segments - 5 ? 'bg-[#ff2a55]' : 'bg-[#c084fc]';
           else if (edition === 'demonslayer') activeColor = idx < 4 ? 'bg-[#10b981]' : idx >= segments - 3 ? 'bg-[#ef4444]' : 'bg-[#f97316]';
           else if (edition === 'naruto') activeColor = idx >= segments - 3 ? 'bg-[#dc2626]' : idx < 4 ? 'bg-[#fde047]' : 'bg-[#ff7a00]';
@@ -1983,6 +2710,22 @@ export const ClockEditionPowerMeter: React.FC<{
 
 export const getEditionCalendarPanelClass = (edition: ClockEdition, isLight?: boolean): string => {
   switch (edition) {
+    case 'gta6':
+      return 'bg-[#170526]/88 border-2 border-[#ff2e93]/75 shadow-[0_0_34px_rgba(255,46,147,0.28)] text-pink-50';
+    case 'minecraft':
+      return 'bg-[#0c1a0e]/90 border-2 border-[#4ade80]/75 shadow-[5px_5px_0_#052e16] text-[#dcfce7]';
+    case 'persona5':
+      return 'bg-[#060606]/92 border-2 border-white shadow-[6px_6px_0_#dc2626] text-white';
+    case 'eldenring':
+      return 'bg-[#0b0803]/90 border border-[#fbbf24]/65 shadow-[0_0_32px_rgba(251,191,36,0.22)] text-amber-50';
+    case 'godofwar':
+      return 'bg-[#09121f]/90 border-2 border-[#38bdf8]/65 shadow-[0_0_30px_rgba(56,189,248,0.22)] text-slate-100';
+    case 'zelda_totk':
+      return 'bg-[#061520]/88 border-2 border-[#06b6d4]/70 shadow-[0_0_30px_rgba(6,182,212,0.24)] text-cyan-50';
+    case 'halo_unsc':
+      return 'bg-[#081320]/90 border border-[#fbbf24]/70 shadow-[0_0_30px_rgba(251,191,36,0.22)] text-amber-50';
+    case 'pacman':
+      return 'bg-[#03061a]/92 border-2 border-[#2563eb] shadow-[0_0_32px_rgba(37,99,235,0.32)] text-yellow-50';
     case 'ben10':
       return 'bg-[#061308]/88 border-2 border-[#65ff00]/75 shadow-[0_0_32px_rgba(101,255,0,0.22)] text-[#ecfccb]';
     case 'jjk':
@@ -2041,6 +2784,22 @@ export const getEditionCalendarPanelClass = (edition: ClockEdition, isLight?: bo
 
 export const getEditionPrimaryBtnClass = (edition: ClockEdition, isLight?: boolean): string => {
   switch (edition) {
+    case 'gta6':
+      return 'bg-gradient-to-r from-[#ff2e93] via-[#ff8c42] to-[#f43f5e] hover:brightness-110 text-white border border-[#00f5d4]/80 shadow-[0_0_24px_rgba(255,46,147,0.45)]';
+    case 'minecraft':
+      return 'bg-[#22c55e] hover:bg-[#4ade80] text-[#052e16] border-2 border-[#052e16] shadow-[4px_4px_0_#052e16]';
+    case 'persona5':
+      return 'bg-[#dc2626] hover:bg-[#ef4444] text-white border-2 border-white shadow-[4px_4px_0_#050505]';
+    case 'eldenring':
+      return 'bg-[#b45309] hover:bg-[#d97706] text-[#fef3c7] border border-[#fbbf24]/80 shadow-[0_0_22px_rgba(251,191,36,0.35)]';
+    case 'godofwar':
+      return 'bg-[#1e3a5f] hover:bg-[#0284c7] text-white border border-[#ef4444]/80 shadow-[0_0_22px_rgba(56,189,248,0.35)]';
+    case 'zelda_totk':
+      return 'bg-[#0891b2] hover:bg-[#06b6d4] text-white border border-[#facc15]/80 shadow-[0_0_22px_rgba(6,182,212,0.38)]';
+    case 'halo_unsc':
+      return 'bg-[#d97706] hover:bg-[#f59e0b] text-[#07111c] border border-[#38bdf8]/80 shadow-[0_0_22px_rgba(251,191,36,0.38)]';
+    case 'pacman':
+      return 'bg-[#facc15] hover:bg-[#fde047] text-[#03071d] border-2 border-[#2563eb] shadow-[0_0_22px_rgba(250,204,21,0.4)]';
     case 'ben10':
       return 'bg-[#65ff00] hover:bg-[#7aff26] text-[#051208] border-2 border-[#022c0c] shadow-[0_0_24px_rgba(101,255,0,0.4)]';
     case 'jjk':

@@ -124,6 +124,14 @@ export type AnalogStyle =
   | 'blackhole'
   | 'gears'
   | 'cyberwave'
+  | 'vice_palm'
+  | 'creeper_dial'
+  | 'phantom_mask'
+  | 'golden_order'
+  | 'leviathan_rune'
+  | 'triforce_slate'
+  | 'mjolnir_visor'
+  | 'arcade_maze'
   | 'omnitrix'
   | 'jjk_void'
   | 'nichirin'
@@ -159,6 +167,14 @@ export type RadialStyle =
   | 'dna_helix'
   | 'synth_prism'
   | 'fractal_mandala'
+  | 'vice_city'
+  | 'emerald_xp'
+  | 'velvet_rebellion'
+  | 'erdtree_grace'
+  | 'omega_frost'
+  | 'sheikah_orb'
+  | 'cortana_ring'
+  | 'maze_chomper'
   | 'omnitrix_core'
   | 'jjk_domain'
   | 'nichirin_flame'
@@ -203,6 +219,9 @@ export type BackgroundFx =
   | 'matrix_rain'
   | 'ember_spores'
   | 'arcane_runes'
+  | 'vice_sunset'
+  | 'erdtree_petals'
+  | 'pixel_arcade'
   | 'none';
 
 export interface AnalogStyleMeta {
@@ -379,6 +398,54 @@ export const ANALOG_STYLES: AnalogStyleMeta[] = [
     label: 'Synthwave',
     tagline: 'Retrofuturistic sliced neon sunset with scrolling 3D laser horizon grid',
     category: 'Modern',
+  },
+  {
+    id: 'vice_palm',
+    label: 'Vice Palms VI',
+    tagline: 'Leonida neon sunset gradient framed by coconut palm silhouettes and Ocean Drive teal hands',
+    category: 'Cinema',
+  },
+  {
+    id: 'creeper_dial',
+    label: 'Overworld Block',
+    tagline: 'Voxel emerald Creeper faceplate with blocky pixel indices and Diamond Sword hands',
+    category: 'Cinema',
+  },
+  {
+    id: 'phantom_mask',
+    label: 'Phantom Calling',
+    tagline: 'Stark Persona crimson-black-white skewed sector dial with rebel star emblem',
+    category: 'Cinema',
+  },
+  {
+    id: 'golden_order',
+    label: 'Golden Order',
+    tagline: 'Interlocking Elden Ring Great Runes engraved over obsidian grace dial face',
+    category: 'Cinema',
+  },
+  {
+    id: 'leviathan_rune',
+    label: 'Nordic Omega',
+    tagline: 'Carved Midgard frost bezel with Futhark rim ticks and blazing Spartan Omega crest',
+    category: 'Cinema',
+  },
+  {
+    id: 'triforce_slate',
+    label: 'Sheikah Triforce',
+    tagline: 'Electric cyan Sheikah constellation slate centering the glowing Golden Triforce triad',
+    category: 'Cinema',
+  },
+  {
+    id: 'mjolnir_visor',
+    label: 'Mjolnir Visor',
+    tagline: 'Spartan hex-mesh golden helmet visor with UNSC shield ring and Cortana blue sweep',
+    category: 'Cinema',
+  },
+  {
+    id: 'arcade_maze',
+    label: 'Maze Chomper',
+    tagline: '1980 neon arcade blue maze bezel with glowing power pellets and Pac-Man emblem',
+    category: 'Cinema',
   },
   {
     id: 'omnitrix',
@@ -588,6 +655,54 @@ export const RADIAL_STYLES: RadialStyleMeta[] = [
     category: 'Classic',
   },
   {
+    id: 'vice_city',
+    label: 'Vice Sunset',
+    tagline: 'Sliced Miami sunset chamber framed by coconut palm silhouettes and neon teal arcs',
+    category: 'Cinema',
+  },
+  {
+    id: 'emerald_xp',
+    label: 'Overworld XP',
+    tagline: 'Voxel emerald Creeper bezel paired with Diamond cyan and glowing Experience Bar tracks',
+    category: 'Cinema',
+  },
+  {
+    id: 'velvet_rebellion',
+    label: 'Rebel Card',
+    tagline: 'Phantom Thieves crimson-black-white calling card bursts around an ink chamber',
+    category: 'Cinema',
+  },
+  {
+    id: 'erdtree_grace',
+    label: 'Erdtree Grace',
+    tagline: 'Interlocking Elden Ring sacred arcs gleaming inside an Erdtree shadow chamber',
+    category: 'Cinema',
+  },
+  {
+    id: 'omega_frost',
+    label: 'Omega Frost',
+    tagline: 'Dual Midgard ice-cyan and Leviathan crimson rings anchored by an Omega halo',
+    category: 'Cinema',
+  },
+  {
+    id: 'sheikah_orb',
+    label: 'Sheikah Rune',
+    tagline: 'Rotating cyan Sheikah constellation rings enclosing a golden Triforce chamber',
+    category: 'Cinema',
+  },
+  {
+    id: 'cortana_ring',
+    label: 'Halo Array',
+    tagline: 'Spartan Mjolnir amber shield track and Forerunner installation ring geometry',
+    category: 'Cinema',
+  },
+  {
+    id: 'maze_chomper',
+    label: 'Arcade Maze',
+    tagline: '1980 neon blue maze tracks dotted with power pellets and golden chomper arcs',
+    category: 'Cinema',
+  },
+  {
     id: 'omnitrix_core',
     label: 'Omnitrix Core',
     tagline: 'Galvan 4-lug dial bezel with luminous green DNA hourglass geometry',
@@ -727,6 +842,14 @@ export const RADIAL_DARK_CHAMBER_STYLES: ReadonlySet<RadialStyle> = new Set([
   'supernova',
   'blackhole_lens',
   'synth_prism',
+  'vice_city',
+  'emerald_xp',
+  'velvet_rebellion',
+  'erdtree_grace',
+  'omega_frost',
+  'sheikah_orb',
+  'cortana_ring',
+  'maze_chomper',
   'omnitrix_core',
   'jjk_domain',
   'nichirin_flame',
@@ -776,6 +899,9 @@ export const CLOCK_BG_FX_OPTIONS: {
   { id: 'matrix_rain', label: 'Bg: Matrix Rain', shortLabel: 'Matrix', tagline: 'Cascading glowing emerald construct digital rain columns' },
   { id: 'ember_spores', label: 'Bg: Rift Spores', shortLabel: 'Spores', tagline: 'Rising glowing embers and Upside Down ash spores drifting skyward' },
   { id: 'arcane_runes', label: 'Bg: Arcane Runes', shortLabel: 'Arcane', tagline: 'Counter-rotating geometric Gallifreyan, Hextech and chakra seal rings' },
+  { id: 'vice_sunset', label: 'Bg: Vice Coconut Sunset', shortLabel: 'Vice Palms', tagline: 'Swaying tropical coconut palm trees silhouetted against a sliced Leonida sunset' },
+  { id: 'erdtree_petals', label: 'Bg: Erdtree Grace', shortLabel: 'Grace', tagline: 'Luminous golden Grace embers and Midgard frost mist drifting in space' },
+  { id: 'pixel_arcade', label: 'Bg: Pixel Arcade', shortLabel: 'Pixels', tagline: 'Floating retro voxel XP blocks and luminous arcade cabinet pellets' },
   { id: 'none', label: 'Bg: Static (Off)', shortLabel: 'Off', tagline: 'Clean static theme canvas' },
 ];
 
@@ -2673,6 +2799,25 @@ const BG_EMBER_SPORES: { left: number; bottom: number; size: number; dur: string
   return arr;
 })();
 
+const BG_PIXEL_BLOCKS: { left: number; top: number; size: number; dur: string; delay: string; tone: 'sec' | 'min' | 'hr' }[] = (() => {
+  const rng = makeSeededRng(19801);
+  const tones: ('sec' | 'min' | 'hr')[] = ['sec', 'min', 'hr'];
+  const arr: { left: number; top: number; size: number; dur: string; delay: string; tone: 'sec' | 'min' | 'hr' }[] = [];
+  for (let i = 0; i < 32; i++) {
+    const durVal = 4.6 + rng() * 5.2;
+    const delayVal = -(rng() * durVal);
+    arr.push({
+      left: Number((4 + rng() * 92).toFixed(1)),
+      top: Number((6 + rng() * 88).toFixed(1)),
+      size: Math.round(5 + rng() * 9),
+      dur: `${durVal.toFixed(2)}s`,
+      delay: `${delayVal.toFixed(2)}s`,
+      tone: tones[i % 3],
+    });
+  }
+  return arr;
+})();
+
 const buildPolygonPoints = (cx: number, cy: number, sides: number, radius: number, rotDeg = 0): string => {
   const pts: string[] = [];
   for (let i = 0; i < sides; i++) {
@@ -3472,6 +3617,118 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
           </g>
         </svg>
       )}
+
+      {/* 20. GTA 6 VICE COCONUT SUNSET */}
+      {bgFx === 'vice_sunset' && (
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <defs>
+            <linearGradient id={`${bgUid}-vice-sun`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#fde047" />
+              <stop offset="48%" stopColor="#ff8c42" />
+              <stop offset="100%" stopColor="#ff2e93" />
+            </linearGradient>
+            <radialGradient id={`${bgUid}-vice-haze`} cx="50%" cy="62%" r="55%">
+              <stop offset="0%" stopColor="#ff2e93" stopOpacity={isLight ? '0.16' : '0.28'} />
+              <stop offset="55%" stopColor="#ff8c42" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#00f5d4" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <rect width="800" height="600" fill={`url(#${bgUid}-vice-haze)`} />
+          {/* Sliced Sunset Orb */}
+          <circle cx="400" cy="395" r="158" fill={`url(#${bgUid}-vice-sun)`} fillOpacity={isLight ? '0.22' : '0.32'} />
+          {[355, 382, 412, 444, 478].map((yPos, idx) => (
+            <line key={idx} x1="220" y1={yPos} x2="580" y2={yPos} stroke="#160423" strokeWidth={3 + idx * 1.4} strokeOpacity="0.65" />
+          ))}
+          {/* Horizon Waterline */}
+          <line x1="0" y1="505" x2="800" y2="505" stroke="#00f5d4" strokeWidth="2" strokeOpacity="0.48" />
+          <line x1="80" y1="532" x2="720" y2="532" stroke="#ff2e93" strokeWidth="1.2" strokeOpacity="0.35" />
+
+          {/* Left Swaying Coconut Palm Silhouette */}
+          <g className="animate-bg-palm-sway" fill="#090214" fillOpacity={isLight ? '0.35' : '0.72'} stroke="#ff2e93" strokeOpacity="0.45" strokeWidth="1">
+            <path d="M 62 605 Q 72 440 128 248 L 140 252 Q 92 445 88 605 Z" />
+            <circle cx="128" cy="260" r="8.5" fill="#2a0a28" stroke="#fde047" strokeWidth="1" />
+            <circle cx="141" cy="262" r="8" fill="#2a0a28" stroke="#fde047" strokeWidth="1" />
+            <circle cx="134" cy="272" r="7.5" fill="#2a0a28" stroke="#ff8c42" strokeWidth="1" />
+            <path d="M 134 250 Q 75 208 26 232 Q 78 232 134 250 Z" />
+            <path d="M 134 250 Q 86 168 42 152 Q 98 186 134 250 Z" />
+            <path d="M 134 250 Q 138 158 164 118 Q 160 176 134 250 Z" />
+            <path d="M 134 250 Q 192 174 236 184 Q 190 206 134 250 Z" />
+            <path d="M 134 250 Q 198 220 230 258 Q 186 248 134 250 Z" />
+          </g>
+
+          {/* Right Swaying Coconut Palm Silhouette */}
+          <g className="animate-bg-palm-sway" style={{ animationDelay: '-3.2s' }} fill="#090214" fillOpacity={isLight ? '0.35' : '0.72'} stroke="#00f5d4" strokeOpacity="0.45" strokeWidth="1">
+            <path d="M 738 605 Q 728 452 676 232 L 664 236 Q 708 455 712 605 Z" />
+            <circle cx="674" cy="244" r="8.5" fill="#0d182b" stroke="#00f5d4" strokeWidth="1" />
+            <circle cx="661" cy="247" r="8" fill="#0d182b" stroke="#fde047" strokeWidth="1" />
+            <circle cx="669" cy="256" r="7.5" fill="#0d182b" stroke="#ff2e93" strokeWidth="1" />
+            <path d="M 670 234 Q 730 192 778 216 Q 726 216 670 234 Z" />
+            <path d="M 670 234 Q 718 152 762 136 Q 706 170 670 234 Z" />
+            <path d="M 670 234 Q 666 142 640 104 Q 644 162 670 234 Z" />
+            <path d="M 670 234 Q 612 160 568 170 Q 614 190 670 234 Z" />
+            <path d="M 670 234 Q 606 206 574 244 Q 618 234 670 234 Z" />
+          </g>
+        </svg>
+      )}
+
+      {/* 21. ERDTREE GRACE & FROST EMBERS (ELDEN RING / GOD OF WAR) */}
+      {bgFx === 'erdtree_petals' && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="absolute inset-x-0 bottom-0 h-1/2"
+            style={{
+              background: `radial-gradient(ellipse at 50% 100%, ${c2}22, ${c1}10, transparent 72%)`,
+            }}
+          />
+          {BG_EMBER_SPORES.map((sp, idx) => {
+            const col = idx % 2 === 0 ? c2 : c1;
+            return (
+              <span
+                key={idx}
+                className="animate-bg-ember-rise absolute rounded-full"
+                style={{
+                  left: `${sp.left}%`,
+                  bottom: `${sp.bottom}%`,
+                  width: `${sp.size * 1.15}px`,
+                  height: `${sp.size * 1.15}px`,
+                  backgroundColor: col,
+                  boxShadow: `0 0 ${sp.size * 2.8}px ${col}`,
+                  opacity: isLight ? 0.5 : 0.85,
+                  animationDuration: sp.dur,
+                  animationDelay: sp.delay,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* 22. PIXEL ARCADE & VOXEL XP BLOCKS (MINECRAFT / PAC-MAN) */}
+      {bgFx === 'pixel_arcade' && (
+        <div className="absolute inset-0 overflow-hidden">
+          {BG_PIXEL_BLOCKS.map((blk, idx) => {
+            const col = pickTone(blk.tone);
+            return (
+              <span
+                key={idx}
+                className="animate-bg-pixel-float absolute border"
+                style={{
+                  left: `${blk.left}%`,
+                  top: `${blk.top}%`,
+                  width: `${blk.size}px`,
+                  height: `${blk.size}px`,
+                  borderRadius: idx % 3 === 0 ? '9999px' : '2px',
+                  backgroundColor: `${col}26`,
+                  borderColor: `${col}88`,
+                  boxShadow: `0 0 10px ${col}44`,
+                  animationDuration: blk.dur,
+                  animationDelay: blk.delay,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 });
@@ -3765,6 +4022,56 @@ export const AnalogStyleGlyph: React.FC<{ styleId: AnalogStyle }> = ({ styleId }
       {styleId === 'gotham_signal' && (
         <>
           <path d="M 4.5 10 Q 7.2 7.4 9 9 L 10 7.2 L 11 9 Q 12.8 7.4 15.5 10 Q 12.8 11 10 13 Q 7.2 11 4.5 10 Z" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'vice_palm' && (
+        <>
+          <circle cx="10" cy="11.5" r="4.2" fill="currentColor" fillOpacity="0.3" />
+          <path d="M 10 16 Q 11 12 10.4 8.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <path d="M 10.4 8.2 Q 7 6.8 5.2 8.8 M 10.4 8.2 Q 14 6.8 15.8 8.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        </>
+      )}
+      {styleId === 'creeper_dial' && (
+        <>
+          <rect x="6" y="6" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="1.2" />
+          <rect x="7.5" y="7.5" width="1.8" height="1.8" fill="currentColor" />
+          <rect x="10.7" y="7.5" width="1.8" height="1.8" fill="currentColor" />
+          <rect x="9" y="10" width="2" height="2" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'phantom_mask' && (
+        <>
+          <polygon points="10,4.5 11.5,8.2 15.5,8.6 12.5,11.2 13.4,15 10,12.8 6.6,15 7.5,11.2 4.5,8.6 8.5,8.2" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'golden_order' && (
+        <>
+          <circle cx="10" cy="7.8" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.1" />
+          <circle cx="7.8" cy="11.5" r="3" fill="none" stroke="currentColor" strokeWidth="1.05" />
+          <circle cx="12.2" cy="11.5" r="3" fill="none" stroke="currentColor" strokeWidth="1.05" />
+        </>
+      )}
+      {styleId === 'leviathan_rune' && (
+        <>
+          <path d="M 6.2 13.8 H 8.4 V 12.2 A 3.8 3.8 0 1 1 11.6 12.2 V 13.8 H 13.8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      )}
+      {styleId === 'triforce_slate' && (
+        <>
+          <polygon points="10,4.5 12.8,9.5 7.2,9.5" fill="currentColor" />
+          <polygon points="7.2,9.5 10,14.5 4.4,14.5" fill="currentColor" />
+          <polygon points="12.8,9.5 15.6,14.5 10,14.5" fill="currentColor" />
+        </>
+      )}
+      {styleId === 'mjolnir_visor' && (
+        <>
+          <polygon points="6,7.2 14,7.2 15.2,10 13,12.8 7,12.8 4.8,10" fill="currentColor" fillOpacity="0.82" />
+        </>
+      )}
+      {styleId === 'arcade_maze' && (
+        <>
+          <path d="M 10 10 L 14.2 7 A 5.2 5.2 0 1 0 14.2 13 Z" fill="currentColor" />
+          <circle cx="15.2" cy="10" r="1.2" fill="currentColor" />
         </>
       )}
     </svg>
@@ -7122,6 +7429,237 @@ const AnalogDialFace: React.FC<AnalogDialFaceProps> = React.memo(({
           </text>
         </g>
       )}
+
+      {/* STYLE 43: GTA 6 VICE PALMS VI */}
+      {styleId === 'vice_palm' && (
+        <g>
+          <defs>
+            <linearGradient id={`${uid}-vice-dial-sky`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#1d062d" />
+              <stop offset="55%" stopColor="#581c87" stopOpacity="0.65" />
+              <stop offset="100%" stopColor="#9d174d" stopOpacity="0.55" />
+            </linearGradient>
+          </defs>
+          <circle cx="150" cy="150" r="142" fill={`url(#${uid}-vice-dial-sky)`} stroke="#ff2e93" strokeWidth="3.2" />
+          {/* Sliced Sunset Orb behind indices */}
+          <circle cx="150" cy="164" r="76" fill="#ff8c42" fillOpacity="0.34" stroke="#fde047" strokeOpacity="0.4" strokeWidth="1.2" />
+          {[155, 170, 185, 200].map((yPos, idx) => (
+            <line key={idx} x1="78" y1={yPos} x2="222" y2={yPos} stroke="#1d062d" strokeWidth={2.5 + idx * 0.9} />
+          ))}
+          {/* Twin Silhouetted Coconut Palm Trees Inside Dial */}
+          <g fill="#090214" stroke="#00f5d4" strokeOpacity="0.45" strokeWidth="0.9">
+            <path d="M 80 250 Q 86 205 102 158 L 106 160 Q 93 206 90 250 Z" />
+            <circle cx="101" cy="162" r="3.4" fill="#2a0a28" stroke="#fde047" strokeWidth="0.7" />
+            <circle cx="107" cy="163" r="3.2" fill="#2a0a28" stroke="#fde047" strokeWidth="0.7" />
+            <path d="M 103 158 Q 82 142 66 152 Q 86 150 103 158 Z" />
+            <path d="M 103 158 Q 88 128 74 122 Q 94 138 103 158 Z" />
+            <path d="M 103 158 Q 124 134 140 138 Q 122 146 103 158 Z" />
+
+            <path d="M 220 250 Q 214 205 198 158 L 194 160 Q 207 206 210 250 Z" />
+            <circle cx="199" cy="162" r="3.4" fill="#0d182b" stroke="#00f5d4" strokeWidth="0.7" />
+            <circle cx="193" cy="163" r="3.2" fill="#0d182b" stroke="#fde047" strokeWidth="0.7" />
+            <path d="M 197 158 Q 218 142 234 152 Q 214 150 197 158 Z" />
+            <path d="M 197 158 Q 212 128 226 122 Q 206 138 197 158 Z" />
+            <path d="M 197 158 Q 176 134 160 138 Q 178 146 197 158 Z" />
+          </g>
+          {[...Array(12)].map((_, idx) => (
+            <rect
+              key={idx}
+              x="148"
+              y="16"
+              width="4"
+              height={idx % 3 === 0 ? '14' : '8'}
+              rx="2"
+              fill={idx % 3 === 0 ? '#00f5d4' : '#ff2e93'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="64" textAnchor="middle" dominantBaseline="central" fill="#fef08a" fontSize="8.5" fontWeight="900" letterSpacing="2.8" fontFamily="'Orbitron', sans-serif">
+            VICE VI
+          </text>
+          <text x="150" y="236" textAnchor="middle" dominantBaseline="central" fill="#00f5d4" fontSize="6.2" fontWeight="800" letterSpacing="2.2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `LEONIDA • ${weekdayShort} ${dayStr}` : 'LEONIDA SUNSET'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 44: MINECRAFT OVERWORLD BLOCK */}
+      {styleId === 'creeper_dial' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0d1a0f" stroke="#22c55e" strokeWidth="3.5" />
+          {/* Top-center Voxel Creeper Medallion */}
+          <g transform="translate(132, 46)">
+            <rect x="0" y="0" width="36" height="36" rx="2" fill="#22c55e" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.5" />
+            <rect x="6" y="7" width="8" height="8" fill="#4ade80" />
+            <rect x="22" y="7" width="8" height="8" fill="#4ade80" />
+            <rect x="14" y="15" width="8" height="7" fill="#4ade80" />
+            <rect x="10" y="19" width="4" height="10" fill="#4ade80" />
+            <rect x="22" y="19" width="4" height="10" fill="#4ade80" />
+          </g>
+          {[...Array(12)].map((_, idx) => (
+            <rect
+              key={idx}
+              x="146.5"
+              y="18"
+              width="7"
+              height={idx % 3 === 0 ? '12' : '7'}
+              fill={idx % 3 === 0 ? '#22d3ee' : '#4ade80'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="226" textAnchor="middle" dominantBaseline="central" fill="#4ade80" fontSize="6.4" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `OVERWORLD • ${weekdayShort} ${dayStr}` : 'LVL 30 XP'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 45: PERSONA 5 PHANTOM CALLING */}
+      {styleId === 'phantom_mask' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#09090b" stroke="#dc2626" strokeWidth="3.5" />
+          {/* Skewed Stark Red/White Sector Shapes */}
+          <polygon points="150,150 28,88 74,26" fill="#dc2626" fillOpacity="0.55" />
+          <polygon points="150,150 272,212 226,274" fill="#dc2626" fillOpacity="0.55" />
+          {/* Stark White Phantom Rebel Star */}
+          <polygon points="150,48 156,64 173,65 160,76 164,92 150,83 136,92 140,76 127,65 144,64" fill="#ffffff" stroke="#050505" strokeWidth="1.5" />
+          {[...Array(12)].map((_, idx) => (
+            <polygon
+              key={idx}
+              points="146,16 154,16 151,32 149,32"
+              fill={idx % 2 === 0 ? '#ffffff' : '#dc2626'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="232" textAnchor="middle" dominantBaseline="central" fill="#ffffff" fontSize="6.5" fontWeight="900" letterSpacing="2.2" fontFamily="'Plus Jakarta Sans', sans-serif">
+            {showDate ? `PHANTOM • ${weekdayShort} ${dayStr}` : 'TAKE YOUR TIME'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 46: ELDEN RING GOLDEN ORDER */}
+      {styleId === 'golden_order' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0c0904" stroke="#d97706" strokeWidth="3" />
+          {/* Four Interlocking Great Runes */}
+          <circle cx="150" cy="118" r="44" fill="none" stroke="#fbbf24" strokeOpacity="0.55" strokeWidth="2.2" />
+          <circle cx="122" cy="160" r="42" fill="none" stroke="#f59e0b" strokeOpacity="0.48" strokeWidth="2" />
+          <circle cx="178" cy="160" r="42" fill="none" stroke="#fef08a" strokeOpacity="0.48" strokeWidth="2" />
+          <line x1="150" y1="48" x2="150" y2="252" stroke="#fef3c7" strokeOpacity="0.48" strokeWidth="2" />
+          <path d="M 96 106 Q 150 144 204 106" fill="none" stroke="#fbbf24" strokeOpacity="0.52" strokeWidth="2" />
+          {[...Array(12)].map((_, idx) => (
+            <polygon
+              key={idx}
+              points="150,15 153,24 150,33 147,24"
+              fill={idx % 3 === 0 ? '#fef08a' : '#d97706'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="238" textAnchor="middle" dominantBaseline="central" fill="#fbbf24" fontSize="6.2" fontWeight="800" letterSpacing="2.4" fontFamily="'Orbitron', serif">
+            {showDate ? `GRACE • ${weekdayShort} ${dayStr}` : 'ELDEN RING'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 47: GOD OF WAR NORDIC OMEGA */}
+      {styleId === 'leviathan_rune' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0b1220" stroke="#ef4444" strokeWidth="3.2" />
+          <circle cx="150" cy="150" r="118" fill="none" stroke="#38bdf8" strokeOpacity="0.42" strokeWidth="1.8" strokeDasharray="10 6" />
+          {/* Engraving Omega Crest */}
+          <path d="M 122 104 H 134 V 96 A 20 20 0 1 1 166 96 V 104 H 178" fill="none" stroke="#ef4444" strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round" />
+          {[...Array(24)].map((_, idx) => (
+            <line
+              key={idx}
+              x1="150"
+              y1="16"
+              x2="150"
+              y2={idx % 2 === 0 ? '29' : '22'}
+              stroke={idx % 6 === 0 ? '#ef4444' : '#38bdf8'}
+              strokeWidth={idx % 2 === 0 ? '2.4' : '1.2'}
+              transform={`rotate(${idx * 15} 150 150)`}
+            />
+          ))}
+          <text x="150" y="228" textAnchor="middle" dominantBaseline="central" fill="#7dd3fc" fontSize="6.4" fontWeight="800" letterSpacing="2.2" fontFamily="'Orbitron', serif">
+            {showDate ? `MIDGARD • ${weekdayShort} ${dayStr}` : 'RAGNAROK'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 48: ZELDA SHEIKAH TRIFORCE */}
+      {styleId === 'triforce_slate' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#071722" stroke="#06b6d4" strokeWidth="3" />
+          <circle cx="150" cy="150" r="116" fill="none" stroke="#22d3ee" strokeOpacity="0.35" strokeWidth="1.4" strokeDasharray="6 6" />
+          {/* Golden Triforce Pyramid Emblem */}
+          <g transform="translate(116, 48)" fill="#facc15" fillOpacity="0.85" stroke="#fde047" strokeWidth="1">
+            <polygon points="34,0 48,24 20,24" />
+            <polygon points="20,24 34,48 6,48" />
+            <polygon points="48,24 62,48 34,48" />
+          </g>
+          {[...Array(12)].map((_, idx) => (
+            <circle
+              key={idx}
+              cx="150"
+              cy="22"
+              r={idx % 3 === 0 ? '3.5' : '2'}
+              fill={idx % 3 === 0 ? '#facc15' : '#22d3ee'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="232" textAnchor="middle" dominantBaseline="central" fill="#22d3ee" fontSize="6.4" fontWeight="800" letterSpacing="2.2" fontFamily="'Orbitron', monospace">
+            {showDate ? `HYRULE • ${weekdayShort} ${dayStr}` : 'SHEIKAH SLATE'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 49: HALO MJOLNIR VISOR */}
+      {styleId === 'mjolnir_visor' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#0b1523" stroke="#fbbf24" strokeWidth="3.2" />
+          <polygon points={buildPolygonPoints(150, 150, 6, 114, 0)} fill="#fbbf24" fillOpacity="0.06" stroke="#fbbf24" strokeOpacity="0.45" strokeWidth="1.5" />
+          <polygon points={buildPolygonPoints(150, 150, 6, 78, 30)} fill="none" stroke="#38bdf8" strokeOpacity="0.45" strokeWidth="1.2" />
+          {[...Array(12)].map((_, idx) => (
+            <rect
+              key={idx}
+              x="148"
+              y="16"
+              width="4"
+              height={idx % 3 === 0 ? '14' : '8'}
+              fill={idx % 3 === 0 ? '#fbbf24' : '#38bdf8'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <text x="150" y="66" textAnchor="middle" dominantBaseline="central" fill="#fbbf24" fontSize="6.8" fontWeight="800" letterSpacing="2.4" fontFamily="'Orbitron', monospace">
+            UNSC // 117
+          </text>
+          <text x="150" y="234" textAnchor="middle" dominantBaseline="central" fill="#38bdf8" fontSize="6.2" fontWeight="800" letterSpacing="2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `MJOLNIR • ${weekdayShort} ${dayStr}` : 'SHIELDS 100%'}
+          </text>
+        </g>
+      )}
+
+      {/* STYLE 50: PAC-MAN ARCADE MAZE */}
+      {styleId === 'arcade_maze' && (
+        <g>
+          <circle cx="150" cy="150" r="142" fill="#03071d" stroke="#2563eb" strokeWidth="4" />
+          <circle cx="150" cy="150" r="126" fill="none" stroke="#38bdf8" strokeOpacity="0.48" strokeWidth="1.4" />
+          {/* Power Pellets on Hours, Classic Pac-Man at 12 */}
+          {[...Array(12)].map((_, idx) => (
+            <circle
+              key={idx}
+              cx="150"
+              cy="22"
+              r={idx % 3 === 0 ? '4.8' : '2.2'}
+              fill={idx % 3 === 0 ? '#fef08a' : '#ffffff'}
+              transform={`rotate(${idx * 30} 150 150)`}
+            />
+          ))}
+          <path d="M 150 74 L 166 64 A 18 18 0 1 0 166 84 Z" fill="#facc15" />
+          <text x="150" y="232" textAnchor="middle" dominantBaseline="central" fill="#fde047" fontSize="6.6" fontWeight="900" letterSpacing="2.2" fontFamily="'JetBrains Mono', monospace">
+            {showDate ? `1UP • ${weekdayShort} ${dayStr}` : 'INSERT COIN'}
+          </text>
+        </g>
+      )}
     </g>
   );
 });
@@ -8409,6 +8947,62 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             <line x1="150" y1="136" x2="150" y2="79" stroke="#f8fafc" strokeWidth="1.3" strokeLinecap="round" />
           </>
         )}
+
+        {styleId === 'vice_palm' && (
+          <>
+            <polygon points="150,162 145.6,144 147.5,82 150,68 152.5,82 154.4,144" fill="#ff2e93" stroke="#160423" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#fde047" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'creeper_dial' && (
+          <>
+            <polygon points="146.5,162 146.5,82 150,69 153.5,82 153.5,162" fill="#a3e635" stroke="#052e16" strokeWidth="1.5" />
+            <line x1="150" y1="136" x2="150" y2="80" stroke="#dcfce7" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'phantom_mask' && (
+          <>
+            <polygon points="150,162 145.2,144 147.4,82 150,68 152.6,82 154.8,144" fill="#dc2626" stroke="#050505" strokeWidth="1.6" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'golden_order' && (
+          <>
+            <polygon points="150,162 145.8,144 147.6,82 150,68 152.4,82 154.2,144" fill="#d97706" stroke="#090704" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#fef3c7" strokeWidth="1.4" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'leviathan_rune' && (
+          <>
+            <polygon points="150,162 145.4,144 147.6,82 150,68 152.4,82 154.6,144" fill="#ef4444" stroke="#0b1220" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#f8fafc" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'triforce_slate' && (
+          <>
+            <polygon points="150,162 145.8,144 147.6,82 150,68 152.4,82 154.2,144" fill="#fbbf24" stroke="#071722" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'mjolnir_visor' && (
+          <>
+            <polygon points="150,162 145.6,144 147.6,82 150,68 152.4,82 154.4,144" fill="#f59e0b" stroke="#07111c" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#fef3c7" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'arcade_maze' && (
+          <>
+            <polygon points="150,162 145.8,144 147.6,82 150,68 152.4,82 154.2,144" fill="#f43f5e" stroke="#03071d" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="136" x2="150" y2="79" stroke="#ffe4e6" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
       </g>
 
       {/* ================= MINUTE HAND BY STYLE ================= */}
@@ -8779,6 +9373,62 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             <line x1="150" y1="138" x2="150" y2="42" stroke="#fbbf24" strokeWidth="1.2" strokeLinecap="round" />
           </>
         )}
+
+        {styleId === 'vice_palm' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#fde047" stroke="#1d062d" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ff2e93" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'creeper_dial' && (
+          <>
+            <polygon points="147.2,166 147.2,42 150,31 152.8,42 152.8,166" fill="#4ade80" stroke="#052e16" strokeWidth="1.3" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'phantom_mask' && (
+          <>
+            <polygon points="150,166 146.5,145 148.2,44 150,31 151.8,44 153.5,145" fill="#ffffff" stroke="#050505" strokeWidth="1.5" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#dc2626" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'golden_order' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#fbbf24" stroke="#0c0904" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#fffbeb" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'leviathan_rune' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#e2e8f0" stroke="#0b1220" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#38bdf8" strokeWidth="1.3" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'triforce_slate' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#22d3ee" stroke="#071722" strokeWidth="1.2" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'mjolnir_visor' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#fbbf24" stroke="#07111c" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
+
+        {styleId === 'arcade_maze' && (
+          <>
+            <polygon points="150,166 146.8,145 148.3,44 150,31 151.7,44 153.2,145" fill="#38bdf8" stroke="#03071d" strokeWidth="1.3" strokeLinejoin="round" />
+            <line x1="150" y1="138" x2="150" y2="42" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+          </>
+        )}
       </g>
 
       {/* ================= SECOND HAND BY STYLE ================= */}
@@ -9077,6 +9727,46 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
               <line x1="150" y1="174" x2="150" y2="26" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #fbbf24)' }} />
               <polygon points="150,24 146.8,36 153.2,36" fill="#fbbf24" />
             </>
+          ) : styleId === 'vice_palm' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="25" stroke="#00f5d4" strokeWidth="1.9" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #00f5d4)' }} />
+              <circle cx="150" cy="31" r="2.8" fill="#ff2e93" stroke="#ffffff" strokeWidth="0.9" />
+            </>
+          ) : styleId === 'creeper_dial' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#22d3ee" strokeWidth="2" strokeLinecap="square" style={{ filter: 'drop-shadow(0 0 6px #22d3ee)' }} />
+              <rect x="147.6" y="28" width="4.8" height="4.8" fill="#4ade80" stroke="#052e16" strokeWidth="0.9" />
+            </>
+          ) : styleId === 'phantom_mask' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="25" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #dc2626)' }} />
+              <polygon points="150,24 153,31 150,37 147,31" fill="#ffffff" stroke="#050505" strokeWidth="0.8" />
+            </>
+          ) : styleId === 'golden_order' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#fef08a" strokeWidth="1.7" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #fbbf24)' }} />
+              <circle cx="150" cy="32" r="2.6" fill="#fbbf24" />
+            </>
+          ) : styleId === 'leviathan_rune' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #38bdf8)' }} />
+              <polygon points="150,24 147,35 153,35" fill="#ef4444" />
+            </>
+          ) : styleId === 'triforce_slate' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#facc15" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #facc15)' }} />
+              <polygon points="150,24 153.2,33 146.8,33" fill="#22d3ee" />
+            </>
+          ) : styleId === 'mjolnir_visor' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #38bdf8)' }} />
+              <circle cx="150" cy="31" r="2.6" fill="#fbbf24" />
+            </>
+          ) : styleId === 'arcade_maze' ? (
+            <>
+              <line x1="150" y1="174" x2="150" y2="26" stroke="#facc15" strokeWidth="1.9" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 6px #facc15)' }} />
+              <circle cx="150" cy="31" r="3" fill="#ffffff" />
+            </>
           ) : (
             <>
               <line x1="150" y1="150" x2="150" y2="177" stroke={secColor} strokeWidth="2.6" strokeLinecap="round" />
@@ -9106,21 +9796,21 @@ export const AnalogClockDial: React.FC<AnalogClockDialProps> = ({
             ? '#fde68a'
             : styleId === 'blackhole'
               ? '#000000'
-              : styleId === 'cyberwave' || styleId === 'tron_disc'
+              : styleId === 'cyberwave' || styleId === 'tron_disc' || styleId === 'vice_palm'
                 ? '#00f2ff'
-                : styleId === 'invincible'
+                : styleId === 'invincible' || styleId === 'arcade_maze'
                   ? '#ffe600'
-                  : styleId === 'omnitrix' || styleId === 'matrix_code'
+                  : styleId === 'omnitrix' || styleId === 'matrix_code' || styleId === 'creeper_dial'
                     ? '#65ff00'
                     : styleId === 'jjk_void'
                       ? '#c084fc'
                       : styleId === 'nichirin' || styleId === 'hawkins_83'
                         ? '#ff4d5a'
-                        : styleId === 'sharingan'
+                        : styleId === 'sharingan' || styleId === 'phantom_mask' || styleId === 'leviathan_rune'
                           ? '#dc2626'
-                          : styleId === 'dragon_radar' || styleId === 'gallifreyan' || styleId === 'gotham_signal'
+                          : styleId === 'dragon_radar' || styleId === 'gallifreyan' || styleId === 'gotham_signal' || styleId === 'golden_order' || styleId === 'mjolnir_visor'
                             ? '#fbbf24'
-                            : styleId === 'log_pose' || styleId === 'hexcore' || styleId === 'arc_reactor' || styleId === 'pokeball_dex'
+                            : styleId === 'log_pose' || styleId === 'hexcore' || styleId === 'arc_reactor' || styleId === 'pokeball_dex' || styleId === 'triforce_slate'
                               ? '#38bdf8'
                               : styleId === 'scout_wings'
                                 ? '#10b981'
@@ -9460,6 +10150,65 @@ export const RadialStyleGlyph: React.FC<{ styleId: RadialStyle; className?: stri
         <svg viewBox="0 0 20 20" className={className} fill="none">
           <ellipse cx="10" cy="10" rx="7.8" ry="5.8" stroke="#fbbf24" strokeWidth="1.3" />
           <path d="M 4.5 10 Q 7.5 7.4 9 9 L 10 7.2 L 11 9 Q 12.5 7.4 15.5 10 Q 12.5 11 10 13 Q 7.5 11 4.5 10 Z" fill="#94a3b8" />
+        </svg>
+      );
+    case 'vice_city':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.8" stroke="#ff2e93" strokeWidth="1.4" />
+          <path d="M 10 16 Q 11 12 10.4 8.2 M 10.4 8.2 Q 7 6.8 5.2 8.8 M 10.4 8.2 Q 14 6.8 15.8 8.8" stroke="#00f5d4" strokeWidth="1.25" strokeLinecap="round" />
+        </svg>
+      );
+    case 'emerald_xp':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#22c55e" strokeWidth="1.6" strokeDasharray="3 1.5" />
+          <polygon points="10,5.5 14,10 10,14.5 6,10" fill="#22d3ee" />
+        </svg>
+      );
+    case 'velvet_rebellion':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#dc2626" strokeWidth="1.5" />
+          <polygon points="10,4.8 11.4,8.2 15.2,8.6 12.4,11 13.2,14.8 10,12.8 6.8,14.8 7.6,11 4.8,8.6 8.6,8.2" fill="#ffffff" />
+        </svg>
+      );
+    case 'erdtree_grace':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="8" r="3.6" stroke="#fbbf24" strokeWidth="1.15" />
+          <circle cx="7.6" cy="11.8" r="3.4" stroke="#f59e0b" strokeWidth="1.1" />
+          <circle cx="12.4" cy="11.8" r="3.4" stroke="#fef08a" strokeWidth="1.1" />
+        </svg>
+      );
+    case 'omega_frost':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.8" stroke="#38bdf8" strokeWidth="1.3" />
+          <path d="M 6.2 13.8 H 8.4 V 12.2 A 3.6 3.6 0 1 1 11.6 12.2 V 13.8 H 13.8" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case 'sheikah_orb':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#06b6d4" strokeWidth="1.3" />
+          <polygon points="10,4.8 13,10 7,10" fill="#facc15" />
+          <polygon points="7,10 10,14.8 4.2,14.8" fill="#facc15" />
+          <polygon points="13,10 15.8,14.8 10,14.8" fill="#facc15" />
+        </svg>
+      );
+    case 'cortana_ring':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#fbbf24" strokeWidth="1.5" />
+          <polygon points="6.2,7.2 13.8,7.2 15,10 12.8,12.8 7.2,12.8 5,10" stroke="#38bdf8" strokeWidth="1.2" />
+        </svg>
+      );
+    case 'maze_chomper':
+      return (
+        <svg viewBox="0 0 20 20" className={className} fill="none">
+          <circle cx="10" cy="10" r="7.6" stroke="#2563eb" strokeWidth="1.5" />
+          <path d="M 10 10 L 14 7.2 A 5 5 0 1 0 14 12.8 Z" fill="#facc15" />
         </svg>
       );
     case 'fractal_mandala':
@@ -10520,6 +11269,122 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
               ))}
             </g>
           )}
+
+          {/* STYLE 35: GTA 6 VICE SUNSET */}
+          {styleId === 'vice_city' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#170526" />
+              <circle cx={cx} cy={cy} r="152" fill="none" stroke="#ff2e93" strokeWidth="2.8" strokeOpacity="0.65" />
+              {/* Tropical Coconut Palm Fronds Peeking on Left/Right Perimeter */}
+              <path d="M 14 218 Q 22 175 34 140 M 34 140 Q 16 128 6 138 M 34 140 Q 26 116 16 110 M 34 140 Q 52 124 62 128" fill="none" stroke="#00f5d4" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.72" />
+              <circle cx="32" cy="144" r="3" fill="#fde047" />
+              <path d="M 306 218 Q 298 175 286 140 M 286 140 Q 304 128 314 138 M 286 140 Q 294 116 304 110 M 286 140 Q 268 124 258 128" fill="none" stroke="#ff8c42" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.72" />
+              <circle cx="288" cy="144" r="3" fill="#ff2e93" />
+            </g>
+          )}
+
+          {/* STYLE 36: MINECRAFT OVERWORLD XP */}
+          {styleId === 'emerald_xp' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#09150b" />
+              <circle cx={cx} cy={cy} r="152" fill="none" stroke="#22c55e" strokeWidth="4.5" strokeDasharray="10 5" strokeOpacity="0.68" />
+              {Array.from({ length: 12 }).map((_, idx) => (
+                <rect
+                  key={idx}
+                  x={cx - 3.5}
+                  y="6"
+                  width="7"
+                  height="9"
+                  fill={idx % 3 === 0 ? '#22d3ee' : '#4ade80'}
+                  transform={`rotate(${idx * 30} ${cx} ${cy})`}
+                />
+              ))}
+            </g>
+          )}
+
+          {/* STYLE 37: PERSONA 5 REBEL CARD */}
+          {styleId === 'velvet_rebellion' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#070708" />
+              <circle cx={cx} cy={cy} r="151" fill="none" stroke="#dc2626" strokeWidth="4" strokeOpacity="0.82" />
+              {Array.from({ length: 12 }).map((_, idx) => (
+                <polygon
+                  key={idx}
+                  points="155,4 165,4 161,19 159,19"
+                  fill={idx % 2 === 0 ? '#ffffff' : '#dc2626'}
+                  transform={`rotate(${idx * 30} ${cx} ${cy})`}
+                />
+              ))}
+            </g>
+          )}
+
+          {/* STYLE 38: ELDEN RING ERDTREE GRACE */}
+          {styleId === 'erdtree_grace' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#090704" />
+              <circle cx={cx} cy={cy} r="152" fill="none" stroke="#d97706" strokeWidth="2.4" strokeOpacity="0.72" />
+              <g transform={`rotate(${hudVernierDeg * 0.4} ${cx} ${cy})`}>
+                <circle cx={cx} cy={cy} r="144" fill="none" stroke="#fef08a" strokeWidth="1" strokeOpacity="0.45" strokeDasharray="14 8" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 39: GOD OF WAR OMEGA FROST */}
+          {styleId === 'omega_frost' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#08101c" />
+              <circle cx={cx} cy={cy} r="152" fill="none" stroke="#38bdf8" strokeWidth="2.4" strokeOpacity="0.68" />
+              <circle cx={cx} cy={cy} r="144" fill="none" stroke="#ef4444" strokeWidth="1.6" strokeOpacity="0.58" strokeDasharray="18 8" />
+            </g>
+          )}
+
+          {/* STYLE 40: ZELDA SHEIKAH RUNE */}
+          {styleId === 'sheikah_orb' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#05131d" />
+              <circle cx={cx} cy={cy} r="151" fill="none" stroke="#06b6d4" strokeWidth="2.6" strokeOpacity="0.72" />
+              {Array.from({ length: 12 }).map((_, idx) => (
+                <circle
+                  key={idx}
+                  cx={cx}
+                  cy="11"
+                  r={idx % 3 === 0 ? '4' : '2.2'}
+                  fill={idx % 3 === 0 ? '#facc15' : '#22d3ee'}
+                  transform={`rotate(${idx * 30} ${cx} ${cy})`}
+                />
+              ))}
+            </g>
+          )}
+
+          {/* STYLE 41: HALO ARRAY */}
+          {styleId === 'cortana_ring' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#07111e" />
+              <circle cx={cx} cy={cy} r="151" fill="none" stroke="#fbbf24" strokeWidth="3" strokeOpacity="0.72" />
+              <g transform={`rotate(${hudVernierDeg * -0.5} ${cx} ${cy})`}>
+                <circle cx={cx} cy={cy} r="143" fill="none" stroke="#38bdf8" strokeWidth="1.4" strokeOpacity="0.6" strokeDasharray="16 8" />
+              </g>
+            </g>
+          )}
+
+          {/* STYLE 42: PAC-MAN ARCADE MAZE */}
+          {styleId === 'maze_chomper' && (
+            <g pointerEvents="none">
+              <circle cx={cx} cy={cy} r="155" fill="#03061a" />
+              <circle cx={cx} cy={cy} r="152" fill="none" stroke="#2563eb" strokeWidth="3.5" />
+              <circle cx={cx} cy={cy} r="145" fill="none" stroke="#38bdf8" strokeWidth="1.2" strokeOpacity="0.65" />
+              {Array.from({ length: 12 }).map((_, idx) => (
+                <circle
+                  key={idx}
+                  cx={cx}
+                  cy="11"
+                  r={idx % 3 === 0 ? '4.2' : '2'}
+                  fill="#fef08a"
+                  transform={`rotate(${idx * 30} ${cx} ${cy})`}
+                />
+              ))}
+            </g>
+          )}
         </g>
 
         {/* ================= INNER CHRONOMETER CHAMBER BACKDROP (ALWAYS QUIET & CRISP) ================= */}
@@ -10537,6 +11402,14 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
                     doomsday_core: '#0a0b0e',
                     nerv_hex: '#070302',
                     tron_disc: '#020710',
+                    vice_city: '#150422',
+                    emerald_xp: '#071409',
+                    velvet_rebellion: '#060607',
+                    erdtree_grace: '#0b0803',
+                    omega_frost: '#08101c',
+                    sheikah_orb: '#05121b',
+                    cortana_ring: '#07101c',
+                    maze_chomper: '#030619',
                     omnitrix_core: '#070e09',
                     jjk_domain: '#050210',
                     nichirin_flame: '#0a0707',
@@ -10570,6 +11443,14 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
                 nerv_hex: '#ff6a00',
                 tron_disc: '#00f2ff',
                 cyber_hud: ringSec,
+                vice_city: '#ff2e93',
+                emerald_xp: '#4ade80',
+                velvet_rebellion: '#dc2626',
+                erdtree_grace: '#fbbf24',
+                omega_frost: '#38bdf8',
+                sheikah_orb: '#06b6d4',
+                cortana_ring: '#fbbf24',
+                maze_chomper: '#2563eb',
                 omnitrix_core: '#65ff00',
                 jjk_domain: '#a855f7',
                 nichirin_flame: '#f97316',
@@ -10596,7 +11477,7 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
           }
           strokeOpacity={isDarkChamber ? 0.85 : 0.45}
           strokeWidth={
-            ['blackhole_lens', 'solar_orbit', 'invincible_arc', 'doomsday_core', 'tron_disc', 'omnitrix_core', 'jjk_domain', 'jarvis_hud'].includes(styleId)
+            ['blackhole_lens', 'solar_orbit', 'invincible_arc', 'doomsday_core', 'tron_disc', 'omnitrix_core', 'jjk_domain', 'jarvis_hud', 'vice_city', 'velvet_rebellion', 'maze_chomper'].includes(styleId)
               ? 1.8
               : 1.1
           }
@@ -10670,6 +11551,14 @@ export const RadialClockGauge: React.FC<RadialClockGaugeProps> = ({
               kyber_core: 'GALACTIC // KYBER',
               zion_construct: 'ZION // CONSTRUCT',
               batcomputer: 'WAYNE-OS // GOTHAM',
+              vice_city: 'VICE CITY // LEONIDA',
+              emerald_xp: 'OVERWORLD // XP 30',
+              velvet_rebellion: 'PHANTOM // TAKE TIME',
+              erdtree_grace: 'ELDEN RING // GRACE',
+              omega_frost: 'MIDGARD // OMEGA',
+              sheikah_orb: 'SHEIKAH // TRIFORCE',
+              cortana_ring: 'UNSC // MJOLNIR',
+              maze_chomper: '1UP // PAC-MAN',
               invincible_arc: 'VILTRUM // HERO',
               dune_eclipse: 'ARRAKIS // 10191',
               doomsday_core: 'MINUTES TO MIDNIGHT',
@@ -12384,7 +13273,7 @@ export const DigitalClock: React.FC = () => {
         </div>
       ) : null}
 
-      {/* Cinema, TV & Anime Edition Studio Bar (Available across ALL 9 clock modes) */}
+      {/* Games, Cinema, TV & Anime Edition Studio Bar (Available across ALL 9 clock modes) */}
       <div
         data-testid="cinema-edition-bar"
         className="p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl shadow-xs flex flex-col gap-2.5"
@@ -12393,7 +13282,7 @@ export const DigitalClock: React.FC = () => {
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
               <Film size={13} className="text-brand-500" />
-              Cinema, TV &amp; Anime Edition
+              Games, Cinema, TV &amp; Anime Edition
             </span>
             <span className="hidden md:inline-block text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate border-l border-slate-200 dark:border-slate-700 pl-2">
               {activeEditionMeta.tagline}
@@ -12409,7 +13298,7 @@ export const DigitalClock: React.FC = () => {
             <button
               onClick={handleEditionDailyMix}
               className="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 whitespace-nowrap shadow-xs"
-              title="Shuffle a TV show, movie, or anime edition across all 9 clock modes"
+              title="Shuffle a game, TV show, movie, or anime edition across all 9 clock modes"
             >
               <Shuffle size={12} />
               <span>Cinema Mix</span>
@@ -12425,6 +13314,7 @@ export const DigitalClock: React.FC = () => {
           {(
             [
               { id: 'all', label: 'All', count: selectableEditions.length },
+              { id: 'games', label: 'Games', count: selectableEditions.filter((e) => e.category === 'games').length },
               { id: 'anime', label: 'Anime', count: selectableEditions.filter((e) => e.category === 'anime').length },
               { id: 'tv', label: 'TV & Animation', count: selectableEditions.filter((e) => e.category === 'tv').length },
               { id: 'movies', label: 'Movies', count: selectableEditions.filter((e) => e.category === 'movies').length },
