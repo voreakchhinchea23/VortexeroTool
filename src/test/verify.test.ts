@@ -1176,4 +1176,44 @@ for (const cssToken of requiredEditionCssTokens) {
 
 console.log(`✓ Test 14: Games, Cinema, TV & Anime Clock Editions (${CLOCK_EDITIONS.length} universal editions across all 9 clock modes) verified.`);
 
+// Test 15: Auto 1-Hour Smart Mix Rotation & Quick Mix Controls
+import {
+  AUTO_MIX_INTERVAL_MS,
+  formatAutoMixCountdown,
+} from '../components/tools/productivity/DigitalClock';
+
+if (AUTO_MIX_INTERVAL_MS !== 3600000) {
+  console.error(`Expected AUTO_MIX_INTERVAL_MS to be 3600000ms (1h), got ${AUTO_MIX_INTERVAL_MS}`);
+  process.exit(1);
+}
+
+if (
+  formatAutoMixCountdown(3600000) !== '60:00' ||
+  formatAutoMixCountdown(65000) !== '01:05' ||
+  formatAutoMixCountdown(-500) !== '00:00'
+) {
+  console.error('formatAutoMixCountdown did not format boundaries properly');
+  process.exit(1);
+}
+
+const requiredAutoMixTokens = [
+  'vortexero_clock_auto_mix',
+  'vortexero_clock_auto_mix_next_at',
+  'auto-hourly-mix-btn',
+  'mix-now-btn',
+  'theme-random-mix-btn',
+  'auto-hourly-stage-badge',
+  'fullscreen-mix-btn',
+  'fullscreen-auto-mix-btn',
+];
+
+for (const token of requiredAutoMixTokens) {
+  if (!digitalClockSource.includes(token)) {
+    console.error(`DigitalClock.tsx missing required Auto Mix token: ${token}`);
+    process.exit(1);
+  }
+}
+
+console.log('✓ Test 15: Auto 1-Hour Random Mix rotation timer, Mix controls, and persistence verified.');
+
 console.log('All automated verification checks PASSED successfully!');

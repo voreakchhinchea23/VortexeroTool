@@ -114,7 +114,7 @@ const RAW_TOOLS: Tool[] = [
   {
     id: 'digital-clock',
     name: 'Modern Digital Clock Studio',
-    description: 'Fullscreen aesthetic desk clock studio with 45 themes, 33 Games, Cinema, TV & Anime Editions (GTA 6 Vice City, Minecraft, Persona 5, Elden Ring, Ben 10, Jujutsu Kaisen & more), 50 Analog dials, 42 Radial gauges, Word Clock, Flip Clock, Desk Calendar & Pomodoro.',
+    description: 'Fullscreen aesthetic desk clock studio with 45 themes, 33 Games, Cinema, TV & Anime Editions (GTA 6 Vice City, Minecraft, Persona 5, Elden Ring, Ben 10, Jujutsu Kaisen & more), 50 Analog dials, 42 Radial gauges, Auto 1h random mix, Word Clock, Flip Clock, Desk Calendar & Pomodoro.',
     category: 'productivity',
     iconName: 'Clock',
     badge: 'Hot',

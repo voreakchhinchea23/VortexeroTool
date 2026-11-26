@@ -25,6 +25,7 @@ import {
   Compass,
   Film,
   Power,
+  Timer,
 } from 'lucide-react';
 import {
   CLOCK_EDITIONS,
@@ -904,6 +905,15 @@ export const CLOCK_BG_FX_OPTIONS: {
   { id: 'pixel_arcade', label: 'Bg: Pixel Arcade', shortLabel: 'Pixels', tagline: 'Floating retro voxel XP blocks and luminous arcade cabinet pellets' },
   { id: 'none', label: 'Bg: Static (Off)', shortLabel: 'Off', tagline: 'Clean static theme canvas' },
 ];
+
+export const AUTO_MIX_INTERVAL_MS = 60 * 60 * 1000;
+
+export const formatAutoMixCountdown = (remainingMs: number): string => {
+  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
 
 const TIMEZONES = [
   { id: 'local', label: 'Local Device Time' },
@@ -12151,6 +12161,14 @@ export const DigitalClock: React.FC = () => {
   const [editionCategory, setEditionCategory] = useState<ClockEditionCategory>('all');
   const [analogCategory, setAnalogCategory] = useState<'all' | AnalogStyleMeta['category']>('all');
   const [radialCategory, setRadialCategory] = useState<'all' | RadialStyleMeta['category']>('all');
+  const [autoHourlyMix, setAutoHourlyMix] = useState<boolean>(() => {
+    return localStorage.getItem('vortexero_clock_auto_mix') === 'true';
+  });
+  const [autoMixNextAt, setAutoMixNextAt] = useState<number>(() => {
+    const raw = Number(localStorage.getItem('vortexero_clock_auto_mix_next_at'));
+    return Number.isFinite(raw) && raw > Date.now() ? raw : Date.now() + AUTO_MIX_INTERVAL_MS;
+  });
+  const performMixRef = useRef<() => void>(() => {});
   const [wakeLockActive, setWakeLockActive] = useState<boolean>(false);
   const wakeLockSentinelRef = useRef<any>(null);
   const fallbackVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -12258,6 +12276,14 @@ export const DigitalClock: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('vortexero_clock_edition', clockEdition);
   }, [clockEdition]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_auto_mix', String(autoHourlyMix));
+  }, [autoHourlyMix]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_auto_mix_next_at', String(autoMixNextAt));
+  }, [autoMixNextAt]);
 
   // Screen Wake Lock API implementation with graceful fallback
   const requestWakeLock = async () => {
@@ -12756,6 +12782,80 @@ export const DigitalClock: React.FC = () => {
     }
   };
 
+  const performCoolRandomMix = (preferThemeOnly = false) => {
+    const pick = <T,>(items: T[]): T => items[Math.floor(Math.random() * items.length)];
+    const animPool: AnimationFx[] = [
+      'auto',
+      'aurora',
+      'breathe',
+      'ocean',
+      'fire',
+      'supernova',
+      'heartbeat',
+      'sunrise',
+      'sunset',
+    ];
+
+    const useThemedEdition = !preferThemeOnly && Math.random() < 0.65;
+    if (useThemedEdition) {
+      const editionPool = CLOCK_EDITIONS.filter((e) => e.id !== 'classic' && e.id !== clockEdition);
+      if (editionPool.length > 0) {
+        const nextEd = pick(editionPool);
+        handleSelectEdition(nextEd.id);
+        setAnimationFx(pick(animPool));
+        return;
+      }
+    }
+
+    setClockEdition('classic');
+    const themePool = themes.filter((t) => t.id !== theme);
+    if (themePool.length > 0) {
+      setTheme(pick(themePool).id);
+    }
+    const bgPool = CLOCK_BG_FX_OPTIONS.filter((b) => b.id !== 'none' && b.id !== bgFx);
+    if (bgPool.length > 0) {
+      setBgFx(pick(bgPool).id);
+    }
+    const analogPool = ANALOG_STYLES.filter((s) => s.id !== analogStyle);
+    if (analogPool.length > 0) {
+      setAnalogStyle(pick(analogPool).id);
+    }
+    const radialPool = RADIAL_STYLES.filter((s) => s.id !== radialStyle);
+    if (radialPool.length > 0) {
+      setRadialStyle(pick(radialPool).id);
+    }
+    setAnimationFx(pick(animPool));
+  };
+
+  performMixRef.current = () => performCoolRandomMix(false);
+
+  const handleCoolMixNow = (preferThemeOnly = false) => {
+    performCoolRandomMix(preferThemeOnly);
+    if (autoHourlyMix) {
+      setAutoMixNextAt(Date.now() + AUTO_MIX_INTERVAL_MS);
+    }
+  };
+
+  const handleToggleAutoHourlyMix = () => {
+    if (autoHourlyMix) {
+      setAutoHourlyMix(false);
+    } else {
+      setAutoHourlyMix(true);
+      setAutoMixNextAt(Date.now() + AUTO_MIX_INTERVAL_MS);
+      performCoolRandomMix(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!autoHourlyMix) return;
+    if (currentTime.getTime() >= autoMixNextAt) {
+      performMixRef.current();
+      setAutoMixNextAt(Date.now() + AUTO_MIX_INTERVAL_MS);
+    }
+  }, [autoHourlyMix, autoMixNextAt, currentTime]);
+
+  const autoMixCountdownLabel = formatAutoMixCountdown(autoMixNextAt - currentTime.getTime());
+
   const filteredThemes = themeCategory === 'all'
     ? themes
     : themes.filter(t => t.category === themeCategory);
@@ -13046,6 +13146,40 @@ export const DigitalClock: React.FC = () => {
               Serif
             </button>
           </div>
+
+          {/* Cool Random Mix Now Button */}
+          <button
+            onClick={() => handleCoolMixNow(false)}
+            data-testid="mix-now-btn"
+            className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+            title="Shuffle a cool random Edition or Aesthetic Theme + Animated Background combo right now"
+          >
+            <Shuffle size={13} className="text-brand-500" />
+            <span>Mix</span>
+          </button>
+
+          {/* Auto 1-Hour Random Theme Rotation Toggle */}
+          <button
+            onClick={handleToggleAutoHourlyMix}
+            data-testid="auto-hourly-mix-btn"
+            aria-pressed={autoHourlyMix}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
+              autoHourlyMix
+                ? 'bg-emerald-500/15 border-emerald-500/55 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+            title={
+              autoHourlyMix
+                ? `Auto 1h Mix Active: switching randomly every hour (next mix in ${autoMixCountdownLabel}). Click to stop.`
+                : 'Auto 1h Mix: automatically switch to a random cool Edition or Theme + Background combo every 1 hour'
+            }
+          >
+            <Timer size={14} className={autoHourlyMix ? 'animate-spin [animation-duration:12s] text-emerald-500' : ''} />
+            <span>{autoHourlyMix ? `Auto 1h (${autoMixCountdownLabel})` : 'Auto 1h Mix'}</span>
+            {autoHourlyMix && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            )}
+          </button>
 
           {/* Keep Screen On Toggle */}
           <button
@@ -13723,6 +13857,17 @@ export const DigitalClock: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-2">
+            {/* Random Theme + Background Mix Button */}
+            <button
+              onClick={() => handleCoolMixNow(true)}
+              data-testid="theme-random-mix-btn"
+              className="px-2.5 py-1 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-xs"
+              title="Pick a random Aesthetic Theme, Animated Background, and Dynamic Animation combo"
+            >
+              <Shuffle size={12} />
+              <span>Mix Theme</span>
+            </button>
+
             {/* Active Theme Summary Pill */}
             {(() => {
               const activeObj = themes.find(t => t.id === theme) || themes[0];
@@ -13857,9 +14002,56 @@ export const DigitalClock: React.FC = () => {
                 <span>Always On</span>
               </span>
             )}
+            {autoHourlyMix && (
+              <span
+                data-testid="auto-hourly-stage-badge"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 backdrop-blur-md"
+                title={`Next automatic random mix in ${autoMixCountdownLabel}`}
+              >
+                <Timer size={11} className="text-emerald-400" />
+                <span>AUTO 1H {autoMixCountdownLabel}</span>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
+            {isFullscreen && (
+              <>
+                <button
+                  onClick={() => handleCoolMixNow(false)}
+                  data-testid="fullscreen-mix-btn"
+                  className={`p-2.5 rounded-2xl backdrop-blur-md transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold ${
+                    themeConfig.isLight
+                      ? 'bg-black/10 hover:bg-black/20 text-slate-800'
+                      : 'bg-white/10 hover:bg-white/20 text-white'
+                  }`}
+                  title="Shuffle a cool random Edition or Theme + Background mix now"
+                >
+                  <Shuffle size={16} />
+                  <span className="hidden md:inline">Mix</span>
+                </button>
+                <button
+                  onClick={handleToggleAutoHourlyMix}
+                  data-testid="fullscreen-auto-mix-btn"
+                  className={`p-2.5 rounded-2xl backdrop-blur-md transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold ${
+                    autoHourlyMix
+                      ? 'bg-emerald-500/25 border border-emerald-500/50 text-emerald-300'
+                      : themeConfig.isLight
+                        ? 'bg-black/10 hover:bg-black/20 text-slate-800'
+                        : 'bg-white/10 hover:bg-white/20 text-white'
+                  }`}
+                  title={
+                    autoHourlyMix
+                      ? `Auto 1h Mix Active (next change in ${autoMixCountdownLabel})`
+                      : 'Enable automatic random mix every 1 hour'
+                  }
+                >
+                  <Timer size={16} />
+                  <span className="hidden md:inline">{autoHourlyMix ? autoMixCountdownLabel : 'Auto 1h'}</span>
+                </button>
+              </>
+            )}
+
             {isFullscreen && (
               <button
                 onClick={() => setKeepScreenOn(!keepScreenOn)}
