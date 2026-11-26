@@ -26,6 +26,7 @@ import {
   Film,
   Power,
   Timer,
+  MousePointerClick,
 } from 'lucide-react';
 import {
   CLOCK_EDITIONS,
@@ -99,11 +100,14 @@ export type ClockTheme =
   | 'neon_cyber_pulse'
   | 'ocean_waves'
   | 'fire_ember'
-  | 'supernova';
+  | 'supernova'
+  | 'reactive_plasma'
+  | 'magnetic_aurora'
+  | 'starlight_touch';
 
 export type Mode = 'digital' | 'stacked' | 'radial' | 'words' | 'calendar' | 'flip' | 'analog' | 'pomodoro' | 'stopwatch';
 export type FontStyle = 'mono' | 'sans' | 'serif' | 'digital' | 'condensed' | 'minimal';
-export type ThemeCategory = 'all' | 'animated' | 'cyber' | 'space' | 'warm' | 'minimal';
+export type ThemeCategory = 'all' | 'interactive' | 'animated' | 'cyber' | 'space' | 'warm' | 'minimal';
 export type AnalogStyle =
   | 'chronometer'
   | 'bauhaus'
@@ -223,6 +227,8 @@ export type BackgroundFx =
   | 'vice_sunset'
   | 'erdtree_petals'
   | 'pixel_arcade'
+  | 'interactive_nodes'
+  | 'touch_ripples'
   | 'none';
 
 export interface AnalogStyleMeta {
@@ -903,8 +909,16 @@ export const CLOCK_BG_FX_OPTIONS: {
   { id: 'vice_sunset', label: 'Bg: Vice Coconut Sunset', shortLabel: 'Vice Palms', tagline: 'Swaying tropical coconut palm trees silhouetted against a sliced Leonida sunset' },
   { id: 'erdtree_petals', label: 'Bg: Erdtree Grace', shortLabel: 'Grace', tagline: 'Luminous golden Grace embers and Midgard frost mist drifting in space' },
   { id: 'pixel_arcade', label: 'Bg: Pixel Arcade', shortLabel: 'Pixels', tagline: 'Floating retro voxel XP blocks and luminous arcade cabinet pellets' },
+  { id: 'interactive_nodes', label: 'Bg: Reactive Matrix', shortLabel: 'Reactive', tagline: 'Cursor-tracking luminous constellation mesh with magnetic spotlight and click starbursts' },
+  { id: 'touch_ripples', label: 'Bg: Touch Liquid Halo', shortLabel: 'Touch Halo', tagline: 'Interactive liquid aurora field responding smoothly to pointer hover and clicks' },
   { id: 'none', label: 'Bg: Static (Off)', shortLabel: 'Off', tagline: 'Clean static theme canvas' },
 ];
+
+export const INTERACTIVE_THEMES: ReadonlySet<ClockTheme> = new Set([
+  'reactive_plasma',
+  'magnetic_aurora',
+  'starlight_touch',
+]);
 
 export const AUTO_MIX_INTERVAL_MS = 60 * 60 * 1000;
 
@@ -954,6 +968,11 @@ export const RADIAL_GAUGE_CONFIG = {
 } as const;
 
 export const CLOCK_THEMES: { id: ClockTheme; label: string; color: string; category: ThemeCategory }[] = [
+  // Interactive Touch Reactive
+  { id: 'reactive_plasma', label: 'Interactive Plasma', color: 'bg-gradient-to-tr from-[#00f5d4] via-[#a855f7] to-[#ff2e93]', category: 'interactive' },
+  { id: 'magnetic_aurora', label: 'Touch Liquid Flux', color: 'bg-gradient-to-tr from-[#38bdf8] via-[#34d399] to-[#818cf8]', category: 'interactive' },
+  { id: 'starlight_touch', label: 'Starlight Touch', color: 'bg-gradient-to-tr from-[#fde047] via-[#60a5fa] to-[#fb7185]', category: 'interactive' },
+
   // Dynamic & Animated
   { id: 'heartbeat_pulse', label: 'Heartbeat Pulse', color: 'bg-[#ff1a53]', category: 'animated' },
   { id: 'sunrise_dawn', label: 'Sunrise Dawn', color: 'bg-amber-400', category: 'animated' },
@@ -1750,6 +1769,60 @@ export const getClockThemeStyles = (theme: ClockTheme): ThemeStyles => {
         flipCard: 'bg-[#1e0a3b] text-fuchsia-300 border-purple-500/35 shadow-purple-950/40',
         progressBar: 'bg-gradient-to-r from-fuchsia-500 via-purple-400 to-sky-400',
         defaultAnimation: 'supernova',
+      };
+    case 'reactive_plasma':
+      return {
+        bg: 'bg-[#050312]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#00f5d4] via-[#c084fc] to-[#ff2e93] drop-shadow-[0_0_35px_rgba(0,245,212,0.85)]',
+        glow: 'bg-gradient-to-tr from-[#00f5d4]/22 via-[#a855f7]/18 to-[#ff2e93]/20',
+        accent: 'text-[#00f5d4]',
+        border: 'border-[#00f5d4]/45',
+        badgeBg: 'bg-[#00f5d4]/15 text-[#99f6e4] border-[#00f5d4]/45',
+        handSec: '#00f5d4',
+        handMin: '#c084fc',
+        handHr: '#ff2e93',
+        dialBg: '#0b061f',
+        dialBorder: '#00f5d4',
+        flipCard: 'bg-[#11082d] text-[#67e8f9] border-[#00f5d4]/40 shadow-[#00f5d4]/25',
+        progressBar: 'bg-gradient-to-r from-[#00f5d4] via-[#a855f7] to-[#ff2e93]',
+        subText: 'text-teal-200/80',
+        defaultAnimation: 'aurora',
+      };
+    case 'magnetic_aurora':
+      return {
+        bg: 'bg-[#030916]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#38bdf8] via-[#34d399] to-[#818cf8] drop-shadow-[0_0_34px_rgba(56,189,248,0.85)]',
+        glow: 'bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.25),rgba(52,211,153,0.12)_55%,transparent_76%)]',
+        accent: 'text-[#34d399]',
+        border: 'border-[#38bdf8]/45',
+        badgeBg: 'bg-[#38bdf8]/15 text-[#bae6fd] border-[#38bdf8]/45',
+        handSec: '#34d399',
+        handMin: '#38bdf8',
+        handHr: '#818cf8',
+        dialBg: '#061428',
+        dialBorder: '#38bdf8',
+        flipCard: 'bg-[#081a33] text-[#7dd3fc] border-[#38bdf8]/40 shadow-[#38bdf8]/25',
+        progressBar: 'bg-gradient-to-r from-[#38bdf8] via-[#34d399] to-[#818cf8]',
+        subText: 'text-sky-200/80',
+        defaultAnimation: 'ocean',
+      };
+    case 'starlight_touch':
+      return {
+        bg: 'bg-[#060610]',
+        clockText: 'text-transparent bg-clip-text bg-gradient-to-r from-[#fde047] via-[#60a5fa] to-[#fb7185] drop-shadow-[0_0_34px_rgba(253,224,71,0.8)]',
+        glow: 'bg-gradient-to-tr from-[#fde047]/16 via-[#60a5fa]/18 to-[#fb7185]/16',
+        accent: 'text-[#fde047]',
+        border: 'border-[#60a5fa]/45',
+        badgeBg: 'bg-[#fde047]/15 text-[#fef08a] border-[#fde047]/45',
+        handSec: '#fde047',
+        handMin: '#60a5fa',
+        handHr: '#fb7185',
+        dialBg: '#0c0d1f',
+        dialBorder: '#fde047',
+        flipCard: 'bg-[#11132b] text-[#fef08a] border-[#60a5fa]/40 shadow-[#60a5fa]/25',
+        progressBar: 'bg-gradient-to-r from-[#fde047] via-[#60a5fa] to-[#fb7185]',
+        subText: 'text-blue-200/80',
+        defaultAnimation: 'breathe',
       };
     default:
       return {
@@ -2828,6 +2901,25 @@ const BG_PIXEL_BLOCKS: { left: number; top: number; size: number; dur: string; d
   return arr;
 })();
 
+const BG_REACTIVE_CONSTELLATION: { x: number; y: number; r: number; tone: 'sec' | 'min' | 'hr'; dur: string; delay: string }[] = (() => {
+  const rng = makeSeededRng(20261);
+  const tones: ('sec' | 'min' | 'hr')[] = ['sec', 'min', 'hr'];
+  const arr: { x: number; y: number; r: number; tone: 'sec' | 'min' | 'hr'; dur: string; delay: string }[] = [];
+  for (let i = 0; i < 24; i++) {
+    const durVal = 3.2 + rng() * 3.8;
+    const delayVal = -(rng() * durVal);
+    arr.push({
+      x: Math.round(52 + rng() * 696),
+      y: Math.round(48 + rng() * 504),
+      r: Number((2.2 + rng() * 2.8).toFixed(1)),
+      tone: tones[i % 3],
+      dur: `${durVal.toFixed(2)}s`,
+      delay: `${delayVal.toFixed(2)}s`,
+    });
+  }
+  return arr;
+})();
+
 const buildPolygonPoints = (cx: number, cy: number, sides: number, radius: number, rotDeg = 0): string => {
   const pts: string[] = [];
   for (let i = 0; i < sides; i++) {
@@ -2837,9 +2929,14 @@ const buildPolygonPoints = (cx: number, cy: number, sides: number, radius: numbe
   return pts.join(' ');
 };
 
-export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: ThemeStyles }> = React.memo(({
+export const ClockBackgroundLayer: React.FC<{
+  bgFx: BackgroundFx;
+  themeConfig: ThemeStyles;
+  interactive?: boolean;
+}> = React.memo(({
   bgFx,
   themeConfig,
+  interactive = true,
 }) => {
   const bgUid = useId().replace(/:/g, '');
   if (bgFx === 'none') return null;
@@ -2854,7 +2951,7 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
     <div
       data-testid="clock-bg-layer"
       data-bg-fx-active={bgFx}
-      className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0"
+      className={`absolute inset-0 overflow-hidden pointer-events-none select-none z-0 ${interactive ? 'clock-bg-parallax' : ''}`}
       aria-hidden="true"
     >
       {/* 1. AURORA RIBBONS */}
@@ -3737,6 +3834,85 @@ export const ClockBackgroundLayer: React.FC<{ bgFx: BackgroundFx; themeConfig: T
               />
             );
           })}
+        </div>
+      )}
+
+      {/* 23. INTERACTIVE REACTIVE CONSTELLATION MESH */}
+      {bgFx === 'interactive_nodes' && (
+        <div className="absolute inset-0 overflow-hidden">
+          <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+            <g stroke={c2} strokeOpacity={isLight ? '0.18' : '0.24'} strokeWidth="0.9">
+              {BG_REACTIVE_CONSTELLATION.map((node, idx) => {
+                const next = BG_REACTIVE_CONSTELLATION[(idx + 1) % BG_REACTIVE_CONSTELLATION.length];
+                const alt = BG_REACTIVE_CONSTELLATION[(idx + 5) % BG_REACTIVE_CONSTELLATION.length];
+                return (
+                  <g key={idx}>
+                    <line x1={node.x} y1={node.y} x2={next.x} y2={next.y} />
+                    {idx % 2 === 0 && <line x1={node.x} y1={node.y} x2={alt.x} y2={alt.y} stroke={c1} strokeOpacity="0.16" />}
+                  </g>
+                );
+              })}
+            </g>
+            {BG_REACTIVE_CONSTELLATION.map((node, idx) => {
+              const col = pickTone(node.tone);
+              return (
+                <circle
+                  key={idx}
+                  cx={node.x}
+                  cy={node.y}
+                  r={node.r}
+                  fill={col}
+                  className="animate-bg-star-twinkle"
+                  style={{ animationDuration: node.dur, animationDelay: node.delay }}
+                />
+              );
+            })}
+          </svg>
+          <div
+            className="absolute inset-0 transition-opacity duration-300"
+            style={{
+              opacity: 'var(--clock-hover, 0)',
+              background: `radial-gradient(circle 220px at var(--clock-mx, 50%) var(--clock-my, 50%), ${c1}36 0%, ${c2}1c 45%, transparent 74%)`,
+            }}
+          />
+          <div className="clock-reactive-dotgrid absolute inset-0" style={{ opacity: 'var(--clock-hover, 0)' }} />
+        </div>
+      )}
+
+      {/* 24. INTERACTIVE TOUCH LIQUID HALO & RIPPLES */}
+      {bgFx === 'touch_ripples' && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="animate-bg-aurora-a absolute -top-1/4 -left-1/4 w-[80%] h-[80%] rounded-full blur-3xl"
+            style={{
+              background: `radial-gradient(circle at center, ${c1} 0%, ${c2} 45%, transparent 74%)`,
+              opacity: isLight ? 0.18 : 0.24,
+            }}
+          />
+          <div
+            className="animate-bg-aurora-b absolute -bottom-1/4 -right-1/4 w-[78%] h-[78%] rounded-full blur-3xl"
+            style={{
+              background: `radial-gradient(circle at center, ${c3} 0%, ${c1} 45%, transparent 74%)`,
+              opacity: isLight ? 0.16 : 0.22,
+            }}
+          />
+          <div
+            className="absolute inset-0 transition-opacity duration-300"
+            style={{
+              opacity: 'var(--clock-hover, 0)',
+              background: `radial-gradient(circle 250px at var(--clock-mx, 50%) var(--clock-my, 50%), ${c1}42 0%, ${c2}22 38%, transparent 72%)`,
+            }}
+          />
+          <div
+            className="pointer-events-none absolute w-40 h-40 rounded-full border transition-opacity duration-300 -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: 'var(--clock-mx, 50%)',
+              top: 'var(--clock-my, 50%)',
+              borderColor: c1,
+              opacity: 'calc(var(--clock-hover, 0) * 0.48)',
+              boxShadow: `0 0 28px ${c1}55, inset 0 0 18px ${c2}44`,
+            }}
+          />
         </div>
       )}
     </div>
@@ -12169,6 +12345,12 @@ export const DigitalClock: React.FC = () => {
     return Number.isFinite(raw) && raw > Date.now() ? raw : Date.now() + AUTO_MIX_INTERVAL_MS;
   });
   const performMixRef = useRef<() => void>(() => {});
+  const [interactiveBg, setInteractiveBg] = useState<boolean>(() => {
+    return localStorage.getItem('vortexero_clock_interactive_bg') !== 'false';
+  });
+  const [stageBursts, setStageBursts] = useState<{ id: number; x: number; y: number }[]>([]);
+  const burstIdRef = useRef(0);
+  const burstTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [wakeLockActive, setWakeLockActive] = useState<boolean>(false);
   const wakeLockSentinelRef = useRef<any>(null);
   const fallbackVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -12284,6 +12466,25 @@ export const DigitalClock: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('vortexero_clock_auto_mix_next_at', String(autoMixNextAt));
   }, [autoMixNextAt]);
+
+  useEffect(() => {
+    localStorage.setItem('vortexero_clock_interactive_bg', String(interactiveBg));
+    if (!interactiveBg) {
+      setStageBursts([]);
+      if (containerRef.current) {
+        containerRef.current.style.setProperty('--clock-hover', '0');
+        containerRef.current.style.setProperty('--clock-px', '0');
+        containerRef.current.style.setProperty('--clock-py', '0');
+      }
+    }
+  }, [interactiveBg]);
+
+  useEffect(() => {
+    return () => {
+      burstTimersRef.current.forEach(clearTimeout);
+      burstTimersRef.current = [];
+    };
+  }, []);
 
   // Screen Wake Lock API implementation with graceful fallback
   const requestWakeLock = async () => {
@@ -12856,6 +13057,63 @@ export const DigitalClock: React.FC = () => {
 
   const autoMixCountdownLabel = formatAutoMixCountdown(autoMixNextAt - currentTime.getTime());
 
+  const handleSelectTheme = (themeId: ClockTheme) => {
+    setTheme(themeId);
+    if (INTERACTIVE_THEMES.has(themeId)) {
+      setInteractiveBg(true);
+      setBgFx(themeId === 'magnetic_aurora' ? 'touch_ripples' : 'interactive_nodes');
+      if (clockEdition !== 'classic') {
+        setClockEdition('classic');
+      }
+    }
+  };
+
+  const spawnInteractiveBurst = (clientX: number, clientY: number) => {
+    const el = containerRef.current;
+    if (!el || !interactiveBg) return;
+    const rect = el.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    const id = ++burstIdRef.current;
+    setStageBursts(prev => [...prev.slice(-7), { id, x, y }]);
+    if (soundEnabled) playTickSound();
+    const timer = setTimeout(() => {
+      setStageBursts(prev => prev.filter(b => b.id !== id));
+      burstTimersRef.current = burstTimersRef.current.filter(t => t !== timer);
+    }, 900);
+    burstTimersRef.current.push(timer);
+  };
+
+  const handleStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = containerRef.current;
+    if (!el || !interactiveBg) return;
+    const rect = el.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const nx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const ny = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    el.style.setProperty('--clock-mx', `${(nx * 100).toFixed(2)}%`);
+    el.style.setProperty('--clock-my', `${(ny * 100).toFixed(2)}%`);
+    el.style.setProperty('--clock-px', `${((nx - 0.5) * 2).toFixed(3)}`);
+    el.style.setProperty('--clock-py', `${((ny - 0.5) * 2).toFixed(3)}`);
+    el.style.setProperty('--clock-hover', '1');
+  };
+
+  const handleStagePointerLeave = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.style.setProperty('--clock-hover', '0');
+    el.style.setProperty('--clock-px', '0');
+    el.style.setProperty('--clock-py', '0');
+  };
+
+  const handleStageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!interactiveBg) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('button, a, input, select, [data-interactive-ignore]')) return;
+    spawnInteractiveBurst(e.clientX, e.clientY);
+  };
+
   const filteredThemes = themeCategory === 'all'
     ? themes
     : themes.filter(t => t.category === themeCategory);
@@ -13178,6 +13436,24 @@ export const DigitalClock: React.FC = () => {
             <span>{autoHourlyMix ? `Auto 1h (${autoMixCountdownLabel})` : 'Auto 1h Mix'}</span>
             {autoHourlyMix && (
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            )}
+          </button>
+
+          {/* Interactive Touch & Hover FX Toggle */}
+          <button
+            data-testid="interactive-bg-btn"
+            onClick={() => setInteractiveBg(!interactiveBg)}
+            title={interactiveBg ? 'Disable hover parallax and click ripples on the clock stage' : 'Enable hover parallax and click ripples on the clock stage'}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border cursor-pointer ${
+              interactiveBg
+                ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-400/50 shadow-xs'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+            }`}
+          >
+            <MousePointerClick size={14} className={interactiveBg ? 'text-sky-500' : ''} />
+            <span>Touch FX</span>
+            {interactiveBg && (
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
             )}
           </button>
 
@@ -13906,6 +14182,7 @@ export const DigitalClock: React.FC = () => {
                 {[
                   { id: 'all' as ThemeCategory, label: 'All' },
                   { id: 'animated' as ThemeCategory, label: 'Dynamic & Animated' },
+                  { id: 'interactive' as ThemeCategory, label: 'Interactive Touch' },
                   { id: 'cyber' as ThemeCategory, label: 'Neon & Cyber' },
                   { id: 'space' as ThemeCategory, label: 'Aurora & Space' },
                   { id: 'warm' as ThemeCategory, label: 'Warm & Sunset' },
@@ -13938,7 +14215,7 @@ export const DigitalClock: React.FC = () => {
               {filteredThemes.map(t => (
                 <button
                   key={t.id}
-                  onClick={() => setTheme(t.id)}
+                  onClick={() => handleSelectTheme(t.id)}
                   className={`px-3 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer truncate ${
                     theme === t.id
                       ? 'bg-brand-600 text-white shadow-md shadow-brand-500/25 scale-[1.02] ring-2 ring-brand-400/40'
@@ -13957,6 +14234,11 @@ export const DigitalClock: React.FC = () => {
       {/* Main Clock Canvas Display */}
       <div
         ref={containerRef}
+        data-testid="clock-stage"
+        data-interactive-bg={interactiveBg ? 'true' : 'false'}
+        onPointerMove={handleStagePointerMove}
+        onPointerLeave={handleStagePointerLeave}
+        onClick={handleStageClick}
         className={`${themeConfig.bg} ${themeConfig.border} border flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 select-none ${
           isFullscreen
             ? 'fixed inset-0 z-[100] !mt-0 rounded-none h-screen h-[100dvh] min-h-0 w-screen w-full border-none px-4 sm:px-8 md:px-12 pt-16 sm:pt-20 pb-6 sm:pb-10 overflow-y-auto overflow-x-hidden no-scrollbar'
@@ -13969,7 +14251,93 @@ export const DigitalClock: React.FC = () => {
         />
 
         {/* Animated Ambient Background Layer */}
-        <ClockBackgroundLayer bgFx={bgFx} themeConfig={themeConfig} />
+        <ClockBackgroundLayer bgFx={bgFx} themeConfig={themeConfig} interactive={interactiveBg} />
+
+        {/* Interactive Cursor Spotlight & Magnetic Dot Grid Overlay */}
+        {interactiveBg && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
+            <div
+              className="absolute inset-0 transition-opacity duration-300"
+              style={{
+                opacity: 'calc(var(--clock-hover, 0) * 0.85)',
+                background: `radial-gradient(360px circle at var(--clock-mx, 50%) var(--clock-my, 50%), ${themeConfig.handSec}33 0%, ${themeConfig.handMin}18 35%, transparent 72%)`,
+              }}
+            />
+            <div
+              className="absolute inset-0 clock-reactive-dotgrid transition-opacity duration-300"
+              style={{
+                opacity: 'var(--clock-hover, 0)',
+                filter: themeConfig.isLight ? 'invert(1)' : undefined,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Click / Tap Kinetic Ripple & Radial Spark Burst Overlay */}
+        {interactiveBg && stageBursts.length > 0 && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-[6]">
+            {stageBursts.map(burst => (
+              <div
+                key={burst.id}
+                data-testid="clock-touch-burst"
+                className="absolute inset-0 pointer-events-none"
+              >
+                <div
+                  className="clock-touch-ripple absolute rounded-full border-2"
+                  style={{
+                    left: `${burst.x}%`,
+                    top: `${burst.y}%`,
+                    width: '180px',
+                    height: '180px',
+                    borderColor: themeConfig.handSec,
+                    boxShadow: `0 0 24px ${themeConfig.handSec}66, inset 0 0 18px ${themeConfig.handSec}33`,
+                  }}
+                />
+                <div
+                  className="clock-touch-ripple absolute rounded-full border"
+                  style={{
+                    left: `${burst.x}%`,
+                    top: `${burst.y}%`,
+                    width: '124px',
+                    height: '124px',
+                    borderColor: themeConfig.handMin,
+                    animationDelay: '80ms',
+                  }}
+                />
+                {[0, 1, 2, 3, 4, 5, 6, 7].map(sparkIdx => {
+                  const angle = (sparkIdx * Math.PI * 2) / 8;
+                  const dist = sparkIdx % 2 === 0 ? 78 : 54;
+                  const dx = Math.round(Math.cos(angle) * dist);
+                  const dy = Math.round(Math.sin(angle) * dist);
+                  const sparkColor =
+                    sparkIdx % 3 === 0
+                      ? themeConfig.handSec
+                      : sparkIdx % 3 === 1
+                        ? themeConfig.handMin
+                        : themeConfig.handHr;
+                  return (
+                    <span
+                      key={sparkIdx}
+                      className="clock-touch-spark absolute rounded-full"
+                      style={
+                        {
+                          left: `${burst.x}%`,
+                          top: `${burst.y}%`,
+                          width: sparkIdx % 2 === 0 ? '7px' : '5px',
+                          height: sparkIdx % 2 === 0 ? '7px' : '5px',
+                          backgroundColor: sparkColor,
+                          boxShadow: `0 0 10px ${sparkColor}`,
+                          '--spark-x': `${dx}px`,
+                          '--spark-y': `${dy}px`,
+                        } as React.CSSProperties
+                      }
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Cinema & Anime Edition Stage Frame Overlay */}
         <ClockEditionOverlay edition={clockEdition} isFullscreen={isFullscreen} />
@@ -14048,6 +14416,21 @@ export const DigitalClock: React.FC = () => {
                 >
                   <Timer size={16} />
                   <span className="hidden md:inline">{autoHourlyMix ? autoMixCountdownLabel : 'Auto 1h'}</span>
+                </button>
+                <button
+                  onClick={() => setInteractiveBg(!interactiveBg)}
+                  data-testid="fullscreen-interactive-btn"
+                  className={`p-2.5 rounded-2xl backdrop-blur-md transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold ${
+                    interactiveBg
+                      ? 'bg-sky-500/25 border border-sky-400/50 text-sky-300'
+                      : themeConfig.isLight
+                        ? 'bg-black/10 hover:bg-black/20 text-slate-800'
+                        : 'bg-white/10 hover:bg-white/20 text-white'
+                  }`}
+                  title={interactiveBg ? 'Disable hover parallax & click ripples' : 'Enable hover parallax & click ripples'}
+                >
+                  <MousePointerClick size={16} />
+                  <span className="hidden md:inline">Touch FX</span>
                 </button>
               </>
             )}

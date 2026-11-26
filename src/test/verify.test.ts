@@ -439,15 +439,18 @@ import {
   CLOCK_THEMES,
   CLOCK_ANIMATION_FX_OPTIONS,
   RADIAL_GAUGE_CONFIG,
+  INTERACTIVE_THEMES,
   getClockThemeStyles,
   ClockTheme,
   AnimationFx,
 } from '../components/tools/productivity/DigitalClock';
 
-if (!Array.isArray(CLOCK_THEMES) || CLOCK_THEMES.length !== 45) {
-  console.error(`Expected exactly 45 clock themes, found ${CLOCK_THEMES?.length}`);
+if (!Array.isArray(CLOCK_THEMES) || CLOCK_THEMES.length !== 48) {
+  console.error(`Expected exactly 48 clock themes, found ${CLOCK_THEMES?.length}`);
   process.exit(1);
 }
+
+const interactiveThemeIds = ['reactive_plasma', 'magnetic_aurora', 'starlight_touch'];
 
 const clockThemeIds = new Set<string>();
 const dynamicThemeIds = [
@@ -516,6 +519,24 @@ for (const theme of CLOCK_THEMES) {
       process.exit(1);
     }
   }
+
+  if (interactiveThemeIds.includes(theme.id)) {
+    if (theme.category !== 'interactive') {
+      console.error(`Interactive theme ${theme.id} must have category 'interactive'`);
+      process.exit(1);
+    }
+    if (!INTERACTIVE_THEMES.has(theme.id)) {
+      console.error(`Interactive theme ${theme.id} missing from INTERACTIVE_THEMES set`);
+      process.exit(1);
+    }
+  }
+}
+
+for (const reqInteractiveId of interactiveThemeIds) {
+  if (!clockThemeIds.has(reqInteractiveId)) {
+    console.error(`Missing required interactive theme: ${reqInteractiveId}`);
+    process.exit(1);
+  }
 }
 
 // Verify Animation FX options
@@ -538,7 +559,7 @@ for (const opt of CLOCK_ANIMATION_FX_OPTIONS) {
   }
 }
 
-console.log('✓ Test 9: DigitalClock 45 aesthetic themes, dynamic animations FX, and wake lock styles verified.');
+console.log('✓ Test 9: DigitalClock 48 aesthetic themes, interactive touch themes, dynamic animations FX, and wake lock styles verified.');
 
 // Test 10: Radial Chronograph geometry & fullscreen overflow protection verification
 const innerClearRadius = RADIAL_GAUGE_CONFIG.secondsRadius - RADIAL_GAUGE_CONFIG.secondsStrokeWidth / 2;
@@ -722,8 +743,8 @@ if (typeof AnalogClockDial !== 'function' || typeof AnalogStyleGlyph !== 'functi
   process.exit(1);
 }
 
-if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 23) {
-  console.error(`Expected 23 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
+if (!Array.isArray(CLOCK_BG_FX_OPTIONS) || CLOCK_BG_FX_OPTIONS.length !== 25) {
+  console.error(`Expected 25 background animation presets, found ${CLOCK_BG_FX_OPTIONS?.length}`);
   process.exit(1);
 }
 
@@ -751,6 +772,8 @@ const expectedBgIds = [
   'vice_sunset',
   'erdtree_petals',
   'pixel_arcade',
+  'interactive_nodes',
+  'touch_ripples',
   'none',
 ];
 for (const bg of CLOCK_BG_FX_OPTIONS) {
@@ -827,6 +850,10 @@ const requiredBgCssTokens = [
   '.animate-bg-omnitrix-pulse',
   '.animate-bg-palm-sway',
   '.animate-bg-pixel-float',
+  '.clock-bg-parallax',
+  '.clock-reactive-dotgrid',
+  '.clock-touch-ripple',
+  '.clock-touch-spark',
 ];
 
 for (const cssToken of requiredBgCssTokens) {
@@ -1215,5 +1242,34 @@ for (const token of requiredAutoMixTokens) {
 }
 
 console.log('✓ Test 15: Auto 1-Hour Random Mix rotation timer, Mix controls, and persistence verified.');
+
+// Test 16: Interactive Touch & Hover Backgrounds and Reactive Themes
+if (!(INTERACTIVE_THEMES instanceof Set) || INTERACTIVE_THEMES.size !== 3) {
+  console.error(`Expected INTERACTIVE_THEMES set of size 3, got ${INTERACTIVE_THEMES?.size}`);
+  process.exit(1);
+}
+
+const requiredInteractiveTokens = [
+  'vortexero_clock_interactive_bg',
+  'interactive-bg-btn',
+  'fullscreen-interactive-btn',
+  'clock-stage',
+  'clock-touch-burst',
+  'INTERACTIVE_THEMES',
+  'onPointerMove',
+  'onPointerLeave',
+  '--clock-mx',
+  '--clock-my',
+  '--clock-hover',
+];
+
+for (const token of requiredInteractiveTokens) {
+  if (!digitalClockSource.includes(token)) {
+    console.error(`DigitalClock.tsx missing required interactive background token: ${token}`);
+    process.exit(1);
+  }
+}
+
+console.log('✓ Test 16: Interactive Touch & Hover clock backgrounds, cursor parallax, click bursts, and 3 reactive themes verified.');
 
 console.log('All automated verification checks PASSED successfully!');

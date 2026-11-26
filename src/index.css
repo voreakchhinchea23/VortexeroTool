@@ -1231,6 +1231,54 @@
   background-blend-mode: overlay;
 }
 
+@keyframes clock-touch-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.08);
+    opacity: 0.92;
+  }
+  70% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes clock-touch-spark {
+  0% {
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1.1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate3d(var(--spark-x, 0px), var(--spark-y, -48px), 0) scale(0.1);
+    opacity: 0;
+  }
+}
+
+.clock-bg-parallax {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translate3d(calc(var(--clock-px, 0) * -14px), calc(var(--clock-py, 0) * -14px), 0) scale(1.035);
+  will-change: transform;
+}
+
+.clock-reactive-dotgrid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(circle 190px at var(--clock-mx, 50%) var(--clock-my, 50%), rgba(0, 0, 0, 0.9) 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle 190px at var(--clock-mx, 50%) var(--clock-my, 50%), rgba(0, 0, 0, 0.9) 0%, transparent 72%);
+}
+
+.clock-touch-ripple {
+  animation: clock-touch-ripple 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.clock-touch-spark {
+  animation: clock-touch-spark 0.72s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-bg-aurora-a,
   .animate-bg-aurora-b,
@@ -1260,7 +1308,12 @@
   .animate-bg-omnitrix-pulse,
   .animate-bg-palm-sway,
   .animate-bg-pixel-float,
-  .animate-cyber-glitch {
+  .animate-cyber-glitch,
+  .clock-touch-ripple,
+  .clock-touch-spark {
     animation: none !important;
+  }
+  .clock-bg-parallax {
+    transform: none !important;
   }
 }
