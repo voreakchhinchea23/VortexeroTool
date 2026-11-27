@@ -343,7 +343,41 @@ export const MathScanner: React.FC = () => {
 
           const bin = prepareBinaryMathImage(rawData.data, sw, sh, polarityMode);
 
-          // Unpadded clean grayscale canvas (dark foreground on light background) for 2D sub-crops
+          // Histogram-based soft autocontrast preserves anti-aliased thin strokes (italic x, minus '-')
+          // while whitening off-white paper/dark-inverted backgrounds cleanly for Tesseract LSTM.
+          let contrastLo = 0;
+          let contrastHi = 255;
+          if (highContrastBw && bin.gray.length > 0) {
+            const hist = new Uint32Array(256);
+            for (let i = 0; i < bin.gray.length; i++) {
+              hist[bin.gray[i]]++;
+            }
+            const totalPx = bin.gray.length;
+            const loTarget = Math.max(1, Math.floor(totalPx * 0.01));
+            const hiTarget = Math.max(1, Math.floor(totalPx * 0.88));
+            let acc = 0;
+            let rawLo = 0;
+            let rawHi = 255;
+            let foundLo = false;
+            for (let v = 0; v < 256; v++) {
+              acc += hist[v];
+              if (!foundLo && acc >= loTarget) {
+                rawLo = v;
+                foundLo = true;
+              }
+              if (acc >= hiTarget) {
+                rawHi = v;
+                break;
+              }
+            }
+            contrastLo = Math.min(
+              Math.max(rawLo, Math.round(bin.threshold * 0.35)),
+              Math.max(0, bin.threshold - 24)
+            );
+            contrastHi = Math.max(bin.threshold + 32, Math.min(244, rawHi - 10));
+          }
+
+          // Unpadded contrast-normalized grayscale canvas (dark foreground on white bg) for 2D sub-crops
           const grayCanvas = document.createElement('canvas');
           grayCanvas.width = sw;
           grayCanvas.height = sh;
@@ -353,8 +387,12 @@ export const MathScanner: React.FC = () => {
             return;
           }
           const grayImgData = grayCtx.createImageData(sw, sh);
+          const span = Math.max(24, contrastHi - contrastLo);
           for (let i = 0; i < bin.gray.length; i++) {
-            const g = bin.gray[i];
+            let g = bin.gray[i];
+            if (highContrastBw) {
+              g = Math.max(0, Math.min(255, Math.round(((g - contrastLo) * 255) / span)));
+            }
             const p = i * 4;
             grayImgData.data[p] = g;
             grayImgData.data[p + 1] = g;
@@ -381,17 +419,6 @@ export const MathScanner: React.FC = () => {
           fullCtx.imageSmoothingEnabled = true;
           fullCtx.imageSmoothingQuality = 'high';
           fullCtx.drawImage(grayCanvas, 0, 0, sw, sh, pad, pad, sw * scale, sh * scale);
-
-          if (highContrastBw) {
-            const fData = fullCtx.getImageData(0, 0, outW, outH);
-            const d = fData.data;
-            for (let i = 0; i < d.length; i += 4) {
-              const v = d[i] < bin.threshold ? 0 : 255;
-              d[i] = d[i + 1] = d[i + 2] = v;
-              d[i + 3] = 255;
-            }
-            fullCtx.putImageData(fData, 0, 0);
-          }
 
           resolve({ bin, grayCanvas, fullCanvas });
         };
@@ -451,17 +478,6 @@ export const MathScanner: React.FC = () => {
           cropCtx.imageSmoothingEnabled = true;
           cropCtx.imageSmoothingQuality = 'high';
           cropCtx.drawImage(grayCanvas, box.x, box.y, cropW, cropH, pad, pad, cropW * scale, cropH * scale);
-
-          if (highContrastBw) {
-            const cropImg = cropCtx.getImageData(0, 0, outW, outH);
-            const cd = cropImg.data;
-            for (let i = 0; i < cd.length; i += 4) {
-              const v = cd[i] < bin.threshold ? 0 : 255;
-              cd[i] = cd[i + 1] = cd[i + 2] = v;
-              cd[i + 3] = 255;
-            }
-            cropCtx.putImageData(cropImg, 0, 0);
-          }
 
           scannedRegions++;
           setScanStatus('Recognizing 2D math symbols...');

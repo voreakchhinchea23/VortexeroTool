@@ -201,7 +201,134 @@ export function extractInkComponents(mask: Uint8Array, width: number, height: nu
     }
   }
 
-  return comps.sort((a, b) => a.x - b.x || a.y - b.y);
+  return mergeBrokenGlyphFragments(comps).sort((a, b) => a.x - b.x || a.y - b.y);
+}
+
+/**
+ * Re-attaches tiny disconnected serif hooks/specks and horizontally-overlapping
+ * fractured digit strokes (such as the flat bottom foot of '2' or '3' broken by
+ * anti-aliasing in low-res screenshots) while preserving minus signs, decimal dots,
+ * and superscripts.
+ */
+function mergeBrokenGlyphFragments(rawComps: InkComponent[]): InkComponent[] {
+  let comps = rawComps.map((c) => ({ ...c }));
+
+  const unionPair = (a: InkComponent, b: InkComponent): InkComponent => {
+    const minX = Math.min(a.x, b.x);
+    const minY = Math.min(a.y, b.y);
+    const maxX = Math.max(a.x + a.w, b.x + b.w);
+    const maxY = Math.max(a.y + a.h, b.y + b.h);
+    const w = maxX - minX;
+    const h = maxY - minY;
+    return {
+      id: a.id,
+      x: minX,
+      y: minY,
+      w,
+      h,
+      area: a.area + b.area,
+      cx: minX + w / 2,
+      cy: minY + h / 2,
+    };
+  };
+
+  // Step 1: Absorb tiny broken serif specks into adjacent/enclosing parent glyphs
+  const removed = new Set<number>();
+  for (let i = 0; i < comps.length; i++) {
+    if (removed.has(comps[i].id)) continue;
+    const s = comps[i];
+    const isSmallSpeck = s.area <= 48 && Math.max(s.w, s.h) <= 9;
+    if (!isSmallSpeck) continue;
+
+    let bestParentIdx = -1;
+    let bestScore = Infinity;
+
+    for (let j = 0; j < comps.length; j++) {
+      if (i === j || removed.has(comps[j].id)) continue;
+      const big = comps[j];
+      if (big.h < Math.max(14, s.h * 2.0)) continue;
+
+      const insideBbox =
+        s.cx >= big.x - 1 &&
+        s.cx <= big.x + big.w + 1 &&
+        s.cy >= big.y - 1 &&
+        s.cy <= big.y + big.h + 1;
+
+      const xGap = Math.max(0, Math.max(s.x - (big.x + big.w), big.x - (s.x + s.w)));
+      const yOverlaps = s.y + s.h >= big.y - 2 && s.y <= big.y + big.h + 2;
+      const isTrailingBaselineDot = s.x >= big.x + big.w + 1 && s.cy > big.y + big.h * 0.65;
+
+      if (insideBbox || (xGap <= 2 && yOverlaps && !isTrailingBaselineDot)) {
+        const dist = Math.hypot(s.cx - big.cx, s.cy - big.cy);
+        if (dist < bestScore) {
+          bestScore = dist;
+          bestParentIdx = j;
+        }
+      }
+    }
+
+    if (bestParentIdx !== -1) {
+      comps[bestParentIdx] = unionPair(comps[bestParentIdx], s);
+      removed.add(s.id);
+    }
+  }
+
+  comps = comps.filter((c) => !removed.has(c.id));
+
+  // Preserve any thin horizontal bar that sits between components above and below it (fraction bar)
+  const isProtectedBar = (idx: number): boolean => {
+    const b = comps[idx];
+    if (b.w / Math.max(1, b.h) < 2.0) return false;
+    let hasAbove = false;
+    let hasBelow = false;
+    for (let k = 0; k < comps.length; k++) {
+      if (k === idx) continue;
+      const c = comps[k];
+      if (c.cx >= b.x - 4 && c.cx <= b.x + b.w + 4) {
+        if (c.y + c.h <= b.y + 3) hasAbove = true;
+        else if (c.y >= b.y + b.h - 3) hasBelow = true;
+      }
+      if (hasAbove && hasBelow) return true;
+    }
+    return false;
+  };
+
+  // Step 2: Re-merge vertically-split broken feet/bars of single digits (e.g. serif '2')
+  let mergedAny = true;
+  while (mergedAny) {
+    mergedAny = false;
+    outer: for (let i = 0; i < comps.length; i++) {
+      for (let j = i + 1; j < comps.length; j++) {
+        if (isProtectedBar(i) || isProtectedBar(j)) continue;
+        const a = comps[i];
+        const b = comps[j];
+        const top = a.y <= b.y ? a : b;
+        const bot = a.y <= b.y ? b : a;
+        const vGap = bot.y - (top.y + top.h);
+        if (vGap < 0 || vGap > 8) continue;
+        if (Math.max(top.w, bot.w) > 32) continue;
+
+        const overlap = Math.max(0, Math.min(top.x + top.w, bot.x + bot.w) - Math.max(top.x, bot.x));
+        const minW = Math.max(1, Math.min(top.w, bot.w));
+        if (overlap / minW < 0.65) continue;
+
+        const topIsThinBar = top.h <= 10 && top.w / Math.max(1, top.h) >= 2.0;
+        const botIsThinBar = bot.h <= 10 && bot.w / Math.max(1, bot.h) >= 2.0;
+        const isSplitDigitFoot =
+          (botIsThinBar && top.h >= 10 && !topIsThinBar) ||
+          (topIsThinBar && bot.h >= 10 && !botIsThinBar && vGap <= 4);
+
+        if (isSplitDigitFoot) {
+          comps[i] = unionPair(a, b);
+          comps.splice(j, 1);
+          mergedAny = true;
+          break outer;
+        }
+      }
+    }
+  }
+
+  return comps;
 }
 
 /**
@@ -404,17 +531,45 @@ export function findTopFractionBar(comps: InkComponent[], regionHeight: number):
 export function splitIntoHorizontalRows(comps: InkComponent[]): InkComponent[][] {
   if (comps.length === 0) return [];
   const sortedY = [...comps].sort((a, b) => a.y - b.y);
-  const bands: { minY: number; maxY: number; items: InkComponent[] }[] = [];
+  const rawBands: { minY: number; maxY: number; items: InkComponent[] }[] = [];
 
   for (const c of sortedY) {
     const cMin = c.y;
     const cMax = c.y + c.h;
-    const last = bands[bands.length - 1];
+    const last = rawBands[rawBands.length - 1];
     if (!last || cMin > last.maxY + 2) {
-      bands.push({ minY: cMin, maxY: cMax, items: [c] });
+      rawBands.push({ minY: cMin, maxY: cMax, items: [c] });
     } else {
       last.maxY = Math.max(last.maxY, cMax);
       last.items.push(c);
+    }
+  }
+
+  // Keep inline elevated superscripts/subscripts on the same horizontal row when they
+  // have no meaningful horizontal stack overlap and sit close vertically.
+  const bands: { minY: number; maxY: number; items: InkComponent[] }[] = [];
+  for (const band of rawBands) {
+    const prev = bands[bands.length - 1];
+    if (!prev) {
+      bands.push(band);
+      continue;
+    }
+    const prevBox = computeBoundingBox(prev.items);
+    const curBox = computeBoundingBox(band.items);
+    const vGap = band.minY - prev.maxY;
+    let maxItemOverlap = 0;
+    for (const a of prev.items) {
+      for (const b of band.items) {
+        const ov = horizontalOverlapRatio(a, b);
+        if (ov > maxItemOverlap) maxItemOverlap = ov;
+      }
+    }
+    const rowH = Math.max(prevBox.h, curBox.h);
+    if (maxItemOverlap < 0.2 && vGap <= Math.max(10, Math.round(rowH * 0.45))) {
+      prev.maxY = Math.max(prev.maxY, band.maxY);
+      prev.items.push(...band.items);
+    } else {
+      bands.push(band);
     }
   }
 
@@ -618,7 +773,14 @@ export async function parse2DMathLayout(
       return `lim(${cond}, ${fracExpr} ${rightText})`;
     }
 
-    return [leftText, fracExpr, rightText].filter(Boolean).join(' ');
+    let out = fracExpr;
+    if (leftText) {
+      out = /[+\-*/^=(,\[]$/.test(leftText) ? `${leftText} ${out}` : `${leftText} * ${out}`;
+    }
+    if (rightText) {
+      out = /^[+\-*/^=),\]]/.test(rightText) ? `${out} ${rightText}` : `${out} * ${rightText}`;
+    }
+    return out;
   }
 
   // No fraction bar: check vertical rows

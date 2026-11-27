@@ -1287,7 +1287,9 @@ import {
   prepareBinaryMathImage,
   extractInkComponents,
   findTopFractionBar,
+  splitIntoHorizontalRows,
   segmentBaselineAndSuperscripts,
+  parse2DMathLayout,
 } from '../utils/mathOcr2d';
 
 const toolRendererSource = fs.readFileSync(
@@ -1494,6 +1496,48 @@ if (
   process.exit(1);
 }
 
+// 17j: Broken serif/digit-foot merging, protected fraction bar, inline superscript retention, and explicit fraction multiplication
+const fracBuf = new Uint8ClampedArray(260 * 120 * 4);
+for (let i = 0; i < fracBuf.length; i += 4) {
+  fracBuf[i] = 255;
+  fracBuf[i + 1] = 255;
+  fracBuf[i + 2] = 255;
+  fracBuf[i + 3] = 255;
+}
+// Stacked fraction 3 / 2 with broken denominator foot (gap 5px), followed by 'x' with detached 5x5 serif hook & '2' with detached flat foot
+paintDarkBox(fracBuf, 260, 24, 16, 44, 48); // '3'
+paintDarkBox(fracBuf, 260, 20, 56, 48, 62); // fraction bar
+paintDarkBox(fracBuf, 260, 24, 70, 44, 96); // '2' body
+paintDarkBox(fracBuf, 260, 22, 101, 46, 106); // '2' detached flat foot (gap 5px)
+paintDarkBox(fracBuf, 260, 62, 62, 78, 86); // 'x' body
+paintDarkBox(fracBuf, 260, 77, 62, 82, 67); // 5x5 detached serif ball on 'x'
+paintDarkBox(fracBuf, 260, 88, 34, 100, 47); // superscript '2' top curve
+paintDarkBox(fracBuf, 260, 86, 54, 102, 58); // superscript '2' detached flat foot (gap 7px)
+paintDarkBox(fracBuf, 260, 114, 62, 140, 86); // '+5x-4' trailing operand (starts below '2' foot with 4px vertical gap)
+
+const fracComps = extractInkComponents(prepareBinaryMathImage(fracBuf, 260, 120, 'auto').mask, 260, 120);
+const fracBar = findTopFractionBar(fracComps, 120);
+if (!fracBar || fracBar.y !== 56 || fracBar.w !== 28) {
+  console.error('mathOcr2d failed to protect fraction bar during broken-digit merging:', fracBar);
+  process.exit(1);
+}
+const rhsComps = fracComps.filter((c) => c.cx > fracBar.x + fracBar.w + 2);
+const rhsRows = splitIntoHorizontalRows(rhsComps);
+if (rhsRows.length !== 1) {
+  console.error('mathOcr2d erroneously split elevated superscript onto a separate equation row:', rhsRows);
+  process.exit(1);
+}
+const rhsSegs = segmentBaselineAndSuperscripts(rhsRows[0]);
+if (rhsSegs.length !== 3 || rhsSegs[0].kind !== 'base' || rhsSegs[1].kind !== 'sup' || rhsSegs[2].kind !== 'base') {
+  console.error('mathOcr2d broken serif/foot reassembly failed on x^2 +5x-4:', rhsSegs);
+  process.exit(1);
+}
+const fracEval = solveMathProblem('(3) / (2) * 2^2 + 5*2 - 4');
+if (fracEval.finalAnswer !== '12') {
+  console.error('Explicit fraction multiplication evaluation failed:', fracEval);
+  process.exit(1);
+}
+
 console.log('✓ Test 17: ToolRenderer routing (all 71 tools), bespoke colors, and Math Scanner solver (OCR cleanup, linear, quadratic, 2x2 system, calculus, limits, 2D OCR layout, plotter) verified.');
 
 // Test 18: Everyday utilities (Document warp, QR payload parser, GPA, Age/Date, Smart Shopping)
@@ -1609,5 +1653,23 @@ if (unitCompare[0].isBestValue || !unitCompare[1].isBestValue) {
 }
 
 console.log('✓ Test 18: Everyday utilities (Document perspective warp, QR parser, GPA, Age/Date, Smart Shopping) verified.');
-console.log('All automated verification checks PASSED successfully!');
+
+void (async () => {
+  const layoutOut = await parse2DMathLayout(fracComps, 260, 120, async (box) => {
+    if (box.x < 50 && box.y < 50) return '3';
+    if (box.x < 50 && box.y > 60) return '2';
+    if (box.x >= 60 && box.x <= 85) return 'X';
+    if (box.x >= 85 && box.x <= 105) return '2';
+    return '+5x-4';
+  });
+  if (layoutOut !== '(3) / (2) * x^2 +5x-4') {
+    console.error('parse2DMathLayout end-to-end layout assembly mismatch:', layoutOut);
+    process.exit(1);
+  }
+  console.log('✓ Test 19: parse2DMathLayout fraction-to-term multiplication assembly verified.');
+  console.log('All automated verification checks PASSED successfully!');
+})().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
 
