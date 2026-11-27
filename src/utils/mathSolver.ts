@@ -11,6 +11,7 @@ export type MathProblemType =
   | 'system_2x2'
   | 'calculus_derivative'
   | 'calculus_integral'
+  | 'calculus_limit'
   | 'expression_function'
   | 'error';
 
@@ -67,8 +68,8 @@ const KNOWN_CONSTANTS_AND_FUNCS = new Set([
   'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh',
   'sqrt', 'cbrt', 'abs', 'log', 'log10', 'log2', 'ln', 'exp',
   'floor', 'ceil', 'round', 'min', 'max', 'mod', 'pow', 'nthRoot',
-  'pi', 'e', 'i', 'tau', 'phi', 'deg', 'rad',
-  'd', 'dx', 'diff', 'derivative', 'int', 'integrate', 'of'
+  'pi', 'e', 'i', 'tau', 'phi', 'deg', 'rad', 'inf', 'infinity',
+  'd', 'dx', 'diff', 'derivative', 'int', 'integrate', 'lim', 'limit', 'of'
 ]);
 
 const SUPERSCRIPT_MAP: Record<string, string> = {
@@ -112,8 +113,10 @@ export function normalizeMathOcr(raw: string): string {
   // Strip common question prefixes like "1)", "Q1:", "Problem 2."
   text = text.replace(/^(?:Q\s*\d+|Problem\s*\d+|\d+\s*[.)\]])[:.\s]+/i, '');
 
-  // Replace Unicode math symbols
+  // Replace Unicode math symbols (preserve -> arrows before replacing dashes)
   text = text
+    .replace(/[→⟶⇒➡]/g, '->')
+    .replace(/∞/g, 'inf')
     .replace(/[×⋅·✕✖]/g, '*')
     .replace(/[÷∕]/g, '/')
     .replace(/[−–—]/g, '-')
@@ -128,6 +131,9 @@ export function normalizeMathOcr(raw: string): string {
     .replace(/√\s*([a-zA-Z0-9.]+)/g, 'sqrt($1)')
     .replace(/√/g, 'sqrt')
     .replace(/≤|≥/g, '=');
+
+  // Normalize limit arrows that OCR read as dash/space (e.g. "lim x-0 ..." -> "lim x->0 ...")
+  text = text.replace(/\b(lim(?:it)?)\s*([a-zA-Z])\s*[-–—>]+\s*(-?(?:\d+(?:\.\d+)?|inf(?:inity)?|pi|e)[+-]?)/gi, '$1 $2->$3');
 
   // Convert superscript digits (e.g. x² -> x^2, x²³ -> x^23)
   text = text.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, (match) => {
@@ -164,7 +170,7 @@ export function normalizeMathOcr(raw: string): string {
   // Common OCR mistakes in math context:
   // "2 X + 5" or "x" uppercase X in equation -> lowercase x (unless hexadecimal, rare here)
   text = text.replace(/\bX\b/g, 'x').replace(/\bY\b/g, 'y');
-  // OCR sometimes writes "l" or "|" next to numbers or standalone as 1 when adjacent to operators
+  // OCR sometimes writes "|" next to numbers
   text = text.replace(/\|/g, '');
   // Replace "==" with "="
   text = text.replace(/={2,}/g, '=');
@@ -698,6 +704,295 @@ function solveCalculusCommand(input: string, options?: SolveOptions): MathSoluti
         verification: null,
         plot: null,
         error: err instanceof Error ? err.message : 'Invalid integral syntax',
+      };
+    }
+  }
+
+  // Limit patterns:
+  // 1) lim(x->0, expr) or lim(x->0+, expr)
+  // 2) lim_(x->0) expr or lim x->0 expr
+  // 3) limit(expr, x, 0)
+  let limVar: string | null = null;
+  let limTargetRaw: string | null = null;
+  let limBody: string | null = null;
+
+  const limCommaMatch = input.match(/^lim(?:it)?\s*\(\s*([a-zA-Z])\s*->\s*([^,]+?)\s*,\s*(.+)\s*\)$/i);
+  const limPrefixMatch = input.match(/^lim(?:it)?\s*_?\s*\(?\s*([a-zA-Z])\s*->\s*([^\s)]+)\s*\)?\s+(.+)$/i);
+  const limThreeArgMatch = input.match(/^lim(?:it)?\s*\(\s*(.+?)\s*,\s*([a-zA-Z])\s*,\s*([^,)]+)\s*\)$/i);
+
+  if (limCommaMatch) {
+    limVar = limCommaMatch[1];
+    limTargetRaw = limCommaMatch[2].trim();
+    limBody = limCommaMatch[3].trim();
+  } else if (limPrefixMatch) {
+    limVar = limPrefixMatch[1];
+    limTargetRaw = limPrefixMatch[2].trim();
+    limBody = limPrefixMatch[3].trim();
+  } else if (limThreeArgMatch) {
+    limBody = limThreeArgMatch[1].trim();
+    limVar = limThreeArgMatch[2];
+    limTargetRaw = limThreeArgMatch[3].trim();
+  }
+
+  if (limVar && limTargetRaw && limBody) {
+    const v = limVar;
+    let direction: 'both' | 'left' | 'right' = 'both';
+    let targetClean = limTargetRaw.trim();
+    if (targetClean.endsWith('+') && targetClean.length > 1 && !/^\+?inf/i.test(targetClean)) {
+      direction = 'right';
+      targetClean = targetClean.slice(0, -1).trim();
+    } else if (targetClean.endsWith('-') && targetClean.length > 1 && !/^-inf/i.test(targetClean)) {
+      direction = 'left';
+      targetClean = targetClean.slice(0, -1).trim();
+    }
+
+    const isPosInf = /^\+?inf(?:inity)?$/i.test(targetClean);
+    const isNegInf = /^-inf(?:inity)?$/i.test(targetClean);
+
+    try {
+      const targetVal = isPosInf
+        ? Infinity
+        : isNegInf
+        ? -Infinity
+        : Number(math.evaluate(preprocessForMathJs(targetClean), buildScope(options)));
+
+      if (!isPosInf && !isNegInf && !Number.isFinite(targetVal)) {
+        throw new Error(`Invalid limit target "${limTargetRaw}".`);
+      }
+
+      const processed = preprocessForMathJs(limBody);
+      const compiled = math.compile(processed);
+      const evalAt = (val: number): number => {
+        try {
+          const r = compiled.evaluate(buildScope(options, { [v]: val }));
+          return typeof r === 'number' ? r : NaN;
+        } catch {
+          return NaN;
+        }
+      };
+
+      const targetDisplay = isPosInf ? '+∞' : isNegInf ? '-∞' : `${formatNum(targetVal)}${direction === 'right' ? '⁺' : direction === 'left' ? '⁻' : ''}`;
+      const steps: MathStep[] = [
+        {
+          title: 'Identify limit expression and approach target',
+          math: `lim (${v} → ${targetDisplay}) [ ${limBody} ]`,
+          explanation: `Evaluate the behavior of f(${v}) as ${v} approaches ${targetDisplay}.`,
+        },
+      ];
+
+      let resolvedValue: number | null = null;
+      let resolvedLabel: string | null = null;
+      const alternateForms: MathAlternateForm[] = [];
+
+      // 1. Direct substitution if target is finite
+      if (Number.isFinite(targetVal)) {
+        const direct = evalAt(targetVal);
+        const nearR = evalAt(targetVal + 1e-5);
+        const nearL = evalAt(targetVal - 1e-5);
+        const continuousHere =
+          Number.isFinite(direct) &&
+          ((direction === 'right' && Number.isFinite(nearR) && Math.abs(nearR - direct) < 1e-3) ||
+            (direction === 'left' && Number.isFinite(nearL) && Math.abs(nearL - direct) < 1e-3) ||
+            (direction === 'both' &&
+              Number.isFinite(nearR) &&
+              Number.isFinite(nearL) &&
+              Math.abs(nearR - direct) < 1e-3 &&
+              Math.abs(nearL - direct) < 1e-3));
+
+        if (continuousHere) {
+          resolvedValue = Math.abs(direct) < 1e-10 ? 0 : direct;
+          steps.push({
+            title: 'Direct substitution',
+            math: `f(${formatNum(targetVal)}) = ${formatNum(resolvedValue, 6)}`,
+            explanation: `Since the function is continuous at ${v} = ${formatNum(targetVal)}, substitute directly.`,
+          });
+        } else {
+          // 2. Check Symbolic L'Hopital's Rule for top-level fraction num / den
+          try {
+            let rootNode = math.parse(processed);
+            while (rootNode.type === 'ParenthesisNode') {
+              rootNode = (rootNode as unknown as { content: MathNode }).content;
+            }
+            if (rootNode.type === 'OperatorNode' && (rootNode as unknown as { op: string }).op === '/') {
+              const args = (rootNode as unknown as { args: MathNode[] }).args;
+              let curNum: MathNode = args[0];
+              let curDen: MathNode = args[1];
+
+              for (let round = 1; round <= 3; round++) {
+                const nVal = Number(curNum.compile().evaluate(buildScope(options, { [v]: targetVal })));
+                const dVal = Number(curDen.compile().evaluate(buildScope(options, { [v]: targetVal })));
+
+                const isZeroZero = Number.isFinite(nVal) && Number.isFinite(dVal) && Math.abs(nVal) < 1e-7 && Math.abs(dVal) < 1e-7;
+                const isInfInf = !Number.isFinite(nVal) && !Number.isFinite(dVal);
+
+                if (round === 1 && !isZeroZero && !isInfInf) break;
+
+                if (isZeroZero || isInfInf) {
+                  const dNum = math.simplify(math.derivative(curNum, v));
+                  const dDen = math.simplify(math.derivative(curDen, v));
+                  steps.push({
+                    title: `Indeterminate form (${isZeroZero ? '0 / 0' : '∞ / ∞'}) — Apply L’Hôpital’s Rule${round > 1 ? ` (Round ${round})` : ''}`,
+                    math: `d/d${v}[${curNum.toString()}] / d/d${v}[${curDen.toString()}] = (${dNum.toString()}) / (${dDen.toString()})`,
+                    explanation: `Both numerator and denominator approach ${isZeroZero ? '0' : '±∞'}. Differentiate numerator and denominator separately with respect to ${v}.`,
+                  });
+
+                  const nextN = Number(dNum.compile().evaluate(buildScope(options, { [v]: targetVal })));
+                  const nextD = Number(dDen.compile().evaluate(buildScope(options, { [v]: targetVal })));
+
+                  if (Number.isFinite(nextN) && Number.isFinite(nextD) && Math.abs(nextD) > 1e-9) {
+                    const ratio = nextN / nextD;
+                    resolvedValue = Math.abs(ratio) < 1e-10 ? 0 : ratio;
+                    steps.push({
+                      title: 'Substitute target value after differentiation',
+                      math: `(${formatNum(nextN, 6)}) / (${formatNum(nextD, 6)}) = ${formatNum(resolvedValue, 6)}`,
+                      explanation: `Evaluate the ratio of derivatives at ${v} = ${formatNum(targetVal)}.`,
+                    });
+                    break;
+                  }
+                  curNum = dNum;
+                  curDen = dDen;
+                } else {
+                  break;
+                }
+              }
+            }
+          } catch {
+            // Fall through to numerical approach
+          }
+        }
+      }
+
+      // 3. Numerical Richardson Extrapolation & One-Sided / Infinite Limit Check
+      if (resolvedValue === null && resolvedLabel === null) {
+        if (isPosInf || isNegInf) {
+          const sign = isPosInf ? 1 : -1;
+          const samples = [1e2, 1e3, 1e4, 1e5, 1e6].map((m) => evalAt(sign * m));
+          const finite = samples.filter((y) => Number.isFinite(y));
+          if (finite.length >= 3) {
+            const last = finite[finite.length - 1];
+            const prev = finite[finite.length - 2];
+            if (Math.abs(last - prev) < 1e-3) {
+              resolvedValue = Math.abs(last) < 1e-8 ? 0 : Number(last.toFixed(6));
+              steps.push({
+                title: 'Asymptotic evaluation at large magnitude',
+                math: `f(${sign > 0 ? '+10⁶' : '-10⁶'}) ≈ ${formatNum(resolvedValue, 6)}`,
+                explanation: `Track convergence of f(${v}) as ${v} grows toward ${targetDisplay}.`,
+              });
+            } else if (Math.abs(last) > Math.abs(prev) * 2 && Math.abs(last) > 1e4) {
+              resolvedLabel = last > 0 ? '+∞ (diverges)' : '-∞ (diverges)';
+            } else {
+              resolvedLabel = 'Does not exist (oscillates)';
+            }
+          } else {
+            resolvedLabel = 'Does not exist or undefined';
+          }
+        } else {
+          const probeSide = (dir: 1 | -1): { val: number | null; div: '+inf' | '-inf' | null } => {
+            const hList = [1e-2, 1e-3, 1e-4, 5e-5];
+            const vals = hList.map((h) => evalAt(targetVal + dir * h));
+            if (vals.every((y) => Number.isFinite(y))) {
+              const v1 = vals[2]; // h = 1e-4
+              const v2 = vals[3]; // h = 5e-5
+              // Richardson extrapolation for O(h) error -> O(h^2)
+              const richardson = 2 * v2 - v1;
+              if (Math.abs(v2 - v1) < 1e-2) {
+                const clean = Math.abs(richardson) < 1e-8 ? 0 : richardson;
+                return { val: clean, div: null };
+              }
+              if (Math.abs(v2) > Math.abs(v1) * 1.5 && Math.abs(v2) > 1e3) {
+                return { val: null, div: v2 > 0 ? '+inf' : '-inf' };
+              }
+            }
+            return { val: null, div: null };
+          };
+
+          const rightRes = direction === 'left' ? null : probeSide(1);
+          const leftRes = direction === 'right' ? null : probeSide(-1);
+
+          if (direction === 'right' && rightRes) {
+            if (rightRes.val !== null) resolvedValue = rightRes.val;
+            else if (rightRes.div) resolvedLabel = rightRes.div === '+inf' ? '+∞' : '-∞';
+          } else if (direction === 'left' && leftRes) {
+            if (leftRes.val !== null) resolvedValue = leftRes.val;
+            else if (leftRes.div) resolvedLabel = leftRes.div === '+inf' ? '+∞' : '-∞';
+          } else if (rightRes && leftRes) {
+            if (rightRes.val !== null && leftRes.val !== null) {
+              if (Math.abs(rightRes.val - leftRes.val) < 1e-3) {
+                resolvedValue = (rightRes.val + leftRes.val) / 2;
+                steps.push({
+                  title: 'Two-sided numerical convergence (Richardson Extrapolation)',
+                  math: `Left(${formatNum(targetVal)}⁻) ≈ ${formatNum(leftRes.val, 6)}  |  Right(${formatNum(targetVal)}⁺) ≈ ${formatNum(rightRes.val, 6)}`,
+                  explanation: 'Both one-sided limits converge to the same finite value.',
+                });
+              } else {
+                resolvedLabel = `Does not exist (Left = ${formatNum(leftRes.val, 4)}, Right = ${formatNum(rightRes.val, 4)})`;
+                steps.push({
+                  title: 'Compare left-hand and right-hand limits',
+                  math: `${formatNum(leftRes.val, 4)} ≠ ${formatNum(rightRes.val, 4)}`,
+                  explanation: 'The two-sided limit does not exist because the left and right limits disagree.',
+                });
+              }
+            } else if (rightRes.div && leftRes.div && rightRes.div === leftRes.div) {
+              resolvedLabel = rightRes.div === '+inf' ? '+∞' : '-∞';
+            } else if (rightRes.div || leftRes.div) {
+              const lTxt = leftRes.div === '+inf' ? '+∞' : leftRes.div === '-inf' ? '-∞' : leftRes.val !== null ? formatNum(leftRes.val, 4) : 'undef';
+              const rTxt = rightRes.div === '+inf' ? '+∞' : rightRes.div === '-inf' ? '-∞' : rightRes.val !== null ? formatNum(rightRes.val, 4) : 'undef';
+              resolvedLabel = `Does not exist (Left = ${lTxt}, Right = ${rTxt})`;
+            }
+          }
+        }
+      }
+
+      // Snap close integers (within 1e-6)
+      if (resolvedValue !== null) {
+        if (Math.abs(resolvedValue - Math.round(resolvedValue)) < 1e-6) {
+          resolvedValue = Math.round(resolvedValue);
+        }
+        const frac = tryToFraction(resolvedValue);
+        if (frac) alternateForms.push({ label: 'Exact Fraction', value: frac });
+        if (Math.abs(resolvedValue - Math.E) < 1e-4) {
+          alternateForms.push({ label: 'Constant Match', value: 'e (≈ 2.71828)' });
+        }
+      }
+
+      const finalAnswer = resolvedValue !== null ? formatNum(resolvedValue, 6) : resolvedLabel || 'Does not exist / Undetermined';
+
+      let plot: MathPlotData | null = null;
+      if (Number.isFinite(targetVal)) {
+        const bounds = buildPlotBounds([processed], v, targetVal, 4, options);
+        plot = {
+          series: [{ label: `f(${v}) = ${limBody}`, expr: processed, color: '#6366f1' }],
+          points:
+            resolvedValue !== null
+              ? [{ x: targetVal, y: resolvedValue, label: `Limit (${formatNum(targetVal, 2)}, ${formatNum(resolvedValue, 2)})` }]
+              : [],
+          xRange: bounds.xRange,
+          yRange: bounds.yRange,
+          variable: v,
+        };
+      }
+
+      return {
+        problemType: 'calculus_limit',
+        problemLabel: 'Calculus Limit',
+        normalizedInput: `lim(${v}->${limTargetRaw}, ${limBody})`,
+        finalAnswer,
+        alternateForms,
+        steps,
+        verification: resolvedValue !== null && Number.isFinite(targetVal) ? `Approached ${formatNum(resolvedValue, 6)} as ${v} → ${targetDisplay}` : null,
+        plot,
+      };
+    } catch (err: unknown) {
+      return {
+        problemType: 'error',
+        problemLabel: 'Limit Error',
+        normalizedInput: input,
+        finalAnswer: 'Could not evaluate limit',
+        alternateForms: [],
+        steps: [],
+        verification: null,
+        plot: null,
+        error: err instanceof Error ? err.message : 'Invalid limit syntax',
       };
     }
   }

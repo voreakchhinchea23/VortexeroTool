@@ -21,7 +21,7 @@ import {
   Square,
   ScanLine,
 } from 'lucide-react';
-import { createWorker } from 'tesseract.js';
+import { createWorker, PSM } from 'tesseract.js';
 import { useToast } from '../../../context/ToastContext';
 import { useClipboard } from '../../../hooks/useClipboard';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
@@ -32,6 +32,13 @@ import {
   formatNum,
   MathSolution,
 } from '../../../utils/mathSolver';
+import {
+  prepareBinaryMathImage,
+  extractInkComponents,
+  parse2DMathLayout,
+  PolarityMode,
+  CropOcrBox,
+} from '../../../utils/mathOcr2d';
 
 type InputTab = 'upload' | 'camera' | 'draw';
 
@@ -48,6 +55,8 @@ const SAMPLE_PROBLEMS = [
   { id: 'quadratic', title: 'Quadratic Equation', lines: ['x^2 - 5x + 6 = 0'] },
   { id: 'system', title: '2x2 Linear System', lines: ['2x + y = 10', 'x - y = 2'] },
   { id: 'arithmetic', title: 'Order of Operations', lines: ['(15 + 9) * 3 - sqrt(144)'] },
+  { id: 'limit', title: 'Dark Limit (2D)', lines: ['lim(x->0, (e^(2x) - 1) / x)'] },
+  { id: 'rational_limit', title: 'Rational Limit (2D)', lines: ['lim(x->3, (x^2 - 9) / (x - 3))'] },
 ];
 
 const QUICK_EXAMPLES = [
@@ -55,6 +64,7 @@ const QUICK_EXAMPLES = [
   '3(x - 2) = 2x + 4',
   'x^2 - 5x + 6 = 0',
   '2x + y = 10; x - y = 2',
+  'lim(x->0, (e^(2x) - 1) / x)',
   'd/dx(x^3 + 2x^2 - 5x)',
   'integrate(x^2, 0, 3)',
   '(18 + 6) * 4 / 3 + sqrt(81)',
@@ -77,16 +87,85 @@ const KEYPAD_BUTTONS = [
   { label: 'cos', insert: 'cos()' },
   { label: 'log₁₀', insert: 'log10()' },
   { label: 'ln', insert: 'ln()' },
+  { label: 'lim', insert: 'lim(x->0, )' },
+  { label: '→', insert: '->' },
   { label: 'd/dx', insert: 'd/dx()' },
   { label: '∫', insert: 'integrate(x^2, 0, 3)' },
   { label: ';', insert: '; ' },
 ];
 
 /**
- * Generates a realistic paper-photo style canvas image for sample testing.
+ * Generates a realistic paper-photo or dark-mode textbook canvas image for sample testing.
  */
-function generateSampleMathImage(lines: string[]): string {
+function generateSampleMathImage(sample: (typeof SAMPLE_PROBLEMS)[number]): string {
+  const lines = sample.lines;
   const canvas = document.createElement('canvas');
+
+  if (sample.id === 'limit' || sample.id === 'rational_limit') {
+    canvas.width = 560;
+    canvas.height = 240;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+
+    const isDark = sample.id === 'limit';
+    ctx.fillStyle = isDark ? '#202124' : '#fcfbf7';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const ink = isDark ? '#e8eaed' : '#0f172a';
+    ctx.fillStyle = ink;
+    ctx.textBaseline = 'alphabetic';
+
+    // Draw "lim" and subscript "x → target"
+    ctx.font = '500 50px "Inter", "Segoe UI", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('lim', 148, 128);
+
+    ctx.font = '500 26px "Inter", "Segoe UI", Arial, sans-serif';
+    ctx.fillText(sample.id === 'limit' ? 'x → 0' : 'x → 3', 148, 166);
+
+    // Draw wide fraction bar (vinculum)
+    const barX = 228;
+    const barY = 114;
+    const barW = sample.id === 'limit' ? 210 : 185;
+    ctx.fillRect(barX, barY, barW, 4);
+
+    if (sample.id === 'limit') {
+      // Numerator: e^(2x) - 1
+      ctx.textAlign = 'left';
+      ctx.font = 'italic 48px "Georgia", "Times New Roman", serif';
+      ctx.fillText('e', 252, 92);
+
+      ctx.font = '500 28px "Inter", "Segoe UI", Arial, sans-serif';
+      ctx.fillText('2x', 284, 64);
+
+      ctx.font = '500 44px "Inter", "Segoe UI", Arial, sans-serif';
+      ctx.fillText('− 1', 332, 92);
+
+      // Denominator: x
+      ctx.textAlign = 'center';
+      ctx.font = 'italic 48px "Georgia", "Times New Roman", serif';
+      ctx.fillText('x', barX + barW / 2, 168);
+    } else {
+      // Numerator: x^2 - 9
+      ctx.textAlign = 'left';
+      ctx.font = 'italic 44px "Georgia", "Times New Roman", serif';
+      ctx.fillText('x', 250, 92);
+
+      ctx.font = '500 28px "Inter", "Segoe UI", Arial, sans-serif';
+      ctx.fillText('2', 278, 66);
+
+      ctx.font = '500 44px "Inter", "Segoe UI", Arial, sans-serif';
+      ctx.fillText('− 9', 308, 92);
+
+      // Denominator: x - 3
+      ctx.textAlign = 'center';
+      ctx.font = 'italic 44px "Georgia", "Times New Roman", serif';
+      ctx.fillText('x − 3', barX + barW / 2, 168);
+    }
+
+    return canvas.toDataURL('image/png');
+  }
+
   canvas.width = 760;
   canvas.height = lines.length > 1 ? 260 : 200;
   const ctx = canvas.getContext('2d');
@@ -141,7 +220,7 @@ export const MathScanner: React.FC = () => {
 
   // Preprocessing options
   const [highContrastBw, setHighContrastBw] = useState<boolean>(true);
-  const [invertColors, setInvertColors] = useState<boolean>(false);
+  const [polarityMode, setPolarityMode] = useState<PolarityMode>('auto');
   const [upscale2x, setUpscale2x] = useState<boolean>(true);
 
   // Crop selection (normalized 0..1)
@@ -232,112 +311,185 @@ export const MathScanner: React.FC = () => {
     [setHistory]
   );
 
-  // Preprocess image onto hidden/preview canvas for crisp OCR accuracy
-  const buildPreprocessedCanvas = useCallback(
-    async (src: string, customCrop: { x: number; y: number; w: number; h: number } | null): Promise<HTMLCanvasElement> => {
-      return new Promise((resolve, reject) => {
+  // Preprocess cropped source region into polarity-normalized grayscale & connected-component analysis
+  const prepareOcrAnalysis = useCallback(
+    async (src: string, customCrop: { x: number; y: number; w: number; h: number } | null) => {
+      return new Promise<{
+        bin: ReturnType<typeof prepareBinaryMathImage>;
+        grayCanvas: HTMLCanvasElement;
+        fullCanvas: HTMLCanvasElement;
+      }>((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
-          const sx = customCrop ? Math.round(customCrop.x * img.naturalWidth) : 0;
-          const sy = customCrop ? Math.round(customCrop.y * img.naturalHeight) : 0;
-          const sw = customCrop ? Math.max(20, Math.round(customCrop.w * img.naturalWidth)) : img.naturalWidth;
-          const sh = customCrop ? Math.max(20, Math.round(customCrop.h * img.naturalHeight)) : img.naturalHeight;
+          const sx = customCrop ? Math.max(0, Math.round(customCrop.x * img.naturalWidth)) : 0;
+          const sy = customCrop ? Math.max(0, Math.round(customCrop.y * img.naturalHeight)) : 0;
+          const sw = customCrop
+            ? Math.min(img.naturalWidth - sx, Math.max(20, Math.round(customCrop.w * img.naturalWidth)))
+            : img.naturalWidth;
+          const sh = customCrop
+            ? Math.min(img.naturalHeight - sy, Math.max(20, Math.round(customCrop.h * img.naturalHeight)))
+            : img.naturalHeight;
 
-          const scale = upscale2x ? (Math.max(sw, sh) < 1200 ? 2 : 1) : 1;
-          const pad = 24;
-          const outW = sw * scale + pad * 2;
-          const outH = sh * scale + pad * 2;
-
-          const canvas = previewCanvasRef.current || document.createElement('canvas');
-          canvas.width = outW;
-          canvas.height = outH;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
+          const srcCanvas = document.createElement('canvas');
+          srcCanvas.width = sw;
+          srcCanvas.height = sh;
+          const srcCtx = srcCanvas.getContext('2d');
+          if (!srcCtx) {
             reject(new Error('Canvas context unavailable'));
             return;
           }
+          srcCtx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+          const rawData = srcCtx.getImageData(0, 0, sw, sh);
 
-          // White padding margin helps Tesseract segment edge characters
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, outW, outH);
-          ctx.drawImage(img, sx, sy, sw, sh, pad, pad, sw * scale, sh * scale);
+          const bin = prepareBinaryMathImage(rawData.data, sw, sh, polarityMode);
 
-          const imgData = ctx.getImageData(0, 0, outW, outH);
-          const d = imgData.data;
-
-          // Compute mean luminance for adaptive-like contrast threshold
-          let sumLum = 0;
-          let count = 0;
-          for (let i = 0; i < d.length; i += 4) {
-            let lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-            if (invertColors) lum = 255 - lum;
-            sumLum += lum;
-            count++;
+          // Unpadded clean grayscale canvas (dark foreground on light background) for 2D sub-crops
+          const grayCanvas = document.createElement('canvas');
+          grayCanvas.width = sw;
+          grayCanvas.height = sh;
+          const grayCtx = grayCanvas.getContext('2d');
+          if (!grayCtx) {
+            reject(new Error('Canvas context unavailable'));
+            return;
           }
-          const avgLum = count > 0 ? sumLum / count : 128;
-          const cutoff = Math.min(200, Math.max(70, avgLum * 0.78));
+          const grayImgData = grayCtx.createImageData(sw, sh);
+          for (let i = 0; i < bin.gray.length; i++) {
+            const g = bin.gray[i];
+            const p = i * 4;
+            grayImgData.data[p] = g;
+            grayImgData.data[p + 1] = g;
+            grayImgData.data[p + 2] = g;
+            grayImgData.data[p + 3] = 255;
+          }
+          grayCtx.putImageData(grayImgData, 0, 0);
 
-          for (let i = 0; i < d.length; i += 4) {
-            let r = d[i];
-            let g = d[i + 1];
-            let b = d[i + 2];
-            if (invertColors) {
-              r = 255 - r;
-              g = 255 - g;
-              b = 255 - b;
-            }
-            const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-            if (highContrastBw) {
-              const v = lum < cutoff ? 0 : 255;
+          // Full upscaled white-padded canvas for fallback whole-block recognition
+          const scale = upscale2x ? (Math.max(sw, sh) < 1200 ? 2 : 1) : 1;
+          const pad = 32;
+          const outW = sw * scale + pad * 2;
+          const outH = sh * scale + pad * 2;
+          const fullCanvas = previewCanvasRef.current || document.createElement('canvas');
+          fullCanvas.width = outW;
+          fullCanvas.height = outH;
+          const fullCtx = fullCanvas.getContext('2d');
+          if (!fullCtx) {
+            reject(new Error('Canvas context unavailable'));
+            return;
+          }
+          fullCtx.fillStyle = '#ffffff';
+          fullCtx.fillRect(0, 0, outW, outH);
+          fullCtx.imageSmoothingEnabled = true;
+          fullCtx.imageSmoothingQuality = 'high';
+          fullCtx.drawImage(grayCanvas, 0, 0, sw, sh, pad, pad, sw * scale, sh * scale);
+
+          if (highContrastBw) {
+            const fData = fullCtx.getImageData(0, 0, outW, outH);
+            const d = fData.data;
+            for (let i = 0; i < d.length; i += 4) {
+              const v = d[i] < bin.threshold ? 0 : 255;
               d[i] = d[i + 1] = d[i + 2] = v;
-            } else {
-              const boosted = Math.max(0, Math.min(255, (lum - 128) * 1.4 + 128));
-              d[i] = d[i + 1] = d[i + 2] = boosted;
+              d[i + 3] = 255;
             }
-            d[i + 3] = 255;
+            fullCtx.putImageData(fData, 0, 0);
           }
 
-          ctx.putImageData(imgData, 0, 0);
-          resolve(canvas);
+          resolve({ bin, grayCanvas, fullCanvas });
         };
         img.onerror = () => reject(new Error('Failed to load image for OCR processing.'));
         img.src = src;
       });
     },
-    [highContrastBw, invertColors, upscale2x]
+    [highContrastBw, polarityMode, upscale2x]
   );
 
-  // Run Tesseract OCR on given image URL
+  // Run 2D layout-aware Tesseract OCR on given image URL
   const runOcrScan = useCallback(
     async (src: string, customCrop: { x: number; y: number; w: number; h: number } | null = cropRect) => {
       setIsScanning(true);
       setScanProgress(5);
-      setScanStatus('Preprocessing image...');
+      setScanStatus('Detecting layout & contrast...');
       setOcrError(null);
 
       let worker: Awaited<ReturnType<typeof createWorker>> | null = null;
       try {
-        const processedCanvas = await buildPreprocessedCanvas(src, customCrop);
+        const { bin, grayCanvas, fullCanvas } = await prepareOcrAnalysis(src, customCrop);
+        const comps = extractInkComponents(bin.mask, bin.width, bin.height);
+
         setScanStatus('Loading OCR engine...');
-        setScanProgress(15);
+        setScanProgress(18);
 
         worker = await createWorker('eng', 1, {
           logger: (m) => {
-            if (m.status === 'recognizing text') {
+            if (m.status === 'recognizing text' && (comps.length === 0 || comps.length > 140)) {
               setScanStatus('Recognizing mathematical symbols...');
               setScanProgress(Math.max(25, Math.min(98, Math.round(m.progress * 100))));
-            } else if (m.status) {
+            } else if (m.status && m.status !== 'recognizing text') {
               setScanStatus(m.status);
             }
           },
         });
 
-        await worker.setParameters({
-          tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/^=()[]{}.,;:!%√×÷−π ',
-        });
+        const activeWorker = worker;
+        const cropCanvas = document.createElement('canvas');
+        let scannedRegions = 0;
 
-        const { data } = await worker.recognize(processedCanvas);
-        const raw = (data.text || '').trim();
+        const recognizeCrop = async (box: CropOcrBox): Promise<string> => {
+          const cropW = Math.max(1, box.w);
+          const cropH = Math.max(1, box.h);
+          const scale = upscale2x ? Math.max(2, Math.min(6, Math.round(72 / Math.max(10, cropH)))) : 1;
+          const pad = 40;
+          const outW = cropW * scale + pad * 2;
+          const outH = cropH * scale + pad * 2;
+
+          cropCanvas.width = outW;
+          cropCanvas.height = outH;
+          const cropCtx = cropCanvas.getContext('2d');
+          if (!cropCtx) return '';
+
+          cropCtx.fillStyle = '#ffffff';
+          cropCtx.fillRect(0, 0, outW, outH);
+          cropCtx.imageSmoothingEnabled = true;
+          cropCtx.imageSmoothingQuality = 'high';
+          cropCtx.drawImage(grayCanvas, box.x, box.y, cropW, cropH, pad, pad, cropW * scale, cropH * scale);
+
+          if (highContrastBw) {
+            const cropImg = cropCtx.getImageData(0, 0, outW, outH);
+            const cd = cropImg.data;
+            for (let i = 0; i < cd.length; i += 4) {
+              const v = cd[i] < bin.threshold ? 0 : 255;
+              cd[i] = cd[i + 1] = cd[i + 2] = v;
+              cd[i + 3] = 255;
+            }
+            cropCtx.putImageData(cropImg, 0, 0);
+          }
+
+          scannedRegions++;
+          setScanStatus('Recognizing 2D math symbols...');
+          setScanProgress(Math.min(96, 28 + scannedRegions * 7));
+
+          const useSingleChar = Boolean(box.singleGlyph && box.w <= box.h * 1.25);
+          await activeWorker.setParameters({
+            tessedit_pageseg_mode: useSingleChar ? PSM.SINGLE_CHAR : PSM.SINGLE_LINE,
+          });
+          const { data } = await activeWorker.recognize(cropCanvas);
+          return (data.text || '').trim();
+        };
+
+        let raw = '';
+        if (comps.length > 0 && comps.length <= 140) {
+          raw = (await parse2DMathLayout(comps, bin.width, bin.height, recognizeCrop)).trim();
+        }
+
+        if (!raw) {
+          setScanStatus('Recognizing full image block...');
+          setScanProgress(65);
+          await activeWorker.setParameters({
+            tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
+          });
+          const { data } = await activeWorker.recognize(fullCanvas);
+          raw = (data.text || '').trim();
+        }
+
         setRawOcrText(raw);
 
         const cleaned = normalizeMathOcr(raw);
@@ -347,7 +499,7 @@ export const MathScanner: React.FC = () => {
           saveToHistory(solved);
           addToast('Math equation scanned!', cleaned, 'success');
         } else {
-          setOcrError('No readable math text was detected. Try cropping closer around the equation or toggling High-Contrast / Invert.');
+          setOcrError('No readable math text was detected. Try cropping closer around the equation or adjusting Background Polarity.');
           addToast('No math expression found in image', 'info');
         }
       } catch (err: unknown) {
@@ -367,7 +519,7 @@ export const MathScanner: React.FC = () => {
         setScanStatus('');
       }
     },
-    [addToast, angleUnit, buildPreprocessedCanvas, cropRect, saveToHistory]
+    [addToast, angleUnit, cropRect, highContrastBw, prepareOcrAnalysis, saveToHistory, upscale2x]
   );
 
   // Handle file upload
@@ -411,7 +563,7 @@ export const MathScanner: React.FC = () => {
 
   // Sample math photo trigger
   const handleLoadSample = (sample: (typeof SAMPLE_PROBLEMS)[number]) => {
-    const dataUrl = generateSampleMathImage(sample.lines);
+    const dataUrl = generateSampleMathImage(sample);
     setUploadedImgUrl(dataUrl);
     setCropRect(null);
     setActiveTab('upload');
@@ -907,12 +1059,36 @@ export const MathScanner: React.FC = () => {
                   </div>
 
                   {/* Preprocessing Toggles */}
-                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800/70 space-y-2">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      <Sliders size={12} />
-                      OCR Image Enhancers
+                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800/70 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <Sliders size={12} />
+                        OCR Image Enhancers
+                      </div>
+                      <div className="inline-flex items-center gap-1 rounded-lg bg-slate-200/70 dark:bg-slate-900 p-0.5 text-[11px] font-bold">
+                        {(
+                          [
+                            { id: 'auto', label: 'Auto Bg' },
+                            { id: 'normal', label: 'Light' },
+                            { id: 'invert', label: 'Dark' },
+                          ] as const
+                        ).map((mode) => (
+                          <button
+                            key={mode.id}
+                            type="button"
+                            onClick={() => setPolarityMode(mode.id)}
+                            className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                              polarityMode === mode.id
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            {mode.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
                       <label className="flex items-center gap-1.5 cursor-pointer">
                         <input
                           type="checkbox"
@@ -921,15 +1097,6 @@ export const MathScanner: React.FC = () => {
                           className="accent-indigo-600 rounded"
                         />
                         <span>High-Contrast B&W</span>
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={invertColors}
-                          onChange={(e) => setInvertColors(e.target.checked)}
-                          className="accent-indigo-600 rounded"
-                        />
-                        <span>Invert (Dark Photo)</span>
                       </label>
                       <label className="flex items-center gap-1.5 cursor-pointer">
                         <input

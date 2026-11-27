@@ -1283,6 +1283,12 @@ console.log('✓ Test 16: Interactive Touch & Hover clock backgrounds, cursor pa
 
 // Test 17: ToolRenderer routing completeness, toolColors, and Math Scanner solver verification
 import { normalizeMathOcr, solveMathProblem, getPrimeFactorization } from '../utils/mathSolver';
+import {
+  prepareBinaryMathImage,
+  extractInkComponents,
+  findTopFractionBar,
+  segmentBaselineAndSuperscripts,
+} from '../utils/mathOcr2d';
 
 const toolRendererSource = fs.readFileSync(
   path.resolve(process.cwd(), 'src/components/tools/ToolRenderer.tsx'),
@@ -1383,7 +1389,112 @@ if (!trans1.finalAnswer.includes('5')) {
   process.exit(1);
 }
 
-console.log('✓ Test 17: ToolRenderer routing (all 71 tools), bespoke colors, and Math Scanner solver (OCR cleanup, linear, quadratic, 2x2 system, calculus, plotter) verified.');
+// 17h: Calculus limits (indeterminate L'Hopital, infinity, one-sided, non-existent)
+const lim1 = solveMathProblem('lim(x->0, (e^(2x) - 1)/x)');
+if (lim1.problemType !== 'calculus_limit' || lim1.finalAnswer !== '2') {
+  console.error('Limit L\'Hopital solver failed:', lim1);
+  process.exit(1);
+}
+const lim2 = solveMathProblem('lim x-0 (e^(2x) - 1)/x');
+if (lim2.problemType !== 'calculus_limit' || lim2.finalAnswer !== '2') {
+  console.error('OCR-shorthand limit solver failed:', lim2);
+  process.exit(1);
+}
+const limInf = solveMathProblem('lim x->inf (3x^2 + 1)/(x^2 - 5)');
+if (limInf.problemType !== 'calculus_limit' || limInf.finalAnswer !== '3') {
+  console.error('Infinite limit solver failed:', limInf);
+  process.exit(1);
+}
+const limOneSided = solveMathProblem('lim(x->0+, 1/x)');
+if (limOneSided.problemType !== 'calculus_limit' || !limOneSided.finalAnswer.includes('+∞')) {
+  console.error('Right-hand limit solver failed:', limOneSided);
+  process.exit(1);
+}
+const limDne = solveMathProblem('lim(x->0, 1/x)');
+if (limDne.problemType !== 'calculus_limit' || !limDne.finalAnswer.toLowerCase().includes('does not exist')) {
+  console.error('Non-existent two-sided limit solver failed:', limDne);
+  process.exit(1);
+}
+
+// 17i: 2D Math OCR contrast auto-inversion, fraction bar detection, and superscript segmentation
+const imgW = 120;
+const imgH = 80;
+const darkBuf = new Uint8ClampedArray(imgW * imgH * 4);
+for (let i = 0; i < darkBuf.length; i += 4) {
+  darkBuf[i] = 32;
+  darkBuf[i + 1] = 34;
+  darkBuf[i + 2] = 38;
+  darkBuf[i + 3] = 255;
+}
+const paintBox = (buf: Uint8ClampedArray, w: number, x0: number, y0: number, x1: number, y1: number) => {
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const p = (y * w + x) * 4;
+      buf[p] = 240;
+      buf[p + 1] = 240;
+      buf[p + 2] = 242;
+    }
+  }
+};
+// Fraction numerator + wide vinculum + denominator + twin equals bars
+paintBox(darkBuf, imgW, 40, 14, 58, 30);
+paintBox(darkBuf, imgW, 24, 36, 94, 39);
+paintBox(darkBuf, imgW, 52, 46, 66, 62);
+paintBox(darkBuf, imgW, 100, 26, 114, 28);
+paintBox(darkBuf, imgW, 100, 32, 114, 34);
+
+const binRes = prepareBinaryMathImage(darkBuf, imgW, imgH, 'auto');
+if (!binRes.wasInverted) {
+  console.error('mathOcr2d failed to auto-invert dark background buffer');
+  process.exit(1);
+}
+const compsRes = extractInkComponents(binRes.mask, imgW, imgH);
+const barRes = findTopFractionBar(compsRes, imgH);
+if (!barRes || barRes.w < 65) {
+  console.error('mathOcr2d fraction bar detection failed:', barRes);
+  process.exit(1);
+}
+
+// Row with base operand + superscript + equals sign + trailing operand
+const rowBuf = new Uint8ClampedArray(100 * 60 * 4);
+for (let i = 0; i < rowBuf.length; i += 4) {
+  rowBuf[i] = 250;
+  rowBuf[i + 1] = 250;
+  rowBuf[i + 2] = 250;
+  rowBuf[i + 3] = 255;
+}
+const paintDarkBox = (buf: Uint8ClampedArray, w: number, x0: number, y0: number, x1: number, y1: number) => {
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const p = (y * w + x) * 4;
+      buf[p] = 15;
+      buf[p + 1] = 23;
+      buf[p + 2] = 42;
+    }
+  }
+};
+paintDarkBox(rowBuf, 100, 12, 24, 28, 48); // base 'x'
+paintDarkBox(rowBuf, 100, 32, 12, 42, 24); // superscript '2'
+paintDarkBox(rowBuf, 100, 48, 30, 62, 32); // '=' top
+paintDarkBox(rowBuf, 100, 48, 36, 62, 38); // '=' bottom
+paintDarkBox(rowBuf, 100, 70, 24, 84, 48); // trailing '9'
+const rowBin = prepareBinaryMathImage(rowBuf, 100, 60, 'auto');
+if (rowBin.wasInverted) {
+  console.error('mathOcr2d unexpectedly inverted light background buffer');
+  process.exit(1);
+}
+const segsRes = segmentBaselineAndSuperscripts(extractInkComponents(rowBin.mask, 100, 60));
+if (
+  segsRes.length !== 3 ||
+  segsRes[0].kind !== 'base' ||
+  segsRes[1].kind !== 'sup' ||
+  segsRes[2].kind !== 'base'
+) {
+  console.error('mathOcr2d superscript/equals segmentation mismatch:', segsRes);
+  process.exit(1);
+}
+
+console.log('✓ Test 17: ToolRenderer routing (all 71 tools), bespoke colors, and Math Scanner solver (OCR cleanup, linear, quadratic, 2x2 system, calculus, limits, 2D OCR layout, plotter) verified.');
 
 // Test 18: Everyday utilities (Document warp, QR payload parser, GPA, Age/Date, Smart Shopping)
 import {
