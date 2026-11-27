@@ -23,6 +23,13 @@ import { VotingSystem } from './productivity/VotingSystem';
 import { NameGenerator } from './productivity/NameGenerator';
 import { CalendarPlanner } from './productivity/CalendarPlanner';
 import { KhmerLunarCalendar } from './productivity/KhmerLunarCalendar';
+import { MathScanner } from './productivity/MathScanner';
+import { DocumentScanner } from './productivity/DocumentScanner';
+import { BudgetTracker } from './productivity/BudgetTracker';
+import { WorldClockPlanner } from './productivity/WorldClockPlanner';
+import { GpaGradeCalculator } from './productivity/GpaGradeCalculator';
+import { AgeDateCalculator } from './productivity/AgeDateCalculator';
+import { SmartShoppingCalculator } from './productivity/SmartShoppingCalculator';
 
 // Security Tools
 import { PasswordGenerator } from './security/PasswordGenerator';
@@ -35,6 +42,7 @@ import { JwtDecoder } from './security/JwtDecoder';
 import { ResponsiveTester } from './web/ResponsiveTester';
 import { MultiWatchesStudio } from './web/MultiWatchesStudio';
 import { QrCodeGenerator } from './web/QrCodeGenerator';
+import { QrScanner } from './web/QrScanner';
 import { UrlShortener } from './web/UrlShortener';
 import { UtmBuilder } from './web/UtmBuilder';
 import { OgMetaGenerator } from './web/OgMetaGenerator';
@@ -46,6 +54,7 @@ import { WordCounter } from './text/WordCounter';
 import { LoremGenerator } from './text/LoremGenerator';
 import { MarkdownPreviewer } from './text/MarkdownPreviewer';
 import { Base64Tool } from './text/Base64Tool';
+import { ImageToTextOcr } from './text/ImageToTextOcr';
 
 // Design & Graphics Tools
 import { WhiteboardSketch } from './design/WhiteboardSketch';
@@ -124,6 +133,20 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <CalendarPlanner />;
       case 'khmer-lunar-calendar':
         return <KhmerLunarCalendar />;
+      case 'math-scanner':
+        return <MathScanner />;
+      case 'document-scanner':
+        return <DocumentScanner />;
+      case 'budget-tracker':
+        return <BudgetTracker />;
+      case 'world-clock-planner':
+        return <WorldClockPlanner />;
+      case 'gpa-grade-calculator':
+        return <GpaGradeCalculator />;
+      case 'age-date-calculator':
+        return <AgeDateCalculator />;
+      case 'smart-shopping-calculator':
+        return <SmartShoppingCalculator />;
 
       // Security
       case 'password-generator':
@@ -144,6 +167,8 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <MultiWatchesStudio />;
       case 'qr-generator':
         return <QrCodeGenerator />;
+      case 'qr-scanner':
+        return <QrScanner />;
       case 'url-shortener':
         return <UrlShortener />;
       case 'utm-builder':
@@ -164,6 +189,8 @@ export const ToolRenderer: React.FC<ToolRendererProps> = ({ tool, onBack }) => {
         return <MarkdownPreviewer />;
       case 'base64-tool':
         return <Base64Tool />;
+      case 'image-to-text':
+        return <ImageToTextOcr />;
 
       // Design & Graphics
       case 'whiteboard-sketch':

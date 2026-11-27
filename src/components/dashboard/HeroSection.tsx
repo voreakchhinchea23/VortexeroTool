@@ -47,7 +47,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             }`}
           >
             <Sparkles size={14} className="animate-spin-slow text-fuchsia-400" />
-            Modern Web & Developer Suite
+            Everyday, Document & Developer Suite
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -56,7 +56,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
-            Ultra-fast, private, and beautifully crafted tools for streaming, security, web sharing, text processing, design, and data conversion.
+            Ultra-fast, private, and beautifully crafted tools for everyday life, math & document scanning, budgeting, study, design, web sharing, and development.
           </p>
 
           {/* Live Search Bar */}
@@ -67,7 +67,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search by tool name, tag (e.g. multistream, password, qr, wifi, hash)..."
+                placeholder="Search by tool or tag (e.g. math, scan, budget, gpa, ocr, qr, password)..."
                 className={`w-full pl-12 pr-4 py-3.5 rounded-2xl border text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none text-sm sm:text-base transition-all ${
                   isVibrant
                     ? 'bg-[#0b0f19]/90 border-slate-700/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 shadow-inner'

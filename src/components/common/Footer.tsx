@@ -23,7 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool, 
               </span>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
-              An all-in-one developer and productivity utility platform built with modern web technologies. Fast, accessible, client-side, and privacy-first.
+              An all-in-one everyday, document, student, and developer utility platform built with modern web technologies. Fast, accessible, client-side, and privacy-first.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
@@ -54,28 +54,28 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onSelectTool, 
                   className="text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1.5"
                 >
                   <Tv size={13} />
-                  <span>MultiWatches App 🔴</span>
+                  <span>MultiWatches App</span>
                   <ExternalLink size={11} />
                 </a>
               </li>
               <li>
-                <button onClick={() => onSelectTool('ambient-sounds')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Ambient Chill Sounds
+                <button onClick={() => onSelectTool('math-scanner')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors cursor-pointer">
+                  Math Scanner & Solver
                 </button>
               </li>
               <li>
-                <button onClick={() => onSelectTool('digital-clock')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                <button onClick={() => onSelectTool('document-scanner')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors cursor-pointer">
+                  Document CamScanner
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onSelectTool('budget-tracker')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors cursor-pointer">
+                  Personal Budget Tracker
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onSelectTool('digital-clock')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors cursor-pointer">
                   Digital Clock Studio
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectTool('cv-builder')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  CV & Resume Builder
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectTool('typing-test')} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Typing Speed Practice
                 </button>
               </li>
             </ul>

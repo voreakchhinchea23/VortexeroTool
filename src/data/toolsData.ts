@@ -2,10 +2,10 @@ import { Tool, CategoryInfo } from '../types/tool';
 
 export const CATEGORIES: CategoryInfo[] = [
   { id: 'all', name: 'All Tools', description: 'Browse all available utilities', iconName: 'LayoutGrid' },
-  { id: 'productivity', name: 'Productivity & Focus', description: 'Finance, health, countdown, CV builder, invoice & clock', iconName: 'Zap' },
+  { id: 'productivity', name: 'Productivity & Focus', description: 'Math scanner, budget, doc scan, finance, health, GPA, CV & clock', iconName: 'Zap' },
   { id: 'security', name: 'Security & Auth', description: 'Passwords, usernames, hashes & tokens', iconName: 'ShieldCheck' },
-  { id: 'web', name: 'Web & Streaming', description: 'Responsive tester, multi-stream viewer, QR codes, links, meta tags', iconName: 'Globe' },
-  { id: 'text', name: 'Text & Content', description: 'Case convert, word counter, markdown & Base64', iconName: 'FileText' },
+  { id: 'web', name: 'Web & Streaming', description: 'QR scanner, responsive tester, multi-stream viewer, QR codes & links', iconName: 'Globe' },
+  { id: 'text', name: 'Text & Content', description: 'Image OCR, case convert, word counter, markdown & Base64', iconName: 'FileText' },
   { id: 'design', name: 'Design & Graphics', description: 'Whiteboard, color palette, image studio, charts & clamp', iconName: 'Palette' },
   { id: 'developer', name: 'Developer & Data', description: 'Code to image, SQL formatter, cron generator, CSV/Excel, JSON & regex', iconName: 'Code2' },
 ];
@@ -179,6 +179,69 @@ const RAW_TOOLS: Tool[] = [
     badge: 'New',
     tags: ['khmer', 'calendar', 'chhankitek', 'lunar', 'cambodia', 'holiday', 'buddhist', 'zodiac', 'sil', 'date']
   },
+  {
+    id: 'math-scanner',
+    name: 'Math Scanner & Step-by-Step Solver',
+    description: 'Upload a math photo, snap with camera, draw, or type equations to get OCR recognition, step-by-step algebra & calculus solutions, and interactive graphs.',
+    category: 'productivity',
+    iconName: 'Sigma',
+    badge: 'Hot',
+    tags: ['math', 'scanner', 'solver', 'ocr', 'algebra', 'calculus', 'homework', 'graph', 'equation', 'everyday']
+  },
+  {
+    id: 'document-scanner',
+    name: 'Document & Receipt CamScanner Studio',
+    description: 'Straighten crooked photos of receipts, IDs, and documents with 4-corner perspective warp, B&W shadow cleanup, and multi-page PDF export.',
+    category: 'productivity',
+    iconName: 'ScanLine',
+    badge: 'New',
+    tags: ['document', 'scanner', 'receipt', 'camscanner', 'pdf', 'crop', 'perspective', 'id', 'paper', 'everyday']
+  },
+  {
+    id: 'budget-tracker',
+    name: 'Personal Budget & Expense Tracker',
+    description: 'Track daily expenses, monthly income, category spending charts, budget caps, and safe daily allowances privately in your browser.',
+    category: 'productivity',
+    iconName: 'Wallet',
+    badge: 'Popular',
+    tags: ['budget', 'expense', 'money', 'finance', 'tracker', 'income', 'savings', 'spending', 'csv', 'everyday']
+  },
+  {
+    id: 'world-clock-planner',
+    name: 'World Clock & Meeting Time Planner',
+    description: 'Compare live times across 34+ global cities with an interactive 24-hour overlap scrubber and instant meeting invite copy.',
+    category: 'productivity',
+    iconName: 'Globe2',
+    badge: 'New',
+    tags: ['world-clock', 'timezone', 'meeting', 'travel', 'time', 'utc', 'converter', 'schedule', 'everyday']
+  },
+  {
+    id: 'gpa-grade-calculator',
+    name: 'Student GPA, Grade & Final Exam Calculator',
+    description: 'Calculate semester & cumulative GPA (4.0 / 4.3 / %), weighted syllabus grades, and exact scores needed on final exams.',
+    category: 'productivity',
+    iconName: 'GraduationCap',
+    badge: 'New',
+    tags: ['gpa', 'grade', 'student', 'school', 'college', 'exam', 'study', 'calculator', 'university', 'everyday']
+  },
+  {
+    id: 'age-date-calculator',
+    name: 'Age, Date Duration & Birthday Studio',
+    description: 'Calculate exact age in years/months/days/seconds, next birthday countdown, zodiac signs, business workdays between dates, and future date shifts.',
+    category: 'productivity',
+    iconName: 'Cake',
+    badge: 'New',
+    tags: ['age', 'birthday', 'date', 'days', 'duration', 'workdays', 'zodiac', 'calendar', 'countdown', 'everyday']
+  },
+  {
+    id: 'smart-shopping-calculator',
+    name: 'Smart Shopping Discount & Unit Price Comparator',
+    description: 'Calculate sale discounts, stackable coupons, and sales tax, plus compare product pack sizes to find the best unit-price value.',
+    category: 'productivity',
+    iconName: 'ShoppingBag',
+    badge: 'New',
+    tags: ['discount', 'sale', 'tax', 'shopping', 'price', 'unit-price', 'deal', 'savings', 'grocery', 'everyday']
+  },
 
   // Security & Auth
   {
@@ -250,6 +313,15 @@ const RAW_TOOLS: Tool[] = [
     iconName: 'QrCode',
     badge: 'Popular',
     tags: ['qr', 'qrcode', 'barcode', 'logo', 'generator', 'download']
+  },
+  {
+    id: 'qr-scanner',
+    name: 'QR Code & Barcode Scanner',
+    description: 'Scan QR codes & barcodes via image upload, Ctrl+V screenshot paste, or live webcam to extract Wi-Fi passwords, links, and contacts.',
+    category: 'web',
+    iconName: 'ScanQrCode',
+    badge: 'New',
+    tags: ['qr', 'scanner', 'barcode', 'wifi', 'camera', 'decode', 'upload', 'reader', 'everyday']
   },
   {
     id: 'url-shortener',
@@ -324,6 +396,15 @@ const RAW_TOOLS: Tool[] = [
     category: 'text',
     iconName: 'FileCode2',
     tags: ['base64', 'encode', 'decode', 'binary', 'string', 'data-uri']
+  },
+  {
+    id: 'image-to-text',
+    name: 'Image to Text Scanner (OCR)',
+    description: 'Extract editable text from photos, screenshots, receipts, slides, and book pages in 10+ languages directly in your browser.',
+    category: 'text',
+    iconName: 'ScanText',
+    badge: 'Hot',
+    tags: ['ocr', 'image', 'text', 'scanner', 'extract', 'screenshot', 'photo', 'receipt', 'copy', 'everyday']
   },
 
   // Design & Graphics

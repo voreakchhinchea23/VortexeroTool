@@ -52,7 +52,16 @@ const requiredIds = [
   'http-status-codes',
   'chmod-calculator',
   'khmer-lunar-calendar',
-  'periodic-table'
+  'periodic-table',
+  'math-scanner',
+  'document-scanner',
+  'qr-scanner',
+  'image-to-text',
+  'budget-tracker',
+  'world-clock-planner',
+  'gpa-grade-calculator',
+  'age-date-calculator',
+  'smart-shopping-calculator',
 ];
 
 for (const reqId of requiredIds) {
@@ -62,7 +71,7 @@ for (const reqId of requiredIds) {
     process.exit(1);
   }
 }
-console.log('✓ Test 3: All required new development, PDF merge, and Khmer lunar calendar tools are present.');
+console.log('✓ Test 3: All required development, PDF, Khmer lunar calendar, and everyday user tools are present.');
 
 // Test 4: Default sort order in App logic
 const sortedNames = TOOLS.map(t => t.name);
@@ -1272,4 +1281,222 @@ for (const token of requiredInteractiveTokens) {
 
 console.log('✓ Test 16: Interactive Touch & Hover clock backgrounds, cursor parallax, click bursts, and 3 reactive themes verified.');
 
+// Test 17: ToolRenderer routing completeness, toolColors, and Math Scanner solver verification
+import { normalizeMathOcr, solveMathProblem, getPrimeFactorization } from '../utils/mathSolver';
+
+const toolRendererSource = fs.readFileSync(
+  path.resolve(process.cwd(), 'src/components/tools/ToolRenderer.tsx'),
+  'utf-8'
+);
+
+for (const t of TOOLS) {
+  if (!toolRendererSource.includes(`case '${t.id}':`)) {
+    console.error(`ToolRenderer.tsx is missing case handler for tool "${t.id}"`);
+    process.exit(1);
+  }
+}
+
+const newEverydayIds = [
+  'math-scanner',
+  'document-scanner',
+  'qr-scanner',
+  'image-to-text',
+  'budget-tracker',
+  'world-clock-planner',
+  'gpa-grade-calculator',
+  'age-date-calculator',
+  'smart-shopping-calculator',
+];
+
+for (const id of newEverydayIds) {
+  const color = getToolColor(id);
+  if (!color || color.id !== id) {
+    console.error(`Missing bespoke color scheme in toolColors.ts for: ${id}`);
+    process.exit(1);
+  }
+}
+
+// 17a: OCR normalization
+if (normalizeMathOcr('1) 2×x² − √16 ÷ 2 ＝ 10') !== '2*x^2 - sqrt(16) / 2 = 10') {
+  console.error('OCR normalization failed:', normalizeMathOcr('1) 2×x² − √16 ÷ 2 ＝ 10'));
+  process.exit(1);
+}
+
+// 17b: Arithmetic & percentages
+const arith1 = solveMathProblem('(15 + 9) * 3 - sqrt(144)');
+if (arith1.finalAnswer !== '60' || arith1.steps.length < 2) {
+  console.error('Arithmetic solver failed:', arith1);
+  process.exit(1);
+}
+const pct1 = solveMathProblem('15% of 240');
+if (pct1.finalAnswer !== '36') {
+  console.error('Percentage solver failed:', pct1);
+  process.exit(1);
+}
+if (getPrimeFactorization(360) !== '2^3 × 3^2 × 5') {
+  console.error('Prime factorization failed:', getPrimeFactorization(360));
+  process.exit(1);
+}
+
+// 17c: Linear equation
+const lin1 = solveMathProblem('3(x - 2) + 4 = 2x + 7');
+if (lin1.problemType !== 'linear_equation' || lin1.finalAnswer !== 'x = 9' || !lin1.plot) {
+  console.error('Linear equation solver failed:', lin1);
+  process.exit(1);
+}
+
+// 17d: Quadratic equation (distinct real, double root, complex)
+const quad1 = solveMathProblem('x^2 - 5x + 6 = 0');
+if (quad1.problemType !== 'quadratic_equation' || quad1.finalAnswer !== 'x₁ = 2, x₂ = 3') {
+  console.error('Quadratic real roots failed:', quad1);
+  process.exit(1);
+}
+const quadComplex = solveMathProblem('x^2 + 4 = 0');
+if (!quadComplex.finalAnswer.includes('2i')) {
+  console.error('Quadratic complex roots failed:', quadComplex);
+  process.exit(1);
+}
+
+// 17e: 2x2 Linear system
+const sys1 = solveMathProblem('2x + y = 10; x - y = 2');
+if (sys1.problemType !== 'system_2x2' || sys1.finalAnswer !== 'x = 4, y = 2') {
+  console.error('2x2 linear system failed:', sys1);
+  process.exit(1);
+}
+
+// 17f: Calculus derivative & definite integral
+const deriv1 = solveMathProblem('d/dx(x^3 + 2x^2 - 5x)');
+if (deriv1.problemType !== 'calculus_derivative' || !deriv1.finalAnswer.includes('3 * x ^ 2')) {
+  console.error('Symbolic derivative failed:', deriv1);
+  process.exit(1);
+}
+const int1 = solveMathProblem('integrate(x^2, 0, 3)');
+if (int1.problemType !== 'calculus_integral' || Math.abs(Number(int1.finalAnswer) - 9) > 1e-4) {
+  console.error('Definite integral failed:', int1);
+  process.exit(1);
+}
+
+// 17g: Transcendental equation
+const trans1 = solveMathProblem('2^x = 32');
+if (!trans1.finalAnswer.includes('5')) {
+  console.error('Transcendental solver failed:', trans1);
+  process.exit(1);
+}
+
+console.log('✓ Test 17: ToolRenderer routing (all 71 tools), bespoke colors, and Math Scanner solver (OCR cleanup, linear, quadratic, 2x2 system, calculus, plotter) verified.');
+
+// Test 18: Everyday utilities (Document warp, QR payload parser, GPA, Age/Date, Smart Shopping)
+import {
+  computeInverseHomography,
+  warpAndFilterDocumentPixels,
+  parseQrPayload,
+  calculateGpaSummary,
+  calculateFinalExamNeeded,
+  calculateAgeBreakdown,
+  calculateDateDuration,
+  addDateOffset,
+  calculateDiscountSummary,
+  compareUnitPrices,
+} from '../utils/everydayUtils';
+
+// 18a: Homography & pixel warp
+const H = computeInverseHomography(
+  [
+    { x: 10, y: 10 },
+    { x: 90, y: 10 },
+    { x: 90, y: 90 },
+    { x: 10, y: 90 },
+  ],
+  80,
+  80
+);
+if (!H || Math.abs(H[2] - 10) > 1e-4 || Math.abs(H[5] - 10) > 1e-4) {
+  console.error('Inverse homography verification failed:', H);
+  process.exit(1);
+}
+const dummySrc = new Uint8ClampedArray(20 * 20 * 4).fill(200);
+const warpedOut = warpAndFilterDocumentPixels(
+  dummySrc,
+  20,
+  20,
+  [
+    { x: 2, y: 2 },
+    { x: 18, y: 2 },
+    { x: 18, y: 18 },
+    { x: 2, y: 18 },
+  ],
+  16,
+  16,
+  'bw'
+);
+if (warpedOut.length !== 16 * 16 * 4) {
+  console.error('Document pixel warp output length mismatch');
+  process.exit(1);
+}
+
+// 18b: QR payload parsing
+const wifiParsed = parseQrPayload('WIFI:S:HomeNet;T:WPA;P:Secret123;H:false;;');
+if (wifiParsed.type !== 'wifi' || wifiParsed.fields[0].value !== 'HomeNet' || wifiParsed.fields[2].value !== 'Secret123') {
+  console.error('QR Wi-Fi parsing failed:', wifiParsed);
+  process.exit(1);
+}
+const urlParsed = parseQrPayload('https://github.com/voreakchhinchea23/VortexeroTool');
+if (urlParsed.type !== 'url' || urlParsed.fields[0].value !== 'github.com') {
+  console.error('QR URL parsing failed:', urlParsed);
+  process.exit(1);
+}
+
+// 18c: GPA & Final Exam calculator
+const gpaRes = calculateGpaSummary(
+  [
+    { id: '1', name: 'Math', credits: 4, gradePoints: 4.0 },
+    { id: '2', name: 'Art', credits: 2, gradePoints: 3.0 },
+  ],
+  3.5,
+  12
+);
+if (Math.abs(gpaRes.semesterGpa - 3.667) > 0.01 || gpaRes.totalCredits !== 18) {
+  console.error('GPA calculation failed:', gpaRes);
+  process.exit(1);
+}
+const finalNeeded = calculateFinalExamNeeded(84, 90, 25);
+if (finalNeeded.requiredScore !== 108 || finalNeeded.status !== 'extra_credit') {
+  console.error('Final exam target calculation failed:', finalNeeded);
+  process.exit(1);
+}
+
+// 18d: Age & Date Duration
+const ageRes = calculateAgeBreakdown('2000-01-01', new Date(2026, 0, 1));
+if (!ageRes || ageRes.years !== 26 || ageRes.months !== 0 || ageRes.days !== 0) {
+  console.error('Age breakdown failed:', ageRes);
+  process.exit(1);
+}
+const durRes = calculateDateDuration('2026-01-05', '2026-01-12'); // Mon to next Mon = 7 days (5 workdays, 2 weekend days)
+if (!durRes || durRes.totalDays !== 7 || durRes.businessDays !== 5 || durRes.weekendDays !== 2) {
+  console.error('Date duration business days failed:', durRes);
+  process.exit(1);
+}
+const shiftedDate = addDateOffset('2026-01-01', 'add', 10, 'days');
+if (!shiftedDate || shiftedDate.iso !== '2026-01-11') {
+  console.error('Date shift failed:', shiftedDate);
+  process.exit(1);
+}
+
+// 18e: Smart Shopping Discount & Unit Price Comparator
+const disc = calculateDiscountSummary(100, 1, 20, 10, 10); // 100 -> 80 -> 72 -> +10% tax = 79.20
+if (Math.abs(disc.finalTotal - 79.2) > 1e-6 || Math.abs(disc.effectiveDiscountPct - 28) > 1e-6) {
+  console.error('Smart discount calculation failed:', disc);
+  process.exit(1);
+}
+const unitCompare = compareUnitPrices([
+  { id: '1', label: 'Small', price: 4.0, quantity: 500, unit: 'ml' },
+  { id: '2', label: 'Large', price: 6.0, quantity: 1, unit: 'l' },
+]);
+if (unitCompare[0].isBestValue || !unitCompare[1].isBestValue) {
+  console.error('Unit price comparison failed:', unitCompare);
+  process.exit(1);
+}
+
+console.log('✓ Test 18: Everyday utilities (Document perspective warp, QR parser, GPA, Age/Date, Smart Shopping) verified.');
 console.log('All automated verification checks PASSED successfully!');
+
